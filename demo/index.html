@@ -1,0 +1,185 @@
+<!--
+@license
+Copyright © HatioLab Inc. All rights reserved.
+-->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <title>visualizer Demo</title>
+    <script src="../../webcomponentsjs/webcomponents-lite.min.js"></script>
+
+    <link rel="import" href="../../things-scene-viewer/things-scene-viewer.html">
+    <link rel="import" href="../../things-scene-viewer/things-scene-layer.html">
+    <link rel="import" href="../../things-scene-viewer/things-scene-handler.html">
+
+    <link rel="import" href="../../things-designer-elements/things-editor-properties.html">
+
+    <link rel="import" href="./things-scene-visualizer.html">
+
+    <link rel="import" href="./things-theme.html">
+
+    <style is="custom-style" include="things-theme">
+    things-scene-viewer {
+      display: block;
+      width: 640px;
+      height: 480px;
+    }
+    </style>
+  </head>
+  <body unresolved>
+
+    <template is="dom-bind" id="app">
+      <p>An example of <code>&lt;visualizer&gt;</code>:</p>
+
+      <things-scene-viewer id='scene'
+                           scene='{{scene}}'
+                           selected='{{selected}}'
+                           model='[[model]]'
+                           mode="0">
+        <things-scene-layer type="selection-layer"></things-scene-layer>
+        <things-scene-layer type="modeling-layer"></things-scene-layer>
+        <things-scene-layer type="threed-layer"></things-scene-layer>
+        <things-scene-handler type="text-editor"></things-scene-handler>
+        <things-scene-handler type="move-handler"></things-scene-handler>
+      </things-scene-viewer>
+
+      <p>Properties</p>
+      <things-editor-properties id='props' target="{{props}}" props="[[selected.0.nature.properties]]">
+      </things-editor-properties>
+
+    </template>
+
+    <script>
+      var data = {}
+
+      window.addEventListener('WebComponentsReady', function(e) {
+        var app = document.querySelector('#app')
+
+        app.props = {}
+
+        var zeroToNine = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+      function buildRow(top, left, area, shelves) {
+
+        return zeroToNine.map(function (x) {
+          return {
+            type: 'rack',
+            locPattern: '{z}{s}-{u}-{sh}',
+            zone: area + top,
+            section: '01',
+            unit: x,
+            shelfPattern: '00',
+            left: left + 50 * x,
+            top: 100 * top,
+            width: 50,
+            height: 20,
+            depth: 20,
+            shelves: shelves,
+            rotation: 0,
+            fillStyle: "#e6e6fa"
+          }
+        }).concat(zeroToNine.map(function (x) {
+          return {
+            locPattern: '{z}{s}-{u}-{sh}',
+            zone: area + top,
+            section: '02',
+            unit: x,
+            shelfPattern: '00',
+            type: 'rack',
+            left: left + 50 * x,
+            top: 100 * top + 20,
+            width: 50,
+            height: 20,
+            depth: 20,
+            shelves: shelves,
+            rotation: Math.PI
+          }
+        }))
+      }
+
+      const GUBUN = [
+        'A', 'B', 'C', 'D', 'E'
+      ]
+
+      const shelfCount = 10
+
+      function buildData(zone, area, shelves) {
+        zeroToNine.forEach(function (x) {
+          var key = zone + area + '01-' + x + '-'
+          for (var i = 0; i < shelves; i++) {
+            data[key + (Math.floor((i + 1) / 10) > 0 ? (i + 1) : '0' + (i + 1))] = {
+              loc: key + (Math.floor((i + 1) / 10) > 0 ? (i + 1) : '0' + (i + 1)),
+              gubun: GUBUN[Math.floor(Math.random() * 5)]
+            }
+          }
+        })
+        zeroToNine.forEach(function (x) {
+          var key = zone + area + '02-' + x + '-'
+          for (var i = 0; i < shelves; i++) {
+            data[key + (Math.floor((i + 1) / 10) > 0 ? (i + 1) : '0' + (i + 1))] = {
+              loc: key + (Math.floor((i + 1) / 10) > 0 ? (i + 1) : '0' + (i + 1)),
+              gubun: GUBUN[Math.floor(Math.random() * 5)]
+            }
+          }
+        })
+      }
+
+      var components = [1, 2, 3, 4, 5, 6].map(function (top) {
+        return buildRow(top, 50, 'A', shelfCount).concat((buildRow(top, 650, 'B', shelfCount))) //.concat((buildRow(top, 1250, 'C', shelfCount)))
+      }).reduce(function (components, row) {
+        return components.concat(row)
+      }, []);
+
+      [1, 2, 3, 4, 5, 6].forEach(function (area) {
+        buildData('A', area, shelfCount)
+        buildData('B', area, shelfCount)
+      })
+
+        setTimeout(function() {
+          app.scene.on('selected', function(after) {
+            var target = after[0]
+            var props = {}
+            if(target) {
+              target.nature.properties.forEach(function(prop) {
+                var property = prop.property
+                props[property] = target.model[property]
+              })
+            }
+            app.props = props
+          });
+        });
+
+        app.$.props.addEventListener('change', function() {
+          app.selected[0].set(app.props)
+        });
+
+        app.model = {
+          width: 640,
+          height: 480,
+          components: [{
+            type: 'visualizer',
+            top: 100,
+            left: 100,
+            width:1024,
+            height: 768,
+            fontSize: 40,
+            fillStyle: {
+              type: 'pattern',
+              image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJsAAAAjCAMAAAC0JoimAAACQ1BMVEVHcEwODw+xHySxHySxHySxHyRYWFldR0mxHyRLS0wPEBAPEBBYWFmxHiNYWFlYWFlYWFm0HyRYWFlYWFlYWFmxHySxHySxHyRYWFkPEBAODw9YWFlYWFm9QkYPEBAPEBBYWFlYWFmxHyRYWFmxHyQPEBBYWFlYWFlYWFkPEBAPEBBYWFlYWFlYWFlYWFkOEA+xHyQPEBD///9YWFmxHyRYWFlYWFlYWFlYWFkPEBBYWFn89vaxHyRYWFlYWFmxHyRYWFkPEBAPEBAPEBCxHySxHyQOEA8OEA+xHyRYWFmxHyRYWFkOEA9YWFmxHySxHyS8PUEPEBCxHyQOEA+xHyRYWFkPEBBYWFlYWFkPEBAPEBDz3d757u4PEBAPEBAPEBCxHySxHSIPEBDTgIMPEBCxHyQPEBAPEBBYWFkOEA+xHySyHySxHyQPEBAPEBCwHCHCT1OxHySxHyQPEBDksbPeoKLKZmmxHyS6ODwPEBAOEA/XjZD/8fHnmpz/2Njll5n+7e3/09S+PkL8y8zae37ikJL2vb7wra/fiIryzs+xHyQPEBCvGR6xHSL///+wGyCsEheuFRqyHySuFxy0HyWsHSK6NzvakZTARkq3MDTuztBwEhGzJCmWGRzipKe1Ky/XhIfBSk7CT1PkrrDNZ2r14ODw09T35uf9+fnIXmLRc3Xy2NnrwcOiHB/+/Px5ExP67++ZGh3ObnHcm525MzeMFxnovb7nt7ntycqTGRtsERDRen1oEA6XGh1qERBpEQ/HVFjdAcS7AAAAfHRSTlMAEw4E93sNAaQEB9er2D4YhRIRIpyfwMQICg5Fev2i+VejKn8J3l9lM8z1iybgLr/Shfa9VimRbks+tv5Jc81ul8fSY3XoJKmV87QdHlJm769ayXYjQbY5aUZx/fvmTl3gXtH88B17KsJujRU4VZCI9qw+M+r29vPGKK/+ZLYwnwAACHRJREFUeF68lklvGkkUx4tNGBCHHIxlJINkwcG+GCQuyEiIsFkIGQUjS3bGGHucWDGxo2QOaJxv8Kp6Be/77uz7PttHm6qmCTTt4Mxh+KtV23tS/fTqva5CVPfHSuZkJuRD16vwIGDOucaNqDsyJcxQq9Vk6Clf6xtK1l1dg91hi4Isv9h7sybDw+siF6nUXWuQv9MNtMGKDB92dnZevajBeGfXcgC+uy51g+0ByB++0g2/vlqTXTc6us5B7YvqWit141QD8trOX1+p/tirmTtv2COvvfpbcf0iQwj9tGyGn3KzRqIhbXDM8tqfivZeALh6OikHa2/2Gq6JxsbBdLCfDex3V9lAr9TqUFy7YrQ8XNLntikPyUEtG0CtLhmuV9PVguqyz2CHmw36h7BfG6D+8PQi7YoYx3SJWzLq2VxQ0rE1RCRJgB+KEzhoqsnmwEN1thF8U8s2gfEU7bLp2C0txY0+cP4nNkFaPz46ELkfkEkSEFH4KTa3erTT2BvWJp77Sjajr5XNqGPjpM2T2xcX5++2qleRkYPD59uf94+IcBWbwmJT2GzF9JBjfnIZIcOqA+PYZBAtpienmcMUtcRWFrVs1khP3hnIhOpszvuWfKAvYdKwcdLpa17R+cAVcNXjZ4pxdAM4Pdt8ykCVjTE2gwMPL2DsnUZZL2YaQWGM0xQiOIwx/WaKGjZjHsw5AEhYGVvSCUw9plY2svkLr2r7QHes0sBZw/qY6Nm8fkXDjM0ej6fc4ZvYn7Uvp7E3ODuFwsPYg9AsxkPF1L1h7E9pznQ8WjDeD0CywNggmXgUTQKMt7IJn+i+r08+XdLuVwJaCfIJ39DosaRja6iRb4asB3uLrBZYvtXZbPN44Tc6CWI80Z5v5cISQISxmRnUnBkyviYbtz7K8xfHsHtK4bZJW+CqA5f8+fGT2xsDGy/5dyLXzuaP35qdvRV3KGzuidjMDD07Wpp3sXeqwZZawJN2OlnEeFXDZoz2lZIVgND3OvWVIHCnyUaevOT5DUkgQON39l4Ajcgpz78VxX92xd0z/uOuoKsFe7MWaNZh/+S8jo01VlbDNAOtLWxlF0DJlW9lQ05wFrRs7Cw5bp/Gb520sX2jxipwQNYv+M9bpNM/ZAV771lRXMf2O41bfz1u6Za4WS0AFhOKtLIZS5AvN9mETXqWn3erEt2cfya3nymN2+0twgnixksWt05s89hPZ0GFbQLjZZWNubF8o+z4nsJWL0VfBnI+hKIqm3mOVYcZek3lRNSn1oLM/hEfT5+e025fgvZ8G6XG95Lw7ZKn+Qad2EawN+6OL2A8i1j0YrNhhU2ZzE8Zpr34Zpax5XrHmIw9AFFjKAcwx9igknhkyUElgnrpuspG3jYrcUAArThgdXr2lLWvj9rqtF97nxaHMZWDRQelaEczP8waZAtSCzNNKfepKlOkwjonQAL5AuCkBgaIUB/AksomwL6KdvmUQIf/22EVtGy2oEd9h0wog+V0bHIiteJRMs0zMjKNUh5PnDkUPSOx1btZ5R3Sq8qHIg/7MpbCWG8E+Sy9ocKYy0WHCEUymUGVDcjuoXIxPDslHOjhjrbrMT3kOC2bXlaDvTkxuFtNboMN6VX2ad4B6hPOZ2re9URYP318+GSrKsAVqh68Pdl+vrHZtFrQ/y9z8z4ngkDUqOkkEI7jaAPdZ6uKAhFFiZNEsSqIYsuMozOiLFXrS9Xusgncv82Y32vbVhTHDwyuuKBZQtKGQDJICCSBZDGkSRYq0vy4YTz2YmxYX0oYmDFYgLYMKsm286sLc7oxcJ0SOo84zeyWAatxCnvxn7Z7Q9YtQMbap34lLlydry4fQPeco7vsjxZFsXu82y/mk71+f7opioerZVEsVw/7/c20X+yN5sSwmhV/HD66the0ELAi3vDt1WMyigoGKku7etz24CZ5letsj072hjvT3bI8OD4YlrPRznBnMy/L/VVRlv3J/nA43wzL/dGsLJ+uDoY7/fG/2eSMxVgiCAIApjiAZDIwGDCvYakrM2B3MTAIIFIBX1pMhTjojTAXhQxdhYQvPbEGdAFqw5Ttp0Wen/06y/MXx+tB/nh0PjjfLPP8+8npID+dPBsMlotBfjZ9nOcXq1eDwWBOU9wnV2xID+qMFKM6b3IpAiusGIYnpLwNbsZ6ka4aKDQ5K41McLoucRBpHVsDT0Mmr7RqfBPAM/iOYNWJpx1Di+dt2wIuhY9Ian1Ke58HpK9ckVTxskpq64KU0LPJ+ujoglaxPxc06b4kZW1C68cpLQ0f/80mxUElaquOG2ishnoKq9R1u1YXQEgMTmIridlmxUyNe6IRSRoQMVJX06El2ZnStHstBCiI455HPJlY5ytBx0zaGapL8PXh+GR9ne23o9//k+3Fz+N//tYQy5mJUwkklVXMyEpbmRE57eASoQUNE1K+o7u6CHpb/SwBKqZhaQ2IJaQmbYHlAMKaYbAdlngUSzUcgETh65JCzhzGJxdvxrYmLdynzBWbkLjA1jqS6rpY1GucknRczutRBD2VpS6ofIUNWQ+ziuE0eDnkKJsScCqLOTMTggqGZlYRm25CPZahJVwnCMNaJAB8fvjD1puxzX48/PD1WQ1ymuAGtqsbKgJVAkaVeIVr0JDJ2mkLzK7HN3kR87bV4nQlEAEaXZmNGrxoOCk4DQ7A0lWt6YgM8TiyE0kW4KwORHfeP37yP9imlG31nAy/jD94jQaMgC93luw1GZBlABBDhAWgEgWEAJEZuRhBphPFARCTGOQQIyy6ANil73Ae9YCAWIIUElqN5YDqqztf3L29/cD3n1Wf+P697Vu+f3/L97+srn3/onru+1v3ff/29j3ff1V9fuvud99+8x68rWiy4FP5prAZIaASdRveaf0FsOq+MCErseEAAAAASUVORK5CYII='
+              // image: 'https://s.pstatic.net/static/www/img/2017/sp_main_v171025.png'
+            },
+            fontColor: '#FF0000',
+            strokeStyle: '#000',
+            lineWidth: 5,
+            antialias: true,
+            value: 40,
+            showAxis: true,
+            components: components
+          }]
+        }
+      });
+    </script>
+  </body>
+</html>
