@@ -61,21 +61,6 @@ Copyright © HatioLab Inc. All rights reserved.
 
         var zeroToNine = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
-        const SCALE_FACTOR = 100
-
-      const RACK_WIDTH = .5 * SCALE_FACTOR;
-      const RACK_HEIGHT = .5 * SCALE_FACTOR;
-      const RACK_DEPTH = .2 * SCALE_FACTOR;
-
-      const RACK_OFFSET_TOP = 1 * SCALE_FACTOR;
-      const RACK_OFFSET_LEFT = .5 * SCALE_FACTOR;
-
-      const SECTION_A_OFFSET_LEFT = .5 * SCALE_FACTOR;
-      const SECTION_B_OFFSET_LEFT = 6.5 * SCALE_FACTOR;
-
-      const CONTAINER_WIDTH = 16.00 * SCALE_FACTOR
-      const CONTAINER_HEIGHT = 9.00 * SCALE_FACTOR
-
       function buildRow(top, left, area, shelves) {
 
         return zeroToNine.map(function (x) {
@@ -86,11 +71,11 @@ Copyright © HatioLab Inc. All rights reserved.
             section: '01',
             unit: x,
             shelfPattern: '00',
-            left: left + RACK_OFFSET_LEFT * x,
-            top: RACK_OFFSET_TOP * top,
-            width: RACK_WIDTH,
-            height: RACK_HEIGHT,
-            depth: RACK_DEPTH,
+            left: left + 50 * x,
+            top: 100 * top,
+            width: 50,
+            height: 20,
+            depth: 20,
             shelves: shelves,
             rotation: 0,
             fillStyle: "#e6e6fa"
@@ -103,11 +88,11 @@ Copyright © HatioLab Inc. All rights reserved.
             unit: x,
             shelfPattern: '00',
             type: 'rack',
-            left: left + RACK_OFFSET_LEFT * x,
-            top: RACK_OFFSET_TOP * top + RACK_HEIGHT,
-            width: RACK_WIDTH,
-            height: RACK_HEIGHT,
-            depth: RACK_DEPTH,
+            left: left + 50 * x,
+            top: 100 * top + 20,
+            width: 50,
+            height: 20,
+            depth: 20,
             shelves: shelves,
             rotation: Math.PI
           }
@@ -118,7 +103,7 @@ Copyright © HatioLab Inc. All rights reserved.
         'A', 'B', 'C', 'D', 'E'
       ]
 
-      const shelfCount = 99
+      const shelfCount = 30
 
       function buildData(zone, area, shelves) {
         zeroToNine.forEach(function (x) {
@@ -141,16 +126,16 @@ Copyright © HatioLab Inc. All rights reserved.
         })
       }
 
-      var components = [1, 2, 3, 4, 5, 6].map(function (top) {
-        return buildRow(top, SECTION_A_OFFSET_LEFT, 'A', shelfCount).concat((buildRow(top, SECTION_B_OFFSET_LEFT, 'B', shelfCount))) //.concat((buildRow(top, 1250, 'C', shelfCount)))
-      }).reduce(function (components, row) {
-        return components.concat(row)
-      }, []);
+      // var components = [1, 2, 3, 4, 5, 6].map(function (top) {
+      //   return buildRow(top, 50, 'A', shelfCount).concat((buildRow(top, 650, 'B', shelfCount))) //.concat((buildRow(top, 1250, 'C', shelfCount)))
+      // }).reduce(function (components, row) {
+      //   return components.concat(row)
+      // }, []);
 
-      [1, 2, 3, 4, 5, 6].forEach(function (area) {
-        buildData('A', area, shelfCount)
-        buildData('B', area, shelfCount)
-      })
+      // [1, 2, 3, 4, 5, 6].forEach(function (area) {
+      //   buildData('A', area, shelfCount)
+      //   buildData('B', area, shelfCount)
+      // })
 
         setTimeout(function() {
           app.scene.on('selected', function(after) {
@@ -177,8 +162,8 @@ Copyright © HatioLab Inc. All rights reserved.
             type: 'visualizer',
             top: 100,
             left: 100,
-            width:CONTAINER_WIDTH,
-            height: CONTAINER_HEIGHT,
+            width:1024,
+            height: 768,
             fontSize: 40,
             fillStyle: {
               type: 'pattern',
@@ -191,7 +176,22 @@ Copyright © HatioLab Inc. All rights reserved.
             antialias: true,
             value: 40,
             showAxis: true,
-            components: components
+            components: [{
+              type: 'rack',
+              locPattern: '{z}{s}-{u}-{sh}',
+              zone: 'A',
+              section: '01',
+              unit: '01',
+              shelfPattern: '00',
+              left: 100,
+              top: 100,
+              width: 50,
+              height: 50,
+              depth: 20,
+              shelves: 5,
+              rotation: 0,
+              fillStyle: "#e6e6fa"
+            }]
           }]
         }
       });

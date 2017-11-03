@@ -99,25 +99,198 @@ export default class Visualizer extends Container {
   /* THREE Object related .. */
   createObjects(components) {
 
+    // components.forEach(component => {
+
+    //   var clazz = scene.Component3d.register(component.type)
+    //   var transModel = this.transcoord3d(component);
+
+    //   if (!clazz) {
+    //     console.warn("Class not found : 3d class is not exist");
+    //     return;
+    //   }
+
+    //   var item = new clazz(this, transModel, this.scene)
+
+    //   if (item) {
+    //     this.putObject(component.id, item);
+    //   }
+
+    // })
+
+    var stock = BABYLON.MeshBuilder.CreateBox('stock', {
+      size: 1
+    }, this.scene);
+
+    var frame1 = BABYLON.MeshBuilder.CreateBox('frame1', {
+      width: 0.1,
+      height: 1,
+      depth: 0.1
+    }, this.scene);
+    var frame2 = BABYLON.MeshBuilder.CreateBox('frame2', {
+      width: 0.1,
+      height: 1,
+      depth: 0.1
+    }, this.scene);
+    var frame3 = BABYLON.MeshBuilder.CreateBox('frame3', {
+      width: 0.1,
+      height: 1,
+      depth: 0.1
+    }, this.scene);
+    var frame4 = BABYLON.MeshBuilder.CreateBox('frame4', {
+      width: 0.1,
+      height: 1,
+      depth: 0.1
+    }, this.scene);
+
+    frame1.position = new BABYLON.Vector3(-0.5, 0, -0.5)
+    frame2.position = new BABYLON.Vector3(-0.5, 0, 0.5)
+    frame3.position = new BABYLON.Vector3(0.5, 0, -0.5)
+    frame4.position = new BABYLON.Vector3(0.5, 0, 0.5)
+
+    var frames = [frame1, frame2, frame3, frame4];
+
+    var mergedFrame = BABYLON.Mesh.MergeMeshes(frames, true);
+
+    frames = null;
+
+    var board = BABYLON.MeshBuilder.CreatePlane('board', {
+      width: 1,
+      height: 1,
+      sideOrientation: BABYLON.Mesh.DOUBLESIDE
+    }, this.scene);
+
+    // board.rotation.x = - Math.PI / 2
+    // board.material.alpha = 0.5;
+
+    var stockCount = 0;
+    var frameCount = 0;
+    var boardCount = 0;
     components.forEach(component => {
+      if (component.type == 'rack') {
+        frameCount++;
+        boardCount += component.shelves - 1;
+        stockCount += component.shelves;
+      }
+    });
 
-      var clazz = scene.Component3d.register(component.type)
-      var transModel = this.transcoord3d(component);
+    var racks = components.filter(c => {
+      return c.type == 'rack'
+    })
 
-      if (!clazz) {
-        console.warn("Class not found : 3d class is not exist");
+    this.sps.addShape(mergedFrame, frameCount)
+    this.sps.addShape(board, boardCount)
+    this.sps.addShape(stock, stockCount)
+
+    mergedFrame.dispose();
+    board.dispose();
+    stock.dispose();
+
+    // this.assetsManager.load();
+
+    this.sps.buildMesh();
+
+    this.sps.initParticles = function () {
+      var stockP = 0;
+      var boardP = 0;
+
+      for (var i = 0; i < racks.length; i++) {
+        var rack = this.transcoord3d(racks[i]);
+        var frameParticle = this.sps.particles[i];
+
+        frameParticle._sceneModel = rack;
+        frameParticle.position.x = rack.x;
+        frameParticle.position.y = rack.y + rack.height * rack.shelves / 2 - rack.height / 2;
+        frameParticle.position.z = rack.z;
+
+        frameParticle.scaling = new BABYLON.Vector3(rack.width, rack.height * rack.shelves, rack.depth);
+
+        for (var s = 0; s < rack.shelves; s++) {
+          if (s < rack.shelves - 1) {
+            var boardParticle = this.sps.particles[frameCount + boardP];
+            boardParticle._sceneModel = rack;
+            boardParticle.position.x = rack.x;
+            boardParticle.position.y = (s + 0.5) * rack.height + rack.y;
+            boardParticle.position.z = rack.z;
+
+            boardParticle.rotation.x = - Math.PI / 2
+
+            boardParticle.scaling = new BABYLON.Vector3(rack.width, rack.depth, 1);
+
+            boardP++;
+          }
+
+          var particle = this.sps.particles[frameCount + boardCount + stockP];
+          var stock = JSON.parse(JSON.stringify(rack));
+          stock.width *= 0.7;
+          stock.height *= 0.7;
+          stock.depth *= 0.7;
+          stock.y = s * rack.height - (rack.height - stock.height) / 2 + stock.y;
+
+          particle._sceneModel = stock;
+          particle.position.x = stock.x;
+          particle.position.y = stock.y;
+          particle.position.z = stock.z;
+
+          particle.scaling = new BABYLON.Vector3(stock.width, stock.height, stock.depth);
+
+          stockP++;
+        }
+
+      }
+    }.bind(this)
+    this.sps.initParticles();
+    this.sps.setParticles();
+    this.sps.refreshVisibleSize();
+
+
+    this.sps.updateParticle = function (p) {
+      if (p.shapeId !== 2)
+        return;
+
+      if (p == this._pickedStock.mesh) {
+        p.rotation.y += 0.02;
+        p.color = BABYLON.Color3.Yellow();
         return;
       }
 
-      var item = new clazz(this, transModel, this.scene)
+      var r = Math.random()
+      var color
+      if (r < 0.33)
+        color = BABYLON.Color3.Red();
+      else if (r < 0.66)
+        color = BABYLON.Color3.Blue();
+      else
+        color = BABYLON.Color3.FromHexString("#ccaa76");
 
-      if (item) {
-        this.putObject(component.id, item);
+      p.color = color;
+      p.rotation.y = 0;
+    }.bind(this)
+
+
+
+    var start = 0;
+    var end = 0;
+    var particleUpdated = 200;
+
+    this.scene.registerBeforeRender(function () {
+
+      // this.sps.setParticles();
+
+      if (end >= this.sps.particles.length - 1) {
+        start = 0;
       }
+      end = start + particleUpdated;
+      this.sps.setParticles(start, end);
+      start = end + 1;
 
-    })
+      if (this._pickedStock.mesh && this._pickedStock.mesh.idx > -1)
+        this.sps.setParticles(this._pickedStock.mesh.idx, this._pickedStock.mesh.idx);
+    }.bind(this));
 
-    this.assetsManager.load();
+    this.engine.runRenderLoop(function() {
+        this.scene.render();
+    }.bind(this));
+
   }
 
   createScene() {
@@ -131,15 +304,16 @@ export default class Visualizer extends Container {
     // Assets Manager
     this.assetsManager = new BABYLON.AssetsManager(scene);
 
-    this.assetsManager.onFinish = function(tasks) {
-      this.engine.runRenderLoop(function() {
-          this.scene.render();
-      }.bind(this));
+    this.assetsManager.onFinish = function (tasks) {
+      this.createObjects(this.hierarchy.components)
+      // this.engine.runRenderLoop(function() {
+      //     this.scene.render();
+      // }.bind(this));
     }.bind(this);
 
     // create a FreeCamera, and set its position to (x:0, y:5, z:-10)
     var camera = new BABYLON.ArcRotateCamera('camera1', 0, 0, 10, new BABYLON.Vector3(0, 0, 0), scene);
-    camera.upperBetaLimit = 1.4835298642;
+    // camera.upperBetaLimit = 1.4835298642;
     camera.allowUpsideDown = false;
 
     // target the camera to scene origin
@@ -161,10 +335,12 @@ export default class Visualizer extends Container {
     // create a built-in "ground" shape; its constructor takes the same 5 params as the sphere's one
     var ground = new (this.getRegister('floor'))(this, model, scene);
 
-    scene.registerBeforeRender(function () {
-      if(model.autoRotate)
-        camera.alpha += 0.001 * scene.getAnimationRatio();
-    });
+    // scene.registerBeforeRender(function () {
+    //   if(model.autoRotate)
+    //     camera.alpha += 0.001 * scene.getAnimationRatio();
+    // });
+
+    this.assetsManager.load();
 
     // return the created scene
     return scene;
@@ -203,6 +379,9 @@ export default class Visualizer extends Container {
   }
 
   _initialize() {
+    if (this._initialized)
+      return;
+
     var {
       components
     } = this.hierarchy
@@ -219,13 +398,15 @@ export default class Visualizer extends Container {
     this.canvas = threedLayer.canvas;
 
     // load the 3D engine
-    this.engine = new BABYLON.Engine(this.canvas, antialias);
+    this.engine = new BABYLON.Engine(this.canvas, antialias, null, false);
 
     // call the createScene function
     this.scene = this.createScene();
 
     if (this.model.showAxis)
       this.showAxis(Math.min(transModel.width, transModel.depth));
+
+    this.sps = new BABYLON.SolidParticleSystem('sps', this.scene, {isPickable: true});
 
     // run the render loop
     this.engine.runRenderLoop(function () {
@@ -237,7 +418,38 @@ export default class Visualizer extends Container {
       this.engine.resize();
     }.bind(this));
 
-    this.createObjects(components)
+    // this.createObjects(components)
+
+    // this.scene.freezeActiveMeshes();
+
+    this.sps.computeParticleTexture = false;
+
+    this.scene.onPointerObservable.add(function (pointerInfo, evt) {
+      var pickInfo = pointerInfo.pickInfo
+      var faceId = pickInfo.faceId;
+
+      if (faceId == -1 || pointerInfo.type !== BABYLON.PointerEventTypes.POINTERPICK) {return;}
+      var idx = this.sps.pickedParticles[faceId].idx;
+      var p = this.sps.particles[idx];
+
+      if (p.shapeId !== 2)
+        return;
+
+      var lastPickedIndex = -1;
+      if (this._pickedStock.mesh != p) {
+        if(this._pickedStock.mesh)
+          lastPickedIndex = this._pickedStock.mesh.idx
+        this._pickedStock.mesh = p;
+      }
+
+      if(lastPickedIndex > -1)
+        this.sps.setParticles(lastPickedIndex, lastPickedIndex);
+
+    }.bind(this))
+
+    this._pickedStock = {}
+
+    this._initialized = true;
   }
 
 
