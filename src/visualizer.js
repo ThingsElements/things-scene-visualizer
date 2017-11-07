@@ -221,6 +221,7 @@ export default class Visualizer extends Container {
 
           var particle = this.sps.particles[frameCount + boardCount + stockP];
           var stock = JSON.parse(JSON.stringify(rack));
+          var location = this.makeLocationString(stock, this.makeShelfString(stock.shelfPattern, s + 1, stock.shelves));
           stock.width *= 0.7;
           stock.height *= 0.7;
           stock.depth *= 0.7;
@@ -231,7 +232,11 @@ export default class Visualizer extends Container {
           particle.position.y = stock.y;
           particle.position.z = stock.z;
 
+          particle.color = BABYLON.Color3.FromHexString('#ccaa76')
+
           particle.scaling = new BABYLON.Vector3(stock.width, stock.height, stock.depth);
+
+          this.putObject(location, particle);
 
           stockP++;
         }
@@ -249,20 +254,32 @@ export default class Visualizer extends Container {
 
       if (p == this._pickedStock.mesh) {
         p.rotation.y += 0.02;
-        p.color = BABYLON.Color3.Yellow();
         return;
       }
 
-      var r = Math.random()
-      var color
-      if (r < 0.33)
-        color = BABYLON.Color3.Red();
-      else if (r < 0.66)
-        color = BABYLON.Color3.Blue();
-      else
-        color = BABYLON.Color3.FromHexString("#ccaa76");
+      // if (p.userData) {
+      //   var color = BABYLON.Color3.FromHexString('#ccaa76')
+      //   switch (p.userData.status || p.userData.gubun) {
+      //     case 'A':
+      //       color = new BABYLON.Color3.Red()
+      //       break;
+      //     case 'B':
+      //       color = new BABYLON.Color3.Blue()
+      //       break;
+      //     case 'C':
+      //       color = new BABYLON.Color3.Green()
+      //       break;
+      //     case 'D':
+      //       color = new BABYLON.Color3.Black()
+      //       break;
+      //   }
 
-      p.color = color;
+      //   if(color)
+      //     p.color = color;
+      // }
+
+      if (p._originColor)
+        p.color = p._originColor;
       p.rotation.y = 0;
     }.bind(this)
 
@@ -273,9 +290,6 @@ export default class Visualizer extends Container {
     var particleUpdated = 200;
 
     this.scene.registerBeforeRender(function () {
-
-      // this.sps.setParticles();
-
       if (end >= this.sps.particles.length - 1) {
         start = 0;
       }
@@ -287,8 +301,8 @@ export default class Visualizer extends Container {
         this.sps.setParticles(this._pickedStock.mesh.idx, this._pickedStock.mesh.idx);
     }.bind(this));
 
-    this.engine.runRenderLoop(function() {
-        this.scene.render();
+    this.engine.runRenderLoop(function () {
+      this.scene.render();
     }.bind(this));
 
   }
@@ -321,7 +335,9 @@ export default class Visualizer extends Container {
     // camera.setPosition(new BABYLON.Vector3(0, minSize, hypotenuseSize));
 
     // attach the camera to the canvas
-    camera.attachControl(this.canvas, true);
+    camera.attachControl(this.engine.getRenderingCanvas(), true);
+
+    console.log(this.engine.getRenderingCanvas())
 
     // create a basic light, aiming 0,1,0 - meaning, to the sky
     var light = new BABYLON.HemisphericLight('hemi-light', new BABYLON.Vector3(0, 1, 0), scene);
@@ -334,11 +350,6 @@ export default class Visualizer extends Container {
 
     // create a built-in "ground" shape; its constructor takes the same 5 params as the sphere's one
     var ground = new (this.getRegister('floor'))(this, model, scene);
-
-    // scene.registerBeforeRender(function () {
-    //   if(model.autoRotate)
-    //     camera.alpha += 0.001 * scene.getAnimationRatio();
-    // });
 
     this.assetsManager.load();
 
@@ -373,6 +384,11 @@ export default class Visualizer extends Container {
 
     if (threed) {
       this._initialize();
+
+      ctx.drawImage(
+        this.engine.getRenderingCanvas(), 0, 0, width, height,
+        left, top, width, height
+      )
     } else {
       super._post_draw(ctx);
     }
@@ -386,19 +402,20 @@ export default class Visualizer extends Container {
       components
     } = this.hierarchy
     var {
+      width,
+      height,
       antialias
     } = this.model
 
     var transModel = this.transcoord3d(this.model);
 
-    // get the canvas DOM element
-    var threedLayer = this.root.assist_layers.filter((layer) => { return layer.model.type == 'threed-layer' })[0];
-
-    /* layer 정보에 맞춰서 assist layer 객체들을 생성한다. */
-    this.canvas = threedLayer.canvas;
-
     // load the 3D engine
-    this.engine = new BABYLON.Engine(this.canvas, antialias, null, false);
+    var canvas = document.createElement('canvas')
+
+    this.engine = new BABYLON.Engine(canvas, antialias, null, false);
+
+    canvas.width = width;
+    canvas.height = height;
 
     // call the createScene function
     this.scene = this.createScene();
@@ -406,11 +423,12 @@ export default class Visualizer extends Container {
     if (this.model.showAxis)
       this.showAxis(Math.min(transModel.width, transModel.depth));
 
-    this.sps = new BABYLON.SolidParticleSystem('sps', this.scene, {isPickable: true});
+    this.sps = new BABYLON.SolidParticleSystem('sps', this.scene, { isPickable: true });
 
     // run the render loop
     this.engine.runRenderLoop(function () {
       this.scene.render();
+      this.invalidate();
     }.bind(this));
 
     // the canvas/window resize event handler
@@ -428,7 +446,7 @@ export default class Visualizer extends Container {
       var pickInfo = pointerInfo.pickInfo
       var faceId = pickInfo.faceId;
 
-      if (faceId == -1 || pointerInfo.type !== BABYLON.PointerEventTypes.POINTERPICK) {return;}
+      if (faceId == -1 || pointerInfo.type !== BABYLON.PointerEventTypes.POINTERPICK) { return; }
       var idx = this.sps.pickedParticles[faceId].idx;
       var p = this.sps.particles[idx];
 
@@ -437,13 +455,16 @@ export default class Visualizer extends Container {
 
       var lastPickedIndex = -1;
       if (this._pickedStock.mesh != p) {
-        if(this._pickedStock.mesh)
+        if (this._pickedStock.mesh)
           lastPickedIndex = this._pickedStock.mesh.idx
         this._pickedStock.mesh = p;
+        p._originColor = p.color;
+        p.color = new BABYLON.Color3.Teal();
       }
 
-      if(lastPickedIndex > -1)
+      if (lastPickedIndex > -1) {
         this.sps.setParticles(lastPickedIndex, lastPickedIndex);
+      }
 
     }.bind(this))
 
@@ -492,6 +513,53 @@ export default class Visualizer extends Container {
     zChar.position = new BABYLON.Vector3(0, 0.05 * size, 0.9 * size);
   }
 
+  makeLocationString(model, shelfString) {
+    var {
+      locPattern = "{z}{s}-{u}-{sh}",
+      zone = "",
+      section = "",
+      unit = ""
+    } = model
+
+    var locationString = locPattern
+
+    locationString = locationString.replace(/{z}/i, zone);
+    locationString = locationString.replace(/{s}/i, section);
+    locationString = locationString.replace(/{u}/i, unit);
+    locationString = locationString.replace(/{sh}/i, shelfString);
+
+    return locationString;
+  }
+
+  makeShelfString(pattern, shelf, length) {
+    /**
+     *  pattern #: 숫자
+     *  pattern 0: 고정 자리수
+     *  pattern -: 역순
+     */
+
+    if (!pattern || !shelf || !length)
+      return
+
+    var isReverse = /^\-/.test(pattern);
+    pattern = pattern.replace(/#+/, '#');
+
+    var fixedLength = (pattern.match(/0/g) || []).length || 0
+    var shelfString = String(isReverse ? length - shelf + 1 : shelf)
+
+    if (shelfString.length > fixedLength && fixedLength > 0) {
+      shelfString = shelfString.split('').shift(shelfString.length - fixedLength).join('')
+    } else {
+      var prefix = '';
+      for (var i = 0; i < fixedLength - shelfString.length; i++) {
+        prefix += '0';
+      }
+      shelfString = prefix + shelfString;
+    }
+
+    return shelfString
+  }
+
 
   dispose() {
     super.dispose();
@@ -519,7 +587,7 @@ export default class Visualizer extends Container {
 
     transPos.x = - (left - this.model.width / 2 + width / 2);
     transPos.y = zPos + depth / 2;
-    transPos.z = top - this.model.height / 2  + height / 2;
+    transPos.z = top - this.model.height / 2 + height / 2;
 
     return transPos
   }
@@ -528,60 +596,78 @@ export default class Visualizer extends Container {
     return NATURE
   }
 
-  _onDataChanged() {
+  setStockColor(stock) {
+    if (!stock.userData)
+      return;
 
-    if (this._data) {
-      if (this._data instanceof Array) {
-        /**
-         *  Array type data
-         *  (e.g. data: [{
-         *    'loc' : 'location1',
-         *    'description': 'description1'
-         *  },
-         *  ...
-         *  ])
-         */
-        this._data.forEach(d => {
-          let data = d
+    var color = BABYLON.Color3.FromHexString('#ccaa76')
+    switch (stock.userData.status || stock.userData.gubun) {
+      case 'A':
+        color = new BABYLON.Color3.Red()
+        break;
+      case 'B':
+        color = new BABYLON.Color3.Blue()
+        break;
+      case 'C':
+        color = new BABYLON.Color3.Green()
+        break;
+      case 'D':
+        color = new BABYLON.Color3.Black()
+        break;
+    }
 
-          setTimeout(function () {
-            let loc = data.loc || data.LOC || data.location || data.LOCATION;
-            let object = this.getObject(loc)
-            if (object) {
-              object.userData = data;
-              object.onUserDataChanged()
-            }
-          }.bind(this))
-        })
-      } else {
-        /**
-         *  Object type data
-         *  (e.g. data: {
-         *    'location1': {description: 'description'},
-         *    ...
-         *  })
-         */
-        for (var loc in this._data) {
-          let location = loc
-          if (this._data.hasOwnProperty(location)) {
+    if(color)
+      stock.color = color;
+  }
 
-            setTimeout(function () {
-              let d = this._data[location]
-              let object = this.getObject(location)
-              if (object) {
-                object.userData = d;
-                object.onUserDataChanged()
-              }
-            }.bind(this))
+  onchangeData(after, before) {
 
+    if (after.data instanceof Array) {
+      /**
+       *  Array type data
+       *  (e.g. data: [{
+       *    'loc' : 'location1',
+       *    'description': 'description1'
+       *  },
+       *  ...
+       *  ])
+       */
+      after.data.forEach(d => {
+        let data = d
+
+        // setTimeout(function () {
+          let loc = data.loc || data.LOC || data.location || data.LOCATION;
+          let object = this.getObject(loc)
+          if (object) {
+            object.userData = data;
+            this.setStockColor(object);
           }
+        // }.bind(this))
+      })
+    } else {
+      /**
+       *  Object type data
+       *  (e.g. data: {
+       *    'location1': {description: 'description'},
+       *    ...
+       *  })
+       */
+      for (var loc in after.data) {
+        let location = loc
+        if (after.data.hasOwnProperty(location)) {
+
+          // setTimeout(function () {
+            let d = after.data[location]
+            let object = this.getObject(location)
+            if (object) {
+              object.userData = d;
+              this.setStockColor(object);
+            }
+          // }.bind(this))
+
         }
       }
     }
-
-    this._dataChanged = false
-
-    this.render_threed();
   }
 
   /* Event Handlers */
@@ -628,37 +714,21 @@ export default class Visualizer extends Container {
   }
 
   onmousedown(e) {
-    if (this._controls) {
-      this._controls.onMouseDown(e)
-    }
+    if (this.engine)
+      this.engine.isPointerLock = true;
+
+  }
+  onmouseup(e) {
+    if (this.engine)
+      this.engine.isPointerLock = false;
+
   }
 
-  onmousemove(e) {
-    if (this._controls) {
-      var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
+  // onmousemove(e) {
+  //   if (this.engine) {
 
-      // this._mouse.originX = this.getContext().canvas.offsetLeft +e.offsetX;
-      // this._mouse.originY = this.getContext().canvas.offsetTop + e.offsetY;
-
-      this._mouse.x = ((pointer.x - this.model.left) / (this.model.width)) * 2 - 1;
-      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
-
-      var object = this.getObjectByRaycast()
-
-      if (object && object.onmousemove)
-        object.onmousemove(e, this)
-      else {
-        if (!this._scene2d)
-          return
-        this._scene2d.remove(this._scene2d.getObjectByName('tooltip'))
-        this.render_threed()
-      }
-
-      this._controls.onMouseMove(e)
-
-      e.stopPropagation()
-    }
-  }
+  //   }
+  // }
 
   onmouseleave(e) {
     if (!this._scene2d)
@@ -671,25 +741,31 @@ export default class Visualizer extends Container {
   }
 
   onwheel(e) {
-    if (this._controls) {
-      this.handleMouseWheel(e)
+    if (this.engine) {
+
       e.stopPropagation()
     }
   }
 
   ondragstart(e) {
-    if (this._controls) {
+    // if (this._controls) {
       var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
 
       // this._mouse.originX = this.getContext().canvas.offsetLeft +e.offsetX;
       // this._mouse.originY = this.getContext().canvas.offsetTop + e.offsetY;
 
-      this._mouse.x = ((pointer.x - this.model.left) / (this.model.width)) * 2 - 1;
-      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
+      // this._controls.onDragStart(e)
+    console.log(e)
 
-      this._controls.onDragStart(e)
+    var obj = e;
+    obj.movementX = e.offsetX;
+    obj.movementY = e.offsetY;
+
+      var mouseEvent = new MouseEvent("mousemove", e);
+
+      this.engine.getRenderingCanvas().dispatchEvent(mouseEvent)
       e.stopPropagation()
-    }
+    // }
   }
 
   ondragmove(e) {

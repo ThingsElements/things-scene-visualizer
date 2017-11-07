@@ -38,21 +38,25 @@ Copyright © HatioLab Inc. All rights reserved.
                            selected='{{selected}}'
                            model='[[model]]'
                            mode="0">
-        <things-scene-layer type="selection-layer"></things-scene-layer>
+        <!-- <things-scene-layer type="selection-layer"></things-scene-layer>
         <things-scene-layer type="modeling-layer"></things-scene-layer>
-        <things-scene-layer type="threed-layer"></things-scene-layer>
         <things-scene-handler type="text-editor"></things-scene-handler>
-        <things-scene-handler type="move-handler"></things-scene-handler>
+        <things-scene-handler type="move-handler"></things-scene-handler> -->
       </things-scene-viewer>
 
       <p>Properties</p>
       <things-editor-properties id='props' target="{{props}}" props="[[selected.0.nature.properties]]">
       </things-editor-properties>
+      <input type="button" value="set data" onclick="setData()">
 
     </template>
 
     <script>
       var data = {}
+
+      function setData() {
+        app.scene.variable('threed', data)
+      }
 
       window.addEventListener('WebComponentsReady', function(e) {
         var app = document.querySelector('#app')
@@ -171,10 +175,12 @@ Copyright © HatioLab Inc. All rights reserved.
         });
 
         app.model = {
-          width: 640,
-          height: 480,
+          width: 1920,
+          height: 1080,
           components: [{
+            id: 'threed',
             type: 'visualizer',
+            locked: true,
             top: 100,
             left: 100,
             width:CONTAINER_WIDTH,
