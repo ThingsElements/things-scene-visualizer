@@ -7,6 +7,8 @@ export { default as Component3d } from './component-3d'
 export { default as Visualizer } from './visualizer'
 export { default as VideoPlayer360 } from './video-player-360'
 
+export { default as RackTable } from './rack-table'
+export { default as RackTableCell } from './rack-table-cell'
 export { default as Door } from './door'
 export { default as ForkLift } from './forkLift'
 export { default as HumiditySensor } from './humidity-sensor'

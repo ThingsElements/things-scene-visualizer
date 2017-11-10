@@ -140,189 +140,28 @@ export default class Visualizer extends Container {
 
   createObjects(components, canvasSize) {
 
-    var stockVertexShader = `
-      precision highp float;
-      uniform mat4 modelViewMatrix;
-      uniform mat4 projectionMatrix;
-      attribute vec3 scale;
-      attribute vec3 position;
-      attribute vec3 offset;
-      attribute vec2 uv;
-      attribute vec4 orientation;
-      attribute vec4 color;
+    components.forEach(component => {
 
-      varying vec2 vUv;
-      varying vec4 vColor;
-      void main() {
-        vec3 vPosition = position;
-        vec3 vScale = scale;
-        vUv = uv;
+      var clazz = scene.Component3d.register(component.model.type)
 
-        vColor = color;
-
-        gl_Position = projectionMatrix * modelViewMatrix * vec4( offset + vScale * vPosition, 1.0 );
+      if (!clazz) {
+        console.warn("Class not found : 3d class is not exist");
+        return;
       }
-    `;
 
-    var stockFragmentShader = `
-      precision highp float;
-      uniform sampler2D map;
-      varying vec2 vUv;
-      varying vec3 vPosition;
-      varying vec4 vColor;
+      var item = new clazz(component.hierarchy, canvasSize, this, component)
 
-      void main() {
-        vec4 color = vec4( vColor );
-        gl_FragColor = color;
+
+      if (item) {
+        // items.push(item)
+        setTimeout(function () {
+          item.name = component.model.id;
+          this._scene3d.add(item)
+          this.putObject(component.model.id, item);
+        }.bind(this))
       }
-    `;
 
-  //   var stockVertexShader = `
-  //   precision highp float;
-  //   uniform mat4 modelViewMatrix;
-  //   uniform mat4 projectionMatrix;
-  //   attribute vec3 scale;
-  //   attribute vec3 position;
-  //   attribute vec3 offset;
-  //   attribute vec2 uv;
-  //   attribute vec4 orientation;
-  //   attribute vec4 color;
-
-  //   varying vec2 vUv;
-  //   varying vec3 vNormal;
-  //   varying vec4 vColor;
-  //   void main() {
-  //     vec3 vPosition = position;
-  //     vec3 vScale = scale;
-  //     vUv = uv;
-
-  //     vColor = color;
-
-  //     vNormal = (modelViewMatrix * vec4(normal, 0.0)).xyz;
-  //     gl_Position = projectionMatrix * modelViewMatrix * vec4( offset + vScale * vPosition, 1.0 );
-  //   }
-  // `;
-
-  // var stockFragmentShader = `
-  //   precision highp float;
-  //   uniform sampler2D map;
-  //   uniform float lightIntensity;
-
-  //   struct PointLight {
-  //     vec3 color;
-  //     vec3 position; // light position, in camera coordinates
-  //     float distance; // used for attenuation purposes. Since
-  //                     // we're writing our own shader, it can
-  //                     // really be anything we want (as long as
-  //                     // we assign it to our light in its
-  //                     // "distance" field
-  //   };
-
-  //   uniform PointLight pointLights[NUM_POINT_LIGHTS];
-
-  //   varying vec2 vUv;
-  //   varying vec3 vPosition;
-  //   varying vec3 vNormal;
-  //   varying vec4 vColor;
-
-  //   void main() {
-
-  //     vec4 addedLights = vec4(0.0, 0.0, 0.0, 1.0);
-  //     for(int l = 0; l < NUM_POINT_LIGHTS; l++) {
-  //       vec3 lightDirection = normalize(vPosition - pointLights[l].position);
-  //       addedLights.rgb += clamp(dot(-lightDirection, vecNormal), 0.0, 1.0) * pointLights[l].color  * lightIntensity;
-  //     }
-
-  //     vec4 color = vec4( vColor );
-  //     gl_FragColor = color;
-  //   }
-  // `;
-
-
-
-    // components.forEach(component => {
-
-    //   var clazz = scene.Component3d.register(component.model.type)
-
-    //   if (!clazz) {
-    //     console.warn("Class not found : 3d class is not exist");
-    //     return;
-    //   }
-
-    //   var item = new clazz(component.model, canvasSize, this, component)
-
-    //   if (item) {
-    //     // items.push(item)
-    //     setTimeout(function () {
-    //       item.name = component.model.id;
-    //       this._scene3d.add(item)
-    //       this.putObject(component.model.id, item);
-    //     }.bind(this))
-    //   }
-
-    // })
-
-    var racks = components.filter(c => { return c.model.type == 'rack' });
-
-    var bufferGeometry = new THREE.BoxBufferGeometry( 1, 1, 1 );
-
-    var geometry = new THREE.InstancedBufferGeometry();
-    geometry.index = bufferGeometry.index;
-    geometry.attributes.position = bufferGeometry.attributes.position;
-    geometry.attributes.uv = bufferGeometry.attributes.uv;
-
-    var scales = [];
-    var offsets = [];
-    var colors = [];
-    // var vector = new THREE.Vector4();
-    for (var i = 0; i < racks.length; i++) {
-      var rack = this.transcoord3d(racks[i].model);
-      var shelves = rack.shelves;
-
-      if (!shelves)
-        continue;
-
-      for (var s = 0; s < shelves; s++) {
-        var stock = JSON.parse(JSON.stringify(rack));
-        stock.width *= 0.7
-        stock.height *= 0.7
-        stock.depth *= 0.7
-        stock.y = s * rack.height - (rack.height - stock.height) / 2 + stock.y;
-
-        offsets.push( stock.x, stock.y, stock.z );
-        scales.push(stock.width, stock.height, stock.depth);
-        colors.push(Math.random(), Math.random(), Math.random(), 1)
-      }
-    }
-
-    var offsetAttribute = new THREE.InstancedBufferAttribute( new Float32Array( offsets ), 3 );
-    var scaleAttribute = new THREE.InstancedBufferAttribute( new Float32Array( scales ), 3 );
-    var colorAttribute = new THREE.InstancedBufferAttribute( new Float32Array( colors ), 4 );
-    geometry.addAttribute( 'offset', offsetAttribute );
-    geometry.addAttribute( 'scale', scaleAttribute );
-    geometry.addAttribute( 'color', colorAttribute );
-
-    var material = new THREE.RawShaderMaterial( {
-      // uniforms: {
-      //   map: { value: new THREE.TextureLoader().load( 'textures/crate.gif' ) }
-      // },
-      uniforms: THREE.UniformsUtils.merge([
-        THREE.UniformsLib['lights'],
-        {
-          lightIntensity: {type: 'f', value: 1.0},
-          textureSampler: {type: 't', value: null}
-        }
-      ]),
-      vertexShader: stockVertexShader,
-      fragmentShader: stockFragmentShader,
-      transparent: true
-      // ,
-      // lights: true
-    } );
-
-    var mesh = new THREE.Mesh( geometry, material );
-    this._scene3d.add( mesh );
-
+    })
   }
 
   makeTextSprite(message, parameters) {
@@ -855,6 +694,152 @@ export default class Visualizer extends Container {
     // saveAs(blob, "exported.txt");
   }
 
+  createTooltipForNavigator(messageObject) {
+
+    if (!messageObject)
+      return
+
+    let isMarker = true;
+    let fontFace = "Arial";
+    let fontSize = 40;
+    let textColor = 'rgba(255,255,255,1)';
+    let borderWidth = 2;
+    let borderColor = 'rgba(0, 0, 0, 1.0)';
+    let backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    let radius = 30;
+    let vAlign = 'middle';
+    let hAlign = 'center';
+
+    let canvas = document.createElement('canvas');
+    let context = canvas.getContext('2d');
+
+    // document.body.appendChild(canvas)
+
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+
+    context.font = fontSize + "px " + fontFace;
+    context.textBaseline = "alphabetic";
+    context.textAlign = "left";
+
+    var textWidth = 0
+
+    let cx = canvas.width / 2;
+    let cy = canvas.height / 2;
+
+    // for location label
+    context.font = Math.floor(fontSize) + "px " + fontFace;
+    var metrics = context.measureText("Location");
+    if (textWidth < metrics.width)
+      textWidth = metrics.width;
+
+    // for location value
+    context.font = "bold " + fontSize * 2 + "px " + fontFace;
+    metrics = context.measureText(messageObject.location);
+    if (textWidth < metrics.width)
+      textWidth = metrics.width;
+
+    // for values (material, qty)
+    context.font = fontSize + "px " + fontFace;
+    metrics = context.measureText("- Material : " + messageObject.material);
+    if (textWidth < metrics.width)
+      textWidth = metrics.width;
+
+    metrics = context.measureText("- QTY : " + messageObject.qty);
+    if (textWidth < metrics.width)
+      textWidth = metrics.width;
+
+
+    var tx = textWidth / 2.0;
+    var ty = fontSize / 2.0;
+
+    // then adjust for the justification
+    if (vAlign == "bottom")
+      ty = fontSize;
+    else if (vAlign == "top")
+      ty = 0;
+
+    if (hAlign == "left")
+      tx = textWidth;
+    else if (hAlign == "right")
+      tx = 0;
+
+    var offsetY = cy
+
+    this.roundRect(
+      context,
+      cx - tx,
+      cy - fontSize * 6 * 0.5,
+      // cy - fontSize * 6 * 0.5 + ty - 0.28 * fontSize,
+      textWidth,
+      // fontSize * 6 * 1.28,
+      fontSize * 8,
+      radius,
+      borderWidth,
+      borderColor,
+      backgroundColor,
+      0
+    );
+
+    // text color
+    context.fillStyle = textColor;
+    context.lineWidth = 3
+
+    // for location label
+    offsetY += -fontSize * 6 * 0.5 + Math.floor(fontSize)
+    context.font = Math.floor(fontSize) + "px " + fontFace;
+    context.fillStyle = 'rgba(134,199,252,1)'
+    context.fillText(
+      "Location",
+      cx - tx,
+      offsetY
+    );
+
+    // for location value
+    offsetY += fontSize * 2.5
+    context.font = "bold " + fontSize * 2 + "px " + fontFace;
+    context.fillStyle = textColor;
+    context.fillText(
+      messageObject.location,
+      cx - tx,
+      offsetY
+    );
+
+    // for values (material, qty)
+    offsetY += fontSize * 2
+    context.font = fontSize + "px " + fontFace;
+    context.fillStyle = 'rgba(204,204,204,1)';
+    context.fillText(
+      "- Material : " + messageObject.material,
+      cx - tx,
+      offsetY
+    );
+
+    offsetY += fontSize + ty
+    context.fillText(
+      "- QTY : " + messageObject.qty,
+      cx - tx,
+      offsetY
+    );
+
+
+    // canvas contents will be used for a texture
+    var texture = new THREE.Texture(canvas)
+    texture.needsUpdate = true;
+
+    var spriteMaterial = new THREE.SpriteMaterial({
+      map: texture
+    });
+    var sprite = new THREE.Sprite(spriteMaterial);
+    sprite.scale.set(window.innerWidth / 4 * 3, window.innerWidth / 8 * 3, 1);
+    // sprite.scale.set(canvas.width, canvas.height,1.0);
+
+    sprite.raycast = function () { }
+
+    return sprite;
+
+  }
+
   showTooltip(targetName) {
     if (!targetName)
       return
@@ -926,30 +911,6 @@ export default class Visualizer extends Container {
     coord3d.z = z;
 
     return coord3d;
-
-
-  }
-
-  transcoord3d(position) {
-    var {
-      left,
-      top,
-      zPos = 0,
-      width,
-      height,
-      depth = 0
-    } = position
-
-    var transPos = JSON.parse(JSON.stringify(position));
-    transPos.width = width;
-    transPos.height = depth;
-    transPos.depth = height;
-
-    transPos.x = - (left - this.model.width / 2 + width / 2);
-    transPos.y = zPos + depth / 2;
-    transPos.z = top - this.model.height / 2  + height / 2;
-
-    return transPos
   }
 
   _showWebglNoSupportText(context) {
@@ -1075,6 +1036,10 @@ export default class Visualizer extends Container {
 
     this._dataChanged = false
 
+    // draw navigatePath
+    if (this._pickingLocations && this._pickingLocations.length > 0)
+      this.navigatePath(this._pickingLocations)
+
     this.render_threed();
   }
 
@@ -1138,10 +1103,6 @@ export default class Visualizer extends Container {
       this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
 
       var object = this.getObjectByRaycast()
-      console.log(object)
-
-      var helper = new THREE.BoxHelper( object, 0xffff00 );
-      this._scene3d.add( helper );
 
       if (object && object.onmousemove)
         object.onmousemove(e, this)

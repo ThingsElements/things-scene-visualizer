@@ -12,6 +12,9 @@ export default class Rack extends THREE.Object3D {
     this._model = model;
     this._threeContainer = threeContainer;
 
+    this._frames = [];
+    this._boards = [];
+
     this.createObject(model, canvasSize);
     // this.castShadow = true
   }
@@ -36,6 +39,14 @@ export default class Rack extends THREE.Object3D {
     return Rack._frameMaterial
   }
 
+  get frames() {
+    return this._frames;
+  }
+
+  get boards() {
+    return this._boards;
+  }
+
   createObject(model, canvasSize) {
 
     let scale = 0.7;
@@ -49,6 +60,7 @@ export default class Rack extends THREE.Object3D {
     this.type = model.type
 
     var frame = this.createRackFrame(model.width, model.height, model.depth * model.shelves)
+    this._frames.push(frame)
 
     this.add(frame)
 
@@ -66,6 +78,8 @@ export default class Rack extends THREE.Object3D {
 
         this.add(board)
         // frame.geometry.merge(board.geometry, board.matrix)
+
+        this._boards.push(board)
       }
 
       let stock = new Stock({

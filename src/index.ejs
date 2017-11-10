@@ -35,7 +35,7 @@
         document.addEventListener('WebComponentsReady', function componentsReady() {
           document.removeEventListener('WebComponentsReady', componentsReady, false);
           var script = document.createElement('script');
-          script.src = 'things-scene-visualizer.js';
+          script.src = '<%= htmlWebpackPlugin.files.js[0] %>';
           var refScript = document.getElementsByTagName('script')[0];
           refScript.parentNode.insertBefore(script, refScript);
         }, false);
@@ -49,5 +49,5 @@
       up above.
     -->
 
-  <script type="text/javascript" src="things-scene-visualizer.js"></script><script type="text/javascript" src="things-scene-visualizer-min.js"></script></body>
+  </body>
 </html>

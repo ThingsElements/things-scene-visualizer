@@ -39,6 +39,8 @@
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
     "web-component-tester": "^4.0.0",
     "things-scene-viewer": "ThingsElements/things-scene-viewer",
-    "things-designer-elements": "ThingsElements/things-designer-elements"
+    "things-designer-elements": "ThingsElements/things-designer-elements#^2.0.54",
+    "things-scene-table": "ThingsElements/things-scene-table#^2.0.7",
+    "three.js": "threejs#*"
   }
 }
