@@ -230,15 +230,10 @@ export default class RackTable3d extends THREE.Group {
       zone,
       locPattern,
       shelfPattern,
-      increasePattern,
+      increasePattern = '+u+s',
       columns,
       rows
     } = model;
-
-    var rowIncreasePattern = increasePattern.row;
-    var colIncreasePattern = increasePattern.col;
-
-    var patternChecker = /([\+,\-])([u,s])/i
 
 
     var currCol = 0;
@@ -248,31 +243,13 @@ export default class RackTable3d extends THREE.Group {
     var unitOperator = 1;
     var sectionOperator = 1;
 
+   var patternChecker = /([\+,\-])([u,s])([\+,\-])([u,s])/i;
 
-    // var colMatched = colIncreasePattern.match(patternChecker);
-    // var rowMatched = rowIncreasePattern.match(patternChecker);
-    // if (colMatched && colMatched.length >= 3) {
-    //   var colOperator
-    //   switch (colMatched[1]) {
-    //     case '+':
-    //       colOperator = 1;
-    //       break;
-    //     case '-':
-    //       colOperator = -1;
-    //       break;
-    //   }
-
-    //   switch (colMatched[2]) {
-    //     case 'u':
-    //       unit = currCol;
-    //       unitOperator = colOperator;
-    //       break;
-    //     case 's':
-    //       section = currCol;
-    //       sectionOperator = colOperator;
-    //       break;
-    //   }
-    // }
+    var matches = increasePattern.match(patternChecker);
+    if (!matches || matches.length < 5) {
+      console.warn("Rack Pattern Error", increasePattern);
+      return false;
+    }
 
     components.forEach(rackModel => {
 
@@ -284,18 +261,32 @@ export default class RackTable3d extends THREE.Group {
       rackModel.locPattern = locPattern;
       rackModel.shelfPattern = shelfPattern;
 
-      console.log(rackModel.shelves)
+      if (matches[2] == 'u') {
+        if (matches[1] == '+')
+          unit = currCol + 1
+        else
+          unit = columns - currCol
+      } else {
+        if (matches[1] == '+')
+          section = currCol + 1
+        else
+          section = columns - currCol
+      }
 
-      // if (colIncreasePattern) {
+      if (matches[4] == 'u') {
+        if (matches[1] == '+')
+          unit = currRow + 1
+        else
+          unit = rows - currRow
+      } else {
+        if (matches[1] == '+')
+          section = currRow + 1
+        else
+          section = rows - currRow
+      }
 
-      // }
-
-      unit = currCol;
-      section = currRow;
-
-      rackModel.unit = ((unit + 1) * unitOperator).toString().padStart(2, 0);
-      rackModel.section = ((section + 1) * sectionOperator).toString().padStart(2, 0);
-
+      rackModel.unit = unit.toString().padStart(2, 0);
+      rackModel.section = section.toString().padStart(2, 0);
 
 
       var rack = new Rack(rackModel, canvasSize, this._threeContainer, this._sceneComponent);

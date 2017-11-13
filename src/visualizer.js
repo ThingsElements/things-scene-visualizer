@@ -119,7 +119,7 @@ export default class Visualizer extends Container {
     } else {
       floorMaterial = new THREE.MeshBasicMaterial({
         color: color,
-        side: THREE.FrontSide
+        side: THREE.DoubleSide
       })
     }
 
