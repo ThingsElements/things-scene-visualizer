@@ -56,7 +56,7 @@ Copyright © HatioLab Inc. All rights reserved.
       var data = {}
 
       function setData() {
-        app.scene.variable('threed', data)
+        app.scene.variable('threed', JSON.parse(JSON.stringify(data)))
       }
 
       window.addEventListener('WebComponentsReady', function (e) {
@@ -209,8 +209,10 @@ Copyright © HatioLab Inc. All rights reserved.
           ],
           "id": "yieldTable",
           "zone": "A",
+          "minSection": 5,
+          "minUnit": 5,
           "locPattern": "{z}{s}-{u}-{sh}",
-          "increasePattern": "-s-u",
+          "increasePattern": "+s+u",
           "shelfPattern": "00",
           "components": [
             {

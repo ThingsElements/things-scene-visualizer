@@ -28,6 +28,37 @@ const NATURE = {
     label: 'columns',
     name: 'columns',
     property: 'columns'
+  }, {
+    type: 'string',
+    label: 'zone',
+    name: 'zone',
+    property: 'zone'
+  }, {
+    type: 'number',
+    label: 'min-section',
+    name: 'minSection'
+  }, {
+    type: 'number',
+    label: 'min-unit',
+    name: 'minUnit'
+  }, {
+    type: 'string',
+    label: 'location-pattern',
+    name: 'locPattern',
+    property: {
+      placeholder: '{z}{s}-{u}-{sh}'
+    }
+  }, {
+    type: 'rack-increase-pattern',
+    label: 'increase-pattern',
+    name: 'increasePattern'
+  }, {
+    type: 'string',
+    label: 'shelf-pattern',
+    name: 'shelfPattern',
+    property: {
+      placeholder: '#, 00, 000'
+    }
   }]
 }
 
@@ -232,7 +263,9 @@ export default class RackTable3d extends THREE.Group {
       shelfPattern,
       increasePattern = '+u+s',
       columns,
-      rows
+      rows,
+      minUnit = 1,
+      minSection = 1
     } = model;
 
 
@@ -263,26 +296,26 @@ export default class RackTable3d extends THREE.Group {
 
       if (matches[2] == 'u') {
         if (matches[1] == '+')
-          unit = currCol + 1
+          unit = currCol + minUnit
         else
-          unit = columns - currCol
+          unit = columns - currCol - 1 + minUnit
       } else {
         if (matches[1] == '+')
-          section = currCol + 1
+          section = currCol + minSection
         else
-          section = columns - currCol
+          section = columns - currCol - 1 + minSection
       }
 
       if (matches[4] == 'u') {
         if (matches[1] == '+')
-          unit = currRow + 1
+          unit = currRow + minUnit
         else
-          unit = rows - currRow
+          unit = rows - currRow - 1 + minUnit
       } else {
         if (matches[1] == '+')
-          section = currRow + 1
+          section = currRow + minSection
         else
-          section = rows - currRow
+          section = rows - currRow - 1 + minSection
       }
 
       rackModel.unit = unit.toString().padStart(2, 0);
