@@ -5,12 +5,12 @@ import Stock from './stock'
 
 export default class Rack extends THREE.Object3D {
 
-  constructor(model, canvasSize, threeContainer, sceneComponent) {
+  constructor(model, canvasSize, visualizer, sceneComponent) {
 
     super();
 
     this._model = model;
-    this._threeContainer = threeContainer;
+    this._visualizer = visualizer;
 
     this._frames = [];
     this._boards = [];
@@ -87,7 +87,7 @@ export default class Rack extends THREE.Object3D {
         height: model.height * scale,
         depth: model.depth * scale,
         fillStyle: model.fillStyle
-      })
+      }, this._visualizer)
 
       let stockDepth = model.depth * scale
 
@@ -95,7 +95,7 @@ export default class Rack extends THREE.Object3D {
       stock.name = this.makeLocationString(this.makeShelfString(shelfPattern, i + 1, model.shelves))
 
       this.add(stock)
-      this._threeContainer.putObject(stock.name, stock);
+      this._visualizer.putObject(stock.name, stock);
     }
 
 

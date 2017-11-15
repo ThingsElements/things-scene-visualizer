@@ -32,12 +32,12 @@ const NATURE = {
 
 export default class Banner extends THREE.Object3D {
 
-  constructor(model, canvasSize, threeContainer) {
+  constructor(model, canvasSize, visualizer) {
 
     super();
 
     this._model = model;
-    this._threeContainer = threeContainer;
+    this._visualizer = visualizer;
 
     this.createObject(model, canvasSize);
   }
@@ -89,10 +89,10 @@ export default class Banner extends THREE.Object3D {
 
     if (fillStyle && fillStyle.type == 'pattern' && fillStyle.image) {
 
-      var texture = this._threeContainer._textureLoader.load(
-        this._threeContainer.app.url(fillStyle.image),
+      var texture = this._visualizer._textureLoader.load(
+        this._visualizer.app.url(fillStyle.image),
         function () {
-          self._threeContainer.render_threed()
+          self._visualizer.render_threed()
         }
       )
       // texture.wrapS = THREE.RepeatWrapping

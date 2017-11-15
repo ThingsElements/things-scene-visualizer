@@ -9,12 +9,12 @@ const STATUS_COLORS = ['#6666ff', '#ccccff', '#ffcccc', '#cc3300']
 
 export default class Beacon3D extends THREE.Object3D {
 
-  constructor(model, canvasSize, threeContainer) {
+  constructor(model, canvasSize, visualizer) {
 
     super();
 
     this._model = model;
-    this._threeContainer = threeContainer
+    this._visualizer = visualizer
 
     this.createObject(model, canvasSize);
 

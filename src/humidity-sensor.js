@@ -173,14 +173,14 @@ export default class HumiditySensor extends THREE.Object3D {
 
   }
 
-  onmousemove(e, threeContainer) {
+  onmousemove(e, visualizer) {
 
-    var tooltip = threeContainer.tooltip || threeContainer._scene2d.getObjectByName("tooltip")
+    var tooltip = visualizer.tooltip || visualizer._scene2d.getObjectByName("tooltip")
 
     if (tooltip) {
-      threeContainer._scene2d.remove(tooltip)
-      threeContainer.tooltip = null
-      threeContainer.render_threed()
+      visualizer._scene2d.remove(tooltip)
+      visualizer.tooltip = null
+      visualizer.render_threed()
     }
 
     if (!this.parent.visible)
@@ -202,15 +202,15 @@ export default class HumiditySensor extends THREE.Object3D {
     // currentLabel.lookAt( camera.position );
 
     if (tooltipText.length > 0) {
-      tooltip = threeContainer.tooltip = threeContainer.makeTextSprite(tooltipText)
+      tooltip = visualizer.tooltip = visualizer.makeTextSprite(tooltipText)
 
       var vector = new THREE.Vector3()
       var vector2 = tooltip.getWorldScale().clone()
 
-      var widthMultiplier = vector2.x / threeContainer.model.width
-      var heightMultiplier = vector2.y / threeContainer.model.height
+      var widthMultiplier = vector2.x / visualizer.model.width
+      var heightMultiplier = vector2.y / visualizer.model.height
 
-      vector.set(threeContainer._mouse.x, threeContainer._mouse.y, 0.5)
+      vector.set(visualizer._mouse.x, visualizer._mouse.y, 0.5)
       vector2.normalize()
 
       vector2.x = vector2.x / 2 * widthMultiplier
@@ -219,7 +219,7 @@ export default class HumiditySensor extends THREE.Object3D {
 
       vector.add(vector2)
 
-      vector.unproject(threeContainer._2dCamera)
+      vector.unproject(visualizer._2dCamera)
       tooltip.position.set(vector.x, vector.y, vector.z)
       tooltip.name = "tooltip"
 
@@ -229,12 +229,12 @@ export default class HumiditySensor extends THREE.Object3D {
 
 
       // tooltip.position.set(this.getWorldPosition().x, this.getWorldPosition().y, this.getWorldPosition().z)
-      // threeContainer._scene3d.add(tooltip)
+      // visualizer._scene3d.add(tooltip)
 
 
-      threeContainer._scene2d.add(tooltip)
-      threeContainer._renderer && threeContainer._renderer.render(threeContainer._scene2d, threeContainer._2dCamera)
-      threeContainer.invalidate()
+      visualizer._scene2d.add(tooltip)
+      visualizer._renderer && visualizer._renderer.render(visualizer._scene2d, visualizer._2dCamera)
+      visualizer.invalidate()
 
     }
 

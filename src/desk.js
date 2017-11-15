@@ -22,12 +22,12 @@ const NATURE = {
 
 export default class Desk extends THREE.Object3D {
 
-  constructor(model, canvasSize, threeContainer, sceneComponent) {
+  constructor(model, canvasSize, visualizer, sceneComponent) {
 
     super();
 
     this._model = model;
-    this._threeContainer = threeContainer;
+    this._visualizer = visualizer;
 
     this.createObject(model, canvasSize);
   }

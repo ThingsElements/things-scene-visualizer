@@ -49,16 +49,16 @@ const NATURE = {
       placeholder: '{z}{s}-{u}-{sh}'
     }
   }, {
-    type: 'rack-increase-pattern',
-    label: 'increase-pattern',
-    name: 'increasePattern'
-  }, {
     type: 'string',
     label: 'shelf-pattern',
     name: 'shelfPattern',
     property: {
       placeholder: '#, 00, 000'
     }
+  }, {
+    type: 'rack-increase-pattern',
+    label: '',
+    name: 'increasePattern'
   }]
 }
 
@@ -240,12 +240,12 @@ var rowControlHandler = {
 
 export default class RackTable3d extends THREE.Group {
 
-  constructor(model, canvasSize, threeContainer, sceneComponent) {
+  constructor(model, canvasSize, visualizer, sceneComponent) {
 
     super();
 
     this._model = model;
-    this._threeContainer = threeContainer;
+    this._visualizer = visualizer;
     this._sceneComponent = sceneComponent;
 
     this.createRacks(model, canvasSize);
@@ -322,7 +322,7 @@ export default class RackTable3d extends THREE.Group {
       rackModel.section = section.toString().padStart(2, 0);
 
 
-      var rack = new Rack(rackModel, canvasSize, this._threeContainer, this._sceneComponent);
+      var rack = new Rack(rackModel, canvasSize, this._visualizer, this._sceneComponent);
       this.add(rack);
 
       currCol++;

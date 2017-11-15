@@ -1,96 +1,63 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-// const STATUS_COLORS = ['black', '#ccaa76', '#ff1100', '#252525', '#6ac428']
-const STATUS_COLORS = {
-  A: 'black',
-  B: '#ccaa76',
-  C: '#ff1100',
-  D: '#252525',
-  E: '#6ac428'
-}
+const STOCK_COLOR = '#ccaa76'
+// const STATUS_COLORS = {
+//   A: 'black',
+//   B: '#ccaa76',
+//   C: '#ff1100',
+//   D: '#252525',
+//   E: '#6ac428'
+// }
 
 export default class Stock extends THREE.Mesh {
 
-  constructor(model) {
+  constructor(model, visualizer) {
 
     super();
 
+    this._visualizer = visualizer;
     this._model = model;
 
     this.createObject(model);
 
   }
 
-  static get blackMaterial() {
-    if (!Stock._material_black)
-      Stock._material_black = new THREE.MeshLambertMaterial({
-        color: STATUS_COLORS.A,
+  getMaterial(index) {
+    if (!this.stockMaterials[index]) {
+      if (!(this._visualizer && this._visualizer._stockStatus))
+        return Stock.defaultMaterial;
+
+      var stockStatus = this._visualizer._stockStatus;
+      var range = stockStatus.ranges[index];
+
+      if (!(range && range.color))
+        this.stockMaterials[index] = Stock.defaultMaterial;
+
+      this.stockMaterials[index] = new THREE.MeshLambertMaterial({
+        color: range.color,
         side: THREE.FrontSide
       })
-
-    return Stock._material_black
-  }
-  static get brownMaterial() {
-    if (!Stock._material_brown)
-      Stock._material_brown = new THREE.MeshLambertMaterial({
-        color: STATUS_COLORS.B,
-        side: THREE.FrontSide
-      })
-
-    return Stock._material_brown
-  }
-  static get redMaterial() {
-    if (!Stock._material_red)
-      Stock._material_red = new THREE.MeshLambertMaterial({
-        color: STATUS_COLORS.C,
-        side: THREE.FrontSide
-      })
-
-    return Stock._material_red
-  }
-  static get darkMaterial() {
-    if (!Stock._material_dark)
-      Stock._material_dark = new THREE.MeshLambertMaterial({
-        color: STATUS_COLORS.D,
-        side: THREE.FrontSide
-      })
-
-    return Stock._material_dark
-  }
-  static get greenMaterial() {
-    if (!Stock._material_green)
-      Stock._material_green = new THREE.MeshLambertMaterial({
-        color: STATUS_COLORS.E,
-        side: THREE.FrontSide
-      })
-
-    return Stock._material_green
-  }
-
-  static getMaterial(status) {
-    var material
-    switch (status) {
-      default:
-      case 'A':
-        material = Stock.blackMaterial
-        break;
-      case 'B':
-        material = Stock.brownMaterial
-        break;
-      case 'C':
-        material = Stock.redMaterial
-        break;
-      case 'D':
-        material = Stock.darkMaterial
-        break;
-      case 'E':
-        material = Stock.greenMaterial
-        break;
-
     }
 
-    return material
+    return this.stockMaterials[index];
+  }
+
+  get stockMaterials() {
+    if (!this._visualizer._stock_materials)
+      this._visualizer._stock_materials = [];
+
+    return this._visualizer._stock_materials
+  }
+
+  static get defaultMaterial() {
+    if (!Stock._material_default)
+      Stock._material_default = new THREE.MeshLambertMaterial({
+        color: STOCK_COLOR,
+        side: THREE.FrontSide
+      })
+
+    return Stock._material_default
   }
 
   createObject(model) {
@@ -101,12 +68,8 @@ export default class Stock extends THREE.Mesh {
 
   createStock(w, h, d) {
 
-    let {
-      fillStyle = '#ccaa76'
-    } = this.model
-
     this.geometry = new THREE.BoxBufferGeometry(w, d, h);
-    this.material = Stock.getMaterial('B')
+    this.material = Stock.defaultMaterial;
     this.type = 'stock'
 
     // this.visible = false
@@ -122,23 +85,45 @@ export default class Stock extends THREE.Mesh {
   onUserDataChanged() {
     super.onUserDataChanged();
 
-    this.material = Stock.getMaterial(this.userData.GUBUN || this.userData.gubun)
+    if (!(this._visualizer && this._visualizer._stockStatus))
+      return
 
-    if ((this.userData.GUBUN || this.userData.gubun) == 'A') {
-      this.visible = false
-    } else {
-      this.visible = true
-    }
+    var stockStatus = this._visualizer._stockStatus;
+    var statusField = stockStatus.field;
+    var ranges = stockStatus.ranges
+
+    if (!(statusField && ranges))
+      return
+
+    ranges.some((range, index) => {
+      let {
+        min,
+        max
+      } = range
+
+      var status = this.userData[statusField];
+
+      if (max > status) {
+        if (min !== undefined) {
+          if (min <= status) {
+            this.material = this.getMaterial(index)
+          }
+        } else
+          this.material = this.getMaterial(index)
+
+        return true;
+      }
+    })
   }
 
-  onmousemove(e, threeContainer) {
+  onmousemove(e, visualizer) {
 
-    var tooltip = threeContainer.tooltip || threeContainer._scene2d.getObjectByName("tooltip")
+    var tooltip = visualizer.tooltip || visualizer._scene2d.getObjectByName("tooltip")
 
     if (tooltip) {
-      threeContainer._scene2d.remove(tooltip)
-      threeContainer.tooltip = null
-      threeContainer.render_threed()
+      visualizer._scene2d.remove(tooltip)
+      visualizer.tooltip = null
+      visualizer.render_threed()
     }
 
     if (!this.visible)
@@ -162,12 +147,12 @@ export default class Stock extends THREE.Mesh {
     // tooltipText = 'loc : ' + loc
 
     if (tooltipText.length > 0) {
-      tooltip = threeContainer.tooltip = threeContainer.makeTextSprite(tooltipText)
+      tooltip = visualizer.tooltip = visualizer.makeTextSprite(tooltipText)
 
       var vector = new THREE.Vector3()
       var vector2 = new THREE.Vector3()
 
-      vector.set(threeContainer._mouse.x, threeContainer._mouse.y, 0.5)
+      vector.set(visualizer._mouse.x, visualizer._mouse.y, 0.5)
       vector2.set(100, 50, 0)
       //
       // vector2.normalize()
@@ -179,14 +164,14 @@ export default class Stock extends THREE.Mesh {
 
       // vector.add(vector2)
 
-      vector.unproject(threeContainer._2dCamera)
+      vector.unproject(visualizer._2dCamera)
       vector.add(vector2)
       tooltip.position.set(vector.x, vector.y, vector.z)
       tooltip.name = "tooltip"
 
-      threeContainer._scene2d.add(tooltip)
-      threeContainer._renderer && threeContainer._renderer.render(threeContainer._scene2d, threeContainer._2dCamera)
-      threeContainer.invalidate()
+      visualizer._scene2d.add(tooltip)
+      visualizer._renderer && visualizer._renderer.render(visualizer._scene2d, visualizer._2dCamera)
+      visualizer.invalidate()
     }
 
   }

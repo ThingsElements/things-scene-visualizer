@@ -4,10 +4,10 @@ if (THREE && THREE.Object3D) {
       return
 
     if (this.userData.hasOwnProperty('location')) {
-      if (!this._threeContainer)
+      if (!this._visualizer)
         return
 
-      this._setPosition(this._threeContainer.transcoord2dTo3d(this.userData.location));
+      this._setPosition(this._visualizer.transcoord2dTo3d(this.userData.location));
     }
 
     if (this.userData.hasOwnProperty('euler')) {
@@ -31,13 +31,13 @@ if (THREE && THREE.Object3D) {
   THREE.Object3D.prototype._setPosition = function(location) {
     var { x, y } = location;
 
-    var index = this._threeContainer.mixers.indexOf(this._mixer);
+    var index = this._visualizer.mixers.indexOf(this._mixer);
     if (index >= 0) {
-      this._threeContainer.mixers.splice(index, 1);
+      this._visualizer.mixers.splice(index, 1);
     }
 
     this._mixer = new THREE.AnimationMixer(this);
-    this._threeContainer.mixers.push(this._mixer);
+    this._visualizer.mixers.push(this._mixer);
 
     var positionKF = new THREE.VectorKeyframeTrack( '.position', [ 0, 1 ], [ this.position.x, this.position.y, this.position.z, x, this.position.y, y] );
     var clip = new THREE.AnimationClip('Move', 2, [positionKF]);

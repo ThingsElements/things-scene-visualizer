@@ -22,12 +22,12 @@ const NATURE = {
 
 export default class Cube extends THREE.Mesh {
 
-  constructor(model, canvasSize, threeContainer) {
+  constructor(model, canvasSize, visualizer) {
 
     super();
 
     this._model = model;
-    this._threeContainer = threeContainer;
+    this._visualizer = visualizer;
 
     this.createObject(model, canvasSize);
 
@@ -77,7 +77,7 @@ export default class Cube extends THREE.Mesh {
   get mixer() {
     if (!this._mixer) {
       this._mixer = new THREE.AnimationMixer(this);
-      this._threeContainer.mixers.push(this._mixer);
+      this._visualizer.mixers.push(this._mixer);
     }
 
     return this._mixer;

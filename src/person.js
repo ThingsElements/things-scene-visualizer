@@ -33,12 +33,12 @@ function init() {
 
 export default class Person extends THREE.Object3D {
 
-  constructor(model, canvasSize, threeContainer) {
+  constructor(model, canvasSize, visualizer) {
 
     super();
 
     this._model = model;
-    this._threeContainer = threeContainer;
+    this._visualizer = visualizer;
 
     this.createObject(model, canvasSize);
 
@@ -87,7 +87,7 @@ export default class Person extends THREE.Object3D {
     this.position.set(cx, 0, cy)
     this.rotation.y = model.rotation || 0
 
-    this._threeContainer.render_threed()
+    this._visualizer.render_threed()
   }
 
 }

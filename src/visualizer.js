@@ -63,6 +63,10 @@ const NATURE = {
     label: '3dmode',
     name: 'threed',
     property: 'threed'
+  }, {
+    type: 'stock-status',
+    label: '',
+    name: ''
   }]
 }
 
@@ -360,7 +364,8 @@ export default class Visualizer extends Container {
       fillStyle = '#424b57',
       light = 0xffffff,
       antialias = true,
-      precision = 'highp'
+      precision = 'highp',
+      stockStatus
     } = this.model
     var components = this.components || []
 
@@ -383,10 +388,11 @@ export default class Visualizer extends Container {
     this._camera.zoom = this.model.zoom * 0.01
 
     if (this.model.showAxis) {
-      var axisHelper = new THREE.AxisHelper( width );
-      this._scene3d.add( axisHelper );
+      var axisHelper = new THREE.AxisHelper(width);
+      this._scene3d.add(axisHelper);
     }
 
+    this._stockStatus = stockStatus;
 
     try {
       // RENDERER
@@ -466,15 +472,15 @@ export default class Visualizer extends Container {
 
   render_threed() {
     var delta
-    if(this._clock)
+    if (this._clock)
       delta = this._clock.getDelta();
 
     var mixers = this.mixers
     for (var i in mixers) {
       if (mixers.hasOwnProperty(i)) {
         var mixer = mixers[i];
-        if ( mixer ) {
-          mixer.update( delta );
+        if (mixer) {
+          mixer.update(delta);
         }
 
       }
@@ -1061,15 +1067,18 @@ export default class Visualizer extends Container {
       after.hasOwnProperty('far') ||
       after.hasOwnProperty('zoom')) {
 
-      this._camera.near = this.model.near
-      this._camera.far = this.model.far
-      this._camera.zoom = this.model.zoom * 0.01
-      this._camera.fov = this.model.fov
-      this._camera.updateProjectionMatrix();
+      if (this._camera) {
+        this._camera.near = this.model.near
+        this._camera.far = this.model.far
+        this._camera.zoom = this.model.zoom * 0.01
+        this._camera.fov = this.model.fov
+        this._camera.updateProjectionMatrix();
 
-      this._controls.cameraChanged = true
+        this._controls.cameraChanged = true
 
-      this._controls.update()
+        this._controls.update()
+      }
+
     }
 
     if (after.hasOwnProperty("data")) {
