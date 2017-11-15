@@ -153,7 +153,7 @@ export default class Stock extends THREE.Mesh {
       var vector2 = new THREE.Vector3()
 
       vector.set(visualizer._mouse.x, visualizer._mouse.y, 0.5)
-      vector2.set(100, 50, 0)
+      vector2.set(tooltip.scale.x / 2, - tooltip.scale.y / 2, 0)
       //
       // vector2.normalize()
       //

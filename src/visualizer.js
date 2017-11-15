@@ -179,13 +179,13 @@ export default class Visualizer extends Container {
       parameters["fontFace"] : "Arial";
 
     var fontSize = parameters.hasOwnProperty("fontSize") ?
-      parameters["fontSize"] : 32;
+      parameters["fontSize"] : 16;
 
     var textColor = parameters.hasOwnProperty("textColor") ?
       parameters["textColor"] : 'rgba(255,255,255,1)';
 
     var borderWidth = parameters.hasOwnProperty("borderWidth") ?
-      parameters["borderWidth"] : 2;
+      parameters["borderWidth"] : 0;
 
     var borderColor = parameters.hasOwnProperty("borderColor") ?
       parameters["borderColor"] : 'rgba(0, 0, 0, 1.0)';
@@ -195,7 +195,7 @@ export default class Visualizer extends Container {
       parameters["backgroundColor"] : 'rgba(0, 0, 0, 0.7)';
 
     var radius = parameters.hasOwnProperty("radius") ?
-      parameters["radius"] : 30;
+      parameters["radius"] : 15;
 
     var vAlign = parameters.hasOwnProperty("vAlign") ?
       parameters["vAlign"] : 'middle';
@@ -207,10 +207,20 @@ export default class Visualizer extends Container {
     var canvas = document.createElement('canvas');
     var context = canvas.getContext('2d');
 
-    // document.body.appendChild(canvas)
+    var span = document.createElement('span');
+    span.style.font = `${fontSize}px ${fontFace}`;
+    span.style.whiteSpace = 'pre-wrap';
 
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
+    span.innerText = message;
+
+    document.body.appendChild(span)
+
+    canvas.width = span.offsetWidth + (borderWidth + radius) * 2
+    canvas.height = span.offsetHeight + (borderWidth + radius) * 2
+
+    document.body.removeChild(span);
+
+    span.remove();
 
     context.font = fontSize + "px " + fontFace;
     context.textBaseline = "alphabetic";
@@ -288,8 +298,7 @@ export default class Visualizer extends Container {
       map: texture
     });
     var sprite = new THREE.Sprite(spriteMaterial);
-    sprite.scale.set(600, 300, 1);
-    // sprite.scale.set(canvas.width, canvas.height, 1.0);
+    sprite.scale.set(canvas.width, canvas.height, 1.0);
 
     sprite.raycast = function () { }
 
@@ -382,7 +391,7 @@ export default class Visualizer extends Container {
     this._scene3d.add(this._camera)
     this._scene2d.add(this._2dCamera)
     this._camera.position.set(height * 0.8, Math.max(width, height) * 0.8, width * 0.8)
-    this._2dCamera.position.set(height * 0.8, Math.max(width, height) * 0.8, width * 0.8)
+    this._2dCamera.position.set(0, 0, 0)
     this._camera.lookAt(this._scene3d.position)
     this._2dCamera.lookAt(this._scene2d.position)
     this._camera.zoom = this.model.zoom * 0.01
