@@ -66,7 +66,7 @@ const NATURE = {
   }, {
     type: 'stock-status',
     label: '',
-    name: ''
+    name: 'stockStatus'
   }]
 }
 
