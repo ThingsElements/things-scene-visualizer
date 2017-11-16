@@ -31,8 +31,8 @@
   ],
   "dependencies": {
     "things-scene-core": "ThingsElements/things-scene-core#^2.0.0",
-    "babylonjs": "^3.0.7",
-    "things-scene-indoor-map": "ThingsElements/things-scene-indoor-map#^2.0.7"
+    "things-scene-indoor-map": "ThingsElements/things-scene-indoor-map#^2.0.7",
+    "three.js": "threejs#*"
   },
   "devDependencies": {
     "polymer": "Polymer/polymer#^1.2.0",
@@ -41,6 +41,6 @@
     "things-scene-viewer": "ThingsElements/things-scene-viewer",
     "things-designer-elements": "ThingsElements/things-designer-elements#^2.0.54",
     "things-scene-table": "ThingsElements/things-scene-table#^2.0.7",
-    "three.js": "threejs#*"
+    "babylonjs": "^3.0.7"
   }
 }
