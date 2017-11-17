@@ -250,6 +250,7 @@ export default class RackTable3d extends THREE.Group {
 
     this.createRacks(model, canvasSize);
     this.mergeObjects()
+
   }
 
   createRacks(model, canvasSize) {
@@ -269,6 +270,14 @@ export default class RackTable3d extends THREE.Group {
     } = model;
 
 
+    let cx = (model.left + (model.width / 2)) - canvasSize.width / 2
+    let cy = (model.top + (model.height / 2)) - canvasSize.height / 2
+    let cz = 0;
+
+    this.position.set(cx, cz, cy)
+    this.rotation.y = - this._model.rotation || 0;
+
+
     var currCol = 0;
     var currRow = 0;
     var unit = currCol;
@@ -276,7 +285,7 @@ export default class RackTable3d extends THREE.Group {
     var unitOperator = 1;
     var sectionOperator = 1;
 
-   var patternChecker = /([\+,\-])([u,s])([\+,\-])([u,s])/i;
+    var patternChecker = /([\+,\-])([u,s])([\+,\-])([u,s])/i;
 
     var matches = increasePattern.match(patternChecker);
     if (!matches || matches.length < 5) {
@@ -288,8 +297,7 @@ export default class RackTable3d extends THREE.Group {
 
       rackModel.depth = rackModel.depth || 20;
       rackModel.shelves = rackModel.shelves || 1;
-      rackModel.left += left;
-      rackModel.top += top;
+
       rackModel.zone = zone;
       rackModel.locPattern = locPattern;
       rackModel.shelfPattern = shelfPattern;
@@ -321,8 +329,7 @@ export default class RackTable3d extends THREE.Group {
       rackModel.unit = unit.toString().padStart(2, 0);
       rackModel.section = section.toString().padStart(2, 0);
 
-
-      var rack = new Rack(rackModel, canvasSize, this._visualizer, this._sceneComponent);
+      var rack = new Rack(rackModel, model, this._visualizer, this._sceneComponent);
       this.add(rack);
 
       currCol++;
@@ -365,15 +372,6 @@ export default class RackTable3d extends THREE.Group {
       targetBoard.geometry.merge(b.geometry);
     })
   }
-
-  // convertTableLocInfoToRackLocInfo(isIncrement, isColumn, tableLoc, rackLoc) {
-  //   var operator = isIncrement ? 1 : -1
-  //   if (isColumn) {
-
-  //   }
-
-
-  // }
 
   raycast(raycaster, intersects) {
 

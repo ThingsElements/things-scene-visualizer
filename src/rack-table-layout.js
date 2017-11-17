@@ -5,7 +5,7 @@ var { Layout } = scene
 
 var RackTableLayout = {
 
-  reflow: function(container) {
+  reflow: function (container) {
     var layoutConfig = container.get('layoutConfig')
 
     var columns = (layoutConfig && layoutConfig.columns) || container.get('columns')
@@ -33,23 +33,23 @@ var RackTableLayout = {
 
       let colspan = component.colspan || 1
       let wspan = 0
-      while(--colspan > 0)
+      while (--colspan > 0)
         wspan += widths ? widths[(idx + colspan) % columns] : 1
 
       let rowspan = component.rowspan || 1
       let hspan = 0
-      while(--rowspan > 0)
+      while (--rowspan > 0)
         hspan += heights ? heights[Math.floor(idx / columns) + rowspan] : 1
 
       component.bounds = {
-        left : paddingLeft + x,
-        top : paddingTop + y,
-        width : width_unit * (w + wspan),
-        height : height_unit * (h + hspan)
+        left: paddingLeft + x,
+        top: paddingTop + y,
+        width: width_unit * (w + wspan),
+        height: height_unit * (h + hspan)
       }
       component.set('rotation', 0)
 
-      if(idx % columns == columns - 1) {
+      if (idx % columns == columns - 1) {
         x = 0
         y += h * height_unit
       } else {
@@ -59,15 +59,15 @@ var RackTableLayout = {
 
   },
 
-  capturables: function(container) {
+  capturables: function (container) {
     return container.components.filter((cell) => { return !cell.merged })
   },
 
-  drawables: function(container) {
+  drawables: function (container) {
     return container.components.filter((cell) => { return !cell.merged })
   },
 
-  isStuck: function(component) {
+  isStuck: function (component) {
     return true
   },
 
@@ -77,7 +77,7 @@ var RackTableLayout = {
    * keyNavigate 메쏘드가 정의되어 있지 않으면, 'Tab' 키에 대한 네비게이션만 작동한다.
    * 'Tab'키에 의한 네비게이션은 모든 레이아웃에 공통으로 적용된다.
    */
-  keyNavigate: function(container, component, e) {
+  keyNavigate: function (container, component, e) {
     var layoutConfig = container.get('layoutConfig')
 
     var columns = (layoutConfig && layoutConfig.columns) || container.get('columns')
@@ -85,25 +85,25 @@ var RackTableLayout = {
 
     var { row, column } = container.getRowColumn(component)
 
-    switch(e.code) {
-    case 'ArrowUp':
-    if(row > 0)
-      return container.getAt((row - 1) * columns + column)
-    break;
-    case 'ArrowDown':
-    if(row < rows - 1)
-      return container.getAt((row + 1) * columns + column)
-    break;
-    case 'ArrowRight':
-    if(column < columns - 1)
-      return container.getAt(row * columns + column + 1)
-    break;
-    case 'ArrowLeft':
-    if(column > 0)
-      return container.getAt(row * columns + column - 1)
-    break;
-    default:
-      return component
+    switch (e.code) {
+      case 'ArrowUp':
+        if (row > 0)
+          return container.getAt((row - 1) * columns + column)
+        break;
+      case 'ArrowDown':
+        if (row < rows - 1)
+          return container.getAt((row + 1) * columns + column)
+        break;
+      case 'ArrowRight':
+        if (column < columns - 1)
+          return container.getAt(row * columns + column + 1)
+        break;
+      case 'ArrowLeft':
+        if (column > 0)
+          return container.getAt(row * columns + column - 1)
+        break;
+      default:
+        return component
     }
   },
 

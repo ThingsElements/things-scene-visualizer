@@ -98,9 +98,8 @@ export default class Rack extends THREE.Object3D {
       this._visualizer.putObject(stock.name, stock);
     }
 
-
     this.position.set(cx, cz, cy)
-    this.rotation.y = rotation || 0
+    this.rotation.y = - rotation || 0
 
   }
 
@@ -112,7 +111,7 @@ export default class Rack extends THREE.Object3D {
     //   depth : h
     // })
 
-    var frameWeight = Math.round(Math.min(w,h) / 10)
+    var frameWeight = Math.round(Math.min(w, h) / 10)
 
     var frames = new THREE.Group()
     for (var i = 0; i < 4; i++) {
