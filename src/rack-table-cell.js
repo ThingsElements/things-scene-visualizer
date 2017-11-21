@@ -30,6 +30,10 @@ const NATURE = {
     label: 'depth',
     name: 'depth',
     property: 'depth'
+  }, {
+    type: 'checkbox',
+    label: 'isEmpty',
+    name: 'isEmpty'
   }]
 }
 
@@ -43,12 +47,20 @@ function isRightMost(idx, rows, columns) {
   return (idx + 1) % columns == 0
 }
 
+const EMPTY_CELL_STROKE_STYLE = '#ccc'
+const EMPTY_CELL_LINE_WIDTH = 1
+const EMPTY_CELL_FILL_STYLE = '#efefef'
+
 /**
  * 1. 스타일을 상속 받아야 함. (cascade-style)
  * 2. 스타일을 동적처리할 수 있음. (로직처리)
  * 3. 데이타를 받을 수 있음.
  */
 export default class RackTableCell extends RectPath(Component) {
+
+  get hasTextProperty() {
+    return false
+  }
 
   get nature() {
     return NATURE
@@ -121,6 +133,37 @@ export default class RackTableCell extends RectPath(Component) {
       this._drawBorder(context, left + width, top, left + width, top + height, border.right);
     if (isBottomMost(idx, rows, columns))
       this._drawBorder(context, left + width, top + height, left, top + height, border.bottom);
+
+  }
+
+  _post_draw(context) {
+    super._post_draw(context);
+
+    if(this.model.isEmpty)
+      this._draw_empty_cell(context);
+  }
+
+  _draw_empty_cell(context) {
+    var {
+      left, top, width, height
+    } = this.model;
+
+    context.save();
+    context.fillStyle = EMPTY_CELL_FILL_STYLE
+    context.fill();
+
+    context.beginPath();
+    context.lineWidth = EMPTY_CELL_LINE_WIDTH
+    context.strokeStyle = EMPTY_CELL_STROKE_STYLE
+
+    context.moveTo(left, top);
+    context.lineTo(left + width, top + height);
+    context.moveTo(left + width, top);
+    context.lineTo(left, top + height);
+
+    context.stroke();
+    context.closePath();
+    context.restore();
   }
 }
 

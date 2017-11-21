@@ -103,6 +103,7 @@ function buildNewCell(app) {
     width: 1,
     height: 1,
     textWrap: true,
+    isEmpty: false,
     border: buildBorderStyle(DEFAULT_STYLE, 'all')
   }, app)
 }
@@ -238,6 +239,11 @@ var rowControlHandler = {
   }
 }
 
+const LOCATION_HEADER_SIZE = 50;
+const LOCATION_HEADER_LINE_WIDTH = 1;
+const LOCATION_HEADER_STROKE_STYLE = '#ccc';
+const LOCATION_HEADER_FILL_STYLE = '#efefef';
+
 export default class RackTable3d extends THREE.Group {
 
   constructor(model, canvasSize, visualizer, sceneComponent) {
@@ -282,8 +288,6 @@ export default class RackTable3d extends THREE.Group {
     var currRow = 0;
     var unit = currCol;
     var section = currRow;
-    var unitOperator = 1;
-    var sectionOperator = 1;
 
     var patternChecker = /([\+,\-])([u,s])([\+,\-])([u,s])/i;
 
@@ -315,12 +319,12 @@ export default class RackTable3d extends THREE.Group {
       }
 
       if (matches[4] == 'u') {
-        if (matches[1] == '+')
+        if (matches[3] == '+')
           unit = currRow + minUnit
         else
           unit = rows - currRow - 1 + minUnit
       } else {
-        if (matches[1] == '+')
+        if (matches[3] == '+')
           section = currRow + minSection
         else
           section = rows - currRow - 1 + minSection
@@ -329,8 +333,10 @@ export default class RackTable3d extends THREE.Group {
       rackModel.unit = unit.toString().padStart(2, 0);
       rackModel.section = section.toString().padStart(2, 0);
 
-      var rack = new Rack(rackModel, model, this._visualizer, this._sceneComponent);
-      this.add(rack);
+      if (!rackModel.isEmpty) {
+        var rack = new Rack(rackModel, model, this._visualizer, this._sceneComponent);
+        this.add(rack);
+      }
 
       currCol++;
 
@@ -338,7 +344,6 @@ export default class RackTable3d extends THREE.Group {
         currCol = 0;
         currRow++;
       }
-
     })
 
   }
@@ -390,6 +395,259 @@ export class RackTable extends Container {
 
   is3dish() {
     return true;
+  }
+
+  _post_draw(context) {
+
+    super._post_draw(context);
+
+    if (!this.app.isEditMode)
+      return;
+
+    if (this._focused) {
+      this._draw_column_header(context);
+      this._draw_row_header(context);
+      this._draw_header_joint(context);
+    }
+  }
+
+  _draw_column_header(context) {
+    var {
+      left, top, width, height
+    } = this.bounds
+
+    var {
+      minUnit = 1,
+      minSection = 1,
+      increasePattern = '+u+s',
+      columns
+    } = this.model
+
+    context.beginPath();
+    context.lineWidth = LOCATION_HEADER_LINE_WIDTH;
+    context.strokeStyle = LOCATION_HEADER_STROKE_STYLE;
+    context.fillStyle = LOCATION_HEADER_FILL_STYLE;
+
+    context.moveTo(left, top - LOCATION_HEADER_SIZE);
+    context.rect(left, top - LOCATION_HEADER_SIZE, width, LOCATION_HEADER_SIZE);
+
+    context.fill();
+
+    var cells = this.getCellsByRow(0)
+
+    var patternChecker = /([\+,\-])([u,s])([\+,\-])([u,s])/i;
+
+    var matches = increasePattern.match(patternChecker);
+    if (!matches || matches.length < 5) {
+      console.warn("Rack Pattern Error", increasePattern);
+      return false;
+    }
+
+    cells.forEach((cell, index) => {
+      var width = cell.model.width;
+      var c = 0;
+
+      if (matches[2] == 'u') {
+        if (matches[1] == '+')
+          c = index + minUnit
+        else
+          c = columns - index - 1 + minUnit
+      } else {
+        if (matches[1] == '+')
+          c = index + minSection
+        else
+          c = columns - index - 1 + minSection
+      }
+
+      var locationText = `${String(c).padStart(2, 0)}`
+
+      this._draw_location_header_text(context, {
+        left: left,
+        top : top - LOCATION_HEADER_SIZE,
+        width,
+        height: LOCATION_HEADER_SIZE
+      }, locationText, this.model)
+
+      left = left + width
+      context.moveTo(left, top - LOCATION_HEADER_SIZE);
+      context.lineTo(left, top);
+    })
+
+    context.stroke();
+
+    context.closePath();
+  }
+
+  _draw_row_header(context) {
+    var {
+      left, top, width, height
+    } = this.bounds
+
+    var {
+      minUnit = 1,
+      minSection = 1,
+      increasePattern = '+u+s',
+      rows
+    } = this.model
+
+    context.beginPath();
+    context.lineWidth = LOCATION_HEADER_LINE_WIDTH;
+    context.strokeStyle = LOCATION_HEADER_STROKE_STYLE;
+    context.fillStyle = LOCATION_HEADER_FILL_STYLE;
+
+    context.moveTo(left - LOCATION_HEADER_SIZE, top);
+    context.rect(left - LOCATION_HEADER_SIZE, top, LOCATION_HEADER_SIZE, height);
+
+    context.fill();
+
+    var cells = this.getCellsByColumn(0)
+
+    var patternChecker = /([\+,\-])([u,s])([\+,\-])([u,s])/i;
+
+    var matches = increasePattern.match(patternChecker);
+    if (!matches || matches.length < 5) {
+      console.warn("Rack Pattern Error", increasePattern);
+      return false;
+    }
+
+    cells.forEach((cell, index) => {
+      var height = cell.model.height;
+      var r = 0
+
+      if (matches[4] == 'u') {
+        if (matches[1] == '+')
+          r = index + minUnit
+        else
+          r = rows - index - 1 + minUnit
+      } else {
+        if (matches[1] == '+')
+          r = index + minSection
+        else
+          r = rows - index - 1 + minSection
+      }
+
+      var locationText = `${String(r).padStart(2, 0)}`
+      this._draw_location_header_text(context, {
+        left: left - LOCATION_HEADER_SIZE,
+        top,
+        width: LOCATION_HEADER_SIZE,
+        height
+      }, locationText, this.model)
+
+      top = top + height
+      context.moveTo(left - LOCATION_HEADER_SIZE, top);
+      context.lineTo(left, top);
+    })
+
+    context.stroke();
+
+    context.closePath();
+  }
+
+  _draw_header_joint(context) {
+    var {
+      left, top, width, height
+    } = this.bounds
+
+    var {
+      minUnit = 1,
+      minSection = 1,
+      increasePattern = '+u+s',
+      rows
+    } = this.model
+
+    context.beginPath();
+    context.lineWidth = LOCATION_HEADER_LINE_WIDTH;
+    context.strokeStyle = LOCATION_HEADER_STROKE_STYLE;
+    context.fillStyle = LOCATION_HEADER_FILL_STYLE;
+
+    context.moveTo(left - LOCATION_HEADER_SIZE, top - LOCATION_HEADER_SIZE);
+    context.rect(left - LOCATION_HEADER_SIZE, top - LOCATION_HEADER_SIZE, LOCATION_HEADER_SIZE, LOCATION_HEADER_SIZE);
+
+    context.fill();
+    context.closePath();
+
+    context.beginPath();
+    context.moveTo(left - LOCATION_HEADER_SIZE, top - LOCATION_HEADER_SIZE);
+    context.lineTo(left, top);
+
+    context.stroke();
+
+    var cells = this.getCellsByColumn(0)
+
+    var patternChecker = /([\+,\-])([u,s])([\+,\-])([u,s])/i;
+
+    var matches = increasePattern.match(patternChecker);
+    if (!matches || matches.length < 5) {
+      console.warn("Rack Pattern Error", increasePattern);
+      return false;
+    }
+
+    var colText, rowText
+    if (matches[2] == 'u') {
+      colText = 'U';
+      rowText = 'S';
+    } else {
+      colText = 'S';
+      rowText = 'U';
+    }
+
+    this._draw_location_header_text(context, {
+      left: left - LOCATION_HEADER_SIZE * 0.5,
+      top: top - LOCATION_HEADER_SIZE,
+      width: LOCATION_HEADER_SIZE * 0.5,
+      height: LOCATION_HEADER_SIZE  * 0.5
+    }, colText, this.model)
+
+    this._draw_location_header_text(context, {
+      left: left - LOCATION_HEADER_SIZE,
+      top: top - LOCATION_HEADER_SIZE * 0.5,
+      width: LOCATION_HEADER_SIZE * 0.5,
+      height: LOCATION_HEADER_SIZE  * 0.5
+    }, rowText, this.model)
+
+
+    context.closePath();
+  }
+
+  _draw_location_header_text(context, bounds, text, style) {
+    var {
+      alpha,
+      fontColor = '#000',
+      fontSize = 12,
+      lineHeight = fontSize * 1.2
+    } = style;
+
+    // 1. context를 준비.
+    context.save();
+    context.beginPath();
+
+    // 2. 텍스팅 바운드를 준비.
+    var {
+      left,
+      top,
+      width,
+      height
+    } = bounds;
+
+    // 3. context의 font를 설정
+    context.font = Component.font(style);
+
+    var baseY;
+    baseY = top + (height / 2);
+    context.textBaseline = 'middle';
+
+    var baseX;
+
+    baseX = left + width / 2;
+    context.textAlign = 'center';
+
+    context.globalAlpha *= alpha;
+    context.fillStyle = fontColor;
+
+    context.fillText(text, baseX, baseY);
+
+    context.restore();
   }
 
   created() {
@@ -453,7 +711,6 @@ export class RackTable extends Container {
   }
 
   buildCells(newrows, newcolumns, oldrows, oldcolumns) {
-
     if (newrows < oldrows) {
       let removals = this._components.slice(oldcolumns * newrows);
 
@@ -1754,7 +2011,30 @@ export class RackTable extends Container {
     if (hasAnyProperty(after, "dataKey", "dataIndex")) {
       this.setCellsData()
     }
+    this.invalidate()
   }
+
+  contains(x, y) {
+    var contains = super.contains(x, y)
+    if(contains)
+      this._focused = true
+    else
+      this._focused = false
+
+    this.invalidate();
+
+    return contains;
+  }
+
+  // onmouseenter(e) {
+  //   this._focused = true;
+  //   this.invalidate();
+  // }
+
+  // onmouseleave(e) {
+  //   this._focused = false;
+  //   this.invalidate();
+  // }
 }
 
 ["rows", "columns", "widths", "heights", "widths_sum", "heights_sum", "controls"].forEach(getter => Component.memoize(RackTable.prototype, getter, false));
