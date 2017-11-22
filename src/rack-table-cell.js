@@ -19,6 +19,8 @@ const NATURE = {
     label: '',
     name: '',
     property: {
+      merge: false,
+      split: false
     }
   }, {
     type: 'number',
@@ -32,7 +34,7 @@ const NATURE = {
     property: 'depth'
   }, {
     type: 'checkbox',
-    label: 'isEmpty',
+    label: 'is-empty',
     name: 'isEmpty'
   }]
 }
