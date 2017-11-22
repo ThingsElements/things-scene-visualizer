@@ -275,7 +275,6 @@ export default class RackTable3d extends THREE.Group {
       minSection = 1
     } = model;
 
-
     let cx = (model.left + (model.width / 2)) - canvasSize.width / 2
     let cy = (model.top + (model.height / 2)) - canvasSize.height / 2
     let cz = 0;
@@ -283,66 +282,26 @@ export default class RackTable3d extends THREE.Group {
     this.position.set(cx, cz, cy)
     this.rotation.y = - this._model.rotation || 0;
 
+    components.forEach(rack => {
 
-    var currCol = 0;
-    var currRow = 0;
-    var unit = currCol;
-    var section = currRow;
-
-    var patternChecker = /([\+,\-])([u,s])([\+,\-])([u,s])/i;
-
-    var matches = increasePattern.match(patternChecker);
-    if (!matches || matches.length < 5) {
-      console.warn("Rack Pattern Error", increasePattern);
-      return false;
-    }
-
-    components.forEach(rackModel => {
-
-      rackModel.depth = rackModel.depth || 20;
-      rackModel.shelves = rackModel.shelves || 1;
-
-      rackModel.zone = zone;
-      rackModel.locPattern = locPattern;
-      rackModel.shelfPattern = shelfPattern;
-
-      if (matches[2] == 'u') {
-        if (matches[1] == '+')
-          unit = currCol + minUnit
-        else
-          unit = columns - currCol - 1 + minUnit
-      } else {
-        if (matches[1] == '+')
-          section = currCol + minSection
-        else
-          section = columns - currCol - 1 + minSection
+      var rackModel = {
+        left: rack.left,
+        top: rack.top,
+        width: rack.width,
+        height: rack.height,
+        depth: rack.depth || 20,
+        shelves: rack.shelves || 1,
+        unit: rack.unit,
+        section: rack.section,
+        zone: zone,
+        locPattern: locPattern,
+        shelfPattern: shelfPattern,
+        isEmpty: rack.isEmpty
       }
-
-      if (matches[4] == 'u') {
-        if (matches[3] == '+')
-          unit = currRow + minUnit
-        else
-          unit = rows - currRow - 1 + minUnit
-      } else {
-        if (matches[3] == '+')
-          section = currRow + minSection
-        else
-          section = rows - currRow - 1 + minSection
-      }
-
-      rackModel.unit = unit.toString().padStart(2, 0);
-      rackModel.section = section.toString().padStart(2, 0);
 
       if (!rackModel.isEmpty) {
         var rack = new Rack(rackModel, model, this._visualizer, this._sceneComponent);
         this.add(rack);
-      }
-
-      currCol++;
-
-      if (currCol >= columns) {
-        currCol = 0;
-        currRow++;
       }
     })
 
@@ -445,28 +404,16 @@ export class RackTable extends Container {
 
     cells.forEach((cell, index) => {
       var width = cell.model.width;
-      var c = 0;
+      var locationText = matches[2] == 'u' ? cell.get('unit') : cell.get('section');
 
-      if (matches[2] == 'u') {
-        if (matches[1] == '+')
-          c = index + minUnit
-        else
-          c = columns - index - 1 + minUnit
-      } else {
-        if (matches[1] == '+')
-          c = index + minSection
-        else
-          c = columns - index - 1 + minSection
+      if (locationText) {
+        this._draw_location_header_text(context, {
+          left: left,
+          top: top - LOCATION_HEADER_SIZE,
+          width,
+          height: LOCATION_HEADER_SIZE
+        }, locationText, this.model)
       }
-
-      var locationText = `${String(c).padStart(2, 0)}`
-
-      this._draw_location_header_text(context, {
-        left: left,
-        top : top - LOCATION_HEADER_SIZE,
-        width,
-        height: LOCATION_HEADER_SIZE
-      }, locationText, this.model)
 
       left = left + width
       context.moveTo(left, top - LOCATION_HEADER_SIZE);
@@ -512,27 +459,16 @@ export class RackTable extends Container {
 
     cells.forEach((cell, index) => {
       var height = cell.model.height;
-      var r = 0
+      var locationText = matches[4] == 'u' ? cell.get('unit') : cell.get('section');
 
-      if (matches[4] == 'u') {
-        if (matches[1] == '+')
-          r = index + minUnit
-        else
-          r = rows - index - 1 + minUnit
-      } else {
-        if (matches[1] == '+')
-          r = index + minSection
-        else
-          r = rows - index - 1 + minSection
+      if (locationText) {
+        this._draw_location_header_text(context, {
+          left: left - LOCATION_HEADER_SIZE,
+          top,
+          width: LOCATION_HEADER_SIZE,
+          height
+        }, locationText, this.model)
       }
-
-      var locationText = `${String(r).padStart(2, 0)}`
-      this._draw_location_header_text(context, {
-        left: left - LOCATION_HEADER_SIZE,
-        top,
-        width: LOCATION_HEADER_SIZE,
-        height
-      }, locationText, this.model)
 
       top = top + height
       context.moveTo(left - LOCATION_HEADER_SIZE, top);
@@ -596,14 +532,14 @@ export class RackTable extends Container {
       left: left - LOCATION_HEADER_SIZE * 0.5,
       top: top - LOCATION_HEADER_SIZE,
       width: LOCATION_HEADER_SIZE * 0.5,
-      height: LOCATION_HEADER_SIZE  * 0.5
+      height: LOCATION_HEADER_SIZE * 0.5
     }, colText, this.model)
 
     this._draw_location_header_text(context, {
       left: left - LOCATION_HEADER_SIZE,
       top: top - LOCATION_HEADER_SIZE * 0.5,
       width: LOCATION_HEADER_SIZE * 0.5,
-      height: LOCATION_HEADER_SIZE  * 0.5
+      height: LOCATION_HEADER_SIZE * 0.5
     }, rowText, this.model)
 
 
@@ -677,6 +613,10 @@ export class RackTable extends Container {
       this.set('heights', this.heights)
   }
 
+  added() {
+    this.setCellLocations();
+  }
+
   // 컴포넌트를 임의로 추가 및 삭제할 수 있는 지를 지정하는 속성임.
   get focusible() {
     return false
@@ -713,51 +653,6 @@ export class RackTable extends Container {
   buildCells(newrows, newcolumns, oldrows, oldcolumns) {
     if (newrows < oldrows) {
       let removals = this._components.slice(oldcolumns * newrows);
-
-      // 지우려는 셀중에 병합된 셀을 찾는다.
-      let mergedCells = [];
-      removals.forEach((cell) => {
-        if (cell.merged === true || cell.rowspan > 1 || cell.colspan > 1)
-          mergedCells.push(cell);
-      });
-
-      // 병합된 셀 중에서 슈퍼셀을 찾는다.
-      if (mergedCells.length > 0) {
-        // 부모 셀을 저장
-        let superCells = [];
-        // 부모 셀의 인덱스를 저장
-        let superCellIndexes = [];
-        mergedCells.forEach((cell) => {
-          let col, row, index;
-          col = this.components.indexOf(cell) % oldcolumns;
-          row = Math.floor(this.components.indexOf(cell) / oldcolumns);
-          index = row * oldcolumns + col + 1;
-          while (index) {
-            --index;
-            let component = this.components[index];
-            // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면서 cell이 있는지 검증해야함
-            if (component.rowspan > 1 || component.colspan > 1) {
-              let spColStart = this.components.indexOf(component) % oldcolumns;
-              let spColEnd = this.components.indexOf(component) % oldcolumns + component.colspan;
-              let spRowStart = Math.floor(this.components.indexOf(component) / oldcolumns);
-              let spRowEnd = Math.floor(this.components.indexOf(component) / oldcolumns) + component.rowspan;
-              // 슈퍼셀 영역 안에 자식 셀이 있으면 superCells에 부모셀을 추가
-              if ((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)) {
-                if (-1 == superCellIndexes.indexOf(index)) {
-                  superCellIndexes.push(index);
-                  superCells.push(component);
-                }
-              }
-            }
-          }
-        });
-        // 슈퍼셀에서 colspan 을 감소시킨다
-        superCells.forEach((cell) => {
-          // newcolumns < oldcolumns 케이스와 이 부분만 다름
-          cell.rowspan -= (oldrows - newrows);
-        });
-      }
-
       this.remove(removals);
     }
 
@@ -777,49 +672,6 @@ export class RackTable extends Container {
           removals.push(this.components[r * oldcolumns + c])
         }
       }
-      // 지우려는 셀중에 병합된 셀을 찾는다.
-      let mergedCells = [];
-      removals.forEach((cell) => {
-        if (cell.merged === true || cell.rowspan > 1 || cell.colspan > 1)
-          mergedCells.push(cell);
-      });
-
-      // 병합된 셀 중에서 슈퍼셀을 찾는다.
-      if (mergedCells.length > 0) {
-        // 부모 셀을 저장
-        let superCells = [];
-        // 부모 셀의 인덱스를 저장
-        let superCellIndexes = [];
-        mergedCells.forEach((cell) => {
-          let col, row, index;
-          col = this.components.indexOf(cell) % oldcolumns;
-          row = Math.floor(this.components.indexOf(cell) / oldcolumns);
-          index = row * oldcolumns + col + 1;
-          while (index) {
-            --index;
-            let component = this.components[index];
-            // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면서 cell이 있는지 검증해야함
-            if (component.rowspan > 1 || component.colspan > 1) {
-              let spColStart = this.components.indexOf(component) % oldcolumns;
-              let spColEnd = this.components.indexOf(component) % oldcolumns + component.colspan;
-              let spRowStart = Math.floor(this.components.indexOf(component) / oldcolumns);
-              let spRowEnd = Math.floor(this.components.indexOf(component) / oldcolumns) + component.rowspan;
-              // 슈퍼셀 영역 안에 자식 셀이 있으면 superCells에 부모셀을 추가
-              if ((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)) {
-                if (-1 == superCellIndexes.indexOf(index)) {
-                  superCellIndexes.push(index);
-                  superCells.push(component);
-                }
-              }
-            }
-          }
-        });
-        // 슈퍼셀에서 colspan 을 감소시킨다
-        superCells.forEach((cell) => {
-          cell.colspan -= (oldcolumns - newcolumns);
-        });
-      }
-
       this.remove(removals);
     }
 
@@ -838,6 +690,108 @@ export class RackTable extends Container {
       widths: this.widths,
       heights: this.heights
     });
+
+    this.setCellLocations()
+  }
+
+  setCellLocations() {
+    var {
+      minUnit = 1,
+      minSection = 1,
+      increasePattern = '+u+s'
+    } = this.model
+
+    var columns = this.get('columns')
+    var rows = this.get('rows')
+
+    var columnCellsList = [];
+    var rowCellsList = [];
+
+    for (var i = 0; i < columns; i++) {
+      var cells = this.getCellsByColumn(i)
+      cells.every(c => { c.model.unit = c.model.section = undefined; })
+      columnCellsList.push(cells);
+    }
+
+    for (var i = 0; i < rows; i++) {
+      var cells = this.getCellsByRow(i);
+      cells.every(c => { c.model.unit = c.model.section = undefined; });
+      rowCellsList.push(cells);
+    }
+
+    var patternChecker = /([\+,\-])([u,s])([\+,\-])([u,s])/i;
+
+    var matches = increasePattern.match(patternChecker);
+    if (!matches || matches.length < 5) {
+      console.warn("Rack Pattern Error", increasePattern);
+      return false;
+    }
+
+    var r = 0;
+    var rowIndex = 0;
+    for (var i = 0; i < rows; i++) {
+      var colIndex = 0;
+
+      var currRowCells = rowCellsList[i];
+
+      var emptyCells = currRowCells.filter(c => {
+        return c.model.isEmpty
+      });
+
+      if (emptyCells.length === columns)
+        continue;
+
+      if (matches[4] == 'u') {
+        if (matches[3] == '+')
+          r = rowIndex + minUnit
+        else
+          r = rows - rowIndex - 1 + minUnit
+      } else {
+        if (matches[3] == '+')
+          r = rowIndex + minSection
+        else
+          r = rows - rowIndex - 1 + minSection
+      }
+
+      for (var y = 0; y < columns; y++) {
+        var c = 0;
+
+        var currColCells = columnCellsList[y];
+
+        var emptyCells = currColCells.filter(c => {
+          return c.model.isEmpty
+        });
+
+        if (emptyCells.length === rows)
+          continue;
+
+        if (matches[2] == 'u') {
+          if (matches[1] == '+')
+            c = colIndex + minUnit
+          else
+            c = columns - colIndex - 1 + minUnit
+        } else {
+          if (matches[1] == '+')
+            c = colIndex + minSection
+          else
+            c = columns - colIndex - 1 + minSection
+        }
+
+        if (matches[2] == 'u') {
+          currColCells[i].model.unit `${String(c).padStart(2, 0)}`,
+          currColCells[i].model.section = `${String(r).padStart(2, 0)}`
+        }
+        else {
+          currColCells[i].model.unit = `${String(r).padStart(2, 0)}`
+          currColCells[i].model.section = `${String(c).padStart(2, 0)}`
+        }
+
+        colIndex++;
+      }
+
+      rowIndex++;
+    }
+
   }
 
   get layout() {
@@ -970,27 +924,6 @@ export class RackTable extends Container {
     })
   }
 
-  setCellsData() {
-    var data = this.get('data')
-
-    if (!data)
-      return
-
-    data = this.toObjectArrayValue(data) || []
-
-    var cells = this.components;
-    var columns = this.get('columns');
-
-    cells.forEach(cell => {
-      var dataKey = cell.model.dataKey
-      var dataIndex = cell.model.dataIndex
-      if (dataKey && dataIndex >= 0) {
-        var currentData = data[dataIndex] || {}
-        cell.set('text', currentData[dataKey] || "")
-      }
-    })
-  }
-
   getRowColumn(cell) {
     var idx = this.components.indexOf(cell)
     var length = this.components.length
@@ -1013,120 +946,7 @@ export class RackTable extends Container {
     return cells
   }
 
-  // 한 개의 행을 매개변수로 받아서 첫 번째 셀부터 우측으로 이동하면서 병합된 셀이 있는지 검사한다.
-  findMergedCellByX(row) {
-    let mergedCells = [];
-    let cell;
-    for (let i = 0; i < this.columns; i++) {
-      cell = this.components[row * this.columns + i];
-      if (cell.merged === true || cell.rowspan > 1 || cell.colspan > 1)
-        mergedCells.push(cell);
-    }
-    return mergedCells;
-  }
-
-  // 한 개의 열을 매개변수로 받아서 첫 번째 셀부터 아래로 이동하면서 병합된 셀이 있는지 검사한다.
-  findMergedCellByY(column) {
-    let mergedCells = [];
-    let cell;
-    for (let i = 0; i < this.rows; i++) {
-      cell = this.components[i * this.columns + column];
-      if (cell.merged === true || cell.rowspan > 1 || cell.colspan > 1)
-        mergedCells.push(cell);
-    }
-    return mergedCells;
-  }
-
-  mergeCells(cells) {
-    // 선택한 셀이 들어있는 행
-    let mergeableRows = [];
-    cells.forEach((cell) => {
-      let row = this.getRowColumn(cell).row;
-      if (-1 == mergeableRows.indexOf(row))
-        mergeableRows.push(row);
-    });
-
-    // 선택한 셀의 행이 연속적인 숫자가 아니라면 병합하지 않는다.
-    if (mergeableRows.length - 1 !== (mergeableRows[mergeableRows.length - 1] - mergeableRows[0]))
-      return false;
-
-    // 선택한 셀이 들어있는 열
-    let mergeableColumns = [];
-    cells.forEach((cell) => {
-      let column = this.getRowColumn(cell).column;
-      if (-1 == mergeableColumns.indexOf(column))
-        mergeableColumns.push(column);
-    });
-
-    // 선택한 셀의 열이 연속적인 숫자가 아니라면 병합하지 않는다.
-    if (mergeableColumns.length - 1 !== (mergeableColumns[mergeableColumns.length - 1] - mergeableColumns[0]))
-      return false;
-
-    // 병합할 행의 수
-    let numberOfRows = mergeableRows.length;
-
-    // 병합할 열의 수
-    let numberOfColumns = mergeableColumns.length;
-
-    // 선택된 셀의 수
-    let numberOfCells = cells.length;
-
-    // 병합될 조건 검사
-    // 행과 열의 곱이 셀의 수가 아니거나 셀의 수가 2보다 작은 경우는 병합하지 않는다.
-    if (numberOfCells !== numberOfRows * numberOfColumns || numberOfCells < 2)
-      return false;
-
-    // 선택한 셀들을 index 값이 낮은 것부터 순서대로 재정렬
-    cells.sort((a, b) => {
-      return ((this.getRowColumn(a).row * this.columns) + this.getRowColumn(a).column) - ((this.getRowColumn(b).row * this.columns) + this.getRowColumn(b).column);
-    });
-
-    // 셀을 병합함
-    let firstCell = cells[0];
-    firstCell.set({
-      colspan: numberOfColumns,
-      rowspan: numberOfRows
-    });
-
-    // 첫 번째 셀을 제외한 나머지 셀을 true로 지정
-    for (let i = 1; i < numberOfCells; i++)
-      cells[i].merged = true;
-
-    // 병합 후에는 첫 번째 셀을 선택하도록 함
-    this.root.selected = [firstCell];
-  }
-
-  splitCells(cells) {
-    // 선택한 병합된 셀의 정보를 가져온다.
-    let firstCellRowColumn = this.getRowColumn(cells[0]);
-    let firstCell = cells[0];
-    let firstCellIndex = this.components.indexOf(cells[0]);
-    let length = this.components.length;
-    let lastCell = this.components[length - 1];
-    let lastCellRowColumn = this.getRowColumn(lastCell);
-    let startIndex = length / (lastCellRowColumn.row + 1);
-
-    // 병합된 셀들을 구해서 merged를 false로 설정한다.
-    // 자식 셀이 갖고 있는 부모 셀의 위치를 초기화 한다.
-    for (let j = 0; j < firstCell.rowspan; j++) {
-      let index;
-      let nextCell;
-      for (let i = firstCellIndex; i < firstCellIndex + firstCell.colspan; i++) {
-        index = startIndex * j + i;
-        nextCell = this.components[index];
-        nextCell.merged = false;
-      }
-    }
-
-    // 첫 번째 셀의 rowspan, colspan = 1로 지정한다.
-    firstCell.colspan = 1;
-    firstCell.rowspan = 1;
-  }
-
   deleteRows(cells) {
-    // 만약 선택한 셀이 병합된 셀이라면 삭제하지 않는다.
-    if (cells[0].merged == true)
-      return false;
     // 먼저 cells 위치의 행을 구한다.
     let rows = [];
     cells.forEach((cell) => {
@@ -1140,60 +960,7 @@ export class RackTable extends Container {
     rows.reverse();
     var heights = this.heights.slice();
     rows.forEach((row) => {
-      // rows에서 가로 방향으로 이동하면서 병합된 셀을 찾는다.
-      let mergedCells = this.findMergedCellByX(row);
-      // mergedCells.length가 0이면 일반적으로 행을 지운다.
-      if (mergedCells.length === 0) {
-        this.remove(this.getCellsByRow(row));
-      }
-      // mergedCells.length가 0이 아니면 병합된 셀을 고려하여 행을 지워야 한다.
-      //
-      else {
-        // 삭제할 행에서 병합된 셀을 삭제할 때 해당 셀을 임시로 저장
-        let temp = [];
-        // 부모 셀을 저장
-        let superCells = [];
-        // 부모 셀의 인덱스 값을 저장
-        let superCellIndexes = [];
-        mergedCells.forEach((cell) => {
-          let col, row, index;
-          col = this.getRowColumn(cell).column;
-          row = this.getRowColumn(cell).row;
-          index = row * this.columns + col + 1;
-          while (index) {
-            --index;
-            let component = this.components[index];
-            // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면서 cell이 있는지 검증해야함
-            if (component.rowspan > 1 || component.colspan > 1) {
-              let spColStart = this.getRowColumn(component).column;
-              let spColEnd = this.getRowColumn(component).column + component.colspan;
-              let spRowStart = this.getRowColumn(component).row;
-              let spRowEnd = this.getRowColumn(component).row + component.rowspan;
-              // 슈퍼셀 영역 안에 자식 셀이 있으면 superCells에 부모셀을 추가
-              if ((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)) {
-                if (-1 == superCellIndexes.indexOf(index)) {
-                  superCellIndexes.push(index);
-                  superCells.push(component);
-                }
-              }
-            }
-          }
-        });
-        superCellIndexes.forEach((index) => {
-          let superCellRow = Math.floor(index / this.columns);
-          // 지우려는 행이 슈퍼셀을 포함한 경우이면서 슈퍼셀이 마지막 행의 셀이 아닌 경우
-          // 그리고 슈퍼셀의 rowspan이 1보다 큰 경우
-          if (row === superCellRow && superCellRow !== this.rows - 1 && this.components[index].rowspan > 1) {
-            this.components[index + this.columns].rowspan = this.components[index].rowspan - 1;
-            this.components[index + this.columns].colspan = this.components[index].colspan;
-            this.components[index + this.columns].merged = false;
-            this.components[index + this.columns].set('text', this.components[index].get('text'));
-          } else {
-            this.components[index].rowspan -= 1;
-          }
-        });
-        this.remove(this.getCellsByRow(row));
-      }
+      this.remove(this.getCellsByRow(row));
     });
     heights.splice(rows, 1);
     this.model.rows -= rows.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
@@ -1201,9 +968,6 @@ export class RackTable extends Container {
   }
 
   deleteColumns(cells) {
-    // 만약 선택한 셀이 병합된 셀이라면 삭제하지 않는다.
-    if (cells[0].merged == true)
-      return false;
     // 먼저 cells 위치의 열을 구한다.
     let columns = [];
     cells.forEach((cell) => {
@@ -1218,59 +982,7 @@ export class RackTable extends Container {
 
     columns.forEach((column) => {
       var widths = this.widths.slice();
-      // columns에서 세로 방향으로 이동하면서 병합된 셀을 찾는다.
-      let mergedCells = this.findMergedCellByY(column);
-      // mergedCells.length가 0이면 일반적으로 열을 지운다.
-      if (mergedCells.length === 0) {
-        this.remove(this.getCellsByColumn(column));
-      }
-      // mergedCells.length가 0이 아니면 병합된 셀을 고려하여 열을 지워야 한다.
-      else {
-        // 삭제할 열에서 병합된 셀을 삭제할 때 해당 셀을 임시로 저장
-        let temp = [];
-        // 부모 셀을 저장
-        let superCells = [];
-        // 부모 셀의 인덱스를 저장
-        let superCellIndexes = [];
-        mergedCells.forEach((cell) => {
-          let col, row, index;
-          col = this.getRowColumn(cell).column;
-          row = this.getRowColumn(cell).row;
-          index = row * this.columns + col + 1;
-          while (index) {
-            --index;
-            let component = this.components[index];
-            // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면서 cell이 있는지 검증해야함
-            if (component.rowspan > 1 || component.colspan > 1) {
-              let spColStart = this.getRowColumn(component).column;
-              let spColEnd = this.getRowColumn(component).column + component.colspan;
-              let spRowStart = this.getRowColumn(component).row;
-              let spRowEnd = this.getRowColumn(component).row + component.rowspan;
-              // 슈퍼셀 영역 안에 자식 셀이 있으면 superCells에 부모셀을 추가
-              if ((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)) {
-                if (-1 == superCellIndexes.indexOf(index)) {
-                  superCellIndexes.push(index);
-                  superCells.push(component);
-                }
-              }
-            }
-          }
-        });
-        superCellIndexes.forEach((index) => {
-          let superCellColumn = index % this.columns;
-          // 지우려는 열이 슈퍼셀을 포함한 경우이면서 슈퍼셀이 마지막 열의 셀이 아닌 경우
-          // 그리고 슈퍼셀의 colspan이 1보다 큰 경우
-          if (column === superCellColumn && superCellColumn !== this.columns - 1 && this.components[index].colspan > 1) {
-            this.components[index + 1].rowspan = this.components[index].rowspan;
-            this.components[index + 1].colspan = this.components[index].colspan - 1;
-            this.components[index + 1].merged = false;
-            this.components[index + 1].set('text', this.components[index].get('text'));
-          } else {
-            this.components[index].colspan -= 1;
-          }
-        });
-        this.remove(this.getCellsByColumn(column));
-      }
+      this.remove(this.getCellsByColumn(column));
       widths.splice(column, 1);
       this.model.columns -= 1; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
       this.set('widths', widths);
@@ -1296,106 +1008,23 @@ export class RackTable extends Container {
     let newbieRowHeights = [];
     let newbieCells = [];
     rows.forEach((row) => {
-      // rows에서 가로 방향으로 이동하면서 병합된 셀을 찾는다.
-      let mergedCells = this.findMergedCellByX(row);
-      // mergedCells.length가 0이면 일반적으로 행을 위에 추가한다.
-      if (mergedCells.length === 0) {
-        for (let i = 0; i < this.columns; i++)
-          newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app));
-        newbieRowHeights.push(this.heights[row]);
+      for (let i = 0; i < this.columns; i++)
+        newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app));
 
-        newbieCells.reverse().forEach((cell) => {
-          this.insertComponentAt(cell, insertionRowPosition * this.columns);
-        });
+      newbieRowHeights.push(this.heights[row]);
 
-        let heights = this.heights.slice();
-        heights.splice(insertionRowPosition, 0, ...newbieRowHeights);
-        this.set('heights', heights);
+      newbieCells.reverse().forEach((cell) => {
+        this.insertComponentAt(cell, insertionRowPosition * this.columns);
+      });
 
-        this.model.rows += rows.length;
+      let heights = this.heights.slice();
+      heights.splice(insertionRowPosition, 0, ...newbieRowHeights);
+      this.set('heights', heights);
 
-        this.clearCache();
-      }
-      // mergedCells.length가 0이 아니면 병합된 셀을 고려하여 행을 추가해야 한다.
-      else {
-        // 선택한 행이 2개 이상 있고 그 중에 병합된 셀이 적어도 한 개라도 있으면
-        // 병합된 셀이 포함된 행의 추가는 무시한다. 임시방편으로 막아놈
-        if (rows.length > 1)
-          return false;
-        // 추가할 행에서 병합된 셀을 추가할 때 해당 셀을 임시로 저장
-        let temp = [];
-        // 부모 셀을 저장
-        let superCells = [];
-        // 부모 셀의 인덱스 값을 저장
-        let superCellIndexes = [];
-        mergedCells.forEach((cell) => {
-          let col, row, index;
-          col = this.getRowColumn(cell).column;
-          row = this.getRowColumn(cell).row;
-          index = row * this.columns + col + 1;
-          while (index) {
-            --index;
-            let component = this.components[index];
-            // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면서 cell이 있는지 검증해야함
-            if (component.rowspan > 1 || component.colspan > 1) {
-              let spColStart = this.getRowColumn(component).column;
-              let spColEnd = this.getRowColumn(component).column + component.colspan;
-              let spRowStart = this.getRowColumn(component).row;
-              let spRowEnd = this.getRowColumn(component).row + component.rowspan;
-              // 슈퍼셀 영역 안에 자식 셀이 있으면 superCells에 부모셀을 추가
-              if ((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)) {
-                if (-1 == superCellIndexes.indexOf(index)) {
-                  superCellIndexes.push(index);
-                  superCells.push(component);
-                }
-              }
-            }
-          }
-        });
-        superCellIndexes.forEach((index) => {
-          // 추가하려는 셀은 일반 셀인데 그 위치에 다른 병합된 셀이 있는 문제로 임시로 막아 놓음. 수정해야함
-          if (superCellIndexes.length >= 2)
-            return false;
-          let superCellRow = Math.floor(index / this.columns);
-          let superCellObj = {
-            rowspan: this.components[index].rowspan,
-            colspan: this.components[index].colspan,
-            text: this.components[index].get('text'),
-            merged: this.components[index].merged
-          }
-          // 추가하려는 행이 슈퍼셀을 포함한 경우
-          if (superCellRow === row) {
-            for (let i = 0; i < this.columns; i++)
-              newbieCells.push(buildNewCell(this.app));
-            newbieRowHeights.push(this.heights[row]);
+      this.model.rows += rows.length;
 
-            newbieCells.reverse().forEach((cell) => {
-              this.insertComponentAt(cell, insertionRowPosition * this.columns);
-            });
-            this.components[index + this.columns].rowspan = superCellObj.rowspan;
-            this.components[index + this.columns].colspan = superCellObj.colspan;
-            this.components[index + this.columns].set('text', superCellObj.text);
-            this.components[index + this.columns].merged = superCellObj.merged;
-          }
-          else {
-            for (let i = 0; i < this.columns; i++)
-              newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app));
-            newbieRowHeights.push(this.heights[row]);
+      this.clearCache();
 
-            newbieCells.reverse().forEach((cell) => {
-              this.insertComponentAt(cell, insertionRowPosition * this.columns);
-            });
-            this.components[index].rowspan += 1;
-          }
-          let heights = this.heights.slice();
-          heights.splice(insertionRowPosition, 0, ...newbieRowHeights);
-          this.set('heights', heights);
-
-          this.model.rows += rows.length;
-
-          this.clearCache();
-        });
-      }
     });
   }
 
@@ -1418,113 +1047,21 @@ export class RackTable extends Container {
     let newbieRowHeights = [];
     let newbieCells = [];
     rows.forEach((row) => {
-      // rows에서 가로 방향으로 이동하면서 병합된 셀을 찾는다.
-      let mergedCells = this.findMergedCellByX(row);
-      // mergedCells.length가 0이면 일반적으로 행을 아래에 추가한다.
-      if (mergedCells.length === 0) {
-        for (let i = 0; i < this.columns; i++)
-          newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app));
-        newbieRowHeights.push(this.heights[row]);
+      for (let i = 0; i < this.columns; i++)
+        newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app));
+      newbieRowHeights.push(this.heights[row]);
 
-        newbieCells.reverse().forEach((cell) => {
-          this.insertComponentAt(cell, insertionRowPosition * this.columns);
-        });
+      newbieCells.reverse().forEach((cell) => {
+        this.insertComponentAt(cell, insertionRowPosition * this.columns);
+      });
 
-        let heights = this.heights.slice();
-        heights.splice(insertionRowPosition, 0, ...newbieRowHeights);
-        this.set('heights', heights);
+      let heights = this.heights.slice();
+      heights.splice(insertionRowPosition, 0, ...newbieRowHeights);
+      this.set('heights', heights);
 
-        this.model.rows += 1;
+      this.model.rows += 1;
 
-        this.clearCache();
-      }
-      // mergedCells.length가 0이 아니면 병합된 셀을 고려하여 행을 추가해야 한다.
-      else {
-        // 추가할 행에서 병합된 셀을 추가할 때 해당 셀을 임시로 저장
-        let temp = [];
-        // 부모 셀을 저장
-        let superCells = [];
-        // 부모 셀의 인덱스 값을 저장
-        let superCellIndexes = [];
-        mergedCells.forEach((cell) => {
-          let col, row, index;
-          col = this.getRowColumn(cell).column;
-          row = this.getRowColumn(cell).row;
-          index = row * this.columns + col + 1;
-          while (index) {
-            --index;
-            let component = this.components[index];
-            // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면서 cell이 있는지 검증해야함
-            if (component.rowspan > 1 || component.colspan > 1) {
-              let spColStart = this.getRowColumn(component).column;
-              let spColEnd = this.getRowColumn(component).column + component.colspan;
-              let spRowStart = this.getRowColumn(component).row;
-              let spRowEnd = this.getRowColumn(component).row + component.rowspan;
-              // 슈퍼셀 영역 안에 자식 셀이 있으면 superCells에 부모셀을 추가
-              if ((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)) {
-                if (-1 == superCellIndexes.indexOf(index)) {
-                  superCellIndexes.push(index);
-                  superCells.push(component);
-                }
-              }
-            }
-          }
-        });
-        superCellIndexes.forEach((index) => {
-          // 추가하려는 셀은 일반 셀인데 그 위치에 다른 병합된 셀이 있는 문제로 임시로 막아 놓음. 수정해야함
-          if (superCellIndexes.length >= 2)
-            return false;
-          let superCellRow = Math.floor(index / this.columns);
-          let superCellObj = {
-            rowspan: this.components[index].rowspan,
-            colspan: this.components[index].colspan,
-            text: this.components[index].get('text'),
-            merged: this.components[index].merged
-          }
-          // 추가하려는 행이 병합된 셀중 마지막 행인 경우
-          if ((superCellRow + superCellObj.rowspan - 1) === row) {
-            for (let i = 0; i < this.columns; i++)
-              newbieCells.push(buildNewCell(this.app));
-            newbieRowHeights.push(this.heights[row]);
-
-            newbieCells.reverse().forEach((cell) => {
-              this.insertComponentAt(cell, insertionRowPosition * this.columns);
-            });
-          }
-          else if (superCellRow === row) {
-            for (let i = 0; i < this.columns; i++)
-              newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app));
-            newbieRowHeights.push(this.heights[row]);
-
-            newbieCells.reverse().forEach((cell) => {
-              this.insertComponentAt(cell, insertionRowPosition * this.columns);
-            });
-            this.components[index].rowspan += 1;
-            // 슈퍼셀이 복사됐으므로 그 해당 셀을 병합된 셀로 설정한다.
-            this.components[index + this.columns].rowspan = 1;
-            this.components[index + this.columns].colspan = 1;
-            this.components[index + this.columns].merged = true;
-            this.components[index + this.columns].set('text', '');
-          }
-          else {
-            for (let i = 0; i < this.columns; i++)
-              newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app));
-            newbieRowHeights.push(this.heights[row]);
-
-            newbieCells.reverse().forEach((cell) => {
-              this.insertComponentAt(cell, insertionRowPosition * this.columns);
-            });
-            this.components[index].rowspan += 1;
-          }
-          let heights = this.heights.slice();
-          heights.splice(insertionRowPosition, 0, ...newbieRowHeights);
-          this.set('heights', heights);
-
-          this.model.rows += 1;
-
-          this.clearCache();
-        });
-      }
+      this.clearCache();
     });
   }
 
@@ -1547,118 +1084,28 @@ export class RackTable extends Container {
     let newbieColumnWidths = [];
     let newbieCells = [];
     columns.forEach((column) => {
-      // columns에서 세로 방향으로 이동하면서 병합된 셀을 찾는다.
-      let mergedCells = this.findMergedCellByY(column);
-      // mergedCells.length가 0이면 일반적으로 열을 왼쪽에 추가한다.
-      if (mergedCells.length === 0) {
-        for (let i = 0; i < this.rows; i++)
-          newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app));
-        newbieColumnWidths.push(this.widths[column]);
+      for (let i = 0; i < this.rows; i++)
+        newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app));
+      newbieColumnWidths.push(this.widths[column]);
 
-        let increasedColumns = this.columns;
-        let index = this.rows;
-        newbieCells.reverse().forEach((cell) => {
-          if (index == 0) {
-            index = this.rows;
-            increasedColumns++;
-          }
+      let increasedColumns = this.columns;
+      let index = this.rows;
+      newbieCells.reverse().forEach((cell) => {
+        if (index == 0) {
+          index = this.rows;
+          increasedColumns++;
+        }
 
-          index--;
-          this.insertComponentAt(cell, insertionColumnPosition + (index * increasedColumns));
-        });
+        index--;
+        this.insertComponentAt(cell, insertionColumnPosition + (index * increasedColumns));
+      });
 
-        let widths = this.widths.slice();
-        this.model.columns += columns.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+      let widths = this.widths.slice();
+      this.model.columns += columns.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
 
-        widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths);
+      widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths);
 
-        this.set('widths', widths);
-      }
-      // mergedCells.length가 0이 아니면 병합된 셀을 고려하여 열을 추가해야 한다.
-      else {
-        // 부모 셀을 저장
-        let superCells = [];
-        // 부모 셀의 인덱스 값을 저장
-        let superCellIndexes = [];
-        mergedCells.forEach((cell) => {
-          let col, row, index;
-          col = this.getRowColumn(cell).column;
-          row = this.getRowColumn(cell).row;
-          index = row * this.columns + col + 1;
-          while (index) {
-            --index;
-            let component = this.components[index];
-            // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면서 cell이 있는지 검증해야함
-            if (component.rowspan > 1 || component.colspan > 1) {
-              let spColStart = this.getRowColumn(component).column;
-              let spColEnd = this.getRowColumn(component).column + component.colspan;
-              let spRowStart = this.getRowColumn(component).row;
-              let spRowEnd = this.getRowColumn(component).row + component.rowspan;
-              // 슈퍼셀 영역 안에 자식 셀이 있으면 superCells에 부모셀을 추가
-              if ((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)) {
-                if (-1 == superCellIndexes.indexOf(index)) {
-                  superCellIndexes.push(index);
-                  superCells.push(component);
-                }
-              }
-            }
-          }
-        });
-        superCellIndexes.forEach((index) => {
-          // 추가하려는 셀은 일반 셀인데 그 위치에 다른 병합된 셀이 있는 문제로 임시로 막아 놓음. 수정해야함
-          if (superCellIndexes.length >= 2)
-            return false;
-          let superCellColumn = index % this.columns;
-          let superCellObj = {
-            rowspan: this.components[index].rowspan,
-            colspan: this.components[index].colspan,
-            text: this.components[index].get('text'),
-            merged: this.components[index].merged
-          }
-          // 추가하려는 열이 슈퍼셀을 포함한 경우
-          if (superCellColumn === column) {
-            for (let i = 0; i < this.rows; i++)
-              newbieCells.push(buildNewCell(this.app));
-            newbieColumnWidths.push(this.widths[column]);
-
-            let increasedColumns = this.columns;
-            let rowIndex = this.rows;
-            newbieCells.reverse().forEach((cell) => {
-              if (rowIndex == 0) {
-                rowIndex = this.rows;
-                increasedColumns++;
-              }
-
-              rowIndex--;
-              this.insertComponentAt(cell, insertionColumnPosition + (rowIndex * increasedColumns));
-            });
-          }
-          else {
-            this.components[index].colspan += 1;
-            for (let i = 0; i < this.rows; i++)
-              newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app));
-            newbieColumnWidths.push(this.widths[column]);
-
-            let increasedColumns = this.columns;
-            let rowIndex = this.rows;
-            newbieCells.reverse().forEach((cell) => {
-              if (rowIndex == 0) {
-                rowIndex = this.rows;
-                increasedColumns++;
-              }
-
-              rowIndex--;
-              this.insertComponentAt(cell, insertionColumnPosition + (rowIndex * increasedColumns));
-            });
-          }
-          let widths = this.widths.slice();
-          this.model.columns += columns.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
-
-          widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths);
-
-          this.set('widths', widths);
-        });
-      }
+      this.set('widths', widths);
     });
   }
 
@@ -1681,142 +1128,28 @@ export class RackTable extends Container {
     let newbieColumnWidths = [];
     let newbieCells = [];
     columns.forEach((column) => {
-      // columns에서 세로 방향으로 이동하면서 병합된 셀을 찾는다.
-      let mergedCells = this.findMergedCellByY(column);
-      // mergedCells.length가 0이면 일반적으로 열을 오른쪽에 추가한다.
-      if (mergedCells.length === 0) {
-        for (let i = 0; i < this.rows; i++)
-          newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app));
-        newbieColumnWidths.push(this.widths[column]);
+      for (let i = 0; i < this.rows; i++)
+        newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app));
+      newbieColumnWidths.push(this.widths[column]);
 
-        let increasedColumns = this.columns;
-        let index = this.rows;
-        newbieCells.reverse().forEach((cell) => {
-          if (index == 0) {
-            index = this.rows;
-            increasedColumns++;
-          }
+      let increasedColumns = this.columns;
+      let index = this.rows;
+      newbieCells.reverse().forEach((cell) => {
+        if (index == 0) {
+          index = this.rows;
+          increasedColumns++;
+        }
 
-          index--;
-          this.insertComponentAt(cell, insertionColumnPosition + (index * increasedColumns));
-        });
+        index--;
+        this.insertComponentAt(cell, insertionColumnPosition + (index * increasedColumns));
+      });
 
-        let widths = this.widths.slice();
-        this.model.columns += columns.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+      let widths = this.widths.slice();
+      this.model.columns += columns.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
 
-        widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths);
+      widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths);
 
-        this.set('widths', widths);
-      }
-      // mergedCells.length가 0이 아니면 병합된 셀을 고려하여 열을 추가해야 한다.
-      else {
-        // 부모 셀을 저장
-        let superCells = [];
-        // 부모 셀의 인덱스 값을 저장
-        let superCellIndexes = [];
-        mergedCells.forEach((cell) => {
-          let col, row, index;
-          col = this.getRowColumn(cell).column;
-          row = this.getRowColumn(cell).row;
-          index = row * this.columns + col + 1;
-          while (index) {
-            --index;
-            let component = this.components[index];
-            // 슈퍼셀을 찾고 슈퍼셀의 위치에서 rowspan, colspan 거리만큼 이동하면서 cell이 있는지 검증해야함
-            if (component.rowspan > 1 || component.colspan > 1) {
-              let spColStart = this.getRowColumn(component).column;
-              let spColEnd = this.getRowColumn(component).column + component.colspan;
-              let spRowStart = this.getRowColumn(component).row;
-              let spRowEnd = this.getRowColumn(component).row + component.rowspan;
-              // 슈퍼셀 영역 안에 자식 셀이 있으면 superCells에 부모셀을 추가
-              if ((col >= spColStart && col < spColEnd) && (row >= spRowStart && row < spRowEnd)) {
-                if (-1 == superCellIndexes.indexOf(index)) {
-                  superCellIndexes.push(index);
-                  superCells.push(component);
-                }
-              }
-            }
-          }
-        });
-        superCellIndexes.forEach((index) => {
-          // 추가하려는 셀은 일반 셀인데 그 위치에 다른 병합된 셀이 있는 문제로 임시로 막아 놓음. 수정해야함
-          if (superCellIndexes.length >= 2)
-            return false;
-          let superCellRow = Math.floor(index / this.columns);
-          let superCellColumn = index % this.columns;
-          let superCellObj = {
-            rowspan: this.components[index].rowspan,
-            colspan: this.components[index].colspan,
-            text: this.components[index].get('text'),
-            merged: this.components[index].merged
-          }
-          // 추가하려는 열이 병합된 셀중 마지막 열인 경우
-          if ((superCellColumn + superCellObj.colspan - 1) === column) {
-            for (let i = 0; i < this.rows; i++)
-              newbieCells.push(buildNewCell(this.app));
-            newbieColumnWidths.push(this.widths[column]);
-
-            let increasedColumns = this.columns;
-            let rowIndex = this.rows;
-            newbieCells.reverse().forEach((cell) => {
-              if (rowIndex == 0) {
-                rowIndex = this.rows;
-                increasedColumns++;
-              }
-
-              rowIndex--;
-              this.insertComponentAt(cell, insertionColumnPosition + (rowIndex * increasedColumns));
-            });
-          }
-          else if (superCellColumn === column) {
-            this.components[index].colspan += 1;
-            for (let i = 0; i < this.rows; i++)
-              newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app));
-            newbieColumnWidths.push(this.widths[column]);
-
-            let increasedColumns = this.columns;
-            let rowIndex = this.rows;
-            newbieCells.reverse().forEach((cell) => {
-              if (rowIndex == 0) {
-                rowIndex = this.rows;
-                increasedColumns++;
-              }
-
-              rowIndex--;
-              this.insertComponentAt(cell, insertionColumnPosition + (rowIndex * increasedColumns));
-            });
-            // 슈퍼셀이 복사됐으므로 그 해당 셀을 병합된 셀로 설정한다.
-            this.components[index + superCellRow + 1].rowspan = 1;
-            this.components[index + superCellRow + 1].colspan = 1;
-            this.components[index + superCellRow + 1].merged = true;
-            this.components[index + superCellRow + 1].set('text', '');
-          }
-          else {
-            this.components[index].colspan += 1;
-            for (let i = 0; i < this.rows; i++)
-              newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app));
-            newbieColumnWidths.push(this.widths[column]);
-
-            let increasedColumns = this.columns;
-            let rowIndex = this.rows;
-            newbieCells.reverse().forEach((cell) => {
-              if (rowIndex == 0) {
-                rowIndex = this.rows;
-                increasedColumns++;
-              }
-
-              rowIndex--;
-              this.insertComponentAt(cell, insertionColumnPosition + (rowIndex * increasedColumns));
-            });
-          }
-          let widths = this.widths.slice();
-          this.model.columns += columns.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
-
-          widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths);
-
-          this.set('widths', widths);
-        });
-      }
+      this.set('widths', widths);
     });
   }
 
@@ -1864,36 +1197,6 @@ export class RackTable extends Container {
     })
 
     this.set('heights', heights)
-  }
-
-  toObjectArrayValue(array) {
-    if (!array || array.length === 0)
-      return null
-
-    if (!array[0].hasOwnProperty('__field1')) {
-      return array
-    }
-
-    let indexKeyMap = {}
-    let value = []
-
-    for (let key in array[0]) {
-      indexKeyMap[key] = array[0][key]
-    }
-
-    for (var i = 1; i < array.length; i++) {
-      let object = {}
-      let thisObject = array[i]
-      for (let key in indexKeyMap) {
-        let k = indexKeyMap[key];
-        let v = thisObject[key];
-        object[k] = v
-      }
-
-      value.push(object)
-    }
-
-    return value
   }
 
   get columns() {
@@ -1991,10 +1294,6 @@ export class RackTable extends Container {
         before.hasOwnProperty('columns') ? before.columns : this.get('columns')
       )
     }
-
-    if (before.data || after.data) {
-      this.setCellsData()
-    }
   }
 
   get eventMap() {
@@ -2008,15 +1307,13 @@ export class RackTable extends Container {
   }
 
   oncellchanged(after, before) {
-    if (hasAnyProperty(after, "dataKey", "dataIndex")) {
-      this.setCellsData()
-    }
+    this.setCellLocations()
     this.invalidate()
   }
 
   contains(x, y) {
     var contains = super.contains(x, y)
-    if(contains)
+    if (contains)
       this._focused = true
     else
       this._focused = false

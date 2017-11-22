@@ -115,6 +115,9 @@ export default class RackTableCell extends RectPath(Component) {
 
     var border = this.model.border || {};
 
+    if (this.model.isEmpty)
+      this._draw_empty_cell(context);
+
     // Cell 채우기.
     context.beginPath();
     context.lineWidth = 0;
@@ -136,21 +139,14 @@ export default class RackTableCell extends RectPath(Component) {
 
   }
 
-  _post_draw(context) {
-    super._post_draw(context);
-
-    if(this.model.isEmpty)
-      this._draw_empty_cell(context);
-  }
-
   _draw_empty_cell(context) {
     var {
       left, top, width, height
     } = this.model;
 
     context.save();
-    context.fillStyle = EMPTY_CELL_FILL_STYLE
-    context.fill();
+    context.fillStyle = EMPTY_CELL_FILL_STYLE;
+    context.fillRect(left, top, width, height);
 
     context.beginPath();
     context.lineWidth = EMPTY_CELL_LINE_WIDTH

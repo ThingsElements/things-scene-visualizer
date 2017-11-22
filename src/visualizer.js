@@ -116,19 +116,20 @@ export default class Visualizer extends Container {
         self.render_threed()
       })
 
-      floorMaterial = new THREE.MeshBasicMaterial({
+      floorMaterial = new THREE.MeshLambertMaterial({
         map: floorTexture,
         side: THREE.DoubleSide
       });
     } else {
-      floorMaterial = new THREE.MeshBasicMaterial({
+      floorMaterial = new THREE.MeshLambertMaterial({
         color: color,
         side: THREE.DoubleSide
       })
     }
 
 
-    var floorGeometry = new THREE.PlaneGeometry(width, height)
+    var floorGeometry = new THREE.BoxGeometry(width, height, 5)
+    // var floorGeometry = new THREE.PlaneGeometry(width, height)
 
     var floor = new THREE.Mesh(floorGeometry, floorMaterial)
 
@@ -390,7 +391,7 @@ export default class Visualizer extends Container {
 
     this._scene3d.add(this._camera)
     this._scene2d.add(this._2dCamera)
-    this._camera.position.set(height * 0.8, Math.max(width, height) * 0.8, width * 0.8)
+    this._camera.position.set(height * 0.8, Math.floor(Math.min(width, height)), width * 0.8)
     this._2dCamera.position.set(0, 0, 0)
     this._camera.lookAt(this._scene3d.position)
     this._2dCamera.lookAt(this._scene2d.position)
@@ -430,7 +431,10 @@ export default class Visualizer extends Container {
 
     // LIGHT
     var _light = new THREE.HemisphereLight(light, 0x000000, 1)
+
+    _light.position.set(-this._camera.position.x, this._camera.position.y, -this._camera.position.z)
     this._camera.add(_light)
+
     // this._camera.castShadow = true
 
     this._raycaster = new THREE.Raycaster()
@@ -1110,7 +1114,8 @@ export default class Visualizer extends Container {
     }
   }
 
-  onmousemove(e) {
+  onclick(e) {
+
     if (this._controls) {
       var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
 
@@ -1122,14 +1127,42 @@ export default class Visualizer extends Container {
 
       var object = this.getObjectByRaycast()
 
-      if (object && object.onmousemove)
-        object.onmousemove(e, this)
+      if (object && object.onclick)
+        object.onclick(e, this)
       else {
         if (!this._scene2d)
           return
         this._scene2d.remove(this._scene2d.getObjectByName('tooltip'))
         this.render_threed()
       }
+
+      // this._controls.onMouseMove(e)
+
+      e.stopPropagation()
+    }
+
+  }
+
+  onmousemove(e) {
+    if (this._controls) {
+      var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
+
+      // this._mouse.originX = this.getContext().canvas.offsetLeft +e.offsetX;
+      // this._mouse.originY = this.getContext().canvas.offsetTop + e.offsetY;
+
+      this._mouse.x = ((pointer.x - this.model.left) / (this.model.width)) * 2 - 1;
+      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
+
+      // var object = this.getObjectByRaycast()
+
+      // if (object && object.onmousemove)
+      //   object.onmousemove(e, this)
+      // else {
+      //   if (!this._scene2d)
+      //     return
+      //   this._scene2d.remove(this._scene2d.getObjectByName('tooltip'))
+      //   this.render_threed()
+      // }
 
       this._controls.onMouseMove(e)
 

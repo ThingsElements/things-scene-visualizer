@@ -116,63 +116,127 @@ export default class Stock extends THREE.Mesh {
     })
   }
 
-  onmousemove(e, visualizer) {
+  // onmousemove(e, visualizer) {
+
+  //   var tooltip = visualizer.tooltip || visualizer._scene2d.getObjectByName("tooltip")
+
+  //   if (tooltip) {
+  //     visualizer._scene2d.remove(tooltip)
+  //     visualizer.tooltip = null
+  //     visualizer.render_threed()
+  //   }
+
+  //   if (!this.visible)
+  //     return;
+
+  //   if (!this.userData)
+  //     this.userData = {};
+
+  //   var tooltipText = '';
+
+  //   for (let key in this.userData) {
+  //     // exclude private data
+  //     if (/^__/.test(key))
+  //       continue;
+
+  //     if (this.userData[key] && typeof this.userData[key] != 'object') {
+  //       tooltipText += key + ": " + this.userData[key] + "\n"
+  //     }
+  //   }
+
+  //   // tooltipText = 'loc : ' + loc
+
+  //   if (tooltipText.length > 0) {
+  //     tooltip = visualizer.tooltip = visualizer.makeTextSprite(tooltipText)
+
+  //     var vector = new THREE.Vector3()
+  //     var vector2 = new THREE.Vector3()
+
+  //     vector.set(visualizer._mouse.x, visualizer._mouse.y, 0.5)
+  //     vector2.set(tooltip.scale.x / 2, - tooltip.scale.y / 2, 0)
+  //     //
+  //     // vector2.normalize()
+  //     //
+  //     // vector2.subScalar(0.5)
+  //     //
+  //     // vector2.y = -vector2.y
+  //     // vector2.z = 0
+
+  //     // vector.add(vector2)
+
+  //     vector.unproject(visualizer._2dCamera)
+  //     vector.add(vector2)
+  //     tooltip.position.set(vector.x, vector.y, vector.z)
+  //     tooltip.name = "tooltip"
+
+  //     visualizer._scene2d.add(tooltip)
+  //     visualizer._renderer && visualizer._renderer.render(visualizer._scene2d, visualizer._2dCamera)
+  //     visualizer.invalidate()
+  //   }
+
+  // }
+
+  onclick(e, visualizer) {
+
 
     var tooltip = visualizer.tooltip || visualizer._scene2d.getObjectByName("tooltip")
 
-    if (tooltip) {
-      visualizer._scene2d.remove(tooltip)
-      visualizer.tooltip = null
-      visualizer.render_threed()
-    }
+        if (tooltip) {
+          visualizer._scene2d.remove(tooltip)
+          visualizer.tooltip = null
+          visualizer.render_threed()
+        }
 
-    if (!this.visible)
-      return;
+        if (!this.visible)
+          return;
 
-    if (!this.userData)
-      this.userData = {};
+        if (!this.userData || Object.keys(this.userData).length === 0)
+          this.userData = {
+            location: this.name
+          };
 
-    var tooltipText = '';
+        var tooltipText = '';
 
-    for (let key in this.userData) {
-      // exclude private data
-      if (/^__/.test(key))
-        continue;
+        for (let key in this.userData) {
+          // exclude private data
+          if (/^__/.test(key))
+            continue;
 
-      if (this.userData[key] && typeof this.userData[key] != 'object') {
-        tooltipText += key + ": " + this.userData[key] + "\n"
-      }
-    }
+          if (this.userData[key] && typeof this.userData[key] != 'object') {
+            tooltipText += key + ": " + this.userData[key] + "\n"
+          }
+        }
 
-    // tooltipText = 'loc : ' + loc
+        // tooltipText = 'loc : ' + loc
 
-    if (tooltipText.length > 0) {
-      tooltip = visualizer.tooltip = visualizer.makeTextSprite(tooltipText)
+        if (tooltipText.length > 0) {
+          tooltip = visualizer.tooltip = visualizer.makeTextSprite(tooltipText)
 
-      var vector = new THREE.Vector3()
-      var vector2 = new THREE.Vector3()
+          var vector = new THREE.Vector3()
+          var vector2 = new THREE.Vector3()
 
-      vector.set(visualizer._mouse.x, visualizer._mouse.y, 0.5)
-      vector2.set(tooltip.scale.x / 2, - tooltip.scale.y / 2, 0)
-      //
-      // vector2.normalize()
-      //
-      // vector2.subScalar(0.5)
-      //
-      // vector2.y = -vector2.y
-      // vector2.z = 0
+          vector.set(visualizer._mouse.x, visualizer._mouse.y, 0.5)
+          vector2.set(tooltip.scale.x / 2, - tooltip.scale.y / 2, 0)
+          //
+          // vector2.normalize()
+          //
+          // vector2.subScalar(0.5)
+          //
+          // vector2.y = -vector2.y
+          // vector2.z = 0
 
-      // vector.add(vector2)
+          // vector.add(vector2)
 
-      vector.unproject(visualizer._2dCamera)
-      vector.add(vector2)
-      tooltip.position.set(vector.x, vector.y, vector.z)
-      tooltip.name = "tooltip"
+          vector.unproject(visualizer._2dCamera)
+          vector.add(vector2)
+          tooltip.position.set(vector.x, vector.y, vector.z)
+          tooltip.name = "tooltip"
 
-      visualizer._scene2d.add(tooltip)
-      visualizer._renderer && visualizer._renderer.render(visualizer._scene2d, visualizer._2dCamera)
-      visualizer.invalidate()
-    }
+          visualizer._scene2d.add(tooltip)
+          visualizer._renderer && visualizer._renderer.render(visualizer._scene2d, visualizer._2dCamera)
+          visualizer.invalidate()
+        }
+
 
   }
 }
