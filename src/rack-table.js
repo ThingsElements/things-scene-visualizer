@@ -778,12 +778,12 @@ export class RackTable extends Container {
         }
 
         if (matches[2] == 'u') {
-          currColCells[i].model.unit `${String(c).padStart(2, 0)}`,
-          currColCells[i].model.section = `${String(r).padStart(2, 0)}`
+          currColCells[i].model.unit = `${String(c).padStart(2, 0)}`;
+          currColCells[i].model.section = `${String(r).padStart(2, 0)}`;
         }
         else {
-          currColCells[i].model.unit = `${String(r).padStart(2, 0)}`
-          currColCells[i].model.section = `${String(c).padStart(2, 0)}`
+          currColCells[i].model.unit = `${String(r).padStart(2, 0)}`;
+          currColCells[i].model.section = `${String(c).padStart(2, 0)}`;
         }
 
         colIndex++;
