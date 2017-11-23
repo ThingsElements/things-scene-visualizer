@@ -188,7 +188,7 @@ var columnControlHandler = {
 
     var diff_unit = diff / width * widths_sum
 
-    var min_width_unit = (widths_sum / width) * 10 // 10픽셀정도를 최소로
+    var min_width_unit = (widths_sum / width) * 5 // 5픽셀정도를 최소로
 
     if (diff_unit < 0)
       diff_unit = - Math.min(widths[index] - min_width_unit, -diff_unit)
@@ -225,7 +225,7 @@ var rowControlHandler = {
 
     var diff_unit = diff / height * heights_sum
 
-    var min_height_unit = (heights_sum / height) * 10 // 10픽셀정도를 최소로
+    var min_height_unit = (heights_sum / height) * 5 // 5픽셀정도를 최소로
 
     if (diff_unit < 0)
       diff_unit = - Math.min(heights[index] - min_height_unit, -diff_unit)
@@ -243,6 +243,8 @@ const LOCATION_HEADER_SIZE = 50;
 const LOCATION_HEADER_LINE_WIDTH = 1;
 const LOCATION_HEADER_STROKE_STYLE = '#ccc';
 const LOCATION_HEADER_FILL_STYLE = '#efefef';
+const LOCATION_HEADER_HIGHLIGHT_STROKE_STYLE = 'rgba(0, 0, 99, 0.9)';
+// const LOCATION_HEADER_HIGHLIGHT_FILL_STYLE = '#55ee55';
 
 export default class RackTable3d extends THREE.Group {
 
@@ -367,6 +369,10 @@ export class RackTable extends Container {
       this._draw_column_header(context);
       this._draw_row_header(context);
       this._draw_header_joint(context);
+    }
+
+    if (this._focused_cell) {
+      this._draw_highlight(context);
     }
   }
 
@@ -584,6 +590,31 @@ export class RackTable extends Container {
     context.fillText(text, baseX, baseY);
 
     context.restore();
+  }
+
+  _draw_highlight(context) {
+
+    // var {
+    //   left, top, width, height
+    // } = this._focused_cell.transcoordS2P()
+
+    // {
+    //   left = x,
+    //   top = y
+    // } = this.transcoordP2S()
+
+    // var cellBottom = top + height;
+    // var cellRight = left + width;
+
+    // var tableLeft = this.bounds.left;
+    // var tableTop = this.bounds.top;
+
+    // context.beginPath();
+    // context.strokeStyle = LOCATION_HEADER_HIGHLIGHT_STROKE_STYLE;
+    // context.rect(tableLeft - LOCATION_HEADER_SIZE, top, cellRight - tableLeft - LOCATION_HEADER_SIZE, height);
+    // context.stroke();
+
+    // context.closePath();
   }
 
   created() {
@@ -1300,7 +1331,8 @@ export class RackTable extends Container {
     return {
       '(self)': {
         '(descendant)': {
-          change: this.oncellchanged
+          change: this.oncellchanged,
+          mouseenter: this.oncellmouseentered
         }
       }
     }
@@ -1332,6 +1364,16 @@ export class RackTable extends Container {
   //   this._focused = false;
   //   this.invalidate();
   // }
+
+  oncellmouseentered(e, hint) {
+    var cell = hint.origin;
+
+    this._focused_cell = cell;
+  }
+
+  oncellmouseleaved(e, hint) {
+    this._focused_cell = null;
+  }
 }
 
 ["rows", "columns", "widths", "heights", "widths_sum", "heights_sum", "controls"].forEach(getter => Component.memoize(RackTable.prototype, getter, false));

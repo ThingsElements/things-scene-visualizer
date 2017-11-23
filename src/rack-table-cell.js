@@ -52,6 +52,7 @@ function isRightMost(idx, rows, columns) {
 const EMPTY_CELL_STROKE_STYLE = '#ccc'
 const EMPTY_CELL_LINE_WIDTH = 1
 const EMPTY_CELL_FILL_STYLE = '#efefef'
+const HIGHLIGHT_FILL_STYLE = 'rgba(00, 00, 255, 0.7)'
 
 /**
  * 1. 스타일을 상속 받아야 함. (cascade-style)
@@ -139,6 +140,25 @@ export default class RackTableCell extends RectPath(Component) {
     if (isBottomMost(idx, rows, columns))
       this._drawBorder(context, left + width, top + height, left, top + height, border.bottom);
 
+
+
+    }
+
+  _post_draw(context) {
+    var {
+      left, top, width, height
+    } = this.bounds
+
+    super._post_draw(context);
+
+    if (this._focused) {
+      context.beginPath();
+      context.fillStyle = HIGHLIGHT_FILL_STYLE
+      context.rect(left, top, width, height);
+
+      context.fill();
+      context.closePath();
+    }
   }
 
   _draw_empty_cell(context) {
@@ -162,6 +182,14 @@ export default class RackTableCell extends RectPath(Component) {
     context.stroke();
     context.closePath();
     context.restore();
+  }
+
+  onmouseenter(e) {
+    this._focused = true;
+  }
+
+  onmouseleave(e) {
+    this._focused = false;
   }
 }
 
