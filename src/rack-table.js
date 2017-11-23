@@ -244,7 +244,7 @@ const LOCATION_HEADER_LINE_WIDTH = 1;
 const LOCATION_HEADER_STROKE_STYLE = '#ccc';
 const LOCATION_HEADER_FILL_STYLE = '#efefef';
 const LOCATION_HEADER_HIGHLIGHT_STROKE_STYLE = 'rgba(0, 0, 99, 0.9)';
-// const LOCATION_HEADER_HIGHLIGHT_FILL_STYLE = '#55ee55';
+const LOCATION_HEADER_HIGHLIGHT_FILL_STYLE = 'rgba(0, 0, 255, 0.5)';
 
 export default class RackTable3d extends THREE.Group {
 
@@ -359,7 +359,6 @@ export class RackTable extends Container {
   }
 
   _post_draw(context) {
-
     super._post_draw(context);
 
     if (!this.app.isEditMode)
@@ -374,6 +373,7 @@ export class RackTable extends Container {
     if (this._focused_cell) {
       this._draw_highlight(context);
     }
+
   }
 
   _draw_column_header(context) {
@@ -594,27 +594,36 @@ export class RackTable extends Container {
 
   _draw_highlight(context) {
 
-    // var {
-    //   left, top, width, height
-    // } = this._focused_cell.transcoordS2P()
+    var {
+      left, top, width, height
+    } = this._focused_cell.bounds;
 
-    // {
-    //   left = x,
-    //   top = y
-    // } = this.transcoordP2S()
+    var cellBottom = top + height;
+    var cellRight = left + width;
 
-    // var cellBottom = top + height;
-    // var cellRight = left + width;
+    var tableLeft = this.bounds.left;
+    var tableTop = this.bounds.top;
 
-    // var tableLeft = this.bounds.left;
-    // var tableTop = this.bounds.top;
+    // draw guide lines
+    context.beginPath();
 
-    // context.beginPath();
-    // context.strokeStyle = LOCATION_HEADER_HIGHLIGHT_STROKE_STYLE;
-    // context.rect(tableLeft - LOCATION_HEADER_SIZE, top, cellRight - tableLeft - LOCATION_HEADER_SIZE, height);
-    // context.stroke();
+    context.strokeStyle = LOCATION_HEADER_HIGHLIGHT_STROKE_STYLE;
+    context.rect(tableLeft - LOCATION_HEADER_SIZE, tableTop + top, cellRight + LOCATION_HEADER_SIZE, height);
+    context.rect(tableLeft + left, tableTop - LOCATION_HEADER_SIZE, width, cellBottom + LOCATION_HEADER_SIZE);
+    context.stroke();
 
-    // context.closePath();
+    context.closePath();
+
+    // draw header fill
+    context.beginPath();
+
+    context.fillStyle = LOCATION_HEADER_HIGHLIGHT_FILL_STYLE;
+    context.rect(tableLeft - LOCATION_HEADER_SIZE, tableTop + top, LOCATION_HEADER_SIZE, height);
+    context.rect(tableLeft + left, tableTop - LOCATION_HEADER_SIZE, width, LOCATION_HEADER_SIZE);
+
+    context.fill();
+
+    context.closePath();
   }
 
   created() {
@@ -1325,6 +1334,8 @@ export class RackTable extends Container {
         before.hasOwnProperty('columns') ? before.columns : this.get('columns')
       )
     }
+
+    this.invalidate();
   }
 
   get eventMap() {
@@ -1332,7 +1343,8 @@ export class RackTable extends Container {
       '(self)': {
         '(descendant)': {
           change: this.oncellchanged,
-          mouseenter: this.oncellmouseentered
+          mouseenter: this.oncellmouseentered,
+          dragstart: this.oncelldragstarted
         }
       }
     }
@@ -1347,8 +1359,10 @@ export class RackTable extends Container {
     var contains = super.contains(x, y)
     if (contains)
       this._focused = true
-    else
+    else {
       this._focused = false
+      this._focused_cell = null;
+    }
 
     this.invalidate();
 
@@ -1364,6 +1378,13 @@ export class RackTable extends Container {
   //   this._focused = false;
   //   this.invalidate();
   // }
+
+  oncelldragstarted(e, hint) {
+    var cell = hint.origin;
+
+    // cell._focused = false;
+    this._focused_cell = null;
+  }
 
   oncellmouseentered(e, hint) {
     var cell = hint.origin;

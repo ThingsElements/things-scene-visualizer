@@ -140,8 +140,6 @@ export default class RackTableCell extends RectPath(Component) {
     if (isBottomMost(idx, rows, columns))
       this._drawBorder(context, left + width, top + height, left, top + height, border.bottom);
 
-
-
     }
 
   _post_draw(context) {
@@ -182,6 +180,10 @@ export default class RackTableCell extends RectPath(Component) {
     context.stroke();
     context.closePath();
     context.restore();
+  }
+
+  ondragstart() {
+    this._focused = false;
   }
 
   onmouseenter(e) {
