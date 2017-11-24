@@ -40,7 +40,6 @@
     "webpack-dev-server": "^2.9.4"
   },
   "dependencies": {
-    "babylonjs": "^3.1.0-alpha3.6",
     "three.js": "^0.77.1"
   }
 }

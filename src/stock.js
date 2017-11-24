@@ -18,6 +18,7 @@ export default class Stock extends THREE.Mesh {
 
     this._visualizer = visualizer;
     this._model = model;
+    this._hideEmptyStock = visualizer && visualizer._stockStatus && visualizer._stockStatus.hideEmptyStock
 
     this.createObject(model);
 
@@ -26,13 +27,13 @@ export default class Stock extends THREE.Mesh {
   getMaterial(index) {
     if (!this.stockMaterials[index]) {
       if (!(this._visualizer && this._visualizer._stockStatus))
-        return Stock.defaultMaterial;
+        return this.userDefineDefaultMaterial;
 
       var stockStatus = this._visualizer._stockStatus;
       var range = stockStatus.ranges[index];
 
       if (!(range && range.color))
-        this.stockMaterials[index] = Stock.defaultMaterial;
+        this.stockMaterials[index] = this.userDefineDefaultMaterial;
 
       this.stockMaterials[index] = new THREE.MeshLambertMaterial({
         color: range.color,
@@ -48,6 +49,26 @@ export default class Stock extends THREE.Mesh {
       this._visualizer._stock_materials = [];
 
     return this._visualizer._stock_materials
+  }
+
+  get userDefineDefaultMaterial() {
+    if (!this._visualizer._default_material) {
+      if (!(this._visualizer && this._visualizer._stockStatus))
+        return Stock.defaultMaterial;
+
+      var stockStatus = this._visualizer._stockStatus;
+      var defaultColor = stockStatus.defaultColor;
+
+      if (!defaultColor)
+        return Stock.defaultMaterial;
+
+      this._visualizer._default_material = new THREE.MeshLambertMaterial({
+        color: defaultColor,
+        side: THREE.FrontSide
+      })
+    }
+
+    return this._visualizer._default_material
   }
 
   static get defaultMaterial() {
@@ -69,10 +90,10 @@ export default class Stock extends THREE.Mesh {
   createStock(w, h, d) {
 
     this.geometry = new THREE.BoxBufferGeometry(w, d, h);
-    this.material = Stock.defaultMaterial;
+    this.material = this.userDefineDefaultMaterial;
     this.type = 'stock'
 
-    // this.visible = false
+    this.visible = !this._hideEmptyStock;
 
     // this.castShadow = true
 
@@ -95,13 +116,21 @@ export default class Stock extends THREE.Mesh {
     if (!(statusField && ranges))
       return
 
+
+    var status = this.userData[statusField];
+
+    if (status == undefined) {
+      this.visible = !this._hideEmptyStock;
+      this.material = this.userDefineDefaultMaterial;
+      return
+    }
+
+
     ranges.some((range, index) => {
       let {
         min,
         max
       } = range
-
-      var status = this.userData[statusField];
 
       if (max > status) {
         if (min !== undefined) {
@@ -111,6 +140,7 @@ export default class Stock extends THREE.Mesh {
         } else
           this.material = this.getMaterial(index)
 
+        this.visible = true;
         return true;
       }
     })

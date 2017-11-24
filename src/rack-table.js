@@ -35,6 +35,16 @@ const NATURE = {
     property: 'zone'
   }, {
     type: 'number',
+    label: 'shelves',
+    name: 'shelves',
+    property: 'shelves'
+  }, {
+    type: 'number',
+    label: 'depth',
+    name: 'depth',
+    property: 'depth'
+  }, {
+    type: 'number',
     label: 'min-section',
     name: 'minSection'
   }, {
@@ -270,6 +280,8 @@ export default class RackTable3d extends THREE.Group {
       zone,
       locPattern,
       shelfPattern,
+      shelves = 1,
+      depth = 1,
       increasePattern = '+u+s',
       columns,
       rows,
@@ -291,8 +303,8 @@ export default class RackTable3d extends THREE.Group {
         top: rack.top,
         width: rack.width,
         height: rack.height,
-        depth: rack.depth || 20,
-        shelves: rack.shelves || 1,
+        depth,
+        shelves,
         unit: rack.unit,
         section: rack.section,
         zone: zone,

@@ -23,16 +23,6 @@ const NATURE = {
       split: false
     }
   }, {
-    type: 'number',
-    label: 'shelves',
-    name: 'shelves',
-    property: 'shelves'
-  }, {
-    type: 'number',
-    label: 'depth',
-    name: 'depth',
-    property: 'depth'
-  }, {
     type: 'checkbox',
     label: 'is-empty',
     name: 'isEmpty'
@@ -104,7 +94,7 @@ export default class RackTableCell extends RectPath(Component) {
       context.beginPath();
       context.moveTo(x, y)
       context.lineTo(to_x, to_y);
-      Component.drawStroke(context, style);
+      Component.drawStroke(context, style, this);
     }
   }
 
@@ -140,7 +130,7 @@ export default class RackTableCell extends RectPath(Component) {
     if (isBottomMost(idx, rows, columns))
       this._drawBorder(context, left + width, top + height, left, top + height, border.bottom);
 
-    }
+  }
 
   _post_draw(context) {
     var {
