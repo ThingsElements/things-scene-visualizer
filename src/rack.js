@@ -49,7 +49,8 @@ export default class Rack extends THREE.Object3D {
 
   createObject(model, canvasSize) {
 
-    let scale = 0.7;
+    let scale = model.stockScale || 0.7;
+    let hideRackFrame = model.hideRackFrame;
 
     let cx = (model.left + (model.width / 2)) - canvasSize.width / 2
     let cy = (model.top + (model.height / 2)) - canvasSize.height / 2
@@ -59,10 +60,13 @@ export default class Rack extends THREE.Object3D {
 
     this.type = model.type
 
-    var frame = this.createRackFrame(model.width, model.height, model.depth * model.shelves)
-    this._frames.push(frame)
+    if (!hideRackFrame) {
+      var frame = this.createRackFrame(model.width, model.height, model.depth * model.shelves)
+      this._frames.push(frame)
 
-    this.add(frame)
+      this.add(frame)
+    }
+
 
     var shelfPattern = model.shelfPattern;
 

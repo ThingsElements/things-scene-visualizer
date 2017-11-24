@@ -69,6 +69,14 @@ const NATURE = {
     type: 'rack-increase-pattern',
     label: '',
     name: 'increasePattern'
+  }, {
+    type: 'number',
+    label: 'stock-scale',
+    name: 'stockScale'
+  }, {
+    type: 'checkbox',
+    label: 'hide-rack-frame',
+    name: 'hideRackFrame'
   }]
 }
 
@@ -286,7 +294,9 @@ export default class RackTable3d extends THREE.Group {
       columns,
       rows,
       minUnit = 1,
-      minSection = 1
+      minSection = 1,
+      stockScale = 0.7,
+      hideRackFrame
     } = model;
 
     let cx = (model.left + (model.width / 2)) - canvasSize.width / 2
@@ -310,7 +320,9 @@ export default class RackTable3d extends THREE.Group {
         zone: zone,
         locPattern: locPattern,
         shelfPattern: shelfPattern,
-        isEmpty: rack.isEmpty
+        isEmpty: rack.isEmpty,
+        hideRackFrame,
+        stockScale
       }
 
       if (!rackModel.isEmpty) {

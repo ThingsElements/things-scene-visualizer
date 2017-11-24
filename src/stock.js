@@ -222,7 +222,7 @@ export default class Stock extends THREE.Mesh {
 
         if (!this.userData || Object.keys(this.userData).length === 0)
           this.userData = {
-            location: this.name
+            loc: this.name
           };
 
         var tooltipText = '';
