@@ -5,7 +5,7 @@ import Stock from './stock'
 
 export default class Rack extends THREE.Object3D {
 
-  constructor(model, canvasSize, visualizer, sceneComponent) {
+  constructor(model, canvasSize, visualizer) {
 
     super();
 
@@ -17,6 +17,25 @@ export default class Rack extends THREE.Object3D {
 
     this.createObject(model, canvasSize);
     // this.castShadow = true
+  }
+
+  dispose() {
+
+    var children = this.children.slice();
+    for (var i in children) {
+      let child = children[i]
+      if (child.dispose)
+        child.dispose();
+      if (child.geometry)
+        child.geometry.dispose();
+      if (child.material)
+        child.material.dispose();
+      if (child.texture)
+        child.texture.dispose();
+      this.remove(child)
+    }
+
+    delete this._visualizer
   }
 
   static get boardMaterial() {

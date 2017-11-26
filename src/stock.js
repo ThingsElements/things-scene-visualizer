@@ -24,6 +24,10 @@ export default class Stock extends THREE.Mesh {
 
   }
 
+  dispose() {
+    delete this._visualizer
+  }
+
   getMaterial(index) {
     if (!this.stockMaterials[index]) {
       if (!(this._visualizer && this._visualizer._stockStatus))

@@ -64,6 +64,11 @@ const NATURE = {
     name: 'threed',
     property: 'threed'
   }, {
+    type: 'checkbox',
+    label: 'debug',
+    name: 'debug',
+    property: 'threed'
+  }, {
     type: 'stock-status',
     label: '',
     name: 'stockStatus'
@@ -311,17 +316,19 @@ export default class Visualizer extends Container {
     this.stop();
     if (this._renderer)
       this._renderer.clear()
-    this._renderer = undefined
-    this._camera = undefined
-    this._2dCamera = undefined
-    this._keyboard = undefined
-    this._controls = undefined
-    this._projector = undefined
-    this._load_manager = undefined
+    delete this._renderer
+    delete this._camera
+    delete this._2dCamera
+    delete this._keyboard
+    delete this._controls
+    delete this._projector
+    delete this._load_manager
+    delete this._objects
 
     if (this._scene3d) {
-      for (let i in this._scene3d.children) {
-        let child = this._scene3d.children[i]
+      let children = this._scene3d.children.slice();
+      for (let i in children) {
+        let child = children[i]
         if (child.dispose)
           child.dispose();
         if (child.geometry)
@@ -335,8 +342,9 @@ export default class Visualizer extends Container {
     }
 
     if (this._scene2d) {
-      for (let i in this._scene2d.children) {
-        let child = this._scene2d.children[i]
+      let children = this._scene2d.children.slice();
+      for (let i in children) {
+        let child = children[i]
         if (child.dispose)
           child.dispose();
         if (child.geometry)
@@ -349,8 +357,8 @@ export default class Visualizer extends Container {
       }
     }
 
-    this._scene3d = undefined
-    this._scene2d = undefined
+    delete this._scene3d
+    delete this._scene2d
   }
 
   init_scene3d() {
@@ -532,6 +540,7 @@ export default class Visualizer extends Container {
       top,
       width,
       height,
+      debug,
       threed
     } = this.model
 
@@ -559,6 +568,14 @@ export default class Visualizer extends Container {
       )
 
       // this.showTooltip('LOC-2-1-1-A-1')
+
+      if(debug) {
+        ctx.font = 100 + 'px Arial'
+        ctx.textAlign = 'center'
+        ctx.fillStyle = 'black'
+        ctx.globalAlpha = 0.5
+        ctx.fillText(scene.FPS(), 100, 100)
+      }
 
     } else {
       super._post_draw(ctx);

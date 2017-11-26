@@ -279,6 +279,24 @@ export default class RackTable3d extends THREE.Group {
 
   }
 
+  dispose() {
+    var children = this.children.slice();
+    for (var i in children) {
+      let child = children[i]
+      if (child.dispose)
+        child.dispose();
+      if (child.geometry)
+        child.geometry.dispose();
+      if (child.material)
+        child.material.dispose();
+      if (child.texture)
+        child.texture.dispose();
+      this.remove(child)
+    }
+
+    delete this._visualizer
+  }
+
   createRacks(model, canvasSize) {
 
     var {
@@ -326,7 +344,7 @@ export default class RackTable3d extends THREE.Group {
       }
 
       if (!rackModel.isEmpty) {
-        var rack = new Rack(rackModel, model, this._visualizer, this._sceneComponent);
+        var rack = new Rack(rackModel, model, this._visualizer);
         this.add(rack);
       }
     })
@@ -380,6 +398,11 @@ export class RackTable extends Container {
 
   is3dish() {
     return true;
+  }
+
+  dispose() {
+    super.dispose()
+    delete this._focused_cell
   }
 
   _post_draw(context) {
