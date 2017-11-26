@@ -79,6 +79,16 @@ export default class Stock extends Mesh {
     return this._visualizer._default_material
   }
 
+  get emptyMaterial() {
+    if (!this._visualizer._empty_material) {
+      this._visualizer._empty_material = new THREE.MeshBasicMaterial();
+      this._visualizer._empty_material.opacity = 0.25;
+      this._visualizer._empty_material.transparent = true;
+    }
+
+    return this._visualizer._empty_material
+  }
+
   static get defaultMaterial() {
     if (!Stock._material_default)
       Stock._material_default = new THREE.MeshLambertMaterial({
@@ -102,10 +112,10 @@ export default class Stock extends Mesh {
   createStock(w, h, d) {
 
     this.geometry = new THREE.BoxBufferGeometry(w, d, h);
-    this.material = this.userDefineDefaultMaterial;
+    this.material = this._hideEmptyStock ? this.emptyMaterial : this.userDefineDefaultMaterial;
     this.type = 'stock'
 
-    this.visible = !this._hideEmptyStock;
+    // this.visible = !this._hideEmptyStock;
 
     // this.castShadow = true
 
@@ -128,8 +138,8 @@ export default class Stock extends Mesh {
     var status = this.userData[statusField];
 
     if (status == undefined) {
-      this.visible = !this._hideEmptyStock;
-      this.material = this.userDefineDefaultMaterial;
+      // this.visible = !this._hideEmptyStock;
+      this.material = this._hideEmptyStock ? this.emptyMaterial : this.userDefineDefaultMaterial;
       return
     }
 
@@ -148,7 +158,7 @@ export default class Stock extends Mesh {
         } else
           this.material = this.getMaterial(index)
 
-        this.visible = true;
+        // this.visible = true;
         return true;
       }
     })

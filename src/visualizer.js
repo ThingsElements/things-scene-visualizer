@@ -121,14 +121,29 @@ export default class Visualizer extends Container {
         self.render_threed()
       })
 
-      floorMaterial = new THREE.MeshLambertMaterial({
-        map: floorTexture,
-        side: THREE.DoubleSide
-      });
+      var floorMaterial = [
+        floorMaterial = new THREE.MeshLambertMaterial({
+          color: color
+        }),
+        floorMaterial = new THREE.MeshLambertMaterial({
+          color: color
+        }),
+        floorMaterial = new THREE.MeshLambertMaterial({
+          color: color
+        }),
+        floorMaterial = new THREE.MeshLambertMaterial({
+          color: color
+        }),
+        new THREE.MeshLambertMaterial({
+          map: floorTexture
+        }),
+        floorMaterial = new THREE.MeshLambertMaterial({
+          color: color
+        })
+      ]
     } else {
       floorMaterial = new THREE.MeshLambertMaterial({
-        color: color,
-        side: THREE.DoubleSide
+        color: color
       })
     }
 

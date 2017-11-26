@@ -88,7 +88,7 @@ export default class Rack extends Object3D {
     for (var i = 0; i < shelves; i++) {
 
       let bottom = -depth * shelves * 0.5
-      if (i > 0) {
+      if (i > 0 && !hideRackFrame) {
         let board = this.createRackBoard(width, height)
         board.position.set(0, bottom + (depth * i), 0)
         board.rotation.x = Math.PI / 2;
