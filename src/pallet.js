@@ -1,6 +1,9 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
+
+import Object3D from './object3d'
+
 var extObj
 var {
   Rect,
@@ -40,16 +43,13 @@ function init() {
   })
 }
 
-export default class Pallet extends THREE.Object3D {
+export default class Pallet extends Object3D {
 
   constructor(model, canvasSize) {
 
-    super();
+    super(model);
 
-    this._model = model;
-
-    this.createObject(model, canvasSize);
-
+    this.createObject(canvasSize);
   }
 
   static get extObject() {
@@ -59,28 +59,37 @@ export default class Pallet extends THREE.Object3D {
     return extObj
   }
 
-  createObject(model, canvasSize) {
+  createObject(canvasSize) {
+
+    var {
+      left,
+      top,
+      width,
+      height,
+      cx,
+      cy,
+      depth,
+      rotation = 0
+    } = this.model
 
     if (!Pallet.extObject) {
-      setTimeout(this.createObject.bind(this, model, canvasSize), 50)
+      setTimeout(this.createObject.bind(this, this.model, canvasSize), 50)
       return;
     }
 
-    let cx = model.cx - canvasSize.width / 2
-    let cy = model.cy - canvasSize.height / 2
-    let cz = 0.5 * model.depth
+    cx -= canvasSize.width / 2
+    cy -= canvasSize.height / 2
+    var cz = 0.5 * depth
 
-    let left = model.left - canvasSize.width / 2
-    let top = model.top - canvasSize.height / 2
-
-    let rotation = model.rotation
+    var left = left - canvasSize.width / 2
+    var top = top - canvasSize.height / 2
 
     this.type = 'pallet'
 
     this.add(Pallet.extObject.clone())
     this.scale.set(10, 10, 10)
     this.position.set(cx, 0, cy)
-    this.rotation.y = model.rotation || 0
+    this.rotation.y = rotation
 
   }
 

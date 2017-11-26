@@ -1,6 +1,9 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
+
+import Object3D from './object3d'
+
 var { Component, Rect } = scene
 
 const NATURE = {
@@ -20,22 +23,21 @@ const NATURE = {
   }]
 }
 
-export default class Desk extends THREE.Object3D {
+export default class Desk extends Object3D {
 
   constructor(model, canvasSize, visualizer, sceneComponent) {
 
-    super();
+    super(model);
 
-    this._model = model;
     this._visualizer = visualizer;
 
-    this.createObject(model, canvasSize);
+    this.createObject(ize);
   }
 
   get boardThickness() {
     var {
       depth
-    } = this._model;
+    } = this.model;
 
     return Math.min(10, depth / 10);
   }
@@ -43,7 +45,7 @@ export default class Desk extends THREE.Object3D {
   get legThickness() {
     var {
       width, height
-    } = this._model;
+    } = this.model;
 
     var min = Math.min(width, height);
 
@@ -54,30 +56,35 @@ export default class Desk extends THREE.Object3D {
     return Math.min(this.legThickness / 5, 2);
   }
 
-  createObject(model, canvasSize) {
+  createObject(canvasSize) {
 
-    let cx = (model.left + (model.width / 2)) - canvasSize.width / 2
-    let cy = (model.top + (model.height / 2)) - canvasSize.height / 2
-    let cz = 0.5 * model.depth
+    var {
+      type,
+      left,
+      top,
+      width,
+      height,
+      depth,
+      rotation = 0,
 
-    let rotation = model.rotation
+    } = this.model;
 
-    this.type = model.type
+    let cx = (left + (width / 2)) - canvasSize.width / 2
+    let cy = (top + (height / 2)) - canvasSize.height / 2
+    let cz = 0.5 * depth
 
-    var legs = this.createDeskLegs(model.width, model.height, model.depth)
+    var legs = this.createDeskLegs(width, height, depth)
     this.add(legs)
 
-    let top = model.depth / 2 - this.boardThickness;
-    let board = this.createDeskBoard(model.width, model.height)
+    top = depth / 2 - this.boardThickness;
+    let board = this.createDeskBoard(width, height)
     board.position.set(0, top, 0)
     board.rotation.x = Math.PI / 2;
 
     this.add(board)
 
-
     this.position.set(cx, cz, cy)
     this.rotation.y = rotation || 0
-
   }
 
   createDeskLegs(w, h, d) {
@@ -94,7 +101,7 @@ export default class Desk extends THREE.Object3D {
     for (var i = 0; i < 4; i++) {
       var geometry = new THREE.BoxGeometry(legThickness, d, legThickness);
       var material = new THREE.MeshBasicMaterial({
-        color: this._model.legColor || '#252525'
+        color: this.model.legColor || '#252525'
       });
       var leg = new THREE.Mesh(geometry, material);
       switch (i) {
@@ -123,7 +130,7 @@ export default class Desk extends THREE.Object3D {
     var d = 10;
 
     var boardMaterial = new THREE.MeshBasicMaterial({
-      color: this._model.fillStyle || '#ccaa76'
+      color: this.model.fillStyle || '#ccaa76'
     });
     var boardGeometry = new THREE.BoxGeometry(w, h, d, 1, 1);
     var board = new THREE.Mesh(boardGeometry, boardMaterial);

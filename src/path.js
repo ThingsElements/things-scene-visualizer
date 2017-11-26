@@ -1,34 +1,43 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
+
+import Object3D from './object3d'
+
 const STATUS_COLORS = ['#6666ff', '#ccccff', '#ffcccc', '#cc3300']
 
-export default class Path extends THREE.Object3D {
+export default class Path extends Object3D {
 
   constructor(model, canvasSize, container) {
 
-    super();
+    super(model);
 
-    this._model = model;
     this._container = container
 
-    this.createObject(model, canvasSize);
+    this.createObject(canvasSize);
 
   }
 
-  createObject(model, canvasSize) {
+  createObject(canvasSize) {
+    var {
+      x1,
+      y1,
+      x2,
+      y2,
+      lineWidth = 5,
+      location
+    } = this.model
 
-    let x1 = (model.x1) - canvasSize.width / 2
-    let y1 = (model.y1) - canvasSize.height / 2
-    let x2 = (model.x2) - canvasSize.width / 2
-    let y2 = (model.y2) - canvasSize.height / 2
+    let x1 = (x1) - canvasSize.width / 2
+    let y1 = (y1) - canvasSize.height / 2
+    let x2 = (x2) - canvasSize.width / 2
+    let y2 = (y2) - canvasSize.height / 2
     let z = 0
-    let lineWidth = model.lineWidth || 5
 
     this.type = 'path'
 
-    if (model.location)
-      this.name = model.location
+    if (location)
+      this.name = location
 
     let material = new THREE.LineBasicMaterial({
       color: 0x333333,

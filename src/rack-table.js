@@ -1,6 +1,9 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
+
+import Group3D from './group3d'
+
 import RackTableCell from './rack-table-cell'
 import RackTableLayout from './rack-table-layout'
 import Rack from './rack'
@@ -264,45 +267,35 @@ const LOCATION_HEADER_FILL_STYLE = '#efefef';
 const LOCATION_HEADER_HIGHLIGHT_STROKE_STYLE = 'rgba(0, 0, 99, 0.9)';
 const LOCATION_HEADER_HIGHLIGHT_FILL_STYLE = 'rgba(0, 0, 255, 0.5)';
 
-export default class RackTable3d extends THREE.Group {
+export default class RackTable3d extends Group3D {
 
   constructor(model, canvasSize, visualizer, sceneComponent) {
 
-    super();
+    super(model);
 
-    this._model = model;
     this._visualizer = visualizer;
     this._sceneComponent = sceneComponent;
 
-    this.createRacks(model, canvasSize);
+    this.createRacks(canvasSize);
     this.mergeObjects()
 
   }
 
   dispose() {
-    var children = this.children.slice();
-    for (var i in children) {
-      let child = children[i]
-      if (child.dispose)
-        child.dispose();
-      if (child.geometry)
-        child.geometry.dispose();
-      if (child.material)
-        child.material.dispose();
-      if (child.texture)
-        child.texture.dispose();
-      this.remove(child)
-    }
+    super.dispose();
 
     delete this._visualizer
   }
 
-  createRacks(model, canvasSize) {
+  createRacks(canvasSize) {
 
     var {
       components = [],
       left,
       top,
+      width,
+      height,
+      rotation = 0,
       zone,
       locPattern,
       shelfPattern,
@@ -315,14 +308,14 @@ export default class RackTable3d extends THREE.Group {
       minSection = 1,
       stockScale = 0.7,
       hideRackFrame
-    } = model;
+    } = this.model;
 
-    let cx = (model.left + (model.width / 2)) - canvasSize.width / 2
-    let cy = (model.top + (model.height / 2)) - canvasSize.height / 2
+    let cx = (left + (width / 2)) - canvasSize.width / 2
+    let cy = (top + (height / 2)) - canvasSize.height / 2
     let cz = 0;
 
     this.position.set(cx, cz, cy)
-    this.rotation.y = - this._model.rotation || 0;
+    this.rotation.y = - rotation
 
     components.forEach(rack => {
 
@@ -335,16 +328,16 @@ export default class RackTable3d extends THREE.Group {
         shelves,
         unit: rack.unit,
         section: rack.section,
-        zone: zone,
-        locPattern: locPattern,
-        shelfPattern: shelfPattern,
+        zone,
+        locPattern,
+        shelfPattern,
         isEmpty: rack.isEmpty,
         hideRackFrame,
         stockScale
       }
 
       if (!rackModel.isEmpty) {
-        var rack = new Rack(rackModel, model, this._visualizer);
+        var rack = new Rack(rackModel, this.model, this._visualizer);
         this.add(rack);
       }
     })

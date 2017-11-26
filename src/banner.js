@@ -1,6 +1,9 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
+
+import Object3D from './object3d'
+
 var { Component, ImageView, Component3d } = scene
 
 const NATURE = {
@@ -30,44 +33,48 @@ const NATURE = {
   }]
 }
 
-export default class Banner extends THREE.Object3D {
+export default class Banner extends Object3D {
 
   constructor(model, canvasSize, visualizer) {
 
-    super();
+    super(model);
 
-    this._model = model;
     this._visualizer = visualizer;
 
-    this.createObject(model, canvasSize);
+    this.createObject(canvasSize);
   }
 
-  createObject(model, canvasSize) {
-
-    let { left = 0, top = 0, zPos = 0, width = 1, height = 1, depth = 1 } = model
+  createObject(canvasSize) {
+    var {
+      type,
+      left = 0,
+      top = 0,
+      zPos = 0,
+      width = 1,
+      height = 1,
+      depth = 1,
+      rotation = 0
+    } = this.model
 
     let cx = (left + width / 2) - canvasSize.width / 2
     let cy = (top + height / 2) - canvasSize.height / 2
     let cz = zPos + 0.5 * depth
-
-    let rotation = model.rotation
 
     this.add(this.createCube(width, height, depth))
     let textureBoard = this.createTextureBoard(width, depth)
     this.add(textureBoard)
     textureBoard.position.set(0, 0, 0.5 * height)
 
-    this.type = model.type
+    this.type = type
 
     this.position.set(cx, cz, cy)
-    this.rotation.y = - rotation || 0
-
+    this.rotation.y = - rotation
 
   }
 
   createCube(w, h, d) {
 
-    var { boxColor = '#ccaa76' } = this._model
+    var { boxColor = '#ccaa76' } = this.model
 
     var geometry = new THREE.BoxGeometry(w, d, h);
     var material = new THREE.MeshLambertMaterial({ color: boxColor, side: THREE.FrontSide });
@@ -85,7 +92,7 @@ export default class Banner extends THREE.Object3D {
 
     let {
       fillStyle = '#ccaa76'
-    } = this._model
+    } = this.model
 
     if (fillStyle && fillStyle.type == 'pattern' && fillStyle.image) {
 

@@ -1,6 +1,9 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
+
+import Object3D from './object3d'
+
 var extObj
 
 function init() {
@@ -26,13 +29,11 @@ function init() {
   })
 }
 
-export default class ForkLift extends THREE.Object3D {
+export default class ForkLift extends Object3D {
 
   constructor(model, canvasSize) {
 
-    super();
-
-    this._model = model;
+    super(model);
 
     this.createObject(model, canvasSize);
 
@@ -45,28 +46,39 @@ export default class ForkLift extends THREE.Object3D {
     return extObj
   }
 
-  createObject(model, canvasSize) {
+  createObject(canvasSize) {
+
+    var {
+      left,
+      top,
+      width,
+      height,
+      cx,
+      cy,
+      depth,
+      rotation = 0
+    } = this.model
 
     if (!ForkLift.extObject) {
-      setTimeout(this.createObject.bind(this, model, canvasSize), 50)
+      setTimeout(this.createObject.bind(this, this.model, canvasSize), 50)
       return;
     }
 
-    let cx = model.cx - canvasSize.width / 2
-    let cy = model.cy - canvasSize.height / 2
-    let cz = 0.5 * model.depth
+    cx = cx - canvasSize.width / 2
+    cy = cy - canvasSize.height / 2
+    var cz = 0.5 * depth
 
-    let left = model.left - canvasSize.width / 2
-    let top = model.top - canvasSize.height / 2
+    var left = left - canvasSize.width / 2
+    var top = top - canvasSize.height / 2
 
-    let rotation = model.rotation
+    var rotation = rotation
 
     this.type = 'forklift'
 
     this.add(ForkLift.extObject.clone())
     this.scale.set(10, 10, 10)
     this.position.set(cx, 0, cy)
-    this.rotation.y = model.rotation || 0
+    this.rotation.y = rotation
 
   }
 

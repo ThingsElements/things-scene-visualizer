@@ -1,6 +1,9 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
+
+import Object3D from './object3d'
+
 var extObj
 
 function init() {
@@ -31,16 +34,15 @@ function init() {
   })
 }
 
-export default class Person extends THREE.Object3D {
+export default class Person extends Object3D {
 
   constructor(model, canvasSize, visualizer) {
 
-    super();
+    super(model);
 
-    this._model = model;
     this._visualizer = visualizer;
 
-    this.createObject(model, canvasSize);
+    this.createObject(canvasSize);
 
   }
 
@@ -51,21 +53,27 @@ export default class Person extends THREE.Object3D {
     return extObj
   }
 
-  createObject(model, canvasSize) {
+  createObject(canvasSize) {
+
+    var {
+      left,
+      top,
+      width,
+      height,
+      rotation
+    } = this.model
 
     if (!Person.extObject) {
-      setTimeout(this.createObject.bind(this, model, canvasSize), 50)
+      setTimeout(this.createObject.bind(this, this.model, canvasSize), 50)
       return;
     }
 
-    let cx = (model.left + (model.width / 2)) - canvasSize.width / 2
-    let cy = (model.top + (model.height / 2)) - canvasSize.height / 2
-    let cz = 0.5 * model.depth
+    let cx = (left + (width / 2)) - canvasSize.width / 2
+    let cy = (top + (height / 2)) - canvasSize.height / 2
+    let cz = 0.5 * depth
 
-    let left = model.left - canvasSize.width / 2
-    let top = model.top - canvasSize.height / 2
-
-    let rotation = model.rotation
+    left -= canvasSize.width / 2
+    top -= canvasSize.height / 2
 
     this.type = 'person'
     let person = Person.extObject.clone()
@@ -85,7 +93,7 @@ export default class Person extends THREE.Object3D {
 
     // this.scale.set(model.width, model.depth, model.height)
     this.position.set(cx, 0, cy)
-    this.rotation.y = model.rotation || 0
+    this.rotation.y = rotation
 
     this._visualizer.render_threed()
   }

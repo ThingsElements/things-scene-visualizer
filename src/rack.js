@@ -1,39 +1,27 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
+
+import Object3D from './object3d'
 import Stock from './stock'
 
-export default class Rack extends THREE.Object3D {
+export default class Rack extends Object3D {
 
   constructor(model, canvasSize, visualizer) {
 
-    super();
+    super(model, canvasSize);
 
-    this._model = model;
     this._visualizer = visualizer;
 
     this._frames = [];
     this._boards = [];
 
-    this.createObject(model, canvasSize);
+    this.createObject(canvasSize);
     // this.castShadow = true
   }
 
   dispose() {
-
-    var children = this.children.slice();
-    for (var i in children) {
-      let child = children[i]
-      if (child.dispose)
-        child.dispose();
-      if (child.geometry)
-        child.geometry.dispose();
-      if (child.material)
-        child.material.dispose();
-      if (child.texture)
-        child.texture.dispose();
-      this.remove(child)
-    }
+    super.dispose()
 
     delete this._visualizer
   }
@@ -66,35 +54,43 @@ export default class Rack extends THREE.Object3D {
     return this._boards;
   }
 
-  createObject(model, canvasSize) {
+  createObject(canvasSize) {
+    var {
+      type,
+      left,
+      top,
+      width,
+      height,
+      depth,
+      rotation = 0,
+      fillStyle,
+      hideRackFrame,
+      shelves,
+      shelfPattern,
+      stockScale = 0.7,
+    } = this.model;
 
-    let scale = model.stockScale || 0.7;
-    let hideRackFrame = model.hideRackFrame;
+    let scale = stockScale;
 
-    let cx = (model.left + (model.width / 2)) - canvasSize.width / 2
-    let cy = (model.top + (model.height / 2)) - canvasSize.height / 2
-    let cz = 0.5 * model.depth * model.shelves
+    let cx = (left + (width / 2)) - canvasSize.width / 2
+    let cy = (top + (height / 2)) - canvasSize.height / 2
+    let cz = 0.5 * depth * shelves
 
-    let rotation = model.rotation
-
-    this.type = model.type
+    this.type = type
 
     if (!hideRackFrame) {
-      var frame = this.createRackFrame(model.width, model.height, model.depth * model.shelves)
+      var frame = this.createRackFrame(width, height, depth * shelves)
       this._frames.push(frame)
 
       this.add(frame)
     }
 
+    for (var i = 0; i < shelves; i++) {
 
-    var shelfPattern = model.shelfPattern;
-
-    for (var i = 0; i < model.shelves; i++) {
-
-      let bottom = -model.depth * model.shelves * 0.5
+      let bottom = -depth * shelves * 0.5
       if (i > 0) {
-        let board = this.createRackBoard(model.width, model.height)
-        board.position.set(0, bottom + (model.depth * i), 0)
+        let board = this.createRackBoard(width, height)
+        board.position.set(0, bottom + (depth * i), 0)
         board.rotation.x = Math.PI / 2;
         board.material.opacity = 0.5
         board.material.transparent = true
@@ -106,23 +102,23 @@ export default class Rack extends THREE.Object3D {
       }
 
       let stock = new Stock({
-        width: model.width * scale,
-        height: model.height * scale,
-        depth: model.depth * scale,
-        fillStyle: model.fillStyle
+        width: width * scale,
+        height: height * scale,
+        depth: depth * scale,
+        fillStyle: fillStyle
       }, this._visualizer)
 
-      let stockDepth = model.depth * scale
+      let stockDepth = depth * scale
 
-      stock.position.set(0, bottom + (model.depth * i) + (stockDepth * 0.5), 0)
-      stock.name = this.makeLocationString(this.makeShelfString(shelfPattern, i + 1, model.shelves))
+      stock.position.set(0, bottom + (depth * i) + (stockDepth * 0.5), 0)
+      stock.name = this.makeLocationString(this.makeShelfString(shelfPattern, i + 1, shelves))
 
       this.add(stock)
       this._visualizer.putObject(stock.name, stock);
     }
 
     this.position.set(cx, cz, cy)
-    this.rotation.y = - rotation || 0
+    this.rotation.y = - rotation
 
   }
 

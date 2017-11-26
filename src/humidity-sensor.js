@@ -1,6 +1,9 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
+
+import Object3D from './object3d'
+
 const STATUS_COLORS = ['#6666ff', '#ccccff', '#ffcccc', '#cc3300']
 
 const NATURE = {
@@ -20,13 +23,12 @@ const NATURE = {
   }]
 }
 
-export default class HumiditySensor extends THREE.Object3D {
+export default class HumiditySensor extends Object3D {
 
   constructor(model, canvasSize, container) {
 
-    super();
+    super(model);
 
-    this._model = model;
     this._container = container
 
     this.userData.temperature = model.humidity ? model.humidity[0] : 0
@@ -34,37 +36,47 @@ export default class HumiditySensor extends THREE.Object3D {
 
     // this.raycast = THREE.Mesh.prototype.raycast
 
-    this.createObject(model, canvasSize);
+    this.createObject(canvasSize);
 
   }
 
-  createObject(model, canvasSize) {
+  createObject(canvasSize) {
 
-    let cx = (model.cx) - canvasSize.width / 2
-    let cy = (model.cy) - canvasSize.height / 2
-    let cz = (model.zPos || 0) + (model.depth / 2)
+    var {
+      left,
+      top,
+      width,
+      height,
+      depth,
+      cx,
+      cy,
+      rx,
+      ry,
+      zPos,
+      rotation = 0,
+      location
+    } = this.model;
 
-    let rotation = model.rotation
+    cx = (cx) - canvasSize.width / 2
+    cy = (cy) - canvasSize.height / 2
+    var cz = (zPos || 0) + (depth / 2)
 
     this.type = 'humidity-sensor'
 
-    if (model.location)
-      this.name = model.location
-
-
+    if (location)
+      this.name = location
 
     for (var i = 0; i < 3; i++) {
-      let mesh = this.createSensor(model.rx * (1 + 0.5 * i), model.ry * (1 + 0.5 * i), model.depth * (1 + 0.5 * i), i)
+      let mesh = this.createSensor(rx * (1 + 0.5 * i), ry * (1 + 0.5 * i), depth * (1 + 0.5 * i), i)
       mesh.material.opacity = 0.5 - (i * 0.15)
     }
 
-
     this.position.set(cx, cz, cy)
-    this.rotation.y = model.rotation || 0
+    this.rotation.y = rotation
 
     this._container._heatmap.addData({
-      x: Math.floor(model.cx),
-      y: Math.floor(model.cy),
+      x: Math.floor(cx),
+      y: Math.floor(cy),
       value: this.userData.temperature
     })
 

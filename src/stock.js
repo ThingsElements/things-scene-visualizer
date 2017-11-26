@@ -1,6 +1,9 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
+
+import Mesh from './mesh'
+
 const STOCK_COLOR = '#ccaa76'
 // const STATUS_COLORS = {
 //   A: 'black',
@@ -10,21 +13,22 @@ const STOCK_COLOR = '#ccaa76'
 //   E: '#6ac428'
 // }
 
-export default class Stock extends THREE.Mesh {
+export default class Stock extends Mesh {
 
   constructor(model, visualizer) {
 
-    super();
+    super(model);
 
     this._visualizer = visualizer;
-    this._model = model;
     this._hideEmptyStock = visualizer && visualizer._stockStatus && visualizer._stockStatus.hideEmptyStock
 
-    this.createObject(model);
+    this.createObject();
 
   }
 
   dispose() {
+    super.dispose();
+
     delete this._visualizer
   }
 
@@ -85,10 +89,14 @@ export default class Stock extends THREE.Mesh {
     return Stock._material_default
   }
 
-  createObject(model) {
+  createObject() {
+    var {
+      width,
+      height,
+      depth
+    } = this.model;
 
-    this.createStock(model.width, model.height, model.depth)
-
+    this.createStock(width, height, depth)
   }
 
   createStock(w, h, d) {
@@ -101,10 +109,6 @@ export default class Stock extends THREE.Mesh {
 
     // this.castShadow = true
 
-  }
-
-  get model() {
-    return this._model
   }
 
   onUserDataChanged() {

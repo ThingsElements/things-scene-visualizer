@@ -1,39 +1,48 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
+
+import Object3D from './object3d'
+
 var {
   Component3d
 } = scene
 
 const STATUS_COLORS = ['#6666ff', '#ccccff', '#ffcccc', '#cc3300']
 
-export default class Beacon3D extends THREE.Object3D {
+export default class Beacon3D extends Object3D {
 
   constructor(model, canvasSize, visualizer) {
 
-    super();
+    super(model);
 
-    this._model = model;
     this._visualizer = visualizer
 
-    this.createObject(model, canvasSize);
+    this.createObject(mcanvasSize);
 
   }
 
-  createObject(model, canvasSize) {
+  createObject(canvasSize) {
+    var {
+      left,
+      top,
+      width,
+      height,
+      rotation = 0,
+      zPos,
+      location,
+    } = this.model
 
-    let rx = Math.min(model.width, model.height);
+    var rx = Math.min(width, height);
 
-    let cx = (model.left) - canvasSize.width / 2
-    let cy = (model.top) - canvasSize.height / 2
-    let cz = (model.zPos || 0) + (rx / 2)
-
-    let rotation = model.rotation
+    var cx = (left) - canvasSize.width / 2
+    var cy = (top) - canvasSize.height / 2
+    var cz = (zPos || 0) + (rx / 2)
 
     this.type = 'beacon'
 
-    if (model.location)
-      this.name = model.location
+    if (location)
+      this.name = location
 
 
     for (var i = 0; i < 3; i++) {
@@ -43,7 +52,7 @@ export default class Beacon3D extends THREE.Object3D {
 
 
     this.position.set(cx, cz, cy)
-    this.rotation.y = rotation || 0
+    this.rotation.y = rotation
 
   }
 
