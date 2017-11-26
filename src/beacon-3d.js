@@ -18,7 +18,7 @@ export default class Beacon3D extends Object3D {
 
     this._visualizer = visualizer
 
-    this.createObject(mcanvasSize);
+    this.createObject(canvasSize);
 
   }
 
