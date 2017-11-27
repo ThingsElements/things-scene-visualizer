@@ -108,14 +108,13 @@ export default class RackTableCell extends RectPath(Component) {
 
     var border = this.model.border || {};
 
-    if (this.model.isEmpty)
-      this._draw_empty_cell(context);
+    if (!this.model.isEmpty)
+      this._draw_rack_cell(context);
 
     // Cell 채우기.
     context.beginPath();
     context.lineWidth = 0;
     context.rect(left, top, width, height);
-    this.drawFill(context);
 
     // Border 그리기
     var parent = this.parent
@@ -149,7 +148,7 @@ export default class RackTableCell extends RectPath(Component) {
     }
   }
 
-  _draw_empty_cell(context) {
+  _draw_rack_cell(context) {
     var {
       left, top, width, height
     } = this.model;

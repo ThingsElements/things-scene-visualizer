@@ -117,7 +117,8 @@ function hasAnyProperty(o, ...properties) {
 function buildNewCell(app) {
   return Model.compile({
     type: 'rack-table-cell',
-    strokeStyle: 'blue',
+    strokeStyle: 'black',
+    fillStyle: 'transparent',
     left: 0,
     top: 0,
     width: 1,
@@ -262,7 +263,7 @@ var rowControlHandler = {
 const LOCATION_HEADER_SIZE = 50;
 const LOCATION_HEADER_LINE_WIDTH = 1;
 const LOCATION_HEADER_STROKE_STYLE = '#ccc';
-const LOCATION_HEADER_FILL_STYLE = '#efefef';
+const LOCATION_HEADER_FILL_STYLE = 'rgba(230, 230, 230, 0.5)';
 const LOCATION_HEADER_HIGHLIGHT_STROKE_STYLE = 'rgba(0, 0, 99, 0.9)';
 const LOCATION_HEADER_HIGHLIGHT_FILL_STYLE = 'rgba(0, 0, 255, 0.5)';
 
