@@ -251,8 +251,13 @@ export default class Stock extends Mesh {
       };
 
     if (callback && typeof callback == 'function') {
+      var data = Object.assign({
+        color: '#' + this.material.color.getHexString()
+      }, this.userData);
+
       callback.call(this, {
-        data: this.userData
+        data: data,
+        location: 'left-top'
       })
     }
 
