@@ -257,7 +257,7 @@ export default class Stock extends Mesh {
 
       callback.call(this, {
         data: data,
-        location: 'left-top'
+        location: 'right-top'
       })
     }
 

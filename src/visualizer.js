@@ -171,7 +171,7 @@ export default class Visualizer extends Container {
   createObjects(components, canvasSize) {
 
     components.forEach(component => {
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         var clazz = scene.Component3d.register(component.model.type)
 
         if (!clazz) {
@@ -189,7 +189,7 @@ export default class Visualizer extends Container {
             this.putObject(component.model.id, item);
           }.bind(this))
         }
-      }, 1)
+      })
     })
   }
 
@@ -1040,7 +1040,7 @@ export default class Visualizer extends Container {
         this._data.forEach(d => {
           let data = d
 
-          setTimeout(function () {
+          requestAnimationFrame(() => {
             let loc = data.loc || data.LOC || data.location || data.LOCATION;
             let object = this.getObject(loc)
             if (object) {
@@ -1054,7 +1054,7 @@ export default class Visualizer extends Container {
               //   this._selectedPickingLocation = loc
               // }
             }
-          }.bind(this))
+          })
         })
       } else {
         /**
@@ -1068,7 +1068,7 @@ export default class Visualizer extends Container {
           let location = loc
           if (this._data.hasOwnProperty(location)) {
 
-            setTimeout(function () {
+            requestAnimationFrame(() => {
               let d = this._data[location]
               let object = this.getObject(location)
               if (object) {
@@ -1082,7 +1082,7 @@ export default class Visualizer extends Container {
                 //   this._selectedPickingLocation = location
                 // }
               }
-            }.bind(this))
+            })
 
           }
         }
