@@ -9,7 +9,8 @@ THREE.Cache.enabled = true
 var {
   Component,
   Container,
-  Layout
+  Layout,
+  Layer
 } = scene
 
 const NATURE = {
@@ -68,6 +69,10 @@ const NATURE = {
     label: 'debug',
     name: 'debug',
     property: 'threed'
+  }, {
+    type: 'string',
+    label: 'popup-scene',
+    name: 'popupScene'
   }, {
     type: 'stock-status',
     label: '',
@@ -166,26 +171,25 @@ export default class Visualizer extends Container {
   createObjects(components, canvasSize) {
 
     components.forEach(component => {
+      setTimeout(() => {
+        var clazz = scene.Component3d.register(component.model.type)
 
-      var clazz = scene.Component3d.register(component.model.type)
+        if (!clazz) {
+          console.warn("Class not found : 3d class is not exist");
+          return;
+        }
 
-      if (!clazz) {
-        console.warn("Class not found : 3d class is not exist");
-        return;
-      }
-
-      var item = new clazz(component.hierarchy, canvasSize, this, component)
+        var item = new clazz(component.hierarchy, canvasSize, this, component)
 
 
-      if (item) {
-        // items.push(item)
-        setTimeout(function () {
-          item.name = component.model.id;
-          this._scene3d.add(item)
-          this.putObject(component.model.id, item);
-        }.bind(this))
-      }
-
+        if (item) {
+          setTimeout(function () {
+            item.name = component.model.id;
+            this._scene3d.add(item)
+            this.putObject(component.model.id, item);
+          }.bind(this))
+        }
+      }, 1)
     })
   }
 
@@ -1149,6 +1153,12 @@ export default class Visualizer extends Container {
   onclick(e) {
 
     if (this._controls) {
+      var modelLayer = Layer.register('model-layer')
+      var popup = modelLayer.Popup;
+      var ref = this.model.popupScene
+
+      console.log("ref", ref)
+
       var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
 
       // this._mouse.originX = this.getContext().canvas.offsetLeft +e.offsetX;
@@ -1160,13 +1170,16 @@ export default class Visualizer extends Container {
       var object = this.getObjectByRaycast()
 
       if (object && object.onclick)
-        object.onclick(e, this)
+        object.onclick(e, this, popup.show.bind(this, this, ref))
       else {
-        if (!this._scene2d)
-          return
-        this._scene2d.remove(this._scene2d.getObjectByName('tooltip'))
-        this.render_threed()
+        popup.hide(this.root)
       }
+      // else {
+      //   if (!this._scene2d)
+      //     return
+      //   this._scene2d.remove(this._scene2d.getObjectByName('tooltip'))
+      //   this.render_threed()
+      // }
 
       // this._controls.onMouseMove(e)
 

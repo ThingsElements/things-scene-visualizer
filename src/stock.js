@@ -224,66 +224,72 @@ export default class Stock extends Mesh {
 
   // }
 
-  onclick(e, visualizer) {
+  onclick(e, visualizer, callback) {
 
 
-    var tooltip = visualizer.tooltip || visualizer._scene2d.getObjectByName("tooltip")
+    // var tooltip = visualizer.tooltip || visualizer._scene2d.getObjectByName("tooltip")
 
-        if (tooltip) {
-          visualizer._scene2d.remove(tooltip)
-          visualizer.tooltip = null
-          visualizer.render_threed()
-        }
+    // if (tooltip) {
+    //   visualizer._scene2d.remove(tooltip)
+    //   visualizer.tooltip = null
+    //   visualizer.render_threed()
+    // }
 
-        if (!this.visible)
-          return;
+    if (!this.visible)
+      return;
 
-        if (!this.userData || Object.keys(this.userData).length === 0)
-          this.userData = {
-            loc: this.name
-          };
+    if (!this.userData || Object.keys(this.userData).length === 0)
+      this.userData = {
+        loc: this.name
+      };
 
-        var tooltipText = '';
+    if (callback && typeof callback == 'function') {
+      callback.call(this, {
+        data: this.userData
+      })
+    }
 
-        for (let key in this.userData) {
-          // exclude private data
-          if (/^__/.test(key))
-            continue;
+    // var tooltipText = '';
 
-          if (this.userData[key] && typeof this.userData[key] != 'object') {
-            tooltipText += key + ": " + this.userData[key] + "\n"
-          }
-        }
+    // for (let key in this.userData) {
+    //   // exclude private data
+    //   if (/^__/.test(key))
+    //     continue;
 
-        // tooltipText = 'loc : ' + loc
+    //   if (this.userData[key] && typeof this.userData[key] != 'object') {
+    //     tooltipText += key + ": " + this.userData[key] + "\n"
+    //   }
+    // }
 
-        if (tooltipText.length > 0) {
-          tooltip = visualizer.tooltip = visualizer.makeTextSprite(tooltipText)
+    // // tooltipText = 'loc : ' + loc
 
-          var vector = new THREE.Vector3()
-          var vector2 = new THREE.Vector3()
+    // if (tooltipText.length > 0) {
+    //   tooltip = visualizer.tooltip = visualizer.makeTextSprite(tooltipText)
 
-          vector.set(visualizer._mouse.x, visualizer._mouse.y, 0.5)
-          vector2.set(tooltip.scale.x / 2, - tooltip.scale.y / 2, 0)
-          //
-          // vector2.normalize()
-          //
-          // vector2.subScalar(0.5)
-          //
-          // vector2.y = -vector2.y
-          // vector2.z = 0
+    //   var vector = new THREE.Vector3()
+    //   var vector2 = new THREE.Vector3()
 
-          // vector.add(vector2)
+    //   vector.set(visualizer._mouse.x, visualizer._mouse.y, 0.5)
+    //   vector2.set(tooltip.scale.x / 2, - tooltip.scale.y / 2, 0)
+    //   //
+    //   // vector2.normalize()
+    //   //
+    //   // vector2.subScalar(0.5)
+    //   //
+    //   // vector2.y = -vector2.y
+    //   // vector2.z = 0
 
-          vector.unproject(visualizer._2dCamera)
-          vector.add(vector2)
-          tooltip.position.set(vector.x, vector.y, vector.z)
-          tooltip.name = "tooltip"
+    //   // vector.add(vector2)
 
-          visualizer._scene2d.add(tooltip)
-          visualizer._renderer && visualizer._renderer.render(visualizer._scene2d, visualizer._2dCamera)
-          visualizer.invalidate()
-        }
+    //   vector.unproject(visualizer._2dCamera)
+    //   vector.add(vector2)
+    //   tooltip.position.set(vector.x, vector.y, vector.z)
+    //   tooltip.name = "tooltip"
+
+    //   visualizer._scene2d.add(tooltip)
+    //   visualizer._renderer && visualizer._renderer.render(visualizer._scene2d, visualizer._2dCamera)
+    //   visualizer.invalidate()
+    // }
 
 
   }

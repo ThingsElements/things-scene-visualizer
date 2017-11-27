@@ -5,7 +5,6 @@
 import Group3D from './group3d'
 
 import RackTableCell from './rack-table-cell'
-import RackTableLayout from './rack-table-layout'
 import Rack from './rack'
 
 var {
@@ -106,7 +105,7 @@ const DEFAULT_STYLE = {
   lineWidth: 1
 }
 
-const RACK_TABLE_LAYOUT = Layout.get('rack-table')
+const TABLE_LAYOUT = Layout.get('table')
 
 function hasAnyProperty(o, ...properties) {
   for (let p in properties) {
@@ -875,7 +874,7 @@ export class RackTable extends Container {
   }
 
   get layout() {
-    return RACK_TABLE_LAYOUT;
+    return TABLE_LAYOUT;
   }
 
   get rows() {
