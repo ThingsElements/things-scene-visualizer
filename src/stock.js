@@ -224,6 +224,13 @@ export default class Stock extends Mesh {
 
   // }
 
+  onBeforeRender() {
+    if (this._focused)
+      this.rotation.y += 0.5
+    else
+      this.rotation.y = 0
+  }
+
   onclick(e, visualizer, callback) {
 
 

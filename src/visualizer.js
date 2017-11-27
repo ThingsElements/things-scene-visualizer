@@ -1153,11 +1153,12 @@ export default class Visualizer extends Container {
   onclick(e) {
 
     if (this._controls) {
+      if (this._lastFocused)
+        this._lastFocused._focused = false;
+
       var modelLayer = Layer.register('model-layer')
       var popup = modelLayer.Popup;
       var ref = this.model.popupScene
-
-      console.log("ref", ref)
 
       var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
 
@@ -1169,8 +1170,12 @@ export default class Visualizer extends Container {
 
       var object = this.getObjectByRaycast()
 
-      if (object && object.onclick)
-        object.onclick(e, this, popup.show.bind(this, this, ref))
+      if (object && object.onclick) {
+        if(ref)
+          object.onclick(e, this, popup.show.bind(this, this, ref))
+        object._focused = true;
+        this._lastFocused = object
+      }
       else {
         popup.hide(this.root)
       }
