@@ -15,11 +15,11 @@ export default class Group3D extends THREE.Group {
     this.children.slice().forEach(child => {
       if (child.dispose)
         child.dispose();
-      if (child.geometry)
+      if (child.geometry && child.geometry.dispose)
         child.geometry.dispose();
-      if (child.material)
+      if (child.material && child.material.dispose)
         child.material.dispose();
-      if (child.texture)
+      if (child.texture && child.texture.dispose)
         child.texture.dispose();
       this.remove(child)
     })
