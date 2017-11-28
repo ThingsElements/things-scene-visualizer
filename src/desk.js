@@ -31,7 +31,7 @@ export default class Desk extends Object3D {
 
     this._visualizer = visualizer;
 
-    this.createObject(ize);
+    this.createObject(canvasSize);
   }
 
   get boardThickness() {
