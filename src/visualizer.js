@@ -1150,7 +1150,7 @@ export default class Visualizer extends Container {
     }
   }
 
-  onclick(e) {
+  onmouseup(e) {
 
     if (this._controls) {
       if (this._lastFocused)
@@ -1170,9 +1170,9 @@ export default class Visualizer extends Container {
 
       var object = this.getObjectByRaycast()
 
-      if (object && object.onclick) {
+      if (object && object.onmouseup) {
         if(ref)
-          object.onclick(e, this, popup.show.bind(this, this, ref))
+          object.onmouseup(e, this, popup.show.bind(this, this, ref))
         object._focused = true;
         this._lastFocused = object
       }

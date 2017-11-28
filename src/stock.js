@@ -231,7 +231,7 @@ export default class Stock extends Mesh {
       this.rotation.y = 0
   }
 
-  onclick(e, visualizer, callback) {
+  onmouseup(e, visualizer, callback) {
 
 
     // var tooltip = visualizer.tooltip || visualizer._scene2d.getObjectByName("tooltip")
