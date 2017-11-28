@@ -4601,10 +4601,6 @@ tar@^2.2.1:
     fstream "^1.0.2"
     inherits "2"
 
-things-scene@^2.2.26:
-  version "2.2.26"
-  resolved "https://registry.yarnpkg.com/things-scene/-/things-scene-2.2.26.tgz#cc7d54677a2b220c8ec93e578fda7d9de1e80c24"
-
 three.js@^0.77.1:
   version "0.77.1"
   resolved "https://registry.yarnpkg.com/three.js/-/three.js-0.77.1.tgz#07858a8749e4b627a31083252a2d987776cca32a"

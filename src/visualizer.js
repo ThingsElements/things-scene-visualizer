@@ -350,11 +350,11 @@ export default class Visualizer extends Container {
         let child = children[i]
         if (child.dispose)
           child.dispose();
-        if (child.geometry)
+        if (child.geometry && child.geometry.dispose)
           child.geometry.dispose();
-        if (child.material)
+        if (child.material && child.material.dispose)
           child.material.dispose();
-        if (child.texture)
+        if (child.texture && child.texture.dispose)
           child.texture.dispose();
         this._scene3d.remove(child)
       }
