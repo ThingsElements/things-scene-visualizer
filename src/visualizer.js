@@ -132,7 +132,7 @@ export default class Visualizer extends Container {
 
       var floorTexture = this._textureLoader.load(this.app.url(fillStyle.image), function (texture) {
         texture.minFilter = THREE.LinearFilter
-        // self.render_threed()
+        self.render_threed()
       })
 
       var floorMaterial = [
@@ -181,7 +181,7 @@ export default class Visualizer extends Container {
   createObjects(components, canvasSize) {
 
     components.forEach(component => {
-      requestAnimationFrame(() => {
+      // requestAnimationFrame(() => {
         var clazz = scene.Component3d.register(component.model.type)
 
         if (!clazz) {
@@ -193,14 +193,14 @@ export default class Visualizer extends Container {
 
 
         if (item) {
-          requestAnimationFrame(() => {
+          // requestAnimationFrame(() => {
             item.name = component.model.id;
             this._scene3d.add(item)
             this.putObject(component.model.id, item);
-          })
+          // })
         }
       })
-    })
+    // })
   }
 
   makeTextSprite(message, parameters) {
