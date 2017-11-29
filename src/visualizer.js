@@ -153,10 +153,11 @@ export default class Visualizer extends Container {
     }
 
 
-    var floorGeometry = new THREE.BoxGeometry(width, height, 5)
+    var floorGeometry = new THREE.BoxGeometry(1, 1, 1);
     // var floorGeometry = new THREE.PlaneGeometry(width, height)
 
     var floor = new THREE.Mesh(floorGeometry, floorMaterial)
+    floor.scale.set(width, height, 5);
 
     // floor.receiveShadow = true
 
@@ -452,6 +453,8 @@ export default class Visualizer extends Container {
     this._renderer.setSize(width, height)
     // this._renderer.setSize(1600, 900)
     // this._renderer.shadowMap.enabled = true
+    // this._renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    // this._renderer.setPixelRatio(window.devicePixelRatio)
 
     // CONTROLS
     this._controls = new ThreeControls(this._camera, this)
@@ -1300,9 +1303,9 @@ export default class Visualizer extends Container {
     var zoom = this.model.zoom
 
     delta = -event.deltaY
-    zoom += delta * 0.01
-    if (zoom < 0)
-      zoom = 0
+    zoom += delta * 0.1
+    if (zoom < 100)
+      zoom = 100
 
     this.set('zoom', zoom)
 
