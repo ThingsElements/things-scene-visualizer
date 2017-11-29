@@ -26,6 +26,20 @@ export default class Rack extends Object3D {
     delete this._visualizer
   }
 
+  static get rackFrameGeometry() {
+    if (!Rack._rackFrameGeometry)
+      Rack._rackFrameGeometry = new THREE.BoxGeometry(1, 1, 1);
+
+    return Rack._rackFrameGeometry
+  }
+
+  static get boardGeometry() {
+    if (!Rack._boardGeometry)
+      Rack._boardGeometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1);
+
+    return Rack._boardGeometry
+  }
+
   static get boardMaterial() {
     if (!Rack._boardMaterial)
       Rack._boardMaterial = new THREE.MeshBasicMaterial({
@@ -80,7 +94,7 @@ export default class Rack extends Object3D {
 
     if (!hideRackFrame) {
       var frame = this.createRackFrame(width, height, depth * shelves)
-      this._frames.push(frame)
+      // this._frames.push(frame)
 
       this.add(frame)
     }
@@ -98,7 +112,7 @@ export default class Rack extends Object3D {
         this.add(board)
         // frame.geometry.merge(board.geometry, board.matrix)
 
-        this._boards.push(board)
+        // this._boards.push(board)
       }
 
       let stock = new Stock({
@@ -134,9 +148,10 @@ export default class Rack extends Object3D {
 
     var frames = new THREE.Group()
     for (var i = 0; i < 4; i++) {
-      var geometry = new THREE.BoxBufferGeometry(frameWeight, d, frameWeight);
+      var geometry = Rack.rackFrameGeometry;
       var material = Rack.frameMaterial;
       var frame = new THREE.Mesh(geometry, material);
+      frame.scale.set(frameWeight, d, frameWeight);
       switch (i) {
         case 0:
           frame.position.set(w / 2, 0, h / 2)
@@ -167,8 +182,11 @@ export default class Rack extends Object3D {
   createRackBoard(w, h) {
 
     var boardMaterial = Rack.boardMaterial;
-    var boardGeometry = new THREE.PlaneBufferGeometry(w, h, 1, 1);
+    var boardGeometry = Rack.boardGeometry;
+    // var boardGeometry = new THREE.PlaneGeometry(w, h, 1, 1);
     var board = new THREE.Mesh(boardGeometry, boardMaterial);
+
+    board.scale.set(w, h, 1)
 
     return board
   }

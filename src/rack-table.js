@@ -277,7 +277,7 @@ export default class RackTable3d extends Group3D {
     this._sceneComponent = sceneComponent;
 
     this.createRacks(canvasSize);
-    this.mergeObjects()
+    // this.mergeObjects()
 
   }
 

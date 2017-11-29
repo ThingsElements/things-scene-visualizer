@@ -54,7 +54,7 @@ export default class Stock extends Mesh {
 
   static get stockGeometry() {
     if (!Stock._geometry)
-      Stock._geometry = new THREE.BoxBufferGeometry(1, 1, 1);
+      Stock._geometry = new THREE.BoxGeometry(1, 1, 1);
 
     return Stock._geometry
   }
@@ -119,13 +119,10 @@ export default class Stock extends Mesh {
   createStock(w, h, d) {
 
     this.geometry = Stock.stockGeometry;
-    // this.geometry = new THREE.BoxBufferGeometry(w, d, h);
     this.material = this._hideEmptyStock ? this.emptyMaterial : this.userDefineDefaultMaterial;
     this.type = 'stock'
 
     this.scale.set(w, d, h);
-
-    // this.visible = !this._hideEmptyStock;
 
     // this.castShadow = true
 

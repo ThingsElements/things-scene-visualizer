@@ -42,7 +42,16 @@ const NATURE = {
     label: 'precision',
     name: 'precision',
     property: {
-      options: ['highp', 'mediump', 'lowp']
+      options: [{
+        display: 'High',
+        value: 'highp'
+      }, {
+        display: 'Medium',
+        value: 'mediump'
+      }, {
+        display: 'Low',
+        value: 'lowp'
+      }]
     }
   }, {
     type: 'checkbox',
@@ -184,11 +193,11 @@ export default class Visualizer extends Container {
 
 
         if (item) {
-          setTimeout(function () {
+          requestAnimationFrame(() => {
             item.name = component.model.id;
             this._scene3d.add(item)
             this.putObject(component.model.id, item);
-          }.bind(this))
+          })
         }
       })
     })
@@ -439,6 +448,7 @@ export default class Visualizer extends Container {
         alpha: true,
         antialias: antialias
       });
+
     } catch (e) {
       this._noSupportWebgl = true
     }
