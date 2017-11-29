@@ -67,7 +67,7 @@ var ThreeControls = function (object, component) {
   // Set to true to automatically rotate around the target
   // If auto-rotate is enabled, you must call controls.update() in your animation loop
   this.autoRotate = this.component.model.autoRotate || false;
-  this.autoRotateSpeed = 2.0; // 30 seconds per round when fps is 60
+  this.autoRotateSpeed = 10.0; // 30 seconds per round when fps is 60
 
   // Set to false to disable use of the keys
   this.enableKeys = true;
@@ -202,7 +202,7 @@ var ThreeControls = function (object, component) {
       // min(camera displacement, camera rotation in radians)^2 > EPS
       // using small-angle approximation cos(x/2) = 1 - x^2 / 8
 
-      if (scope.cameraChanged ||
+      if (scope.cameraChanged &&
         lastPosition.distanceToSquared(scope.object.position) > EPS ||
         8 * (1 - lastQuaternion.dot(scope.object.quaternion)) > EPS) {
 

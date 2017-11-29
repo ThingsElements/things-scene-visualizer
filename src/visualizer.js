@@ -487,13 +487,13 @@ export default class Visualizer extends Container {
 
     }
 
-    this.threed_animate()
+    this._threed_animate_func = this.threed_animate.bind(this)
+    requestAnimationFrame(this._threed_animate_func)
   }
 
   threed_animate() {
-    this._animationFrame = requestAnimationFrame(this.threed_animate.bind(this));
+    this._animationFrame = requestAnimationFrame(this._threed_animate_func);
 
-    // if (this.model.autoRotate)
     this.update();
 
   }
@@ -503,7 +503,11 @@ export default class Visualizer extends Container {
   }
 
   update() {
-    this._controls.update();
+    if (this._need_control_update || this.get('autoRotate')) {
+      this._controls.update();
+      this._need_control_update = false;
+    }
+
     this.render_threed();
   }
 
@@ -515,8 +519,8 @@ export default class Visualizer extends Container {
 
   render_threed() {
     var delta
-    if (this._clock)
-      delta = this._clock.getDelta();
+    // if (this._clock)
+    //   delta = this._clock.getDelta();
 
     var mixers = this.mixers
     for (var i in mixers) {
@@ -534,9 +538,9 @@ export default class Visualizer extends Container {
       this._renderer.render(this._scene3d, this._camera)
     }
 
-    if (this._renderer && this._scene2d) {
-      this._renderer.render(this._scene2d, this._2dCamera)
-    }
+    // if (this._renderer && this._scene2d) {
+    //   this._renderer.render(this._scene2d, this._2dCamera)
+    // }
 
     this.invalidate()
   }
@@ -591,7 +595,7 @@ export default class Visualizer extends Container {
 
       // this.showTooltip('LOC-2-1-1-A-1')
 
-      if(debug) {
+      if (debug) {
         ctx.font = 100 + 'px Arial'
         ctx.textAlign = 'center'
         ctx.fillStyle = 'black'
@@ -1111,7 +1115,8 @@ export default class Visualizer extends Container {
       this.destroy_scene3d()
 
     if (after.hasOwnProperty('autoRotate')) {
-      this._controls.autoRotate = after.autoRotate
+      if (this._controls)
+        this._controls.autoRotate = after.autoRotate
     }
 
     if (after.hasOwnProperty('fov') ||
@@ -1174,7 +1179,7 @@ export default class Visualizer extends Container {
       var object = this.getObjectByRaycast()
 
       if (object && object.onmouseup) {
-        if(ref)
+        if (ref)
           object.onmouseup(e, this, popup.show.bind(this, this, ref))
         object._focused = true;
         this._lastFocused = object
@@ -1235,6 +1240,7 @@ export default class Visualizer extends Container {
 
   onwheel(e) {
     if (this._controls) {
+      this._need_control_update = true;
       this.handleMouseWheel(e)
       e.stopPropagation()
     }
@@ -1242,6 +1248,7 @@ export default class Visualizer extends Container {
 
   ondragstart(e) {
     if (this._controls) {
+      this._need_control_update = true;
       var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
 
       // this._mouse.originX = this.getContext().canvas.offsetLeft +e.offsetX;
@@ -1266,6 +1273,7 @@ export default class Visualizer extends Container {
     if (this._controls) {
       this._controls.onDragEnd(e)
       e.stopPropagation()
+      this._need_control_update = false;
     }
   }
 
