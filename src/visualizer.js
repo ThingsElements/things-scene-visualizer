@@ -132,7 +132,7 @@ export default class Visualizer extends Container {
 
       var floorTexture = this._textureLoader.load(this.app.url(fillStyle.image), function (texture) {
         texture.minFilter = THREE.LinearFilter
-        self.render_threed()
+        // self.render_threed()
       })
 
       var floorMaterial = [
@@ -457,7 +457,7 @@ export default class Visualizer extends Container {
       return
 
 
-    this._renderer.autoClear = false
+    this._renderer.autoClear = true
 
     this._renderer.setClearColor(0xffffff, 0) // transparent
     this._renderer.setSize(width, height)
@@ -504,7 +504,8 @@ export default class Visualizer extends Container {
   threed_animate() {
     this._animationFrame = requestAnimationFrame(this._threed_animate_func);
 
-    this.update();
+    this._controls.update()
+    // this.update();
 
   }
 
@@ -512,14 +513,15 @@ export default class Visualizer extends Container {
     cancelAnimationFrame(this._animationFrame)
   }
 
-  update() {
-    if (this._need_control_update || this.get('autoRotate')) {
-      this._controls.update();
-      this._need_control_update = false;
-    }
-
-    this.render_threed();
-  }
+  // update() {
+  //   if (this._need_control_update || this.get('autoRotate')) {
+  //     this._controls.update()
+  //     this._need_control_update = false;
+  //   } else {
+  //     // this.invalidate()
+  //     // this.render_threed();
+  //   }
+  // }
 
   get scene3d() {
     if (!this._scene3d)
@@ -528,23 +530,23 @@ export default class Visualizer extends Container {
   }
 
   render_threed() {
-    var delta
+    // var delta
     // if (this._clock)
     //   delta = this._clock.getDelta();
 
-    var mixers = this.mixers
-    for (var i in mixers) {
-      if (mixers.hasOwnProperty(i)) {
-        var mixer = mixers[i];
-        if (mixer) {
-          mixer.update(delta);
-        }
+    // var mixers = this.mixers
+    // for (var i in mixers) {
+    //   if (mixers.hasOwnProperty(i)) {
+    //     var mixer = mixers[i];
+    //     if (mixer) {
+    //       mixer.update(delta);
+    //     }
 
-      }
-    }
+    //   }
+    // }
 
     if (this._renderer) {
-      this._renderer.clear()
+      // this._renderer.clear()
       this._renderer.render(this._scene3d, this._camera)
     }
 
@@ -584,7 +586,7 @@ export default class Visualizer extends Container {
 
       if (!this._scene3d) {
         this.init_scene3d()
-        this.render_threed()
+        // this.render_threed()
       }
 
       if (this._noSupportWebgl) {
@@ -596,14 +598,12 @@ export default class Visualizer extends Container {
         this._onDataChanged()
       }
 
-      this.showTooltip(this._selectedPickingLocation)
+      // this.showTooltip(this._selectedPickingLocation)
 
       ctx.drawImage(
         this._renderer.domElement, 0, 0, width, height,
         left, top, width, height
       )
-
-      // this.showTooltip('LOC-2-1-1-A-1')
 
       if (debug) {
         ctx.font = 100 + 'px Arial'
@@ -958,8 +958,9 @@ export default class Visualizer extends Container {
 
       this._scene2d.add(tooltip)
       this.render_threed()
-    }
 
+      this.invalidate();
+    }
   }
 
   transcoord2dTo3d(position) {
@@ -1057,7 +1058,7 @@ export default class Visualizer extends Container {
         this._data.forEach(d => {
           let data = d
 
-          requestAnimationFrame(() => {
+          // requestAnimationFrame(() => {
             let loc = data.loc || data.LOC || data.location || data.LOCATION;
             let object = this.getObject(loc)
             if (object) {
@@ -1071,7 +1072,7 @@ export default class Visualizer extends Container {
               //   this._selectedPickingLocation = loc
               // }
             }
-          })
+          // })
         })
       } else {
         /**
@@ -1085,7 +1086,7 @@ export default class Visualizer extends Container {
           let location = loc
           if (this._data.hasOwnProperty(location)) {
 
-            requestAnimationFrame(() => {
+            // requestAnimationFrame(() => {
               let d = this._data[location]
               let object = this.getObject(location)
               if (object) {
@@ -1099,7 +1100,7 @@ export default class Visualizer extends Container {
                 //   this._selectedPickingLocation = location
                 // }
               }
-            })
+            // })
 
           }
         }
@@ -1109,8 +1110,8 @@ export default class Visualizer extends Container {
     this._dataChanged = false
 
     // draw navigatePath
-    if (this._pickingLocations && this._pickingLocations.length > 0)
-      this.navigatePath(this._pickingLocations)
+    // if (this._pickingLocations && this._pickingLocations.length > 0)
+    //   this.navigatePath(this._pickingLocations)
 
     this.render_threed();
   }
@@ -1159,7 +1160,7 @@ export default class Visualizer extends Container {
     //   this.model.autoRotate = after.autoRotate
     // }
 
-    this.invalidate()
+    this.render_threed()
   }
 
   onmousedown(e) {
@@ -1250,7 +1251,7 @@ export default class Visualizer extends Container {
 
   onwheel(e) {
     if (this._controls) {
-      this._need_control_update = true;
+      // this._need_control_update = true;
       this.handleMouseWheel(e)
       e.stopPropagation()
     }
@@ -1258,7 +1259,7 @@ export default class Visualizer extends Container {
 
   ondragstart(e) {
     if (this._controls) {
-      this._need_control_update = true;
+      // this._need_control_update = true;
       var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
 
       // this._mouse.originX = this.getContext().canvas.offsetLeft +e.offsetX;
@@ -1283,7 +1284,7 @@ export default class Visualizer extends Container {
     if (this._controls) {
       this._controls.onDragEnd(e)
       e.stopPropagation()
-      this._need_control_update = false;
+      // this._need_control_update = false;
     }
   }
 
