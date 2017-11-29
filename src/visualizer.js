@@ -586,7 +586,7 @@ export default class Visualizer extends Container {
 
       if (!this._scene3d) {
         this.init_scene3d()
-        // this.render_threed()
+        this.render_threed()
       }
 
       if (this._noSupportWebgl) {
@@ -611,6 +611,7 @@ export default class Visualizer extends Container {
         ctx.fillStyle = 'black'
         ctx.globalAlpha = 0.5
         ctx.fillText(scene.FPS(), 100, 100)
+        this.invalidate()
       }
 
     } else {
