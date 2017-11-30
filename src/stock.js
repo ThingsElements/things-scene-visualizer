@@ -20,7 +20,7 @@ export default class Stock extends Mesh {
     super(model);
 
     this._visualizer = visualizer;
-    this._hideEmptyStock = visualizer && visualizer._stockStatus && visualizer._stockStatus.hideEmptyStock
+    this._hideEmptyStock = visualizer && visualizer.legendTarget && visualizer.legendTarget.get('status') && visualizer.legendTarget.get('status').hideEmptyStock
 
     this.createObject();
 
@@ -34,10 +34,10 @@ export default class Stock extends Mesh {
 
   getMaterial(index) {
     if (!this.stockMaterials[index]) {
-      if (!(this._visualizer && this._visualizer._stockStatus))
+      if (!(this._visualizer && this._visualizer && this._visualizer.legendTarget && this._visualizer.legendTarget.get('status')))
         return this.userDefineDefaultMaterial;
 
-      var stockStatus = this._visualizer._stockStatus;
+      var stockStatus = this._visualizer.legendTarget.get('status');
       var range = stockStatus.ranges[index];
 
       if (!(range && range.color))
@@ -68,10 +68,10 @@ export default class Stock extends Mesh {
 
   get userDefineDefaultMaterial() {
     if (!this._visualizer._default_material) {
-      if (!(this._visualizer && this._visualizer._stockStatus))
+      if (!(this._visualizer && this._visualizer && this._visualizer.legendTarget && this._visualizer.legendTarget.get('status')))
         return Stock.defaultMaterial;
 
-      var stockStatus = this._visualizer._stockStatus;
+      var stockStatus = this._visualizer.legendTarget.get('status');
       var defaultColor = stockStatus.defaultColor;
 
       if (!defaultColor)
@@ -131,10 +131,10 @@ export default class Stock extends Mesh {
   onUserDataChanged() {
     super.onUserDataChanged();
 
-    if (!(this._visualizer && this._visualizer._stockStatus))
+    if (!(this._visualizer && this._visualizer && this._visualizer.legendTarget && this._visualizer.legendTarget.get('status')))
       return
 
-    var stockStatus = this._visualizer._stockStatus;
+    var stockStatus = this._visualizer.legendTarget.get('status');
     var statusField = stockStatus.field;
     var ranges = stockStatus.ranges
 

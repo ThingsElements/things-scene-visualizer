@@ -83,9 +83,9 @@ const NATURE = {
     label: 'popup-scene',
     name: 'popupScene'
   }, {
-    type: 'stock-status',
-    label: '',
-    name: 'stockStatus'
+    type: 'string',
+    label: 'legend-target',
+    name: 'legendTarget'
   }]
 }
 
@@ -99,6 +99,17 @@ function registerLoaders() {
 }
 
 export default class Visualizer extends Container {
+
+  get legendTarget() {
+    var { legendTarget } = this.model
+
+    if (!this._legendTarget && legendTarget) {
+      this._legendTarget = this.root.findById(legendTarget)
+      this._legendTarget && this._legendTarget.on('change', this.onLegendTargetChanged, this)
+    }
+
+    return this._legendTarget
+  }
 
   containable(component) {
     return component.is3dish()
@@ -203,146 +214,12 @@ export default class Visualizer extends Container {
     // })
   }
 
-  makeTextSprite(message, parameters) {
-
-    if (!message)
-      return
-
-    if (parameters === undefined) parameters = {};
-
-    var fontFace = parameters.hasOwnProperty("fontFace") ?
-      parameters["fontFace"] : "Arial";
-
-    var fontSize = parameters.hasOwnProperty("fontSize") ?
-      parameters["fontSize"] : 16;
-
-    var textColor = parameters.hasOwnProperty("textColor") ?
-      parameters["textColor"] : 'rgba(255,255,255,1)';
-
-    var borderWidth = parameters.hasOwnProperty("borderWidth") ?
-      parameters["borderWidth"] : 0;
-
-    var borderColor = parameters.hasOwnProperty("borderColor") ?
-      parameters["borderColor"] : 'rgba(0, 0, 0, 1.0)';
-
-    var backgroundColor = parameters.hasOwnProperty("backgroundColor") ?
-      // parameters["backgroundColor"] : 'rgba(51, 51, 51, 1.0)';
-      parameters["backgroundColor"] : 'rgba(0, 0, 0, 0.7)';
-
-    var radius = parameters.hasOwnProperty("radius") ?
-      parameters["radius"] : 15;
-
-    var vAlign = parameters.hasOwnProperty("vAlign") ?
-      parameters["vAlign"] : 'middle';
-
-    var hAlign = parameters.hasOwnProperty("hAlign") ?
-      parameters["hAlign"] : 'center';
-
-
-    var canvas = document.createElement('canvas');
-    var context = canvas.getContext('2d');
-
-    var span = document.createElement('span');
-    span.style.font = `${fontSize}px ${fontFace}`;
-    span.style.whiteSpace = 'pre-wrap';
-
-    span.innerText = message;
-
-    document.body.appendChild(span)
-
-    canvas.width = span.offsetWidth + (borderWidth + radius) * 2
-    canvas.height = span.offsetHeight + (borderWidth + radius) * 2
-
-    document.body.removeChild(span);
-
-    span.remove();
-
-    context.font = fontSize + "px " + fontFace;
-    context.textBaseline = "alphabetic";
-    context.textAlign = "left";
-
-    var textWidth = 0
-
-    var msgArr = String(message).trim().split('\n')
-
-    var cx = canvas.width / 2;
-    var cy = canvas.height / 2;
-
-    for (let i in msgArr) {
-      // get size data (height depends only on font size)
-      var metrics = context.measureText(msgArr[i]);
-
-      if (textWidth < metrics.width)
-        textWidth = metrics.width;
-
-    }
-
-    var tx = textWidth / 2.0;
-    var ty = fontSize / 2.0;
-
-    // then adjust for the justification
-    if (vAlign == "bottom")
-      ty = fontSize;
-    else if (vAlign == "top")
-      ty = 0;
-
-    if (hAlign == "left")
-      tx = textWidth;
-    else if (hAlign == "right")
-      tx = 0;
-
-
-    this.roundRect(
-      context,
-      cx - tx,
-      cy - fontSize * msgArr.length * 0.5,
-      // cy - fontSize * msgArr.length * 0.5 + ty - 0.28 * fontSize,
-      textWidth,
-      fontSize * msgArr.length,
-      // fontSize * msgArr.length * 1.28,
-      radius,
-      borderWidth,
-      borderColor,
-      backgroundColor,
-      5
-    );
-
-    // text color
-    context.fillStyle = textColor;
-    context.lineWidth = 3
-
-    var offsetY = cy - fontSize * msgArr.length * 0.5 - 5 - borderWidth
-
-    for (var i in msgArr) {
-      i = Number(i)
-      offsetY += fontSize
-
-      context.fillText(
-        msgArr[i],
-        cx - tx,
-        // cy - fontSize * (i - msgArr.length/2) + ty
-        offsetY
-      );
-    }
-
-    // canvas contents will be used for a texture
-    var texture = new THREE.Texture(canvas)
-    texture.needsUpdate = true;
-
-    var spriteMaterial = new THREE.SpriteMaterial({
-      map: texture
-    });
-    var sprite = new THREE.Sprite(spriteMaterial);
-    sprite.scale.set(canvas.width, canvas.height, 1.0);
-
-    sprite.raycast = function () { }
-
-    return sprite;
-  }
-
 
   destroy_scene3d() {
     this.stop();
+
+    window.removeEventListener('focus', this._onFocus);
+
     if (this._renderer)
       this._renderer.clear()
     delete this._renderer
@@ -370,24 +247,7 @@ export default class Visualizer extends Container {
       }
     }
 
-    if (this._scene2d) {
-      let children = this._scene2d.children.slice();
-      for (let i in children) {
-        let child = children[i]
-        if (child.dispose)
-          child.dispose();
-        if (child.geometry)
-          child.geometry.dispose();
-        if (child.material)
-          child.material.dispose();
-        if (child.texture)
-          child.texture.dispose();
-        this._scene2d.remove(child)
-      }
-    }
-
     delete this._scene3d
-    delete this._scene2d
   }
 
   init_scene3d() {
@@ -412,34 +272,27 @@ export default class Visualizer extends Container {
       light = 0xffffff,
       antialias = true,
       precision = 'highp',
-      stockStatus
+      legendTarget
     } = this.model
     var components = this.components || []
 
     // SCENE
     this._scene3d = new THREE.Scene()
-    this._scene2d = new THREE.Scene()
 
     // CAMERA
     var aspect = width / height
 
     this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
-    this._2dCamera = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 1, 1000)
 
     this._scene3d.add(this._camera)
-    this._scene2d.add(this._2dCamera)
     this._camera.position.set(height * 0.8, Math.floor(Math.min(width, height)), width * 0.8)
-    this._2dCamera.position.set(0, 0, 0)
     this._camera.lookAt(this._scene3d.position)
-    this._2dCamera.lookAt(this._scene2d.position)
     this._camera.zoom = this.model.zoom * 0.01
 
     if (this.model.showAxis) {
       var axisHelper = new THREE.AxisHelper(width);
       this._scene3d.add(axisHelper);
     }
-
-    this._stockStatus = stockStatus;
 
     try {
       // RENDERER
@@ -499,6 +352,12 @@ export default class Visualizer extends Container {
 
     this._threed_animate_func = this.threed_animate.bind(this)
     requestAnimationFrame(this._threed_animate_func)
+
+    this._onFocus = function () {
+      this.render_threed();
+    }.bind(this)
+
+    window.addEventListener('focus', this._onFocus);
   }
 
   threed_animate() {
@@ -620,6 +479,10 @@ export default class Visualizer extends Container {
   }
 
   dispose() {
+
+    this._legendTarget && this._legendTarget.off('change', this.onLegendTargetChanged, this)
+    delete this._legendTarget
+
     super.dispose();
     this.destroy_scene3d()
   }
@@ -630,46 +493,6 @@ export default class Visualizer extends Container {
 
   get nature() {
     return NATURE
-  }
-
-  roundRect(ctx, x, y, w, h, r, borderWidth, borderColor, fillColor, padding, image) {
-    // no point in drawing it if it isn't going to be rendered
-    if (fillColor == undefined && borderColor == undefined)
-      return;
-
-    let left = x - borderWidth - r - padding;
-    let right = left + w + borderWidth * 2 + r * 2 + padding * 2
-    let top = y - borderWidth - r - padding
-    let bottom = top + h + borderWidth * 2 + r * 2 + padding * 2
-
-    ctx.beginPath();
-    ctx.moveTo(left + r, top);
-    ctx.lineTo(right - r, top);
-    ctx.quadraticCurveTo(right, top, right, top + r);
-    ctx.lineTo(right, bottom - r);
-    ctx.quadraticCurveTo(right, bottom, right - r, bottom);
-    ctx.lineTo(left + r, bottom);
-    ctx.quadraticCurveTo(left, bottom, left, bottom - r);
-    ctx.lineTo(left, top + r);
-    ctx.quadraticCurveTo(left, top, left + r, top);
-    ctx.closePath();
-
-    ctx.lineWidth = borderWidth;
-
-    // background color
-    // border color
-
-    // if the fill color is defined, then fill it
-    if (fillColor != undefined) {
-      ctx.fillStyle = fillColor;
-      ctx.fill();
-    }
-
-    if (borderWidth > 0 && borderColor != undefined) {
-      ctx.strokeStyle = borderColor;
-      ctx.stroke();
-    }
-
   }
 
   getObjectByRaycast() {
@@ -702,289 +525,11 @@ export default class Visualizer extends Container {
     return intersects
   }
 
-  moveCameraTo(targetName) {
-
-    if (!targetName)
-      return
-
-    let object = this._scene3d.getObjectByName(targetName, true)
-    if (!object)
-      return
-
-
-    var self = this
-    // this._controls.rotateLeft(5)
-    // setTimeout(function() {
-    //   self.moveCameraTo(5)
-    // }, 100)
-
-    let objectPositionVector = object.getWorldPosition()
-    objectPositionVector.y = 0
-    let distance = objectPositionVector.distanceTo(new THREE.Vector3(0, 0, 0))
-
-    objectPositionVector.multiplyScalar(1000 / (distance || 1))
-
-    var self = this
-    var diffX = this._camera.position.x - objectPositionVector.x
-    var diffY = this._camera.position.y - 300
-    var diffZ = this._camera.position.z - objectPositionVector.z
-
-
-    this.animate({
-      step: function (delta) {
-
-        let vector = new THREE.Vector3()
-
-        vector.x = objectPositionVector.x - diffX * (delta - 1)
-        vector.y = 0
-        vector.z = objectPositionVector.z - diffZ * (delta - 1)
-
-        let distance = vector.distanceTo(new THREE.Vector3(0, 0, 0))
-
-        vector.multiplyScalar(1000 / (distance || 1))
-
-        self._camera.position.x = vector.x
-        self._camera.position.y = 300 - diffY * (delta - 1)
-        self._camera.position.z = vector.z
-
-        self._camera.lookAt(self._scene3d.position)
-
-      },
-      duration: 2000,
-      delta: 'linear'
-    }).start()
-
-    // this._camera.position.x = objectPositionVector.x
-    // this._camera.position.y = 300
-    // this._camera.position.z = objectPositionVector.z
-
-  }
-
   exportModel() {
     var exported = this._exporter.parse(this._scene3d);
     var blob = new Blob([exported], { type: "text/plain;charset=utf-8" });
     console.log(exported)
     // saveAs(blob, "exported.txt");
-  }
-
-  createTooltipForNavigator(messageObject) {
-
-    if (!messageObject)
-      return
-
-    let isMarker = true;
-    let fontFace = "Arial";
-    let fontSize = 40;
-    let textColor = 'rgba(255,255,255,1)';
-    let borderWidth = 2;
-    let borderColor = 'rgba(0, 0, 0, 1.0)';
-    let backgroundColor = 'rgba(0, 0, 0, 0.7)';
-    let radius = 30;
-    let vAlign = 'middle';
-    let hAlign = 'center';
-
-    let canvas = document.createElement('canvas');
-    let context = canvas.getContext('2d');
-
-    // document.body.appendChild(canvas)
-
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
-
-    context.font = fontSize + "px " + fontFace;
-    context.textBaseline = "alphabetic";
-    context.textAlign = "left";
-
-    var textWidth = 0
-
-    let cx = canvas.width / 2;
-    let cy = canvas.height / 2;
-
-    // for location label
-    context.font = Math.floor(fontSize) + "px " + fontFace;
-    var metrics = context.measureText("Location");
-    if (textWidth < metrics.width)
-      textWidth = metrics.width;
-
-    // for location value
-    context.font = "bold " + fontSize * 2 + "px " + fontFace;
-    metrics = context.measureText(messageObject.location);
-    if (textWidth < metrics.width)
-      textWidth = metrics.width;
-
-    // for values (material, qty)
-    context.font = fontSize + "px " + fontFace;
-    metrics = context.measureText("- Material : " + messageObject.material);
-    if (textWidth < metrics.width)
-      textWidth = metrics.width;
-
-    metrics = context.measureText("- QTY : " + messageObject.qty);
-    if (textWidth < metrics.width)
-      textWidth = metrics.width;
-
-
-    var tx = textWidth / 2.0;
-    var ty = fontSize / 2.0;
-
-    // then adjust for the justification
-    if (vAlign == "bottom")
-      ty = fontSize;
-    else if (vAlign == "top")
-      ty = 0;
-
-    if (hAlign == "left")
-      tx = textWidth;
-    else if (hAlign == "right")
-      tx = 0;
-
-    var offsetY = cy
-
-    this.roundRect(
-      context,
-      cx - tx,
-      cy - fontSize * 6 * 0.5,
-      // cy - fontSize * 6 * 0.5 + ty - 0.28 * fontSize,
-      textWidth,
-      // fontSize * 6 * 1.28,
-      fontSize * 8,
-      radius,
-      borderWidth,
-      borderColor,
-      backgroundColor,
-      0
-    );
-
-    // text color
-    context.fillStyle = textColor;
-    context.lineWidth = 3
-
-    // for location label
-    offsetY += -fontSize * 6 * 0.5 + Math.floor(fontSize)
-    context.font = Math.floor(fontSize) + "px " + fontFace;
-    context.fillStyle = 'rgba(134,199,252,1)'
-    context.fillText(
-      "Location",
-      cx - tx,
-      offsetY
-    );
-
-    // for location value
-    offsetY += fontSize * 2.5
-    context.font = "bold " + fontSize * 2 + "px " + fontFace;
-    context.fillStyle = textColor;
-    context.fillText(
-      messageObject.location,
-      cx - tx,
-      offsetY
-    );
-
-    // for values (material, qty)
-    offsetY += fontSize * 2
-    context.font = fontSize + "px " + fontFace;
-    context.fillStyle = 'rgba(204,204,204,1)';
-    context.fillText(
-      "- Material : " + messageObject.material,
-      cx - tx,
-      offsetY
-    );
-
-    offsetY += fontSize + ty
-    context.fillText(
-      "- QTY : " + messageObject.qty,
-      cx - tx,
-      offsetY
-    );
-
-
-    // canvas contents will be used for a texture
-    var texture = new THREE.Texture(canvas)
-    texture.needsUpdate = true;
-
-    var spriteMaterial = new THREE.SpriteMaterial({
-      map: texture
-    });
-    var sprite = new THREE.Sprite(spriteMaterial);
-    sprite.scale.set(window.innerWidth / 4 * 3, window.innerWidth / 8 * 3, 1);
-    // sprite.scale.set(canvas.width, canvas.height,1.0);
-
-    sprite.raycast = function () { }
-
-    return sprite;
-
-  }
-
-  showTooltip(targetName) {
-    if (!targetName)
-      return
-
-    var tooltip = this._scene2d.getObjectByName('navigator-tooltip')
-    if (tooltip)
-      this._scene2d.remove(tooltip)
-
-    var object = this._scene3d.getObjectByName(targetName, true)
-    var nav = this._scene3d.getObjectByName(targetName + '-marker', true)
-
-    if (object && nav) {
-      let vector = nav.getWorldPosition().clone()
-      vector.project(this._camera)
-      vector.z = 0.5
-
-      var tooltipTextObject = {
-        location: object.userData.location,
-        material: object.userData.material,
-        qty: object.userData.qty
-      };
-
-      tooltip = this.createTooltipForNavigator(tooltipTextObject)
-
-      var vector2 = tooltip.getWorldScale().clone()
-
-      var widthMultiplier = vector2.x / this.model.width
-      var heightMultiplier = vector2.y / this.model.height
-
-      vector2.normalize()
-
-      vector2.x = 0
-      vector2.y = vector2.y * 1.5 * heightMultiplier
-      vector2.z = 0;
-
-      vector.add(vector2)
-
-      vector.unproject(this._2dCamera)
-      tooltip.position.set(vector.x, vector.y, vector.z)
-      tooltip.name = 'navigator-tooltip'
-
-      tooltip.scale.x = tooltip.scale.x * widthMultiplier
-      tooltip.scale.y = tooltip.scale.y * heightMultiplier
-
-      this._scene2d.add(tooltip)
-      this.render_threed()
-
-      this.invalidate();
-    }
-  }
-
-  transcoord2dTo3d(position) {
-    var {
-      width,
-      height
-    } = this.model;
-
-    var {
-      x = 0,
-      y = 0,
-      z = 0
-    } = position;
-
-    var cx = width / 2;
-    var cy = height / 2;
-
-    var coord3d = {};
-    coord3d.x = x - cx;
-    coord3d.y = y - cy;
-    coord3d.z = z;
-
-    return coord3d;
   }
 
   _showWebglNoSupportText(context) {
@@ -1000,6 +545,18 @@ export default class Visualizer extends Container {
     context.fillText(WEBGL_NO_SUPPORT_TEXT, width / 2 - width / 40, height / 2)
 
     context.restore();
+  }
+
+  resetMaterials() {
+    if (!(this._visualizer || this._visualizer._stock_materials))
+      return;
+
+    this._visualizer._stock_materials.forEach(m => {
+      if (m.dispose)
+        m.dispose();
+    })
+
+    delete this._visualizer._stock_materials
   }
 
   _onDataChanged() {
@@ -1119,7 +676,17 @@ export default class Visualizer extends Container {
 
   /* Event Handlers */
 
+  onLegendTargetChanged(after, before) {
+    if (after.hasOwnProperty('status') && before.hasOwnProperty('status'))
+      this.resetMaterials()
+  }
+
   onchange(after, before) {
+
+    if (before.hasOwnProperty('legendTarget') || after.hasOwnProperty('legendTarget')) {
+      this._legendTarget && this._legendTarget.off('change', this.onLegendTargetChanged, this)
+      delete this._legendTarget
+    }
 
     if (after.hasOwnProperty('width') ||
       after.hasOwnProperty('height') ||
