@@ -548,15 +548,15 @@ export default class Visualizer extends Container {
   }
 
   resetMaterials() {
-    if (!(this._visualizer || this._visualizer._stock_materials))
+    if (!this._stock_materials)
       return;
 
-    this._visualizer._stock_materials.forEach(m => {
+    this._stock_materials.forEach(m => {
       if (m.dispose)
         m.dispose();
     })
 
-    delete this._visualizer._stock_materials
+    delete this._stock_materials
   }
 
   _onDataChanged() {
@@ -686,6 +686,8 @@ export default class Visualizer extends Container {
     if (before.hasOwnProperty('legendTarget') || after.hasOwnProperty('legendTarget')) {
       this._legendTarget && this._legendTarget.off('change', this.onLegendTargetChanged, this)
       delete this._legendTarget
+      this.resetMaterials()
+      this._onDataChanged()
     }
 
     if (after.hasOwnProperty('width') ||
