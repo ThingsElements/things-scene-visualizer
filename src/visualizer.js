@@ -173,7 +173,7 @@ export default class Visualizer extends Container {
     }
 
 
-    var floorGeometry = new THREE.BoxGeometry(1, 1, 1);
+    var floorGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
     // var floorGeometry = new THREE.PlaneGeometry(width, height)
 
     var floor = new THREE.Mesh(floorGeometry, floorMaterial)
@@ -193,24 +193,24 @@ export default class Visualizer extends Container {
 
     components.forEach(component => {
       // requestAnimationFrame(() => {
-        var clazz = scene.Component3d.register(component.model.type)
+      var clazz = scene.Component3d.register(component.model.type)
 
-        if (!clazz) {
-          console.warn("Class not found : 3d class is not exist");
-          return;
-        }
+      if (!clazz) {
+        console.warn("Class not found : 3d class is not exist");
+        return;
+      }
 
-        var item = new clazz(component.hierarchy, canvasSize, this, component)
+      var item = new clazz(component.hierarchy, canvasSize, this, component)
 
 
-        if (item) {
-          // requestAnimationFrame(() => {
-            item.name = component.model.id;
-            this._scene3d.add(item)
-            this.putObject(component.model.id, item);
-          // })
-        }
-      })
+      if (item) {
+        // requestAnimationFrame(() => {
+        item.name = component.model.id;
+        this._scene3d.add(item)
+        this.putObject(component.model.id, item);
+        // })
+      }
+    })
     // })
   }
 
@@ -251,6 +251,8 @@ export default class Visualizer extends Container {
   }
 
   init_scene3d() {
+
+    this.root.on('redraw', this.onredraw, this)
 
     if (this._scene3d)
       this.destroy_scene3d()
@@ -350,9 +352,6 @@ export default class Visualizer extends Container {
 
     }
 
-    this._threed_animate_func = this.threed_animate.bind(this)
-    requestAnimationFrame(this._threed_animate_func)
-
     this._onFocus = function () {
       this.render_threed();
     }.bind(this)
@@ -361,7 +360,7 @@ export default class Visualizer extends Container {
   }
 
   threed_animate() {
-    this._animationFrame = requestAnimationFrame(this._threed_animate_func);
+    // this._animationFrame = requestAnimationFrame(this._threed_animate_func);
 
     this._controls.update()
     // this.update();
@@ -369,7 +368,7 @@ export default class Visualizer extends Container {
   }
 
   stop() {
-    cancelAnimationFrame(this._animationFrame)
+    // cancelAnimationFrame(this._animationFrame)
   }
 
   // update() {
@@ -413,7 +412,7 @@ export default class Visualizer extends Container {
     //   this._renderer.render(this._scene2d, this._2dCamera)
     // }
 
-    this.invalidate()
+    // this.invalidate()
   }
 
   /* Container Overides .. */
@@ -457,8 +456,6 @@ export default class Visualizer extends Container {
         this._onDataChanged()
       }
 
-      // this.showTooltip(this._selectedPickingLocation)
-
       ctx.drawImage(
         this._renderer.domElement, 0, 0, width, height,
         left, top, width, height
@@ -483,8 +480,11 @@ export default class Visualizer extends Container {
     this._legendTarget && this._legendTarget.off('change', this.onLegendTargetChanged, this)
     delete this._legendTarget
 
-    super.dispose();
+    this.root.off('redraw', this.onredraw, this);
+
     this.destroy_scene3d()
+
+    super.dispose();
   }
 
   get layout() {
@@ -561,47 +561,6 @@ export default class Visualizer extends Container {
 
   _onDataChanged() {
 
-    /* for picking navigator
-
-    if (this._pickingLocations) {
-      // set picking locations
-      for (let i in this._pickingLocations) {
-        let loc = this._pickingLocations[i]
-
-        let obj = this._scene3d.getObjectByName(loc, true)
-        if (obj) {
-          obj.userData = {}
-        }
-
-        let empObj = this._scene3d.getObjectByName(loc + '-emp', true)
-        if (empObj) {
-          this._scene3d.remove(empObj)
-        }
-        let navObj = this._scene3d.getObjectByName(loc + '-marker', true)
-        if (navObj) {
-          navObj.parent.remove(navObj)
-        }
-
-        let navTooltipObj = this._scene2d.getObjectByName('navigator-tooltip', true)
-        if (navTooltipObj) {
-          this._scene2d.remove(navTooltipObj)
-        }
-      }
-    }
-
-    if (this._selectedPickingLocation) {
-      // set selected picking location
-      let obj = this._scene3d.getObjectByName(this._selectedPickingLocation, true)
-      if (obj && obj.userData) {
-        delete obj.userData.selected
-      }
-    }
-
-    this._pickingLocations = []
-    this._selectedPickingLocation = null
-
-    */
-
     if (this._data) {
       if (this._data instanceof Array) {
         /**
@@ -616,21 +575,12 @@ export default class Visualizer extends Container {
         this._data.forEach(d => {
           let data = d
 
-          // requestAnimationFrame(() => {
-            let loc = data.loc || data.LOC || data.location || data.LOCATION;
-            let object = this.getObject(loc)
-            if (object) {
-              object.userData = data;
-              object.onUserDataChanged()
-
-              // if (d.navigationData) {
-              //   this._pickingLocations.push(loc)
-              // }
-              // if (d.selected) {
-              //   this._selectedPickingLocation = loc
-              // }
-            }
-          // })
+          let loc = data.loc || data.LOC || data.location || data.LOCATION;
+          let object = this.getObject(loc)
+          if (object) {
+            object.userData = data;
+            object.onUserDataChanged()
+          }
         })
       } else {
         /**
@@ -643,23 +593,13 @@ export default class Visualizer extends Container {
         for (var loc in this._data) {
           let location = loc
           if (this._data.hasOwnProperty(location)) {
+            let d = this._data[location]
+            let object = this.getObject(location)
+            if (object) {
+              object.userData = d;
+              object.onUserDataChanged()
 
-            // requestAnimationFrame(() => {
-              let d = this._data[location]
-              let object = this.getObject(location)
-              if (object) {
-                object.userData = d;
-                object.onUserDataChanged()
-
-                // if (d.navigationData) {
-                //   this._pickingLocations.push(location)
-                // }
-                // if (d.selected) {
-                //   this._selectedPickingLocation = location
-                // }
-              }
-            // })
-
+            }
           }
         }
       }
@@ -667,11 +607,7 @@ export default class Visualizer extends Container {
 
     this._dataChanged = false
 
-    // draw navigatePath
-    // if (this._pickingLocations && this._pickingLocations.length > 0)
-    //   this.navigatePath(this._pickingLocations)
-
-    this.render_threed();
+    this.invalidate();
   }
 
   /* Event Handlers */
@@ -714,7 +650,7 @@ export default class Visualizer extends Container {
 
         this._controls.cameraChanged = true
 
-        this._controls.update()
+        this.invalidate();
       }
 
     }
@@ -730,7 +666,7 @@ export default class Visualizer extends Container {
     //   this.model.autoRotate = after.autoRotate
     // }
 
-    this.render_threed()
+    this.invalidate()
   }
 
   onmousedown(e) {
@@ -768,14 +704,6 @@ export default class Visualizer extends Container {
       else {
         popup.hide(this.root)
       }
-      // else {
-      //   if (!this._scene2d)
-      //     return
-      //   this._scene2d.remove(this._scene2d.getObjectByName('tooltip'))
-      //   this.render_threed()
-      // }
-
-      // this._controls.onMouseMove(e)
 
       e.stopPropagation()
     }
@@ -791,17 +719,6 @@ export default class Visualizer extends Container {
 
       this._mouse.x = ((pointer.x - this.model.left) / (this.model.width)) * 2 - 1;
       this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
-
-      // var object = this.getObjectByRaycast()
-
-      // if (object && object.onmousemove)
-      //   object.onmousemove(e, this)
-      // else {
-      //   if (!this._scene2d)
-      //     return
-      //   this._scene2d.remove(this._scene2d.getObjectByName('tooltip'))
-      //   this.render_threed()
-      // }
 
       this._controls.onMouseMove(e)
 
@@ -821,7 +738,6 @@ export default class Visualizer extends Container {
 
   onwheel(e) {
     if (this._controls) {
-      // this._need_control_update = true;
       this.handleMouseWheel(e)
       e.stopPropagation()
     }
@@ -829,7 +745,6 @@ export default class Visualizer extends Container {
 
   ondragstart(e) {
     if (this._controls) {
-      // this._need_control_update = true;
       var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
 
       // this._mouse.originX = this.getContext().canvas.offsetLeft +e.offsetX;
@@ -854,7 +769,6 @@ export default class Visualizer extends Container {
     if (this._controls) {
       this._controls.onDragEnd(e)
       e.stopPropagation()
-      // this._need_control_update = false;
     }
   }
 
@@ -898,6 +812,10 @@ export default class Visualizer extends Container {
 
     this.set('zoom', zoom)
 
+  }
+
+  onredraw() {
+    this.threed_animate();
   }
 
 }

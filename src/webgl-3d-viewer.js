@@ -156,7 +156,7 @@ export default class WebGL3dViewer {
     // floorTexture.repeat.set( 1, 1 );
     // var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
     var floorMaterial = new THREE.MeshBasicMaterial({ color: floorColor, side: THREE.DoubleSide });
-    var floorGeometry = new THREE.BoxGeometry(this.FLOOR_WIDTH, this.FLOOR_HEIGHT, 1, 10, 10);
+    var floorGeometry = new THREE.BoxBufferGeometry(this.FLOOR_WIDTH, this.FLOOR_HEIGHT, 1, 10, 10);
     // var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
     // var floorGeometry = new THREE.PlaneGeometry(this.FLOOR_WIDTH, this.FLOOR_HEIGHT, 10, 10);
     var floor = new THREE.Mesh(floorGeometry, floorMaterial);
@@ -169,7 +169,7 @@ export default class WebGL3dViewer {
   createSkyBox() {
 
     // SKYBOX/FOG
-    var skyBoxGeometry = new THREE.BoxGeometry(10000, 10000, 10000);
+    var skyBoxGeometry = new THREE.BoxBufferGeometry(10000, 10000, 10000);
     var skyBoxMaterial = new THREE.MeshBasicMaterial({ color: 0x9999ff, side: THREE.BackSide });
     var skyBox = new THREE.Mesh(skyBoxGeometry, skyBoxMaterial);
     this._scene.add(skyBox);

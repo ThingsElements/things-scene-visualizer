@@ -29,7 +29,7 @@ export default class Plane extends THREE.Mesh {
 
   createPlane(w, h, fillStyle) {
 
-    this.geometry = new THREE.PlaneGeometry(w, h);
+    this.geometry = new THREE.PlaneBufferGeometry(w, h);
     if (fillStyle && fillStyle.type == 'pattern' && fillStyle.image) {
       var texture = new THREE.TextureLoader().load(fillStyle.image)
       texture.wrapS = THREE.RepeatWrapping

@@ -54,7 +54,7 @@ export default class Sphere extends THREE.Mesh {
       fillStyle = 'lightgray'
     } = this.model
 
-    this.geometry = new THREE.SphereGeometry(rx, 20, 20);
+    this.geometry = new THREE.SphereBufferGeometry(rx, 20, 20);
     this.material = new THREE.MeshLambertMaterial({
       color: fillStyle,
       side: THREE.FrontSide

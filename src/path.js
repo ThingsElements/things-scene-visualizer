@@ -44,7 +44,7 @@ export default class Path extends Object3D {
       linewidth: lineWidth
     })
 
-    let geometry = new THREE.Geometry();
+    let geometry = new THREE.BufferGeometry();
 
     geometry.vertices.push(new THREE.Vector3(x1, z, y1))
     geometry.vertices.push(new THREE.Vector3(x2, z, y2))
@@ -98,7 +98,7 @@ export default class Path extends Object3D {
 
     var isFirst = i === 0
 
-    let geometry = new THREE.SphereGeometry(w, 32, 32);
+    let geometry = new THREE.SphereBufferGeometry(w, 32, 32);
     // let geometry = new THREE.SphereGeometry(w, d, h);
     var material
     if (isFirst) {

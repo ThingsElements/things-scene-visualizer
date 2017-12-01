@@ -28,7 +28,7 @@ export default class Rack extends Object3D {
 
   static get rackFrameGeometry() {
     if (!Rack._rackFrameGeometry)
-      Rack._rackFrameGeometry = new THREE.BoxGeometry(1, 1, 1);
+      Rack._rackFrameGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
 
     return Rack._rackFrameGeometry
   }
@@ -189,44 +189,6 @@ export default class Rack extends Object3D {
     board.scale.set(w, h, 1)
 
     return board
-  }
-
-  cube(size) {
-
-    var w = size.width * 0.5;
-    var h = size.height * 0.5;
-    var d = size.depth * 0.5;
-
-    var geometry = new THREE.Geometry();
-    geometry.vertices.push(
-      new THREE.Vector3(-w, -h, -d),
-      new THREE.Vector3(-w, h, -d),
-      new THREE.Vector3(-w, h, -d),
-      new THREE.Vector3(w, h, -d),
-      new THREE.Vector3(w, h, -d),
-      new THREE.Vector3(w, -h, -d),
-      new THREE.Vector3(w, -h, -d),
-      new THREE.Vector3(-w, -h, -d),
-      new THREE.Vector3(-w, -h, d),
-      new THREE.Vector3(-w, h, d),
-      new THREE.Vector3(-w, h, d),
-      new THREE.Vector3(w, h, d),
-      new THREE.Vector3(w, h, d),
-      new THREE.Vector3(w, -h, d),
-      new THREE.Vector3(w, -h, d),
-      new THREE.Vector3(-w, -h, d),
-      new THREE.Vector3(-w, -h, -d),
-      new THREE.Vector3(-w, -h, d),
-      new THREE.Vector3(-w, h, -d),
-      new THREE.Vector3(-w, h, d),
-      new THREE.Vector3(w, h, -d),
-      new THREE.Vector3(w, h, d),
-      new THREE.Vector3(w, -h, -d),
-      new THREE.Vector3(w, -h, d)
-    );
-
-    return geometry;
-
   }
 
   makeLocationString(shelfString) {

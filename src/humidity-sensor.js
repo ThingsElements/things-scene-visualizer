@@ -109,7 +109,7 @@ export default class HumiditySensor extends Object3D {
 
     var isFirst = i === 0
 
-    let geometry = new THREE.SphereGeometry(w, 32, 32);
+    let geometry = new THREE.SphereBufferGeometry(w, 32, 32);
     // let geometry = new THREE.SphereGeometry(w, d, h);
     var material
     if (isFirst) {

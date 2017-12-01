@@ -54,7 +54,7 @@ export default class Stock extends Mesh {
 
   static get stockGeometry() {
     if (!Stock._geometry)
-      Stock._geometry = new THREE.BoxGeometry(1, 1, 1);
+      Stock._geometry = new THREE.BoxBufferGeometry(1, 1, 1);
 
     return Stock._geometry
   }

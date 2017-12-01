@@ -49,7 +49,7 @@ export default class Cylinder extends THREE.Mesh {
       fillStyle = 'lightgray'
     } = this.model
 
-    this.geometry = new THREE.CylinderGeometry(rx, rx, rz, 25);
+    this.geometry = new THREE.CylinderBufferGeometry(rx, rx, rz, 25);
     this.material = new THREE.MeshLambertMaterial({ color: fillStyle, side: THREE.FrontSide });
 
     // this.castShadow = true

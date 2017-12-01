@@ -76,7 +76,7 @@ export default class Banner extends Object3D {
 
     var { boxColor = '#ccaa76' } = this.model
 
-    var geometry = new THREE.BoxGeometry(w, d, h);
+    var geometry = new THREE.BoxBufferGeometry(w, d, h);
     var material = new THREE.MeshLambertMaterial({ color: boxColor, side: THREE.FrontSide });
 
     var cube = new THREE.Mesh(geometry, material);
@@ -113,7 +113,7 @@ export default class Banner extends Object3D {
       boardMaterial = new THREE.MeshLambertMaterial({ color: fillStyle || '#ccaa76', side: THREE.FrontSide });
     }
 
-    var boardGeometry = new THREE.PlaneGeometry(w, h, 1, 1);
+    var boardGeometry = new THREE.PlaneBufferGeometry(w, h, 1, 1);
     var board = new THREE.Mesh(boardGeometry, boardMaterial);
 
     return board
