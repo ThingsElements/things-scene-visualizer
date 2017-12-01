@@ -131,6 +131,9 @@ var ThreeControls = function (object, component) {
 
     return function () {
 
+      if (!(scope.cameraChanged || scope.autoRotate))
+        return false;
+
       var position = scope.object.position;
 
       offset.copy(position).sub(scope.target);
@@ -209,8 +212,6 @@ var ThreeControls = function (object, component) {
         lastPosition.copy(scope.object.position);
         lastQuaternion.copy(scope.object.quaternion);
         scope.cameraChanged = false;
-
-        scope.component.render_threed();
         return true;
 
       }

@@ -363,7 +363,7 @@ export default class Visualizer extends Container {
     // this._animationFrame = requestAnimationFrame(this._threed_animate_func);
 
     this._controls.update()
-    // this.update();
+    this.render_threed();
 
   }
 
@@ -407,12 +407,6 @@ export default class Visualizer extends Container {
       // this._renderer.clear()
       this._renderer.render(this._scene3d, this._camera)
     }
-
-    // if (this._renderer && this._scene2d) {
-    //   this._renderer.render(this._scene2d, this._2dCamera)
-    // }
-
-    // this.invalidate()
   }
 
   /* Container Overides .. */
@@ -760,6 +754,7 @@ export default class Visualizer extends Container {
 
   ondragmove(e) {
     if (this._controls) {
+      this._controls.cameraChanged = true
       this._controls.onDragMove(e)
       e.stopPropagation()
     }
