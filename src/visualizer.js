@@ -80,6 +80,10 @@ const NATURE = {
     property: 'threed'
   }, {
     type: 'string',
+    label: 'location-field',
+    name: 'locationField'
+  }, {
+    type: 'string',
     label: 'popup-scene',
     name: 'popupScene'
   }, {
@@ -555,6 +559,8 @@ export default class Visualizer extends Container {
 
   _onDataChanged() {
 
+    var locationField = this.getState('locationField') || 'location';
+
     if (this._data) {
       if (this._data instanceof Array) {
         /**
@@ -569,7 +575,7 @@ export default class Visualizer extends Container {
         this._data.forEach(d => {
           let data = d
 
-          let loc = data.loc || data.LOC || data.location || data.LOCATION;
+          let loc = data[locationField];
           let object = this.getObject(loc)
           if (object) {
             object.userData = data;
