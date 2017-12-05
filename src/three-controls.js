@@ -211,6 +211,8 @@ var ThreeControls = function (object, component) {
 
         lastPosition.copy(scope.object.position);
         lastQuaternion.copy(scope.object.quaternion);
+
+        scope.component.invalidate();
         scope.cameraChanged = false;
         return true;
 
