@@ -260,6 +260,8 @@ export default class Visualizer extends Container {
 
   init_scene3d() {
 
+    this.trigger("visualizer-initialized", this)
+
     this.root.on('redraw', this.onredraw, this)
 
     if (this._scene3d)
