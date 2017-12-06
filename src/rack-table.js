@@ -1366,7 +1366,7 @@ export class RackTable extends Container {
   }
 
   onchange(after, before) {
-    if (hasAnyProperty(after, "rows", "columns")) {
+    if (hasAnyProperty(after, "rows", "columns", "increasePattern")) {
       this.buildCells(
         this.get('rows'),
         this.get('columns'),
