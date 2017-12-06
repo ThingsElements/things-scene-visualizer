@@ -63,7 +63,7 @@ const NATURE = {
     label: 'auto-rotate',
     name: 'autoRotate',
     property: 'autoRotate'
-  }, {
+  },{
     type: 'checkbox',
     label: 'show-axis',
     name: 'showAxis',
@@ -90,6 +90,10 @@ const NATURE = {
     type: 'string',
     label: 'legend-target',
     name: 'legendTarget'
+  }, {
+    type: 'number',
+    label: 'rotation-speed',
+    name: 'rotationSpeed'
   }]
 }
 
