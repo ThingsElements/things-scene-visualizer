@@ -48,12 +48,47 @@ Copyright © HatioLab Inc. All rights reserved.
       <p>Properties</p>
       <things-editor-properties id='props' target="{{props}}" props="[[selected.0.nature.properties]]">
       </things-editor-properties>
+      <input type="button" value="make aisle" onclick="makeAisle()">
+      <input type="button" value="set empty" onclick="setEmpty()">
+      <input type="button" value="setLocationCW" onclick="setLocationCW()">
       <input type="button" value="set data" onclick="setData()">
 
     </template>
 
     <script>
       var data = {}
+
+      function makeAisle() {
+        var rackTable = app.scene.findById('yieldTable');
+        app.scene.findAll('rack-table-cell').forEach((c, i) => {
+          switch(Math.floor(i / rackTable.columns)) {
+            case 1:
+            case 4:
+            case 7:
+            case 10:
+              c.set('isEmpty', true)
+            break;
+          }
+        })
+      }
+
+      function setEmpty() {
+        var rackTable = app.scene.findById('yieldTable');
+        app.scene.findAll('rack-table-cell').forEach((c, i) => {
+          switch(i % rackTable.columns) {
+            case 3:
+              c.set('isEmpty', true)
+            break;
+          }
+        })
+      }
+
+      function setLocationCW() {
+        app.scene.select('rack-table-cell')
+        app.scene.selected.forEach((c, i) => {
+          c.increaseLocationCW()
+        })
+      }
 
       function setData() {
         app.scene.variable('threed', JSON.parse(JSON.stringify(data)))

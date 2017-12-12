@@ -304,9 +304,7 @@ export default class RackTableCell extends RectPath(Component) {
   get aboveRowCells() {
     var aboveCell = this.aboveCell
     while (1) {
-      var aboveRowCells = aboveCell.rowCells.filter((c) => {
-        return !c.get('isEmpty')
-      })
+      var aboveRowCells = aboveCell.notEmptyRowCells;
 
       if (aboveRowCells.length > 0)
         return aboveRowCells
@@ -345,7 +343,23 @@ export default class RackTableCell extends RectPath(Component) {
     return 0
   }
 
-  increaseLocationCW() {
+  get notEmptyRowCells() {
+    return this.rowCells.filter(c => {
+      return !c.get('isEmpty')
+    })
+  }
+
+  get emptyRowCells() {
+    return this.rowCells.filter(c => {
+      return c.get('isEmpty')
+    })
+  }
+
+  get isEmptyRow() {
+    return this.notEmptyRowCells.length === 0
+  }
+
+  increaseLocationCW(skipNumbering) {
     var rackTable = this.parent;
     var selectedCells = this.root.selected;
     var selectedIndex = selectedCells.indexOf(this);
@@ -384,11 +398,11 @@ export default class RackTableCell extends RectPath(Component) {
       return
 
     var increasing = selectedRowIndex % 2 === 0
-    this.setLocationInfo(increasing)
+    this.setLocationInfo(increasing, skipNumbering)
 
   }
 
-  increaseLocationCCW() {
+  increaseLocationCCW(skipNumbering) {
     var rackTable = this.parent;
     var selectedCells = this.root.selected;
     var selectedIndex = selectedCells.indexOf(this);
@@ -426,17 +440,19 @@ export default class RackTableCell extends RectPath(Component) {
       return
 
     var increasing = selectedRowIndex % 2 !== 0
-    this.setLocationInfo(increasing)
+    this.setLocationInfo(increasing, skipNumbering)
   }
 
-  setLocationInfo(increasing, startUnitNo) {
+  setLocationInfo(increasing, skipNumbering) {
     var rackTable = this.parent;
+    var emptyCellCount = this.emptyRowCells.length
     var lastSection = 1;
-    var lastUnit = increasing ? 1 : rackTable.columns;
+    var lastUnit = increasing ? 1 : rackTable.columns - emptyCellCount;
 
     var unitOffset = 0;
 
     var aboveCell = this.aboveCell;
+    var aboveCells = aboveCell.notEmptyRowCells;
 
     if (aboveCell) {
       if (!aboveCell.get('section')) {
@@ -450,22 +466,43 @@ export default class RackTableCell extends RectPath(Component) {
 
     }
 
-    if (increasing) {
-      var leftCell = this.leftCell;
-      if (leftCell)
-        lastUnit = Number(leftCell.get('unit') || 1) + 1
+    var foundInfo = this.getNotEmptyLeftCell(this) || {cell:null, count: 0};
+    var leftCell = foundInfo.cell;
+    var count = foundInfo.count;
+
+    var increaseCoefficient = increasing ? 1 : -1;
+
+    if (leftCell) {
+      if (skipNumbering)
+        lastUnit = Number(leftCell.get('unit') || 1) + increaseCoefficient
       else
-        lastUnit += unitOffset
-    } else {
-      var leftCell = this.leftCell;
-      if (leftCell)
-        lastUnit = Number(leftCell.get('unit') || 1) - 1
-      else
-        lastUnit += unitOffset
+        lastUnit = Number(leftCell.get('unit') || 1) + increaseCoefficient + count
     }
+    else
+      if (skipNumbering)
+        lastUnit += unitOffset
+      else
+        lastUnit += unitOffset + count
 
     this.set('unit', String(lastUnit).padStart(2, 0))
     this.set('section', String(lastSection).padStart(2, 0))
+  }
+
+  getNotEmptyLeftCell(cell, searchCount) {
+    cell = cell || this;
+    searchCount = searchCount || 0;
+
+    var leftCell = cell.leftCell;
+    if (!leftCell)
+      return null;
+
+    if (leftCell.get('isEmpty'))
+      return this.getNotEmptyLeftCell(leftCell, searchCount++);
+
+    return {
+      cell: leftCell,
+      count: searchCount
+    };
   }
 
   onchange(after, before) {
