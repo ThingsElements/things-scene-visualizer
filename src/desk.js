@@ -91,15 +91,15 @@ export default class Desk extends Object3D {
 
     var legThickness = this.legThickness;
     var margin = this.margin;
-    d = d - legThickness;
+    d = d - this.boardThickness;
 
     var legs = new THREE.Group()
     var posX = w / 2 - legThickness / 2 - margin;
     var posY = h / 2 - legThickness / 2 - margin;
-    var posZ = -legThickness;
+    var posZ = 0;
 
     for (var i = 0; i < 4; i++) {
-      var geometry = new THREE.BoxGeometry(legThickness, d, legThickness);
+      var geometry = new THREE.BoxBufferGeometry(legThickness, d, legThickness);
       var material = new THREE.MeshBasicMaterial({
         color: this.model.legColor || '#252525'
       });
