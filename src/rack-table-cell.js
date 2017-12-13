@@ -355,7 +355,7 @@ export default class RackTableCell extends RectPath(Component) {
     })
   }
 
-  get isEmptyRow() {
+  get isAisle() {
     return this.notEmptyRowCells.length === 0
   }
 
@@ -452,18 +452,20 @@ export default class RackTableCell extends RectPath(Component) {
     var unitOffset = 0;
 
     var aboveCell = this.aboveCell;
-    var aboveCells = aboveCell.notEmptyRowCells;
+    var sectionIncreaseCoefficient = 1
+
+    while (aboveCell && aboveCell.isAisle) {
+      aboveCell = aboveCell.aboveCell
+      sectionIncreaseCoefficient = 0
+    }
 
     if (aboveCell) {
-      if (!aboveCell.get('section')) {
-        aboveCell = aboveCell.aboveCell
-        var rowCells = this.rowCells
-        unitOffset = increasing ? this.firstUnit : this.lastUnit
-        lastSection = Number(aboveCell.get('section'))
-      } else {
-        lastSection = Number(aboveCell.get('section')) + 1
-      }
+      var aboveCells = aboveCell.notEmptyRowCells;
+      aboveCell = aboveCells[increasing ? 0 : aboveCells.length - 1]
 
+      unitOffset = !sectionIncreaseCoefficient ? Number(aboveCell.get('unit')) : 0;
+
+      lastSection = Number(aboveCell.get('section')) + sectionIncreaseCoefficient
     }
 
     var foundInfo = this.getNotEmptyLeftCell(this) || {cell:null, count: 0};
@@ -476,13 +478,13 @@ export default class RackTableCell extends RectPath(Component) {
       if (skipNumbering)
         lastUnit = Number(leftCell.get('unit') || 1) + increaseCoefficient
       else
-        lastUnit = Number(leftCell.get('unit') || 1) + increaseCoefficient + count
+        lastUnit = Number(leftCell.get('unit') || 1) + increaseCoefficient + count * increaseCoefficient
     }
     else
       if (skipNumbering)
         lastUnit += unitOffset
       else
-        lastUnit += unitOffset + count
+        lastUnit += unitOffset + count * increaseCoefficient
 
     this.set('unit', String(lastUnit).padStart(2, 0))
     this.set('section', String(lastSection).padStart(2, 0))
@@ -497,7 +499,7 @@ export default class RackTableCell extends RectPath(Component) {
       return null;
 
     if (leftCell.get('isEmpty'))
-      return this.getNotEmptyLeftCell(leftCell, searchCount++);
+      return this.getNotEmptyLeftCell(leftCell, ++searchCount);
 
     return {
       cell: leftCell,

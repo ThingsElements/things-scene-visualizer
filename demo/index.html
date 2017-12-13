@@ -74,19 +74,20 @@ Copyright © HatioLab Inc. All rights reserved.
 
       function setEmpty() {
         var rackTable = app.scene.findById('yieldTable');
-        app.scene.findAll('rack-table-cell').forEach((c, i) => {
-          switch(i % rackTable.columns) {
-            case 3:
-              c.set('isEmpty', true)
-            break;
-          }
-        })
+        var cells = app.scene.findAll('rack-table-cell');
+
+        for(var i = 0; i < rackTable.rows; i++) {
+          var emptyIndex = i * rackTable.columns + Math.floor(Math.random() * rackTable.columns)
+          cells[emptyIndex].set('isEmpty', true)
+        }
       }
 
       function setLocationCW() {
-        app.scene.select('rack-table-cell')
+        if(app.scene.selected && app.scene.selected.length === 0)
+          app.scene.select('rack-table-cell')
+
         app.scene.selected.forEach((c, i) => {
-          c.increaseLocationCW()
+          c.increaseLocationCW(true)
         })
       }
 
