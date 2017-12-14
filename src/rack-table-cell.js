@@ -197,7 +197,7 @@ export default class RackTableCell extends RectPath(Component) {
     let { left, top } = this.bounds
 
     left = Math.max(left, 0)
-    top = Math.max(top - 18 , 0)
+    top = top - 18
 
     context.font = '12px Arial';
     let metrics = context.measureText(locationString)
@@ -394,8 +394,11 @@ export default class RackTableCell extends RectPath(Component) {
     // var selectedRowIndex = Math.floor(selectedIndex / rackTable.columns);
     var selectedColumnIndex = selectedIndex % rackTable.columns;
 
-    if (this.get('isEmpty'))
+    if (this.get('isEmpty')) {
+      delete this.model.unit
+      delete this.model.section
       return
+    }
 
     var increasing = selectedRowIndex % 2 === 0
     this.setLocationInfo(increasing, skipNumbering)
@@ -447,7 +450,14 @@ export default class RackTableCell extends RectPath(Component) {
     var rackTable = this.parent;
     var emptyCellCount = this.emptyRowCells.length
     var lastSection = 1;
-    var lastUnit = increasing ? 1 : rackTable.columns - emptyCellCount;
+    var lastUnit = 1;
+    // var lastUnit = increasing ? 1 : rackTable.columns - emptyCellCount;
+
+    if (!increasing) {
+      lastUnit = rackTable.columns;
+      if(skipNumbering)
+        lastUnit -= emptyCellCount
+    }
 
     var unitOffset = 0;
 
@@ -463,7 +473,8 @@ export default class RackTableCell extends RectPath(Component) {
       var aboveCells = aboveCell.notEmptyRowCells;
       aboveCell = aboveCells[increasing ? 0 : aboveCells.length - 1]
 
-      unitOffset = !sectionIncreaseCoefficient ? Number(aboveCell.get('unit')) : 0;
+      if(skipNumbering)
+        unitOffset = !sectionIncreaseCoefficient ? Number(aboveCell.get('unit')) : 0;
 
       lastSection = Number(aboveCell.get('section')) + sectionIncreaseCoefficient
     }
@@ -478,7 +489,7 @@ export default class RackTableCell extends RectPath(Component) {
       if (skipNumbering)
         lastUnit = Number(leftCell.get('unit') || 1) + increaseCoefficient
       else
-        lastUnit = Number(leftCell.get('unit') || 1) + increaseCoefficient + count * increaseCoefficient
+        lastUnit = Number(leftCell.get('unit') || 0) + increaseCoefficient + count * increaseCoefficient
     }
     else
       if (skipNumbering)
@@ -496,7 +507,10 @@ export default class RackTableCell extends RectPath(Component) {
 
     var leftCell = cell.leftCell;
     if (!leftCell)
-      return null;
+      return {
+        cell: null,
+        count: searchCount
+      };
 
     if (leftCell.get('isEmpty'))
       return this.getNotEmptyLeftCell(leftCell, ++searchCount);

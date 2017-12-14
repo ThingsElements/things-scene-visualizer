@@ -50,7 +50,8 @@ Copyright © HatioLab Inc. All rights reserved.
       </things-editor-properties>
       <input type="button" value="make aisle" onclick="makeAisle()">
       <input type="button" value="set empty" onclick="setEmpty()">
-      <input type="button" value="setLocationCW" onclick="setLocationCW()">
+      <input type="button" value="setLocationCW - skipNumbering" onclick="setLocationCW(true)">
+      <input type="button" value="setLocationCW" onclick="setLocationCW(false)">
       <input type="button" value="set data" onclick="setData()">
 
     </template>
@@ -62,10 +63,14 @@ Copyright © HatioLab Inc. All rights reserved.
         var rackTable = app.scene.findById('yieldTable');
         app.scene.findAll('rack-table-cell').forEach((c, i) => {
           switch(Math.floor(i / rackTable.columns)) {
-            case 1:
-            case 4:
-            case 7:
-            case 10:
+            // case 1:
+            // case 4:
+            // case 7:
+            // case 10:
+            case 2:
+            case 5:
+            case 8:
+            case 11:
               c.set('isEmpty', true)
             break;
           }
@@ -82,12 +87,12 @@ Copyright © HatioLab Inc. All rights reserved.
         }
       }
 
-      function setLocationCW() {
-        if(app.scene.selected && app.scene.selected.length === 0)
+      function setLocationCW(skipNumbering) {
+        if(!app.scene.selected || app.scene.selected.length === 0)
           app.scene.select('rack-table-cell')
 
         app.scene.selected.forEach((c, i) => {
-          c.increaseLocationCW(true)
+          c.increaseLocationCW(skipNumbering)
         })
       }
 
