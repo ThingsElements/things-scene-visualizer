@@ -15,13 +15,13 @@ const NATURE = {
   resizable: true,
   rotatable: true,
   properties: [{
-    type: 'editor-table',
-    label: '',
-    name: '',
-    property: {
-      merge: false,
-      split: false
-    }
+    type: 'number',
+    label: 'section',
+    name: 'section'
+  }, {
+    type: 'number',
+    label: 'unit',
+    name: 'unit'
   }, {
     type: 'checkbox',
     label: 'is-empty',
@@ -30,6 +30,14 @@ const NATURE = {
     type: 'location-increase-pattern',
     label: '',
     name: ''
+  }, {
+    type: 'editor-table',
+    label: '',
+    name: '',
+    property: {
+      merge: false,
+      split: false
+    }
   }]
 }
 
@@ -359,7 +367,7 @@ export default class RackTableCell extends RectPath(Component) {
     return this.notEmptyRowCells.length === 0
   }
 
-  increaseLocationCW(skipNumbering) {
+  increaseLocationCW(skipNumbering, startSection, startUnit) {
     var rackTable = this.parent;
     var selectedCells = this.root.selected;
     var selectedIndex = selectedCells.indexOf(this);
@@ -401,11 +409,11 @@ export default class RackTableCell extends RectPath(Component) {
     }
 
     var increasing = selectedRowIndex % 2 === 0
-    this.setLocationInfo(increasing, skipNumbering)
+    this.setLocationInfo(increasing, skipNumbering, startSection, startUnit, selectedRowIndex===0)
 
   }
 
-  increaseLocationCCW(skipNumbering) {
+  increaseLocationCCW(skipNumbering, startSection, startUnit) {
     var rackTable = this.parent;
     var selectedCells = this.root.selected;
     var selectedIndex = selectedCells.indexOf(this);
@@ -443,18 +451,18 @@ export default class RackTableCell extends RectPath(Component) {
       return
 
     var increasing = selectedRowIndex % 2 !== 0
-    this.setLocationInfo(increasing, skipNumbering)
+    this.setLocationInfo(increasing, skipNumbering, startSection, startUnit, selectedRowIndex===0)
   }
 
-  setLocationInfo(increasing, skipNumbering) {
+  setLocationInfo(increasing, skipNumbering, startSection, startUnit, isFirst) {
     var rackTable = this.parent;
     var emptyCellCount = this.emptyRowCells.length
-    var lastSection = rackTable.model.minSection || 1;
-    var lastUnit = rackTable.model.minUnit || 1;
+    var lastSection = Number(startSection) || 1;
+    var lastUnit = Number(startUnit) || 1;
     // var lastUnit = increasing ? 1 : rackTable.columns - emptyCellCount;
 
     if (!increasing) {
-      lastUnit = rackTable.columns;
+      lastUnit = rackTable.columns + Number(startUnit) -1;
       if(skipNumbering)
         lastUnit -= emptyCellCount
     }
@@ -469,12 +477,12 @@ export default class RackTableCell extends RectPath(Component) {
       sectionIncreaseCoefficient = 0
     }
 
-    if (aboveCell) {
+    if (!isFirst && aboveCell) {
       var aboveCells = aboveCell.notEmptyRowCells;
       aboveCell = aboveCells[increasing ? 0 : aboveCells.length - 1]
 
       if (skipNumbering) {
-        unitOffset = !sectionIncreaseCoefficient ? Number(aboveCell.get('unit')) : 0;
+        unitOffset = !sectionIncreaseCoefficient ? Number(aboveCell.get('unit')) - Number(startUnit || 0) + 1 : 0;
       } else {
         if (increasing) {
           unitOffset = !sectionIncreaseCoefficient ? rackTable.columns : 0;

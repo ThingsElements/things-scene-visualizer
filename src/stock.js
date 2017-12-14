@@ -20,7 +20,7 @@ export default class Stock extends Mesh {
     super(model);
 
     this._visualizer = visualizer;
-    this._hideEmptyStock = visualizer && visualizer.legendTarget && visualizer.legendTarget.get('status') && visualizer.legendTarget.get('status').hideEmptyStock
+    this._hideEmptyStock = visualizer && visualizer.model.hideEmptyStock
 
     this.createObject();
 
@@ -87,9 +87,17 @@ export default class Stock extends Mesh {
   }
 
   get emptyMaterial() {
+    var defaultColor = STOCK_COLOR
     if (!this._visualizer._empty_material) {
-      this._visualizer._empty_material = new THREE.MeshBasicMaterial();
-      this._visualizer._empty_material.opacity = 0.25;
+      if ((this._visualizer && this._visualizer && this._visualizer.legendTarget && this._visualizer.legendTarget.get('status'))) {
+        var stockStatus = this._visualizer.legendTarget.get('status');
+        defaultColor = stockStatus.defaultColor || STOCK_COLOR;
+      }
+
+      this._visualizer._empty_material = new THREE.MeshBasicMaterial({
+        color: defaultColor
+      });
+      this._visualizer._empty_material.opacity = 0.33;
       this._visualizer._empty_material.transparent = true;
     }
 

@@ -94,6 +94,10 @@ const NATURE = {
     type: 'number',
     label: 'rotation-speed',
     name: 'rotationSpeed'
+  }, {
+    type: 'checkbox',
+    label: 'hide-empty-stock',
+    name: 'hideEmptyStock'
   }]
 }
 

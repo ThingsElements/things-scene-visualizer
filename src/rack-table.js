@@ -7,6 +7,14 @@ import Group3D from './group3d'
 import RackTableCell from './rack-table-cell'
 import Rack from './rack'
 
+
+const LABEL_WIDTH = 25
+const LABEL_HEIGHT = 25
+
+function rgba(r, g, b, a) {
+  return `rgba(${r}, ${g}, ${b}, ${a})`
+}
+
 var {
   Table,
   Component,
@@ -45,14 +53,6 @@ const NATURE = {
     label: 'depth',
     name: 'depth',
     property: 'depth'
-  }, {
-    type: 'number',
-    label: 'min-section',
-    name: 'minSection'
-  }, {
-    type: 'number',
-    label: 'min-unit',
-    name: 'minUnit'
   }, {
     type: 'string',
     label: 'location-pattern',
@@ -398,6 +398,22 @@ export class RackTable extends Container {
 
     if (!this.app.isEditMode)
       return;
+
+    if (!this._focused)
+      return
+
+    var { left, top, width } = this.bounds
+
+    // 이동 핸들 그리기
+    context.beginPath();
+
+    context.rect(left + width, top, LABEL_WIDTH, LABEL_HEIGHT)
+
+    let color = 255 - 20 % 255
+    context.fillStyle = rgba(color, color, color, 1)
+    context.fill()
+
+    context.closePath();
   }
 
   created() {
@@ -1021,15 +1037,34 @@ export class RackTable extends Container {
     this.invalidate()
   }
 
-  // onmouseenter(e) {
-  //   this._focused = true;
-  //   this.invalidate();
-  // }
+  contains(x, y) {
+    var contains = false;
 
-  // onmouseleave(e) {
-  //   this._focused = false;
-  //   this.invalidate();
-  // }
+    if (this.app.isViewMode)
+      return contains
+
+    var { left, top, width, height } = this.bounds;
+    var right = left + width;
+    var h = LABEL_HEIGHT
+
+    contains =
+      // component bound에 포함되는지
+      (x < Math.max(right, left) && x > Math.min(right, left)
+        && y < Math.max(top + height, top) && y > Math.min(top + height, top))
+      ||
+      // 이동 핸들러 영역에 포함되는지
+      (x < Math.max(right + LABEL_WIDTH, right) && x > Math.min(right + LABEL_WIDTH, right)
+        && y < Math.max(top + h, top) && y > Math.min(top + h, top))
+
+    if (contains)
+      this._focused = true;
+    else
+      this._focused = false;
+
+    this.invalidate();
+
+    return contains
+  }
 }
 
 ["rows", "columns", "widths", "heights", "widths_sum", "heights_sum", "controls"].forEach(getter => Component.memoize(RackTable.prototype, getter, false));
