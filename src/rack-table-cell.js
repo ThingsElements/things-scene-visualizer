@@ -538,6 +538,16 @@ export default class RackTableCell extends RectPath(Component) {
     this.invalidate()
   }
 
+  contains(x, y) {
+    var contains = super.contains(x, y);
+    if (!contains) {
+      this._focused = false;
+      this.invalidate()
+    }
+
+    return contains
+  }
+
 }
 
 ["border"].forEach(getter => Component.memoize(RackTableCell.prototype, getter, false));
