@@ -449,8 +449,8 @@ export default class RackTableCell extends RectPath(Component) {
   setLocationInfo(increasing, skipNumbering) {
     var rackTable = this.parent;
     var emptyCellCount = this.emptyRowCells.length
-    var lastSection = 1;
-    var lastUnit = 1;
+    var lastSection = rackTable.model.minSection || 1;
+    var lastUnit = rackTable.model.minUnit || 1;
     // var lastUnit = increasing ? 1 : rackTable.columns - emptyCellCount;
 
     if (!increasing) {
