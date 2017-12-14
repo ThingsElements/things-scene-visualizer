@@ -473,8 +473,15 @@ export default class RackTableCell extends RectPath(Component) {
       var aboveCells = aboveCell.notEmptyRowCells;
       aboveCell = aboveCells[increasing ? 0 : aboveCells.length - 1]
 
-      if(skipNumbering)
+      if (skipNumbering) {
         unitOffset = !sectionIncreaseCoefficient ? Number(aboveCell.get('unit')) : 0;
+      } else {
+        if (increasing) {
+          unitOffset = !sectionIncreaseCoefficient ? rackTable.columns : 0;
+        } else {
+          unitOffset = !sectionIncreaseCoefficient ? lastUnit : 0;
+        }
+      }
 
       lastSection = Number(aboveCell.get('section')) + sectionIncreaseCoefficient
     }

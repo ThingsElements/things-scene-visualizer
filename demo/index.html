@@ -38,6 +38,15 @@ Copyright © HatioLab Inc. All rights reserved.
       <p>An example of
         <code>&lt;visualizer&gt;</code>:</p>
 
+      <input type="button" value="make aisle" onclick="makeAisle()">
+      <input type="button" value="set empty" onclick="setEmpty()">
+      <select id="direction">
+        <option value="cw">CW</option>
+        <option value="ccw">CCW</option>
+      </select>
+      <input type="checkbox" id="skipNumbering"></input>
+      <input type="button" value="setLocation" onclick="setLocation()">
+      <input type="button" value="set data" onclick="setData()">
       <things-scene-viewer id='scene' scene='{{scene}}' selected='{{selected}}' model='[[model]]' mode="1">
         <things-scene-layer type="selection-layer"></things-scene-layer>
         <things-scene-layer type="modeling-layer"></things-scene-layer>
@@ -48,11 +57,6 @@ Copyright © HatioLab Inc. All rights reserved.
       <p>Properties</p>
       <things-editor-properties id='props' target="{{props}}" props="[[selected.0.nature.properties]]">
       </things-editor-properties>
-      <input type="button" value="make aisle" onclick="makeAisle()">
-      <input type="button" value="set empty" onclick="setEmpty()">
-      <input type="button" value="setLocationCW - skipNumbering" onclick="setLocationCW(true)">
-      <input type="button" value="setLocationCW" onclick="setLocationCW(false)">
-      <input type="button" value="set data" onclick="setData()">
 
     </template>
 
@@ -87,12 +91,31 @@ Copyright © HatioLab Inc. All rights reserved.
         }
       }
 
+      function setLocation() {
+        var direction = document.getElementById('direction').value
+        var skipNumbering = document.getElementById('skipNumbering').checked
+
+        if(direction == 'cw')
+          setLocationCW(skipNumbering)
+        else
+          setLocationCCW(skipNumbering)
+      }
+
       function setLocationCW(skipNumbering) {
         if(!app.scene.selected || app.scene.selected.length === 0)
           app.scene.select('rack-table-cell')
 
         app.scene.selected.forEach((c, i) => {
           c.increaseLocationCW(skipNumbering)
+        })
+      }
+
+      function setLocationCCW(skipNumbering) {
+        if(!app.scene.selected || app.scene.selected.length === 0)
+          app.scene.select('rack-table-cell')
+
+        app.scene.selected.forEach((c, i) => {
+          c.increaseLocationCCW(skipNumbering)
         })
       }
 
@@ -252,8 +275,8 @@ Copyright © HatioLab Inc. All rights reserved.
           ],
           "id": "yieldTable",
           "zone": "A",
-          "minSection": 5,
-          "minUnit": 5,
+          "minSection": 1,
+          "minUnit": 1,
           "locPattern": "{z}{s}-{u}-{sh}",
           "increasePattern": "+s+u",
           "shelfPattern": "00",
