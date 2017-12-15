@@ -393,29 +393,6 @@ export class RackTable extends Container {
     delete this._focused_cell
   }
 
-  _post_draw(context) {
-    super._post_draw(context);
-
-    if (!this.app.isEditMode)
-      return;
-
-    if (!this._focused)
-      return
-
-    var { left, top, width } = this.bounds
-
-    // 이동 핸들 그리기
-    context.beginPath();
-
-    context.rect(left + width, top, LABEL_WIDTH, LABEL_HEIGHT)
-
-    let color = 255 - 20 % 255
-    context.fillStyle = rgba(color, color, color, 1)
-    context.fill()
-
-    context.closePath();
-  }
-
   created() {
     var tobeSize = this.rows * this.columns
     var gap = this.size() - tobeSize
@@ -1035,35 +1012,6 @@ export class RackTable extends Container {
 
   oncellchanged(after, before) {
     this.invalidate()
-  }
-
-  contains(x, y) {
-    var contains = false;
-
-    if (this.app.isViewMode)
-      return contains
-
-    var { left, top, width, height } = this.bounds;
-    var right = left + width;
-    var h = LABEL_HEIGHT
-
-    contains =
-      // component bound에 포함되는지
-      (x < Math.max(right, left) && x > Math.min(right, left)
-        && y < Math.max(top + height, top) && y > Math.min(top + height, top))
-      ||
-      // 이동 핸들러 영역에 포함되는지
-      (x < Math.max(right + LABEL_WIDTH, right) && x > Math.min(right + LABEL_WIDTH, right)
-        && y < Math.max(top + h, top) && y > Math.min(top + h, top))
-
-    if (contains)
-      this._focused = true;
-    else
-      this._focused = false;
-
-    this.invalidate();
-
-    return contains
   }
 }
 
