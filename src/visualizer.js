@@ -374,6 +374,9 @@ export default class Visualizer extends Container {
   }
 
   threed_animate() {
+    if (!this._controls)
+      return;
+
     // this._animationFrame = requestAnimationFrame(this._threed_animate_func);
 
     this._controls.update()

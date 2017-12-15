@@ -15,11 +15,11 @@ const NATURE = {
   resizable: true,
   rotatable: true,
   properties: [{
-    type: 'number',
+    type: 'string',
     label: 'section',
     name: 'section'
   }, {
-    type: 'number',
+    type: 'string',
     label: 'unit',
     name: 'unit'
   }, {
