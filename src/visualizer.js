@@ -659,8 +659,6 @@ export default class Visualizer extends Container {
         this._camera.updateProjectionMatrix();
 
         this._controls.cameraChanged = true
-
-        this.invalidate();
       }
 
     }
@@ -708,6 +706,7 @@ export default class Visualizer extends Container {
       if (object && object.onmouseup) {
         if (ref)
           object.onmouseup(e, this, popup.show.bind(this, this, ref))
+
         object._focused = true;
         this._lastFocused = object
       }
@@ -715,6 +714,7 @@ export default class Visualizer extends Container {
         popup.hide(this.root)
       }
 
+      this.invalidate();
       e.stopPropagation()
     }
 
