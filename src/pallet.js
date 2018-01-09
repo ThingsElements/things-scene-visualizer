@@ -29,15 +29,15 @@ function init() {
 
   init.done = true
 
-  let objLoader = new THREE.OBJLoader2();
+  let objLoader = new THREE.OBJLoader();
+  let mtlLoader = new THREE.MTLLoader();
 
-  objLoader.setPath('/obj/pallet/')
-
-  objLoader.loadMtl('Pallet.mtl', 'pallet.mtl', null, function (materials) {
-    objLoader.setMaterials('pallet')
+  mtlLoader.load('/obj/pallet/pallet2.mtl', function (materials) {
+    materials.preload();
     objLoader.setMaterials(materials)
+    materials.side = THREE.frontSide
 
-    objLoader.load('Pallet.obj', function (obj) {
+    objLoader.load('/obj/pallet/pallet2.obj', function (obj) {
       extObj = obj
     })
   })
@@ -45,9 +45,11 @@ function init() {
 
 export default class Pallet extends Object3D {
 
-  constructor(model, canvasSize) {
+  constructor(model, canvasSize, visualizer) {
 
-    super(model);
+    super(model, canvasSize);
+
+    this._visualizer = visualizer;
 
     this.createObject(canvasSize);
   }
@@ -66,19 +68,17 @@ export default class Pallet extends Object3D {
       top,
       width,
       height,
-      cx,
-      cy,
       depth,
       rotation = 0
     } = this.model
 
     if (!Pallet.extObject) {
-      setTimeout(this.createObject.bind(this, this.model, canvasSize), 50)
+      setTimeout(this.createObject.bind(this, canvasSize), 50)
       return;
     }
 
-    cx -= canvasSize.width / 2
-    cy -= canvasSize.height / 2
+    let cx = (left + (width / 2)) - canvasSize.width / 2
+    let cy = (top + (height / 2)) - canvasSize.height / 2
     var cz = 0.5 * depth
 
     var left = left - canvasSize.width / 2
@@ -87,7 +87,7 @@ export default class Pallet extends Object3D {
     this.type = 'pallet'
 
     this.add(Pallet.extObject.clone())
-    this.scale.set(10, 10, 10)
+    this.scale.set(width, depth, height)
     this.position.set(cx, 0, cy)
     this.rotation.y = rotation
 

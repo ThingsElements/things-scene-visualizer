@@ -41,6 +41,8 @@
     "things-scene-viewer": "ThingsElements/things-scene-viewer",
     "things-designer-elements": "ThingsElements/things-designer-elements#^2.0.54",
     "things-scene-table": "ThingsElements/things-scene-table#^2.0.7",
-    "babylonjs": "^3.0.7"
+    "babylonjs": "^3.0.7",
+    "things-scene-forklift": "ThingsElements/things-scene-forklift#^2.0.2",
+    "things-scene-person": "ThingsElements/things-scene-person#^2.0.2"
   }
 }
