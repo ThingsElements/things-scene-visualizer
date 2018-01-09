@@ -6,7 +6,8 @@ import Object3D from './object3d'
 
 var extObj
 var {
-  Rect,
+  RectPath,
+  Shape,
   Component,
   Component3d
 } = scene
@@ -95,7 +96,7 @@ export default class Pallet extends Object3D {
 
 }
 
-export class Pallet2d extends Rect {
+export class Pallet2d extends RectPath(Shape) {
   is3dish() {
     return true
   }
