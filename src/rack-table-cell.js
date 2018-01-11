@@ -109,6 +109,10 @@ export default class RackTableCell extends RectPath(Component) {
     var border = this.model.border || EMPTY_BORDER;
   }
 
+  get isEmpty() {
+    return this.get('isEmpty');
+  }
+
   _drawBorder(context, x, y, to_x, to_y, style) {
     if (style && style.strokeStyle && style.lineWidth && style.lineDash) {
       context.beginPath();
@@ -195,10 +199,10 @@ export default class RackTableCell extends RectPath(Component) {
     locPattern = locPattern.substring(0, locPattern.indexOf('{u}') + 3);
 
     var locationString = ''
-    if(this.get('section') && this.get('unit'))
+    if (this.get('section') && this.get('unit'))
       locationString = locPattern.replace('{z}', zone).replace('{s}', this.get('section')).replace('{u}', this.get('unit'))
 
-    if(!locationString)
+    if (!locationString)
       return
 
 
@@ -365,175 +369,6 @@ export default class RackTableCell extends RectPath(Component) {
 
   get isAisle() {
     return this.notEmptyRowCells.length === 0
-  }
-
-  increaseLocationCW(skipNumbering, startSection, startUnit) {
-    var rackTable = this.parent;
-    var selectedCells = this.root.selected;
-    var selectedIndex = selectedCells.indexOf(this);
-
-    var selectedRows = []
-    var s;
-    var emptyCount;
-
-    var selectedRowIndex = 0;
-
-    for (var i = 0; i < selectedCells.length; i++) {
-      if (i % rackTable.columns === 0) {
-        s = [];
-        selectedRows.push(s);
-        emptyCount = 0
-      }
-
-      var cell = selectedCells[i];
-      if (cell.get('isEmpty')) {
-        emptyCount++;
-      }
-
-      s.push(cell)
-
-      if (emptyCount === rackTable.columns)
-        selectedRows.pop();
-
-      if (cell === this)
-        selectedRowIndex = selectedRows.length - 1;
-    }
-
-    // var selectedRowIndex = Math.floor(selectedIndex / rackTable.columns);
-    var selectedColumnIndex = selectedIndex % rackTable.columns;
-
-    if (this.get('isEmpty')) {
-      delete this.model.unit
-      delete this.model.section
-      return
-    }
-
-    var increasing = selectedRowIndex % 2 === 0
-    this.setLocationInfo(increasing, skipNumbering, startSection, startUnit, selectedRowIndex===0)
-
-  }
-
-  increaseLocationCCW(skipNumbering, startSection, startUnit) {
-    var rackTable = this.parent;
-    var selectedCells = this.root.selected;
-    var selectedIndex = selectedCells.indexOf(this);
-
-    var selectedRows = []
-    var s;
-    var emptyCount;
-
-    var selectedRowIndex = 0;
-
-    for (var i = 0; i < selectedCells.length; i++) {
-      if (i % rackTable.columns === 0) {
-        s = [];
-        selectedRows.push(s);
-        emptyCount = 0
-      }
-
-      var cell = selectedCells[i];
-      if (cell.get('isEmpty')) {
-        emptyCount++;
-      }
-
-      s.push(cell)
-
-      if (emptyCount === rackTable.columns)
-        selectedRows.pop();
-
-      if (cell === this)
-        selectedRowIndex = selectedRows.length - 1;
-    }
-
-    var selectedColumnIndex = selectedIndex % rackTable.columns;
-
-    if (this.get('isEmpty'))
-      return
-
-    var increasing = selectedRowIndex % 2 !== 0
-    this.setLocationInfo(increasing, skipNumbering, startSection, startUnit, selectedRowIndex===0)
-  }
-
-  setLocationInfo(increasing, skipNumbering, startSection, startUnit, isFirst) {
-    var rackTable = this.parent;
-    var emptyCellCount = this.emptyRowCells.length
-    var lastSection = Number(startSection) || 1;
-    var lastUnit = Number(startUnit) || 1;
-    // var lastUnit = increasing ? 1 : rackTable.columns - emptyCellCount;
-
-    if (!increasing) {
-      lastUnit = rackTable.columns + Number(startUnit) -1;
-      if(skipNumbering)
-        lastUnit -= emptyCellCount
-    }
-
-    var unitOffset = 0;
-
-    var aboveCell = this.aboveCell;
-    var sectionIncreaseCoefficient = 1
-
-    while (aboveCell && aboveCell.isAisle) {
-      aboveCell = aboveCell.aboveCell
-      sectionIncreaseCoefficient = 0
-    }
-
-    if (!isFirst && aboveCell) {
-      var aboveCells = aboveCell.notEmptyRowCells;
-      aboveCell = aboveCells[increasing ? 0 : aboveCells.length - 1]
-
-      if (skipNumbering) {
-        unitOffset = !sectionIncreaseCoefficient ? Number(aboveCell.get('unit')) - Number(startUnit || 0) + 1 : 0;
-      } else {
-        if (increasing) {
-          unitOffset = !sectionIncreaseCoefficient ? rackTable.columns : 0;
-        } else {
-          unitOffset = !sectionIncreaseCoefficient ? lastUnit : 0;
-        }
-      }
-
-      lastSection = Number(aboveCell.get('section')) + sectionIncreaseCoefficient
-    }
-
-    var foundInfo = this.getNotEmptyLeftCell(this) || {cell:null, count: 0};
-    var leftCell = foundInfo.cell;
-    var count = foundInfo.count;
-
-    var increaseCoefficient = increasing ? 1 : -1;
-
-    if (leftCell) {
-      if (skipNumbering)
-        lastUnit = Number(leftCell.get('unit') || 1) + increaseCoefficient
-      else
-        lastUnit = Number(leftCell.get('unit') || 0) + increaseCoefficient + count * increaseCoefficient
-    }
-    else
-      if (skipNumbering)
-        lastUnit += unitOffset
-      else
-        lastUnit += unitOffset + count * increaseCoefficient
-
-    this.set('unit', String(lastUnit).padStart(2, 0))
-    this.set('section', String(lastSection).padStart(2, 0))
-  }
-
-  getNotEmptyLeftCell(cell, searchCount) {
-    cell = cell || this;
-    searchCount = searchCount || 0;
-
-    var leftCell = cell.leftCell;
-    if (!leftCell)
-      return {
-        cell: null,
-        count: searchCount
-      };
-
-    if (leftCell.get('isEmpty'))
-      return this.getNotEmptyLeftCell(leftCell, ++searchCount);
-
-    return {
-      cell: leftCell,
-      count: searchCount
-    };
   }
 
   onchange(after, before) {
