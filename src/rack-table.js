@@ -960,7 +960,7 @@ export class RackTable extends Container {
      *
      * set location
      */
-    this.setLocations(merged)
+    this.setLocations(merged, startSection, startUnit)
 
   }
 
