@@ -175,6 +175,8 @@ export default class Stock extends Mesh {
 
         // this.visible = true;
         return true;
+      } else {
+        this.material = this._hideEmptyStock ? this.emptyMaterial : this.userDefineDefaultMaterial
       }
     })
   }
