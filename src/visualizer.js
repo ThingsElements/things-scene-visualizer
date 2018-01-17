@@ -687,7 +687,6 @@ export default class Visualizer extends Container {
   }
 
   onmouseup(e) {
-
     if (this._controls) {
       if (this._lastFocused)
         this._lastFocused._focused = false;
@@ -795,6 +794,7 @@ export default class Visualizer extends Container {
 
   ontouchmove(e) {
     if (this._controls) {
+      this._controls.cameraChanged = true
       this._controls.onTouchMove(e)
       e.stopPropagation()
     }
@@ -803,6 +803,7 @@ export default class Visualizer extends Container {
   ontouchend(e) {
     if (this._controls) {
       this._controls.onTouchEnd(e)
+      this.onmouseup(e);
       e.stopPropagation()
     }
   }
@@ -810,6 +811,19 @@ export default class Visualizer extends Container {
   onkeydown(e) {
     if (this._controls) {
       this._controls.onKeyDown(e)
+      e.stopPropagation()
+    }
+  }
+
+  onpinch(e) {
+    if (this._controls) {
+      var zoom = this.model.zoom
+      zoom *= e.scale
+
+      if (zoom < 100)
+        zoom = 100
+
+      this.set('zoom', zoom)
       e.stopPropagation()
     }
   }
