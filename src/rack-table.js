@@ -1086,6 +1086,37 @@ export class RackTable extends Container {
 
         });
         break;
+      case 'zigzag-reverse':
+        sections.forEach((rows, i) => {
+          var section = [];
+
+          rows.forEach((r, i) => {
+
+            if (i % 2 === 0) {
+              r.reverse();
+              section.push(r);
+            }
+          })
+
+          var sectionLength = section.length;
+          var tempRow = [];
+          var tempSection = [];
+
+          section.forEach((row, rowIdx) => {
+            row.forEach((cell, idx) => {
+              tempRow[rowIdx + idx * section.length] = cell;
+            })
+          })
+
+          var chunkSize = tempRow.length / sectionLength
+          for (var idx = 0; idx < sectionLength; idx++) {
+            tempSection.push(tempRow.slice(idx * chunkSize, (idx + 1) * chunkSize))
+          }
+
+          rearranged.push(tempSection);
+
+        });
+        break;
     }
 
     return rearranged;
