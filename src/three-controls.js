@@ -67,7 +67,7 @@ var ThreeControls = function (object, component) {
   // Set to true to automatically rotate around the target
   // If auto-rotate is enabled, you must call controls.update() in your animation loop
   this.autoRotate = this.component.model.autoRotate || false;
-  this.autoRotateSpeed = this.component.model.rotationSpeed || 5.0; // 30 seconds per round when fps is 60
+  this.autoRotateSpeed = this.component.model.rotationSpeed || 2.0; // 30 seconds per round when fps is 60
 
   // Set to false to disable use of the keys
   this.enableKeys = true;
@@ -151,7 +151,8 @@ var ThreeControls = function (object, component) {
 
       if (scope.autoRotate && state === STATE.NONE) {
 
-        rotateLeft(getAutoRotationAngle());
+        thetaDelta = - getAutoRotationAngle();
+        theta = 0;
 
       }
 
@@ -428,9 +429,14 @@ var ThreeControls = function (object, component) {
   var dollyEnd = new THREE.Vector2();
   var dollyDelta = new THREE.Vector2();
 
-  function getAutoRotationAngle() {
+  var START_TIME = performance.now();
 
-    return 2 * Math.PI / 60 / 60 * scope.autoRotateSpeed;
+  function getAutoRotationAngle() {
+    var lastTime = performance.now() - START_TIME;
+    var progress = (lastTime / (60000 / scope.autoRotateSpeed));
+
+    return 2 * Math.PI * progress;
+    // return 2 * Math.PI / 60 / 60 * scope.autoRotateSpeed;
 
   }
 

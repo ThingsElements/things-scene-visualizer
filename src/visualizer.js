@@ -710,6 +710,7 @@ export default class Visualizer extends Container {
           object.onmouseup(e, this, popup.show.bind(this, this, ref))
 
         object._focused = true;
+        object._focusedAt = performance.now();
         this._lastFocused = object
       }
       else {
@@ -792,7 +793,8 @@ export default class Visualizer extends Container {
     }
   }
 
-  ontouchmove(e) {
+  onpan(e) {
+    console.log('pan!')
     if (this._controls) {
       this._controls.cameraChanged = true
       this._controls.onTouchMove(e)
@@ -844,6 +846,18 @@ export default class Visualizer extends Container {
 
   onredraw() {
     this.threed_animate();
+  }
+
+
+
+
+
+  ontap() {
+    console.log("tap!")
+  }
+
+  onhold() {
+    console.log("hold!")
   }
 
 }

@@ -242,12 +242,32 @@ export default class Stock extends Mesh {
   // }
 
   onBeforeRender() {
+    // if (!this._originScale)
+    //   this._originScale = this.scale.toArray();
+
     if (this._focused) {
-      this.rotation.y += 0.5
-      this._visualizer.invalidate()
+      var lastTime = (performance.now() - this._focusedAt);
+      var progress = (lastTime / 2000);
+
+      // if (progress > 1)
+      //   progress %= 1
+
+      // var currScale = new THREE.Vector3().fromArray(this._originScale);
+      // var total_scale = 0.5;
+
+      // currScale.multiplyScalar(1 + total_scale * progress)
+
+      // this.scale.copy(currScale);
+      this.rotation.y = 2 * Math.PI * progress;
     }
-    else
-      this.rotation.y = 0
+    else {
+      if (this._focusedAt)
+        delete this._focusedAt;
+
+      // this.scale.fromArray(this._originScale);
+      this.rotation.y = 0;
+    }
+    this._visualizer.invalidate();
   }
 
   onmouseup(e, visualizer, callback) {
