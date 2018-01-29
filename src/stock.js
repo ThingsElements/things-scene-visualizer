@@ -259,15 +259,18 @@ export default class Stock extends Mesh {
 
       // this.scale.copy(currScale);
       this.rotation.y = 2 * Math.PI * progress;
+      this._visualizer.invalidate();
     }
     else {
-      if (this._focusedAt)
+      if (this._focusedAt) {
         delete this._focusedAt;
+        this.rotation.y = 0;
+        this._visualizer.invalidate();
+      }
 
       // this.scale.fromArray(this._originScale);
-      this.rotation.y = 0;
     }
-    this._visualizer.invalidate();
+
   }
 
   onmouseup(e, visualizer, callback) {
