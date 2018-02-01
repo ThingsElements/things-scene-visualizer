@@ -63,7 +63,7 @@ const NATURE = {
     label: 'auto-rotate',
     name: 'autoRotate',
     property: 'autoRotate'
-  },{
+  }, {
     type: 'checkbox',
     label: 'show-axis',
     name: 'showAxis',
@@ -280,7 +280,10 @@ export default class Visualizer extends Container {
 
     var {
       width,
-      height,
+      height
+    } = this.bounds
+
+    var {
       fov = 45,
       near = 0.1,
       far = 20000,
@@ -290,6 +293,7 @@ export default class Visualizer extends Container {
       precision = 'highp',
       legendTarget
     } = this.model
+
     var components = this.components || []
 
     // SCENE
@@ -445,11 +449,18 @@ export default class Visualizer extends Container {
     var {
       left,
       top,
-      width,
-      height,
       debug,
       threed
     } = this.model
+
+    var {
+      width,
+      height
+    } = this.bounds
+
+    // ios에서 width, height에 소수점이 있으면 3d를 표현하지 못하는 문제가 있어 정수화
+    width = Math.floor(width);
+    height = Math.floor(height);
 
     if (threed) {
 
