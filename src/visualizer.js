@@ -794,7 +794,6 @@ export default class Visualizer extends Container {
   }
 
   onpan(e) {
-    console.log('pan!')
     if (this._controls) {
       this._controls.cameraChanged = true
       this._controls.onTouchMove(e)
@@ -830,8 +829,11 @@ export default class Visualizer extends Container {
     }
   }
 
-  handleMouseWheel(event) {
+  ondoubletap() {
+    this._controls.reset();
+  }
 
+  handleMouseWheel(event) {
     var delta = 0;
     var zoom = this.model.zoom
 
@@ -848,17 +850,6 @@ export default class Visualizer extends Container {
     this.threed_animate();
   }
 
-
-
-
-
-  ontap() {
-    console.log("tap!")
-  }
-
-  onhold() {
-    console.log("hold!")
-  }
 
 }
 
