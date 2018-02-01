@@ -67,7 +67,7 @@ var ThreeControls = function (object, component) {
   // Set to true to automatically rotate around the target
   // If auto-rotate is enabled, you must call controls.update() in your animation loop
   this.autoRotate = this.component.model.autoRotate || false;
-  this.autoRotateSpeed = this.component.model.rotationSpeed || 5.0; // 30 seconds per round when fps is 60
+  this.autoRotateSpeed = this.component.model.rotationSpeed || 2.0; // 30 seconds per round when fps is 60
 
   // Set to false to disable use of the keys
   this.enableKeys = true;
@@ -151,7 +151,8 @@ var ThreeControls = function (object, component) {
 
       if (scope.autoRotate && state === STATE.NONE) {
 
-        rotateLeft(getAutoRotationAngle());
+        thetaDelta = - getAutoRotationAngle();
+        theta = 0;
 
       }
 
@@ -315,55 +316,55 @@ var ThreeControls = function (object, component) {
 
   this.onTouchStart = function (event) {
 
-    //   if ( this.enabled === false ) return;
+    // if (this.enabled === false) return;
 
-    //   switch ( event.touches.length ) {
-    //     case 1: // one-fingered touch: rotate
-    //       if ( this.enableRotate === false ) return;
-    //       handleTouchStartRotate( event );
-    //       state = STATE.TOUCH_ROTATE;
-    //       break;
+    // switch (event.touches.length) {
+    //   case 1: // one-fingered touch: rotate
+    //     if (this.enableRotate === false) return;
+    //     handleTouchStartRotate(event);
+    //     state = STATE.TOUCH_ROTATE;
+    //     break;
 
-    //     case 2: // two-fingered touch: dolly
-    //       if ( this.enableZoom === false ) return;
-    //       handleTouchStartDolly( event );
-    //       state = STATE.TOUCH_DOLLY;
-    //       break;
+    //   case 2: // two-fingered touch: dolly
+    //     if (this.enableZoom === false) return;
+    //     handleTouchStartDolly(event);
+    //     state = STATE.TOUCH_DOLLY;
+    //     break;
 
-    //     case 3: // three-fingered touch: pan
-    //       if ( this.enablePan === false ) return;
-    //       handleTouchStartPan( event );
-    //       state = STATE.TOUCH_PAN;
-    //       break;
+    //   case 3: // three-fingered touch: pan
+    //     if (this.enablePan === false) return;
+    //     handleTouchStartPan(event);
+    //     state = STATE.TOUCH_PAN;
+    //     break;
 
-    //     default:
-    //       state = STATE.NONE;
-    //   }
+    //   default:
+    //     state = STATE.NONE;
+    // }
   }
 
   this.onTouchMove = function (event) {
 
-    //   if ( this.enabled === false ) return;
+    // if (this.enabled === false) return;
 
-    //   switch ( event.touches.length ) {
-    //     case 1: // one-fingered touch: rotate
-    //       if ( this.enableRotate === false ) return;
-    //       if ( state !== STATE.TOUCH_ROTATE ) return; // is this needed?...
-    //       handleTouchMoveRotate( event );
-    //       break;
-    //     case 2: // two-fingered touch: dolly
-    //       if ( this.enableZoom === false ) return;
-    //       if ( state !== STATE.TOUCH_DOLLY ) return; // is this needed?...
-    //       handleTouchMoveDolly( event );
-    //       break;
-    //     case 3: // three-fingered touch: pan
-    //       if ( this.enablePan === false ) return;
-    //       if ( state !== STATE.TOUCH_PAN ) return; // is this needed?...
-    //       handleTouchMovePan( event );
-    //       break;
-    //     default:
-    //       state = STATE.NONE;
-    //   }
+    // switch (event.touches.length) {
+    //   case 1: // one-fingered touch: rotate
+    //     if (this.enableRotate === false) return;
+    //     if (state !== STATE.TOUCH_ROTATE) return; // is this needed?...
+    //     handleTouchMoveRotate(event);
+    //     break;
+    //   case 2: // two-fingered touch: dolly
+    //     if ( this.enableZoom === false ) return;
+    //     if ( state !== STATE.TOUCH_DOLLY ) return; // is this needed?...
+    //     handleTouchMoveDolly( event );
+    //     break;
+    //   case 3: // three-fingered touch: pan
+    //     if ( this.enablePan === false ) return;
+    //     if ( state !== STATE.TOUCH_PAN ) return; // is this needed?...
+    //     handleTouchMovePan( event );
+    //     break;
+    //   default:
+    //     state = STATE.NONE;
+    // }
   }
 
   this.onTouchEnd = function (event) {
@@ -411,9 +412,14 @@ var ThreeControls = function (object, component) {
   var dollyEnd = new THREE.Vector2();
   var dollyDelta = new THREE.Vector2();
 
-  function getAutoRotationAngle() {
+  var START_TIME = performance.now();
 
-    return 2 * Math.PI / 60 / 60 * scope.autoRotateSpeed;
+  function getAutoRotationAngle() {
+    var lastTime = performance.now() - START_TIME;
+    var progress = (lastTime / (60000 / scope.autoRotateSpeed));
+
+    return 2 * Math.PI * progress;
+    // return 2 * Math.PI / 60 / 60 * scope.autoRotateSpeed;
 
   }
 

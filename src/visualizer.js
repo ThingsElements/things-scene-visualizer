@@ -63,7 +63,7 @@ const NATURE = {
     label: 'auto-rotate',
     name: 'autoRotate',
     property: 'autoRotate'
-  },{
+  }, {
     type: 'checkbox',
     label: 'show-axis',
     name: 'showAxis',
@@ -687,7 +687,6 @@ export default class Visualizer extends Container {
   }
 
   onmouseup(e) {
-
     if (this._controls) {
       if (this._lastFocused)
         this._lastFocused._focused = false;
@@ -711,6 +710,7 @@ export default class Visualizer extends Container {
           object.onmouseup(e, this, popup.show.bind(this, this, ref))
 
         object._focused = true;
+        object._focusedAt = performance.now();
         this._lastFocused = object
       }
       else {
@@ -789,13 +789,6 @@ export default class Visualizer extends Container {
   ontouchstart(e) {
     if (this._controls) {
       this._controls.onTouchStart(e)
-      e.stopPropagation()
-    }
-  }
-
-  ontouchmove(e) {
-    if (this._controls) {
-      this._controls.onTouchMove(e)
       e.stopPropagation()
     }
   }
