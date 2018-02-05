@@ -349,7 +349,6 @@ var ThreeControls = function (object, component) {
   }
 
   this.onTouchMove = function (event) {
-
       if ( this.enabled === false ) return;
 
       switch ( event.touches.length ) {

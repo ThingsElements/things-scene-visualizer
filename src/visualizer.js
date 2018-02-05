@@ -811,7 +811,6 @@ export default class Visualizer extends Container {
       e.stopPropagation()
     }
   }
-
   ontouchend(e) {
     if (this._controls) {
       this._controls.onTouchEnd(e)
