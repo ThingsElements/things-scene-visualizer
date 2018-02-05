@@ -1,12 +1,16 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import * as BABYLON from 'babylonjs'
+import ThreeLayout from './three-layout'
+import ThreeControls from './three-controls'
+
+THREE.Cache.enabled = true
 
 var {
   Component,
   Container,
-  Layout
+  Layout,
+  Layer
 } = scene
 
 const NATURE = {
@@ -38,7 +42,16 @@ const NATURE = {
     label: 'precision',
     name: 'precision',
     property: {
-      options: ['highp', 'mediump', 'lowp']
+      options: [{
+        display: 'High',
+        value: 'highp'
+      }, {
+        display: 'Medium',
+        value: 'mediump'
+      }, {
+        display: 'Low',
+        value: 'lowp'
+      }]
     }
   }, {
     type: 'checkbox',
@@ -60,10 +73,35 @@ const NATURE = {
     label: '3dmode',
     name: 'threed',
     property: 'threed'
+  }, {
+    type: 'checkbox',
+    label: 'debug',
+    name: 'debug',
+    property: 'threed'
+  }, {
+    type: 'string',
+    label: 'location-field',
+    name: 'locationField'
+  }, {
+    type: 'string',
+    label: 'popup-scene',
+    name: 'popupScene'
+  }, {
+    type: 'string',
+    label: 'legend-target',
+    name: 'legendTarget'
+  }, {
+    type: 'number',
+    label: 'rotation-speed',
+    name: 'rotationSpeed'
+  }, {
+    type: 'checkbox',
+    label: 'hide-empty-stock',
+    name: 'hideEmptyStock'
   }]
 }
 
-const WEBGL_NO_SUPPORT_TEXT = 'WebGL is not supported'
+const WEBGL_NO_SUPPORT_TEXT = 'WebGL no support'
 
 function registerLoaders() {
   if (!registerLoaders.done) {
@@ -73,6 +111,17 @@ function registerLoaders() {
 }
 
 export default class Visualizer extends Container {
+
+  get legendTarget() {
+    var { legendTarget } = this.model
+
+    if (!this._legendTarget && legendTarget) {
+      this._legendTarget = this.root.findById(legendTarget)
+      this._legendTarget && this._legendTarget.on('change', this.onLegendTargetChanged, this)
+    }
+
+    return this._legendTarget
+  }
 
   containable(component) {
     return component.is3dish()
@@ -92,269 +141,293 @@ export default class Visualizer extends Container {
     return this._objects[id]
   }
 
-  getRegister(type) {
-    return scene.Component3d.register(type)
+  /* THREE Object related .. */
+
+  createFloor(color, width, height) {
+
+    let fillStyle = this.model.fillStyle
+
+    var floorMaterial
+
+    var self = this;
+
+    if (fillStyle.type == 'pattern' && fillStyle.image) {
+
+      var floorTexture = this._textureLoader.load(this.app.url(fillStyle.image), function (texture) {
+        texture.minFilter = THREE.LinearFilter
+        self.render_threed()
+      })
+
+      var floorMaterial = [
+        floorMaterial = new THREE.MeshLambertMaterial({
+          color: color
+        }),
+        floorMaterial = new THREE.MeshLambertMaterial({
+          color: color
+        }),
+        floorMaterial = new THREE.MeshLambertMaterial({
+          color: color
+        }),
+        floorMaterial = new THREE.MeshLambertMaterial({
+          color: color
+        }),
+        new THREE.MeshLambertMaterial({
+          map: floorTexture
+        }),
+        floorMaterial = new THREE.MeshLambertMaterial({
+          color: color
+        })
+      ]
+    } else {
+      floorMaterial = new THREE.MeshLambertMaterial({
+        color: color
+      })
+    }
+
+
+    var floorGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
+    // var floorGeometry = new THREE.PlaneGeometry(width, height)
+
+    var floor = new THREE.Mesh(floorGeometry, floorMaterial)
+    floor.scale.set(width, height, 5);
+
+    // floor.receiveShadow = true
+
+    floor.rotation.x = -Math.PI / 2
+    floor.position.y = -2
+
+    floor.name = 'floor'
+
+    this._scene3d.add(floor)
   }
 
-  /* THREE Object related .. */
-  createObjects(components) {
+  createObjects(components, canvasSize) {
 
-    // components.forEach(component => {
-
-    //   var clazz = scene.Component3d.register(component.type)
-    //   var transModel = this.transcoord3d(component);
-
-    //   if (!clazz) {
-    //     console.warn("Class not found : 3d class is not exist");
-    //     return;
-    //   }
-
-    //   var item = new clazz(this, transModel, this.scene)
-
-    //   if (item) {
-    //     this.putObject(component.id, item);
-    //   }
-
-    // })
-
-    var stock = BABYLON.MeshBuilder.CreateBox('stock', {
-      size: 1
-    }, this.scene);
-
-    var frame1 = BABYLON.MeshBuilder.CreateBox('frame1', {
-      width: 0.1,
-      height: 1,
-      depth: 0.1
-    }, this.scene);
-    var frame2 = BABYLON.MeshBuilder.CreateBox('frame2', {
-      width: 0.1,
-      height: 1,
-      depth: 0.1
-    }, this.scene);
-    var frame3 = BABYLON.MeshBuilder.CreateBox('frame3', {
-      width: 0.1,
-      height: 1,
-      depth: 0.1
-    }, this.scene);
-    var frame4 = BABYLON.MeshBuilder.CreateBox('frame4', {
-      width: 0.1,
-      height: 1,
-      depth: 0.1
-    }, this.scene);
-
-    frame1.position = new BABYLON.Vector3(-0.5, 0, -0.5)
-    frame2.position = new BABYLON.Vector3(-0.5, 0, 0.5)
-    frame3.position = new BABYLON.Vector3(0.5, 0, -0.5)
-    frame4.position = new BABYLON.Vector3(0.5, 0, 0.5)
-
-    var frames = [frame1, frame2, frame3, frame4];
-
-    var mergedFrame = BABYLON.Mesh.MergeMeshes(frames, true);
-
-    frames = null;
-
-    var board = BABYLON.MeshBuilder.CreatePlane('board', {
-      width: 1,
-      height: 1,
-      sideOrientation: BABYLON.Mesh.DOUBLESIDE
-    }, this.scene);
-
-    // board.rotation.x = - Math.PI / 2
-    // board.material.alpha = 0.5;
-
-    var stockCount = 0;
-    var frameCount = 0;
-    var boardCount = 0;
     components.forEach(component => {
-      if (component.type == 'rack') {
-        frameCount++;
-        boardCount += component.shelves - 1;
-        stockCount += component.shelves;
-      }
-    });
+      // requestAnimationFrame(() => {
+      var clazz = scene.Component3d.register(component.model.type)
 
-    var racks = components.filter(c => {
-      return c.type == 'rack'
+      if (!clazz) {
+        console.warn("Class not found : 3d class is not exist");
+        return;
+      }
+
+      var item = new clazz(component.hierarchy, canvasSize, this, component)
+
+
+      if (item) {
+        // requestAnimationFrame(() => {
+        item.name = component.model.id;
+        this._scene3d.add(item)
+        this.putObject(component.model.id, item);
+        // })
+      }
+    })
+    // })
+  }
+
+
+  destroy_scene3d() {
+    this.stop();
+
+    window.removeEventListener('focus', this._onFocus);
+
+    if (this._renderer)
+      this._renderer.clear()
+    delete this._renderer
+    delete this._camera
+    delete this._2dCamera
+    delete this._keyboard
+    delete this._controls
+    delete this._projector
+    delete this._load_manager
+    delete this._objects
+
+    if (this._scene3d) {
+      let children = this._scene3d.children.slice();
+      for (let i in children) {
+        let child = children[i]
+        if (child.dispose)
+          child.dispose();
+        if (child.geometry && child.geometry.dispose)
+          child.geometry.dispose();
+        if (child.material && child.material.dispose)
+          child.material.dispose();
+        if (child.texture && child.texture.dispose)
+          child.texture.dispose();
+        this._scene3d.remove(child)
+      }
+    }
+
+    delete this._scene3d
+  }
+
+  init_scene3d() {
+
+    this.trigger("visualizer-initialized", this)
+
+    this.root.on('redraw', this.onredraw, this)
+
+    if (this._scene3d)
+      this.destroy_scene3d()
+
+    registerLoaders()
+    this._textureLoader = new THREE.TextureLoader()
+    this._textureLoader.withCredential = true
+    this._textureLoader.crossOrigin = 'use-credentials'
+
+    this._exporter = new THREE.OBJExporter();
+
+    var {
+      width,
+      height
+    } = this.bounds
+
+    var {
+      fov = 45,
+      near = 0.1,
+      far = 20000,
+      fillStyle = '#424b57',
+      light = 0xffffff,
+      antialias = true,
+      precision = 'highp',
+      legendTarget
+    } = this.model
+
+    var components = this.components || []
+
+    // SCENE
+    this._scene3d = new THREE.Scene()
+
+    // CAMERA
+    var aspect = width / height
+
+    this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
+
+    this._scene3d.add(this._camera)
+    this._camera.position.set(height * 0.8, Math.floor(Math.min(width, height)), width * 0.8)
+    this._camera.lookAt(this._scene3d.position)
+    this._camera.zoom = this.model.zoom * 0.01
+
+    if (this.model.showAxis) {
+      var axisHelper = new THREE.AxisHelper(width);
+      this._scene3d.add(axisHelper);
+    }
+
+    try {
+      // RENDERER
+      this._renderer = new THREE.WebGLRenderer({
+        precision: precision,
+        alpha: true,
+        antialias: antialias
+      });
+
+    } catch (e) {
+      this._noSupportWebgl = true
+    }
+
+    if (this._noSupportWebgl)
+      return
+
+
+    this._renderer.autoClear = true
+
+    this._renderer.setClearColor(0xffffff, 0) // transparent
+    this._renderer.setSize(width, height)
+    // this._renderer.setSize(1600, 900)
+    // this._renderer.shadowMap.enabled = true
+    // this._renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    // this._renderer.setPixelRatio(window.devicePixelRatio)
+
+    // CONTROLS
+    this._controls = new ThreeControls(this._camera, this)
+
+    // LIGHT
+    var _light = new THREE.HemisphereLight(light, 0x000000, 1)
+
+    _light.position.set(-this._camera.position.x, this._camera.position.y, -this._camera.position.z)
+    this._camera.add(_light)
+
+    // this._camera.castShadow = true
+
+    this._raycaster = new THREE.Raycaster()
+    // this._mouse = { x: 0, y: 0, originX: 0, originY : 0 }
+    this._mouse = new THREE.Vector2()
+
+
+    this._tick = 0
+    this._clock = new THREE.Clock(true)
+    this.mixers = new Array();
+
+    this.createFloor(fillStyle, width, height)
+    this.createObjects(components, {
+      width,
+      height
     })
 
-    this.sps.addShape(mergedFrame, frameCount)
-    this.sps.addShape(board, boardCount)
-    this.sps.addShape(stock, stockCount)
+    this._load_manager = new THREE.LoadingManager();
+    this._load_manager.onProgress = function (item, loaded, total) {
 
-    mergedFrame.dispose();
-    board.dispose();
-    stock.dispose();
+    }
 
-    // this.assetsManager.load();
-
-    this.sps.buildMesh();
-
-    this.sps.initParticles = function () {
-      var stockP = 0;
-      var boardP = 0;
-
-      for (var i = 0; i < racks.length; i++) {
-        var rack = this.transcoord3d(racks[i]);
-        var frameParticle = this.sps.particles[i];
-
-        frameParticle._sceneModel = rack;
-        frameParticle.position.x = rack.x;
-        frameParticle.position.y = rack.y + rack.height * rack.shelves / 2 - rack.height / 2;
-        frameParticle.position.z = rack.z;
-
-        frameParticle.scaling = new BABYLON.Vector3(rack.width, rack.height * rack.shelves, rack.depth);
-
-        for (var s = 0; s < rack.shelves; s++) {
-          if (s < rack.shelves - 1) {
-            var boardParticle = this.sps.particles[frameCount + boardP];
-            boardParticle._sceneModel = rack;
-            boardParticle.position.x = rack.x;
-            boardParticle.position.y = (s + 0.5) * rack.height + rack.y;
-            boardParticle.position.z = rack.z;
-
-            boardParticle.rotation.x = - Math.PI / 2
-
-            boardParticle.scaling = new BABYLON.Vector3(rack.width, rack.depth, 1);
-
-            boardP++;
-          }
-
-          var particle = this.sps.particles[frameCount + boardCount + stockP];
-          var stock = JSON.parse(JSON.stringify(rack));
-          var location = this.makeLocationString(stock, this.makeShelfString(stock.shelfPattern, s + 1, stock.shelves));
-          stock.width *= 0.7;
-          stock.height *= 0.7;
-          stock.depth *= 0.7;
-          stock.y = s * rack.height - (rack.height - stock.height) / 2 + stock.y;
-
-          particle._sceneModel = stock;
-          particle.position.x = stock.x;
-          particle.position.y = stock.y;
-          particle.position.z = stock.z;
-
-          particle.color = BABYLON.Color3.FromHexString('#ccaa76')
-
-          particle.scaling = new BABYLON.Vector3(stock.width, stock.height, stock.depth);
-
-          this.putObject(location, particle);
-
-          stockP++;
-        }
-
-      }
-    }.bind(this)
-    this.sps.initParticles();
-    this.sps.setParticles();
-    this.sps.refreshVisibleSize();
-
-
-    this.sps.updateParticle = function (p) {
-      if (p.shapeId !== 2)
-        return;
-
-      if (p == this._pickedStock.mesh) {
-        p.rotation.y += 0.02;
-        return;
-      }
-
-      // if (p.userData) {
-      //   var color = BABYLON.Color3.FromHexString('#ccaa76')
-      //   switch (p.userData.status || p.userData.gubun) {
-      //     case 'A':
-      //       color = new BABYLON.Color3.Red()
-      //       break;
-      //     case 'B':
-      //       color = new BABYLON.Color3.Blue()
-      //       break;
-      //     case 'C':
-      //       color = new BABYLON.Color3.Green()
-      //       break;
-      //     case 'D':
-      //       color = new BABYLON.Color3.Black()
-      //       break;
-      //   }
-
-      //   if(color)
-      //     p.color = color;
-      // }
-
-      if (p._originColor)
-        p.color = p._originColor;
-      p.rotation.y = 0;
+    this._onFocus = function () {
+      this.render_threed();
     }.bind(this)
 
+    window.addEventListener('focus', this._onFocus);
+  }
 
+  threed_animate() {
+    if (!this._controls)
+      return;
 
-    var start = 0;
-    var end = 0;
-    var particleUpdated = 200;
+    // this._animationFrame = requestAnimationFrame(this._threed_animate_func);
 
-    this.scene.registerBeforeRender(function () {
-      if (end >= this.sps.particles.length - 1) {
-        start = 0;
-      }
-      end = start + particleUpdated;
-      this.sps.setParticles(start, end);
-      start = end + 1;
-
-      if (this._pickedStock.mesh && this._pickedStock.mesh.idx > -1)
-        this.sps.setParticles(this._pickedStock.mesh.idx, this._pickedStock.mesh.idx);
-    }.bind(this));
-
-    this.engine.runRenderLoop(function () {
-      this.scene.render();
-    }.bind(this));
+    this._controls.update()
+    this.render_threed();
 
   }
 
-  createScene() {
-    var model = this.transcoord3d(this.model);
-    var maxSize = Math.max(model.width, model.depth);
-    var minSize = Math.min(model.width, model.depth);
-    // var hypotenuseSize = Math.floor(Math.sqrt(Math.pow(model.width, 2) + Math.pow(model.depth, 2)));
-    // create a basic BJS Scene object
-    var scene = new BABYLON.Scene(this.engine);
+  stop() {
+    // cancelAnimationFrame(this._animationFrame)
+  }
 
-    // Assets Manager
-    this.assetsManager = new BABYLON.AssetsManager(scene);
+  // update() {
+  //   if (this._need_control_update || this.get('autoRotate')) {
+  //     this._controls.update()
+  //     this._need_control_update = false;
+  //   } else {
+  //     // this.invalidate()
+  //     // this.render_threed();
+  //   }
+  // }
 
-    this.assetsManager.onFinish = function (tasks) {
-      this.createObjects(this.hierarchy.components)
-      // this.engine.runRenderLoop(function() {
-      //     this.scene.render();
-      // }.bind(this));
-    }.bind(this);
+  get scene3d() {
+    if (!this._scene3d)
+      this.init_scene3d()
+    return this._scene3d
+  }
 
-    // create a FreeCamera, and set its position to (x:0, y:5, z:-10)
-    var camera = new BABYLON.ArcRotateCamera('camera1', 0, 0, 10, new BABYLON.Vector3(0, 0, 0), scene);
-    // camera.upperBetaLimit = 1.4835298642;
-    camera.allowUpsideDown = false;
+  render_threed() {
+    // var delta
+    // if (this._clock)
+    //   delta = this._clock.getDelta();
 
-    // target the camera to scene origin
-    camera.setPosition(new BABYLON.Vector3(0, minSize, maxSize));
-    // camera.setPosition(new BABYLON.Vector3(0, minSize, hypotenuseSize));
+    // var mixers = this.mixers
+    // for (var i in mixers) {
+    //   if (mixers.hasOwnProperty(i)) {
+    //     var mixer = mixers[i];
+    //     if (mixer) {
+    //       mixer.update(delta);
+    //     }
 
-    // attach the camera to the canvas
-    camera.attachControl(this.engine.getRenderingCanvas(), true);
+    //   }
+    // }
 
-    console.log(this.engine.getRenderingCanvas())
-
-    // create a basic light, aiming 0,1,0 - meaning, to the sky
-    var light = new BABYLON.HemisphericLight('hemi-light', new BABYLON.Vector3(0, 1, 0), scene);
-    // var directionalLight = new BABYLON.DirectionalLight('directional-light', new BABYLON.Vector3(1, -1, -1), scene);
-    // directionalLight.diffuse = new BABYLON.Color3(1, 1, 1)
-    // directionalLight.specular = new BABYLON.Color3(1, 1, 1)
-    // directionalLight.groundColor = new BABYLON.Color3(0, 0, 0)
-    // directionalLight.position = camera.position
-    // directionalLight.parent = camera
-
-    // create a built-in "ground" shape; its constructor takes the same 5 params as the sphere's one
-    var ground = new (this.getRegister('floor'))(this, model, scene);
-
-    this.assetsManager.load();
-
-    // return the created scene
-    return scene;
+    if (this._renderer) {
+      // this._renderer.clear()
+      this._renderer.render(this._scene3d, this._camera)
+    }
   }
 
   /* Container Overides .. */
@@ -376,303 +449,206 @@ export default class Visualizer extends Container {
     var {
       left,
       top,
-      width,
-      height,
-      threed,
-      showAxis
+      debug,
+      threed
     } = this.model
 
+    var {
+      width,
+      height
+    } = this.bounds
+
+    // ios에서 width, height에 소수점이 있으면 3d를 표현하지 못하는 문제가 있어 정수화
+    width = Math.floor(width);
+    height = Math.floor(height);
+
     if (threed) {
-      this._initialize();
+
+      if (!this._scene3d) {
+        this.init_scene3d()
+        this.render_threed()
+      }
+
+      if (this._noSupportWebgl) {
+        this._showWebglNoSupportText(ctx);
+        return
+      }
+
+      if (this._dataChanged) {
+        this._onDataChanged()
+      }
 
       ctx.drawImage(
-        this.engine.getRenderingCanvas(), 0, 0, width, height,
+        this._renderer.domElement, 0, 0, width, height,
         left, top, width, height
       )
+
+      if (debug) {
+        ctx.font = 100 + 'px Arial'
+        ctx.textAlign = 'center'
+        ctx.fillStyle = 'black'
+        ctx.globalAlpha = 0.5
+        ctx.fillText(scene.FPS(), 100, 100)
+        this.invalidate()
+      }
+
     } else {
       super._post_draw(ctx);
     }
   }
 
-  _initialize() {
-    if (this._initialized)
-      return;
-
-    var {
-      components
-    } = this.hierarchy
-    var {
-      width,
-      height,
-      antialias
-    } = this.model
-
-    var transModel = this.transcoord3d(this.model);
-
-    // load the 3D engine
-    var canvas = document.createElement('canvas')
-
-    this.engine = new BABYLON.Engine(canvas, antialias, null, false);
-
-    canvas.width = width;
-    canvas.height = height;
-
-    // call the createScene function
-    this.scene = this.createScene();
-
-    if (this.model.showAxis)
-      this.showAxis(Math.min(transModel.width, transModel.depth));
-
-    this.sps = new BABYLON.SolidParticleSystem('sps', this.scene, { isPickable: true });
-
-    // run the render loop
-    this.engine.runRenderLoop(function () {
-      this.scene.render();
-      this.invalidate();
-    }.bind(this));
-
-    // the canvas/window resize event handler
-    window.addEventListener('resize', function () {
-      this.engine.resize();
-    }.bind(this));
-
-    // this.createObjects(components)
-
-    // this.scene.freezeActiveMeshes();
-
-    this.sps.computeParticleTexture = false;
-
-    this.scene.onPointerObservable.add(function (pointerInfo, evt) {
-      var pickInfo = pointerInfo.pickInfo
-      var faceId = pickInfo.faceId;
-
-      if (faceId == -1 || pointerInfo.type !== BABYLON.PointerEventTypes.POINTERPICK) { return; }
-      var idx = this.sps.pickedParticles[faceId].idx;
-      var p = this.sps.particles[idx];
-
-      if (p.shapeId !== 2)
-        return;
-
-      var lastPickedIndex = -1;
-      if (this._pickedStock.mesh != p) {
-        if (this._pickedStock.mesh)
-          lastPickedIndex = this._pickedStock.mesh.idx
-        this._pickedStock.mesh = p;
-        p._originColor = p.color;
-        p.color = new BABYLON.Color3.Teal();
-      }
-
-      if (lastPickedIndex > -1) {
-        this.sps.setParticles(lastPickedIndex, lastPickedIndex);
-      }
-
-    }.bind(this))
-
-    this._pickedStock = {}
-
-    this._initialized = true;
-  }
-
-
-  // show axis
-  showAxis(size) {
-    var scene = this.scene;
-    var makeTextPlane = function (text, color, size) {
-      var dynamicTexture = new BABYLON.DynamicTexture("DynamicTexture", 50, scene, true);
-      dynamicTexture.hasAlpha = true;
-      dynamicTexture.drawText(text, 5, 40, "bold 36px Arial", color, "transparent", true);
-      var plane = new BABYLON.Mesh.CreatePlane("TextPlane", size, scene, true);
-      plane.material = new BABYLON.StandardMaterial("TextPlaneMaterial", scene);
-      plane.material.backFaceCulling = false;
-      plane.material.specularColor = new BABYLON.Color3(0, 0, 0);
-      plane.material.diffuseTexture = dynamicTexture;
-      return plane;
-    };
-
-    var axisX = BABYLON.Mesh.CreateLines("axisX", [
-      new BABYLON.Vector3.Zero(), new BABYLON.Vector3(size, 0, 0), new BABYLON.Vector3(size * 0.95, 0.05 * size, 0),
-      new BABYLON.Vector3(size, 0, 0), new BABYLON.Vector3(size * 0.95, -0.05 * size, 0)
-    ], scene);
-    axisX.color = new BABYLON.Color3(1, 0, 0);
-    var xChar = makeTextPlane("X", "red", size / 10);
-    xChar.position = new BABYLON.Vector3(0.9 * size, -0.05 * size, 0);
-    var axisY = BABYLON.Mesh.CreateLines("axisY", [
-      new BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, size, 0), new BABYLON.Vector3(-0.05 * size, size * 0.95, 0),
-      new BABYLON.Vector3(0, size, 0), new BABYLON.Vector3(0.05 * size, size * 0.95, 0)
-    ], scene);
-
-    axisY.color = new BABYLON.Color3(0, 1, 0);
-    var yChar = makeTextPlane("Y", "green", size / 10);
-    yChar.position = new BABYLON.Vector3(0, 0.9 * size, -0.05 * size);
-    var axisZ = BABYLON.Mesh.CreateLines("axisZ", [
-      new BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, 0, size), new BABYLON.Vector3(0, -0.05 * size, size * 0.95),
-      new BABYLON.Vector3(0, 0, size), new BABYLON.Vector3(0, 0.05 * size, size * 0.95)
-    ], scene);
-    axisZ.color = new BABYLON.Color3(0, 0, 1);
-    var zChar = makeTextPlane("Z", "blue", size / 10);
-    zChar.position = new BABYLON.Vector3(0, 0.05 * size, 0.9 * size);
-  }
-
-  makeLocationString(model, shelfString) {
-    var {
-      locPattern = "{z}{s}-{u}-{sh}",
-      zone = "",
-      section = "",
-      unit = ""
-    } = model
-
-    var locationString = locPattern
-
-    locationString = locationString.replace(/{z}/i, zone);
-    locationString = locationString.replace(/{s}/i, section);
-    locationString = locationString.replace(/{u}/i, unit);
-    locationString = locationString.replace(/{sh}/i, shelfString);
-
-    return locationString;
-  }
-
-  makeShelfString(pattern, shelf, length) {
-    /**
-     *  pattern #: 숫자
-     *  pattern 0: 고정 자리수
-     *  pattern -: 역순
-     */
-
-    if (!pattern || !shelf || !length)
-      return
-
-    var isReverse = /^\-/.test(pattern);
-    pattern = pattern.replace(/#+/, '#');
-
-    var fixedLength = (pattern.match(/0/g) || []).length || 0
-    var shelfString = String(isReverse ? length - shelf + 1 : shelf)
-
-    if (shelfString.length > fixedLength && fixedLength > 0) {
-      shelfString = shelfString.split('').shift(shelfString.length - fixedLength).join('')
-    } else {
-      var prefix = '';
-      for (var i = 0; i < fixedLength - shelfString.length; i++) {
-        prefix += '0';
-      }
-      shelfString = prefix + shelfString;
-    }
-
-    return shelfString
-  }
-
-
   dispose() {
-    super.dispose();
+
+    this._legendTarget && this._legendTarget.off('change', this.onLegendTargetChanged, this)
+    delete this._legendTarget
+
+    this.root.off('redraw', this.onredraw, this);
+
     this.destroy_scene3d()
+
+    super.dispose();
   }
 
-  // get layout() {
-  //   return Layout.get('three')
-  // }
-
-  transcoord3d(position) {
-    var {
-      left,
-      top,
-      zPos = 0,
-      width,
-      height,
-      depth = 0
-    } = position
-
-    var transPos = JSON.parse(JSON.stringify(position));
-    transPos.width = width;
-    transPos.height = depth;
-    transPos.depth = height;
-
-    transPos.x = - (left - this.model.width / 2 + width / 2);
-    transPos.y = zPos + depth / 2;
-    transPos.z = top - this.model.height / 2 + height / 2;
-
-    return transPos
+  get layout() {
+    return Layout.get('three')
   }
 
   get nature() {
     return NATURE
   }
 
-  setStockColor(stock) {
-    if (!stock.userData)
-      return;
+  getObjectByRaycast() {
 
-    var color = BABYLON.Color3.FromHexString('#ccaa76')
-    switch (stock.userData.status || stock.userData.gubun) {
-      case 'A':
-        color = new BABYLON.Color3.Red()
-        break;
-      case 'B':
-        color = new BABYLON.Color3.Blue()
-        break;
-      case 'C':
-        color = new BABYLON.Color3.Green()
-        break;
-      case 'D':
-        color = new BABYLON.Color3.Black()
-        break;
+    var intersects = this.getObjectsByRaycast()
+    var intersected
+
+    if (intersects.length > 0) {
+      intersected = intersects[0].object
     }
 
-    if(color)
-      stock.color = color;
+    return intersected
   }
 
-  onchangeData(after, before) {
+  getObjectsByRaycast() {
+    // find intersections
 
-    if (after.data instanceof Array) {
-      /**
-       *  Array type data
-       *  (e.g. data: [{
-       *    'loc' : 'location1',
-       *    'description': 'description1'
-       *  },
-       *  ...
-       *  ])
-       */
-      after.data.forEach(d => {
-        let data = d
+    // create a Ray with origin at the mouse position
+    //   and direction into the scene (camera direction)
 
-        // setTimeout(function () {
-          let loc = data.loc || data.LOC || data.location || data.LOCATION;
+    var vector = this._mouse
+    if (!this._camera)
+      return
+
+    this._raycaster.setFromCamera(vector, this._camera)
+
+    // create an array containing all objects in the scene with which the ray intersects
+    var intersects = this._raycaster.intersectObjects(this._scene3d.children, true);
+
+    return intersects
+  }
+
+  exportModel() {
+    var exported = this._exporter.parse(this._scene3d);
+    var blob = new Blob([exported], { type: "text/plain;charset=utf-8" });
+    console.log(exported)
+    // saveAs(blob, "exported.txt");
+  }
+
+  _showWebglNoSupportText(context) {
+    context.save();
+
+    var {
+      width,
+      height
+    } = this.model
+
+    context.font = width / 20 + 'px Arial'
+    context.textAlign = 'center'
+    context.fillText(WEBGL_NO_SUPPORT_TEXT, width / 2 - width / 40, height / 2)
+
+    context.restore();
+  }
+
+  resetMaterials() {
+    if (!this._stock_materials)
+      return;
+
+    this._stock_materials.forEach(m => {
+      if (m.dispose)
+        m.dispose();
+    })
+
+    delete this._stock_materials
+  }
+
+  _onDataChanged() {
+
+    var locationField = this.getState('locationField') || 'location';
+
+    if (this._data) {
+      if (this._data instanceof Array) {
+        /**
+         *  Array type data
+         *  (e.g. data: [{
+         *    'loc' : 'location1',
+         *    'description': 'description1'
+         *  },
+         *  ...
+         *  ])
+         */
+        this._data.forEach(d => {
+          let data = d
+
+          let loc = data[locationField];
           let object = this.getObject(loc)
           if (object) {
             object.userData = data;
-            this.setStockColor(object);
+            object.onUserDataChanged()
           }
-        // }.bind(this))
-      })
-    } else {
-      /**
-       *  Object type data
-       *  (e.g. data: {
-       *    'location1': {description: 'description'},
-       *    ...
-       *  })
-       */
-      for (var loc in after.data) {
-        let location = loc
-        if (after.data.hasOwnProperty(location)) {
-
-          // setTimeout(function () {
-            let d = after.data[location]
+        })
+      } else {
+        /**
+         *  Object type data
+         *  (e.g. data: {
+         *    'location1': {description: 'description'},
+         *    ...
+         *  })
+         */
+        for (var loc in this._data) {
+          let location = loc
+          if (this._data.hasOwnProperty(location)) {
+            let d = this._data[location]
             let object = this.getObject(location)
             if (object) {
               object.userData = d;
-              this.setStockColor(object);
-            }
-          // }.bind(this))
+              object.onUserDataChanged()
 
+            }
+          }
         }
       }
     }
+
+    this._dataChanged = false
+
+    this.invalidate();
   }
 
   /* Event Handlers */
 
+  onLegendTargetChanged(after, before) {
+    if (after.hasOwnProperty('status') && before.hasOwnProperty('status'))
+      this.resetMaterials()
+  }
+
   onchange(after, before) {
+
+    if (before.hasOwnProperty('legendTarget') || after.hasOwnProperty('legendTarget')) {
+      this._legendTarget && this._legendTarget.off('change', this.onLegendTargetChanged, this)
+      delete this._legendTarget
+      this.resetMaterials()
+      this._onDataChanged()
+    }
 
     if (after.hasOwnProperty('width') ||
       after.hasOwnProperty('height') ||
@@ -680,7 +656,8 @@ export default class Visualizer extends Container {
       this.destroy_scene3d()
 
     if (after.hasOwnProperty('autoRotate')) {
-      this._controls.autoRotate = after.autoRotate
+      if (this._controls)
+        this._controls.autoRotate = after.autoRotate
     }
 
     if (after.hasOwnProperty('fov') ||
@@ -688,15 +665,16 @@ export default class Visualizer extends Container {
       after.hasOwnProperty('far') ||
       after.hasOwnProperty('zoom')) {
 
-      this._camera.near = this.model.near
-      this._camera.far = this.model.far
-      this._camera.zoom = this.model.zoom * 0.01
-      this._camera.fov = this.model.fov
-      this._camera.updateProjectionMatrix();
+      if (this._camera) {
+        this._camera.near = this.model.near
+        this._camera.far = this.model.far
+        this._camera.zoom = this.model.zoom * 0.01
+        this._camera.fov = this.model.fov
+        this._camera.updateProjectionMatrix();
 
-      this._controls.cameraChanged = true
+        this._controls.cameraChanged = true
+      }
 
-      this._controls.update()
     }
 
     if (after.hasOwnProperty("data")) {
@@ -714,21 +692,63 @@ export default class Visualizer extends Container {
   }
 
   onmousedown(e) {
-    if (this.engine)
-      this.engine.isPointerLock = true;
-
+    if (this._controls) {
+      this._controls.onMouseDown(e)
+    }
   }
+
   onmouseup(e) {
-    if (this.engine)
-      this.engine.isPointerLock = false;
+    if (this._controls) {
+      if (this._lastFocused)
+        this._lastFocused._focused = false;
+
+      var modelLayer = Layer.register('model-layer')
+      var popup = modelLayer.Popup;
+      var ref = this.model.popupScene
+
+      var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
+
+      // this._mouse.originX = this.getContext().canvas.offsetLeft +e.offsetX;
+      // this._mouse.originY = this.getContext().canvas.offsetTop + e.offsetY;
+
+      this._mouse.x = ((pointer.x - this.model.left) / (this.model.width)) * 2 - 1;
+      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
+
+      var object = this.getObjectByRaycast()
+
+      if (object && object.onmouseup) {
+        if (ref)
+          object.onmouseup(e, this, popup.show.bind(this, this, ref))
+
+        object._focused = true;
+        object._focusedAt = performance.now();
+        this._lastFocused = object
+      }
+      else {
+        popup.hide(this.root)
+      }
+
+      this.invalidate();
+      e.stopPropagation()
+    }
 
   }
 
-  // onmousemove(e) {
-  //   if (this.engine) {
+  onmousemove(e) {
+    if (this._controls) {
+      var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
 
-  //   }
-  // }
+      // this._mouse.originX = this.getContext().canvas.offsetLeft +e.offsetX;
+      // this._mouse.originY = this.getContext().canvas.offsetTop + e.offsetY;
+
+      this._mouse.x = ((pointer.x - this.model.left) / (this.model.width)) * 2 - 1;
+      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
+
+      this._controls.onMouseMove(e)
+
+      e.stopPropagation()
+    }
+  }
 
   onmouseleave(e) {
     if (!this._scene2d)
@@ -741,35 +761,30 @@ export default class Visualizer extends Container {
   }
 
   onwheel(e) {
-    if (this.engine) {
-
+    if (this._controls) {
+      this.handleMouseWheel(e)
       e.stopPropagation()
     }
   }
 
   ondragstart(e) {
-    // if (this._controls) {
+    if (this._controls) {
       var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
 
       // this._mouse.originX = this.getContext().canvas.offsetLeft +e.offsetX;
       // this._mouse.originY = this.getContext().canvas.offsetTop + e.offsetY;
 
-      // this._controls.onDragStart(e)
-    console.log(e)
+      this._mouse.x = ((pointer.x - this.model.left) / (this.model.width)) * 2 - 1;
+      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
 
-    var obj = e;
-    obj.movementX = e.offsetX;
-    obj.movementY = e.offsetY;
-
-      var mouseEvent = new MouseEvent("mousemove", e);
-
-      this.engine.getRenderingCanvas().dispatchEvent(mouseEvent)
+      this._controls.onDragStart(e)
       e.stopPropagation()
-    // }
+    }
   }
 
   ondragmove(e) {
     if (this._controls) {
+      this._controls.cameraChanged = true
       this._controls.onDragMove(e)
       e.stopPropagation()
     }
@@ -789,16 +804,17 @@ export default class Visualizer extends Container {
     }
   }
 
-  ontouchmove(e) {
+  onpan(e) {
     if (this._controls) {
+      this._controls.cameraChanged = true
       this._controls.onTouchMove(e)
       e.stopPropagation()
     }
   }
-
   ontouchend(e) {
     if (this._controls) {
       this._controls.onTouchEnd(e)
+      this.onmouseup(e);
       e.stopPropagation()
     }
   }
@@ -810,18 +826,40 @@ export default class Visualizer extends Container {
     }
   }
 
-  handleMouseWheel(event) {
+  onpinch(e) {
+    if (this._controls) {
+      var zoom = this.model.zoom
+      zoom *= e.scale
 
+      if (zoom < 100)
+        zoom = 100
+
+      this.set('zoom', zoom)
+      e.stopPropagation()
+    }
+  }
+
+  ondoubletap() {
+    this._controls.reset();
+  }
+
+  handleMouseWheel(event) {
     var delta = 0;
     var zoom = this.model.zoom
 
     delta = -event.deltaY
-    zoom += delta * 0.01
-    if (zoom < 0)
-      zoom = 0
+    zoom += delta * 0.1
+    if (zoom < 100)
+      zoom = 100
 
     this.set('zoom', zoom)
+
   }
+
+  onredraw() {
+    this.threed_animate();
+  }
+
 
 }
 

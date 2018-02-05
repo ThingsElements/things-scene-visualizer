@@ -1,71 +1,90 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import * as BABYLON from 'babylonjs'
+import Cube from './cube'
 
-export default class Floor {
+export default class Floor extends Cube {
 
-  constructor(visualizer, model, scene) {
-    this._visualizer = visualizer;
-    this._model = model;
-    this._scene = scene;
+  createColors() {
 
-    this.createObject(model, scene);
-  }
+    var colorsOfFaces = [
+      [1.0, 0.3, 0.3, 1.0],    // Front face: cyan
+      [1.0, 0.3, 0.3, 1.0],    // Back face: red
+      [1.0, 0.3, 0.3, 1.0],    // Top face: green
+      [1.0, 0.3, 0.3, 1.0],    // Bottom face: blue
+      [1.0, 0.3, 0.3, 1.0],    // Right face: yellow
+      [1.0, 0.3, 0.3, 1.0]     // Left face: purple
+    ];
 
-  getAssets(url) {
-    var task = this._visualizer.assetsManager.addTextureTask('floor-material task', url)
-    task.onSuccess = function (task) {
-      this._material.opacityTexture = task.texture;
-      this._material.diffuseTexture = task.texture;
-    }.bind(this)
-  }
+    var colors = [];
 
+    for (var j = 0; j < 6; j++) {
+      var polygonColor = colorsOfFaces[j];
 
-  createObject(model, scene) {
-    let {
-      x, y, z, width, height, depth, rotation, id, fillStyle = '#fff'
-    } = model;
-
-    var rgbaRegExp = /^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(?:\.\d+)?))?\)$/
-
-    this.type = model.type
-
-    this._object = BABYLON.Mesh.CreateGround(id, width, depth, 1, scene);
-    this._material = new BABYLON.StandardMaterial('floor-material', scene);
-
-
-    if (fillStyle.type == 'pattern' && fillStyle.image)
-      this.getAssets(this._visualizer.app.url(fillStyle.image))
-    else {
-      var rgba = {};
-      var color;
-      var matched = rgbaRegExp.exec(fillStyle);
-      if (matched && matched.length > 0) {
-        matched = matched.splice(1);
-        matched = matched.filter(m => { return !!m })
-
-        if (matched.length === 3)
-          color = BABYLON.Color3.FromArray(matched)
-        else {
-          color = BABYLON.Color4.FromArray(matched)
-          this._material.alpha = matched[3];
-        }
-      } else {
-        color = BABYLON.Color3.FromHexString(fillStyle)
+      for (var i = 0; i < 4; i++) {
+        colors = colors.concat(polygonColor);
       }
-
-      this._material.diffuseColor = color;
     }
 
-    this._object.material = this._material;
-    // this._material.
+    return colors;
 
-    // this._object.;
+  }
+
+  createPositions() {
+
+    var positions = [
+      // Front face
+      -1.0, -1.0, 1.0,
+      1.0, -1.0, 1.0,
+      1.0, 1.0, 1.0,
+      -1.0, 1.0, 1.0,
+
+      // Back face
+      -1.0, -1.0, -1.0,
+      -1.0, 1.0, -1.0,
+      1.0, 1.0, -1.0,
+      1.0, -1.0, -1.0,
+
+      // Top face
+      -1.0, 1.0, -1.0,
+      -1.0, 1.0, 1.0,
+      1.0, 1.0, 1.0,
+      1.0, 1.0, -1.0,
+
+      // Bottom face
+      -1.0, -1.0, -1.0,
+      1.0, -1.0, -1.0,
+      1.0, -1.0, 1.0,
+      -1.0, -1.0, 1.0,
+
+      // Right face
+      1.0, -1.0, -1.0,
+      1.0, 1.0, -1.0,
+      1.0, 1.0, 1.0,
+      1.0, -1.0, 1.0,
+
+      // Left face
+      -1.0, -1.0, -1.0,
+      -1.0, -1.0, 1.0,
+      -1.0, 1.0, 1.0,
+      -1.0, 1.0, -1.0
+    ];
+
+    return positions;
+
+  }
+
+  createElements() {
+    var elements = [
+      0, 1, 2, 0, 2, 3,    // front
+      4, 5, 6, 4, 6, 7,    // back
+      8, 9, 10, 8, 10, 11,   // top
+      12, 13, 14, 12, 14, 15,   // bottom
+      16, 17, 18, 16, 18, 19,   // right
+      20, 21, 22, 20, 22, 23    // left
+    ]
+
+    return elements;
   }
 
 }
-
-
-scene.Component3d.register('floor', Floor)
-

@@ -1,16 +1,43 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import * as BABYLON from 'babylonjs'
 
-export default class Rack {
+import Object3D from './object3d'
+import Stock from './stock'
 
-  constructor(visualizer, model, scene) {
+export default class Rack extends Object3D {
+
+  constructor(model, canvasSize, visualizer) {
+
+    super(model, canvasSize);
+
     this._visualizer = visualizer;
-    this._model = model;
-    this._scene = scene;
 
-    this.createObject(model, scene);
+    this._frames = [];
+    this._boards = [];
+
+    this.createObject(canvasSize);
+    // this.castShadow = true
+  }
+
+  dispose() {
+    super.dispose()
+
+    delete this._visualizer
+  }
+
+  static get rackFrameGeometry() {
+    if (!Rack._rackFrameGeometry)
+      Rack._rackFrameGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
+
+    return Rack._rackFrameGeometry
+  }
+
+  static get boardGeometry() {
+    if (!Rack._boardGeometry)
+      Rack._boardGeometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1);
+
+    return Rack._boardGeometry
   }
 
   static get boardMaterial() {
@@ -33,244 +60,135 @@ export default class Rack {
     return Rack._frameMaterial
   }
 
-  createObject(model, scene) {
-    var {
-      id,
-      x = 0,
-      y = 0,
-      z = 0,
-      height,
-      shelves = 1
-    } = model
-
-    this._object = new BABYLON.Mesh(id, scene);
-
-    this.createRackFrame(model, scene);
-
-    // for (var i = 0; i < model.shelves; i++) {
-
-    //   let bottom = -model.depth * model.shelves * 0.5
-    //   if (i > 0) {
-    //     let board = this.createRackBoard(model.width, model.height)
-    //     board.position.set(0, bottom + (model.depth * i), 0)
-    //     board.rotation.x = Math.PI / 2;
-    //     board.material.opacity = 0.5
-    //     board.material.transparent = true
-
-    //     this.add(board)
-    //     // frame.geometry.merge(board.geometry, board.matrix)
-    //   }
-
-    //   let stock = new Stock({
-    //     width: model.width * scale,
-    //     height: model.height * scale,
-    //     depth: model.depth * scale,
-    //     fillStyle: model.fillStyle
-    //   })
-
-    //   let stockDepth = model.depth * scale
-
-    //   stock.position.set(0, bottom + (model.depth * i) + (stockDepth * 0.5), 0)
-    //   stock.name = this.makeLocationString(this.makeShelfString(shelfPattern, i + 1, model.shelves))
-
-    //   this.add(stock)
-    //   this._threeContainer.putObject(stock.name, stock);
-    // }
-
-    // this._object = BABYLON.MeshBuilder.CreateBox(id, model, scene);
-
-
-
-    // var frame = this.createRackFrame(model.width, model.height, model.depth * model.shelves)
-
-    // this.add(frame)
-
-    // var shelfPattern = model.shelfPattern;
-
-    // for (var i = 0; i < model.shelves; i++) {
-
-    //   let bottom = -model.depth * model.shelves * 0.5
-    //   if (i > 0) {
-    //     let board = this.createRackBoard(model.width, model.height)
-    //     board.position.set(0, bottom + (model.depth * i), 0)
-    //     board.rotation.x = Math.PI / 2;
-    //     board.material.opacity = 0.5
-    //     board.material.transparent = true
-
-    //     this.add(board)
-    //     // frame.geometry.merge(board.geometry, board.matrix)
-    //   }
-
-    //   let stock = new Stock({
-    //     width: model.width * scale,
-    //     height: model.height * scale,
-    //     depth: model.depth * scale,
-    //     fillStyle: model.fillStyle
-    //   })
-
-    //   let stockDepth = model.depth * scale
-
-    //   stock.position.set(0, bottom + (model.depth * i) + (stockDepth * 0.5), 0)
-    //   stock.name = this.makeLocationString(this.makeShelfString(shelfPattern, i + 1, model.shelves))
-
-    //   this.add(stock)
-    //   this._threeContainer.putObject(stock.name, stock);
-    // }
-
-    y = y > height / 2 ? y : 0;
-
-    this._object.setAbsolutePosition(new BABYLON.Vector3(x, y + (height * shelves / 2), z))
-    // this.rotation.y = rotation || 0
-
+  get frames() {
+    return this._frames;
   }
 
-  createRackFrame(model, scene) {
-    var stockScaleFactor = 0.7;
+  get boards() {
+    return this._boards;
+  }
 
+  createObject(canvasSize) {
     var {
+      type,
+      left,
+      top,
       width,
       height,
       depth,
-      x,
-      y,
-      z,
-      shelves = 1,
-      shelfPattern
-    } = model;
+      rotation = 0,
+      fillStyle,
+      hideRackFrame,
+      shelves,
+      shelfPattern,
+      stockScale = 0.7,
+    } = this.model;
 
-    // create frame
-    var frameWeight = Math.round(Math.min(width, depth) / 10)
-    var frameHeight = height * shelves;
-    var frameModel = {
-      height: frameHeight,
-      width: frameWeight,
-      depth: frameWeight
+    let scale = stockScale;
+
+    let cx = (left + (width / 2)) - canvasSize.width / 2
+    let cy = (top + (height / 2)) - canvasSize.height / 2
+    let cz = 0.5 * depth * shelves
+
+    this.type = type
+
+    if (!hideRackFrame) {
+      var frame = this.createRackFrame(width, height, depth * shelves)
+      // this._frames.push(frame)
+
+      this.add(frame)
     }
 
-    var frameBottom = frameHeight / 2;
-    var frameWidthArr = [
-      width / 2 - frameWeight / 2,
-      width / 2 - frameWeight / 2,
-      -(width / 2 - frameWeight / 2),
-      -(width / 2 - frameWeight / 2)
-    ]
-    var frameDepthArr = [
-      depth / 2 - frameWeight / 2,
-      (-depth / 2 - frameWeight / 2),
-      depth / 2 - frameWeight / 2,
-      (-depth / 2 - frameWeight / 2)
-    ]
-
-    var frameMeshArray = [];
-    var originFrame
-    for (var i = 0; i < 4; i++) {
-      var frame
-      if (!originFrame)
-        frame = originFrame = BABYLON.MeshBuilder.CreateBox(null, frameModel, scene);
-      else
-        frame = originFrame.clone(null);
-      frame.parent = parent;
-      frame.position.set(frameWidthArr[i], 0, frameDepthArr[i])
-      frame.occlusionQueryAlgorithmType = BABYLON.AbstractMesh.OCCLUSION_ALGORITHM_TYPE_CONSERVATIVE;
-      frame.isOccluded = true;
-      frame.occlusionType = BABYLON.AbstractMesh.OCCLUSION_TYPE_STRICT;
-      frame.convertToUnIndexedMesh();
-      // frame.freezeWorldMatrix();
-      frameMeshArray.push(frame);
-    }
-
-    var mergedFrameMesh = BABYLON.Mesh.MergeMeshes(frameMeshArray);
-
-    this._visualizer.sps.addShape(mergedFrameMesh);
-
-    var boardMeshArray = [];
-
-    var boardModel = {
-      width: width,
-      height: depth,
-      sideOrientation: BABYLON.Mesh.DOUBLESIDE
-    }
-
-    var boardMaterial = new BABYLON.StandardMaterial("boardMaterial", scene)
-    boardMaterial.useAlphaFromDiffuseTexture = true;
-    boardMaterial.diffuseColor = BABYLON.Color3.FromInts(33, 33, 33);
-    boardMaterial.alpha = 0.5
-    boardMaterial.freeze();
-
-
-    var stockModel = {
-      width: width * 0.7,
-      height: height * 0.7,
-      depth: depth * 0.7
-    }
-
-    var stockMaterial = new BABYLON.StandardMaterial("stockMaterial", scene);
-    // stockMaterial.useAlphaFromDiffuseTexture = true;
-    stockMaterial.diffuseColor = BABYLON.Color3.FromHexString("#ccaa76");
-
-    var originBoard;
-    var originStock;
-
-    // board & stock create
     for (var i = 0; i < shelves; i++) {
-      let bottom = -model.height * model.shelves * 0.5
-      if (i > 0) {
-        var board
-        if (!originBoard)
-          board = originBoard = BABYLON.MeshBuilder.CreatePlane(null, boardModel, scene);
-        else
-          board = originBoard.clone(null);
-        board.parent = parent;
-        board.position.set(0, bottom + (model.height * i), 0)
-        board.rotation.x = - Math.PI / 2
-        // board.rotation.x = Math.PI / 2
-        board.material = boardMaterial;
-        board.occlusionQueryAlgorithmType = BABYLON.AbstractMesh.OCCLUSION_ALGORITHM_TYPE_CONSERVATIVE;
-        board.isOccluded = true;
-        board.occlusionType = BABYLON.AbstractMesh.OCCLUSION_TYPE_STRICT;
-        board.convertToUnIndexedMesh();
-        // board.freezeWorldMatrix();
-        boardMeshArray.push(board)
+
+      let bottom = -depth * shelves * 0.5
+      if (i > 0 && !hideRackFrame) {
+        let board = this.createRackBoard(width, height)
+        board.position.set(0, bottom + (depth * i), 0)
+        board.rotation.x = Math.PI / 2;
+        board.material.opacity = 0.5
+        board.material.transparent = true
+
+        this.add(board)
+        // frame.geometry.merge(board.geometry, board.matrix)
+
+        // this._boards.push(board)
       }
 
-      // var stockId = this.makeLocationString(this.makeShelfString(shelfPattern, i + 1, model.shelves))
-      // var stock
-      // if (!originStock)
-      //   stock = originStock = BABYLON.MeshBuilder.CreateBox(stockId, stockModel, scene);
-      // else
-      //   stock = originStock.clone(stockId);
-      // stock.parent = parent;
-      // stock.material = stockMaterial;
-      // stock.position.set(0, bottom + (model.height * i) + stockModel.height / 2, 0);
-      // stock.occlusionQueryAlgorithmType = BABYLON.AbstractMesh.OCCLUSION_ALGORITHM_TYPE_CONSERVATIVE;
-      // stock.isOccluded = true;
-      // stock.occlusionType = BABYLON.AbstractMesh.OCCLUSION_TYPE_STRICT;
-      // stock.convertToUnIndexedMesh();
-      // stock.freezeWorldMatrix();
+      let stock = new Stock({
+        width: width * scale,
+        height: height * scale,
+        depth: depth * scale,
+        fillStyle: fillStyle
+      }, this._visualizer)
+
+      let stockDepth = depth * scale
+
+      stock.position.set(0, bottom + (depth * i) + (stockDepth * 0.5), 0)
+      stock.name = this.makeLocationString(this.makeShelfString(shelfPattern, i + 1, shelves))
+
+      this.add(stock)
+      this._visualizer.putObject(stock.name, stock);
     }
 
-    var mergedBoardMesh = BABYLON.Mesh.MergeMeshes(boardMeshArray);
-
-    this._visualizer.sps.addShape(mergedBoardMesh);
+    this.position.set(cx, cz, cy)
+    this.rotation.y = - rotation
 
   }
 
-  getFrameMesh() {
+  createRackFrame(w, h, d) {
 
-    var {
-      x, y, z, width, height, depth
-    } = model
-    width /= 2;
-    height /= 2;
-    depth /= 2;
+    // this.geometry = this.cube({
+    //   width: w,
+    //   height : d,
+    //   depth : h
+    // })
 
-    var corners = [
-      new BABYLON.Vector3(width, depth, ),
-      new BABYLON.Vector3(1, -1),
-      new BABYLON.Vector3(-1, 1),
-      new BABYLON.Vector3(-1, -1)
-    ]
+    var frameWeight = Math.round(Math.min(w, h) / 10)
 
+    var frames = new THREE.Group()
+    for (var i = 0; i < 4; i++) {
+      var geometry = Rack.rackFrameGeometry;
+      var material = Rack.frameMaterial;
+      var frame = new THREE.Mesh(geometry, material);
+      frame.scale.set(frameWeight, d, frameWeight);
+      switch (i) {
+        case 0:
+          frame.position.set(w / 2, 0, h / 2)
+          break;
+        case 1:
+          frame.position.set(w / 2, 0, -h / 2)
+          break;
+        case 2:
+          frame.position.set(-w / 2, 0, h / 2)
+          break;
+        case 3:
+          frame.position.set(-w / 2, 0, -h / 2)
+          break;
+      }
+
+      frames.add(frame)
+    }
+
+    return frames
+
+    // return new THREE.LineSegments(
+    //   this.geometry,
+    //   Rack.frameMaterial
+    // );
+
+  }
+
+  createRackBoard(w, h) {
+
+    var boardMaterial = Rack.boardMaterial;
+    var boardGeometry = Rack.boardGeometry;
+    // var boardGeometry = new THREE.PlaneGeometry(w, h, 1, 1);
+    var board = new THREE.Mesh(boardGeometry, boardMaterial);
+
+    board.scale.set(w, h, 1)
+
+    return board
   }
 
   makeLocationString(shelfString) {
@@ -331,6 +249,7 @@ export default class Rack {
   }
 
 }
+
 
 scene.Component3d.register('rack', Rack)
 
