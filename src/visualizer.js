@@ -280,7 +280,10 @@ export default class Visualizer extends Container {
 
     var {
       width,
-      height,
+      height
+    } = this.bounds
+
+    var {
       fov = 45,
       near = 0.1,
       far = 20000,
@@ -290,6 +293,7 @@ export default class Visualizer extends Container {
       precision = 'highp',
       legendTarget
     } = this.model
+
     var components = this.components || []
 
     // SCENE
@@ -445,11 +449,18 @@ export default class Visualizer extends Container {
     var {
       left,
       top,
-      width,
-      height,
       debug,
       threed
     } = this.model
+
+    var {
+      width,
+      height
+    } = this.bounds
+
+    // ios에서 width, height에 소수점이 있으면 3d를 표현하지 못하는 문제가 있어 정수화
+    width = Math.floor(width);
+    height = Math.floor(height);
 
     if (threed) {
 
@@ -793,9 +804,17 @@ export default class Visualizer extends Container {
     }
   }
 
+  onpan(e) {
+    if (this._controls) {
+      this._controls.cameraChanged = true
+      this._controls.onTouchMove(e)
+      e.stopPropagation()
+    }
+  }
   ontouchend(e) {
     if (this._controls) {
       this._controls.onTouchEnd(e)
+      this.onmouseup(e);
       e.stopPropagation()
     }
   }
@@ -807,8 +826,24 @@ export default class Visualizer extends Container {
     }
   }
 
-  handleMouseWheel(event) {
+  onpinch(e) {
+    if (this._controls) {
+      var zoom = this.model.zoom
+      zoom *= e.scale
 
+      if (zoom < 100)
+        zoom = 100
+
+      this.set('zoom', zoom)
+      e.stopPropagation()
+    }
+  }
+
+  ondoubletap() {
+    this._controls.reset();
+  }
+
+  handleMouseWheel(event) {
     var delta = 0;
     var zoom = this.model.zoom
 
@@ -824,6 +859,7 @@ export default class Visualizer extends Container {
   onredraw() {
     this.threed_animate();
   }
+
 
 }
 

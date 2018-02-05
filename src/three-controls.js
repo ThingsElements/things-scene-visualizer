@@ -316,62 +316,78 @@ var ThreeControls = function (object, component) {
 
   this.onTouchStart = function (event) {
 
-    // if (this.enabled === false) return;
+      if ( this.enabled === false ) return;
 
-    // switch (event.touches.length) {
-    //   case 1: // one-fingered touch: rotate
-    //     if (this.enableRotate === false) return;
-    //     handleTouchStartRotate(event);
-    //     state = STATE.TOUCH_ROTATE;
-    //     break;
+      switch ( event.touches.length ) {
+        case 1: // one-fingered touch: rotate
+          if ( this.enableRotate === false ) return;
+          handleTouchStartRotate( event );
+          state = STATE.TOUCH_ROTATE;
+          break;
 
-    //   case 2: // two-fingered touch: dolly
-    //     if (this.enableZoom === false) return;
-    //     handleTouchStartDolly(event);
-    //     state = STATE.TOUCH_DOLLY;
-    //     break;
+        case 2: // two-fingered touch: pan
+          this.lastScale = event.scale
+          if (this.enablePan === false) return;
+          handleTouchStartPan( event );
+          state = STATE.TOUCH_PAN;
+          break;
+        // case 2: // two-fingered touch: dolly
+        //   if ( this.enableZoom === false ) return;
+        //   handleTouchStartDolly( event );
+        //   state = STATE.TOUCH_DOLLY;
+        //   break;
 
-    //   case 3: // three-fingered touch: pan
-    //     if (this.enablePan === false) return;
-    //     handleTouchStartPan(event);
-    //     state = STATE.TOUCH_PAN;
-    //     break;
+        // case 3: // three-fingered touch: pan
+        //   if ( this.enablePan === false ) return;
+        //   handleTouchStartPan( event );
+        //   state = STATE.TOUCH_PAN;
+        //   break;
 
-    //   default:
-    //     state = STATE.NONE;
-    // }
+        default:
+          state = STATE.NONE;
+      }
   }
 
   this.onTouchMove = function (event) {
+      if ( this.enabled === false ) return;
 
-    // if (this.enabled === false) return;
-
-    // switch (event.touches.length) {
-    //   case 1: // one-fingered touch: rotate
-    //     if (this.enableRotate === false) return;
-    //     if (state !== STATE.TOUCH_ROTATE) return; // is this needed?...
-    //     handleTouchMoveRotate(event);
-    //     break;
-    //   case 2: // two-fingered touch: dolly
-    //     if ( this.enableZoom === false ) return;
-    //     if ( state !== STATE.TOUCH_DOLLY ) return; // is this needed?...
-    //     handleTouchMoveDolly( event );
-    //     break;
-    //   case 3: // three-fingered touch: pan
-    //     if ( this.enablePan === false ) return;
-    //     if ( state !== STATE.TOUCH_PAN ) return; // is this needed?...
-    //     handleTouchMovePan( event );
-    //     break;
-    //   default:
-    //     state = STATE.NONE;
-    // }
+      switch ( event.touches.length ) {
+        case 1: // one-fingered touch: rotate
+          if ( this.enableRotate === false ) return;
+          if ( state !== STATE.TOUCH_ROTATE ) return; // is this needed?...
+          handleTouchMoveRotate( event );
+          break;
+        case 2: // two-fingered touch: pan
+          if (Math.abs(this.lastScale - event.scale) > 0.05) {
+            console.log(event.scale)
+            return;
+          }
+          if ( this.enablePan === false ) return;
+          if ( state !== STATE.TOUCH_PAN ) return; // is this needed?...
+          handleTouchMovePan( event );
+          break;
+        // case 2: // two-fingered touch: dolly
+        //   if ( this.enableZoom === false ) return;
+        //   if ( state !== STATE.TOUCH_DOLLY ) return; // is this needed?...
+        //   handleTouchMoveDolly( event );
+        //   break;
+        // case 3: // three-fingered touch: pan
+        //   if ( this.enablePan === false ) return;
+        //   if ( state !== STATE.TOUCH_PAN ) return; // is this needed?...
+        //   handleTouchMovePan( event );
+        //   break;
+        default:
+          state = STATE.NONE;
+      }
   }
 
   this.onTouchEnd = function (event) {
-    //   if ( this.enabled === false ) return;
-    //   handleTouchEnd( event );
-    //   // this.dispatchEvent( endEvent );
-    //   state = STATE.NONE;
+    if (this.enabled === false) return;
+    this.lastScale = 1;
+
+    handleTouchEnd(event)
+    // this.dispatchEvent( endEvent );
+    state = STATE.NONE;
   }
 
   //
@@ -674,8 +690,10 @@ var ThreeControls = function (object, component) {
   }
 
   function handleTouchStartRotate(event) {
+    var x = event.touches[0].offsetX || event.touches[0].pageX
+    var y = event.touches[0].offsetY || event.touches[0].pageY
 
-    rotateStart.set(event.touches[0].pageX, event.touches[0].pageY);
+    rotateStart.set(x, y);
 
   }
 
@@ -691,14 +709,19 @@ var ThreeControls = function (object, component) {
   }
 
   function handleTouchStartPan(event) {
+    var x = event.touches[0].offsetX || event.touches[0].pageX
+    var y = event.touches[0].offsetY || event.touches[0].pageY
 
-    panStart.set(event.touches[0].pageX, event.touches[0].pageY);
+    panStart.set(x, y);
 
   }
 
   function handleTouchMoveRotate(event) {
 
-    rotateEnd.set(event.touches[0].pageX, event.touches[0].pageY);
+    var x = event.touches[0].offsetX || event.touches[0].pageX
+    var y = event.touches[0].offsetY || event.touches[0].pageY
+
+    rotateEnd.set(x, y);
     rotateDelta.subVectors(rotateEnd, rotateStart);
 
     var element = scope.component === document ? scope.component.body : scope.component;
@@ -745,8 +768,10 @@ var ThreeControls = function (object, component) {
   }
 
   function handleTouchMovePan(event) {
+    var x = event.touches[0].offsetX || event.touches[0].pageX
+    var y = event.touches[0].offsetY || event.touches[0].pageY
 
-    panEnd.set(event.touches[0].pageX, event.touches[0].pageY);
+    panEnd.set(x, y);
 
     panDelta.subVectors(panEnd, panStart);
 
