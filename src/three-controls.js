@@ -159,6 +159,7 @@ var ThreeControls = function (object, component) {
         // theta = 0;
 
         rotateLeft(getAutoRotationAngle())
+        // spherical.theta = getAutoRotationAngle();
 
       }
 
@@ -211,7 +212,7 @@ var ThreeControls = function (object, component) {
       // if ((scope.cameraChanged || zoomChanged) && (
       //   lastPosition.distanceToSquared(scope.object.position) > EPS ||
       //   8 * (1 - lastQuaternion.dot(scope.object.quaternion)) > EPS)) {
-      if (zoomChanged &&
+      if (zoomChanged ||
         lastPosition.distanceToSquared(scope.object.position) > EPS ||
         8 * (1 - lastQuaternion.dot(scope.object.quaternion)) > EPS) {
 
@@ -226,6 +227,7 @@ var ThreeControls = function (object, component) {
 
       }
 
+      scope.component.invalidate();
       return false;
 
     };
@@ -253,6 +255,7 @@ var ThreeControls = function (object, component) {
       return;
 
     scope.component.stop()
+    this.autoRotate = false;
 
     if (event.altKey === true)
       state = STATE.PAN
@@ -310,6 +313,9 @@ var ThreeControls = function (object, component) {
       return;
 
     state = STATE.NONE;
+
+    START_TIME = null;
+    this.autoRotate = this.component.model.autoRotate || false;
 
     scope.component.threed_animate()
     // scope.update();
@@ -399,8 +405,10 @@ var ThreeControls = function (object, component) {
   }
 
   this.doAutoRotate = function (autoRotate) {
+    START_TIME = null;
     this.cameraChanged = true;
     this.autoRotate = autoRotate;
+    this.update();
   }
 
   //
@@ -439,14 +447,22 @@ var ThreeControls = function (object, component) {
   var dollyEnd = new THREE.Vector2();
   var dollyDelta = new THREE.Vector2();
 
-  // var START_TIME = performance.now();
+  var START_TIME = null;
+  var offsetTheta = 0;
 
   function getAutoRotationAngle() {
-    // var lastTime = performance.now() - START_TIME;
-    // var progress = (lastTime / (60000 / scope.autoRotateSpeed));
+    if (!START_TIME) {
+      START_TIME = performance.now()
+      offsetTheta = spherical.theta;
+      return 0;
+    }
 
-    // return 2 * Math.PI * progress + spherical.theta;
-    return 2 * Math.PI / 60 / 60 * scope.autoRotateSpeed;
+    var lastTime = performance.now() - START_TIME;
+    var progress = (lastTime / (60000 / scope.autoRotateSpeed));
+
+    // return - 2 * Math.PI * progress;
+    return 2 * Math.PI * progress + spherical.theta - offsetTheta;
+    // return 2 * Math.PI / 60 / 60 * scope.autoRotateSpeed;
 
   }
 
