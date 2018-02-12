@@ -186,8 +186,6 @@ export default class Visualizer extends Container {
 
 
     var floorGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
-    // var floorGeometry = new THREE.PlaneGeometry(width, height)
-
     var floor = new THREE.Mesh(floorGeometry, floorMaterial)
     floor.scale.set(width, height, 5);
 
@@ -333,7 +331,9 @@ export default class Visualizer extends Container {
     this._renderer.autoClear = true
 
     this._renderer.setClearColor(0xffffff, 0) // transparent
-    this._renderer.setSize(width, height)
+
+    this._renderer.setSize(Math.min(width, window.innerWidth), Math.min(height, window.innerHeight))
+
     // this._renderer.setSize(1600, 900)
     // this._renderer.shadowMap.enabled = true
     // this._renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -478,8 +478,14 @@ export default class Visualizer extends Container {
         this._onDataChanged()
       }
 
+      var rendererSize = this._renderer.getSize();
+      var {
+        width: rendererWidth,
+        height: rendererHeight
+      } = rendererSize;
+
       ctx.drawImage(
-        this._renderer.domElement, 0, 0, width, height,
+        this._renderer.domElement, 0, 0, rendererWidth, rendererHeight,
         left, top, width, height
       )
 
