@@ -14,7 +14,7 @@
 //
 //    Orbit - left mouse / touch: one finger move
 //    Zoom - middle mouse, or mousewheel / touch: two finger spread or squish
-//    Pan - right mouse, or arrow keys / touch: three finter swipe
+//    Pan - right mouse, or arrow keys / touch: three finger swipe
 
 var ThreeControls = function (object, component) {
 
@@ -92,13 +92,21 @@ var ThreeControls = function (object, component) {
 
   this.getPolarAngle = function () {
 
-    return phi;
+    return spherical.phi;
 
   };
 
   this.getAzimuthalAngle = function () {
 
-    return theta;
+    return spherical.theta;
+
+  };
+
+  this.saveState = function () {
+
+    scope.target0.copy(scope.target);
+    scope.position0.copy(scope.object.position);
+    scope.zoom0 = scope.object.zoom;
 
   };
 
@@ -129,10 +137,10 @@ var ThreeControls = function (object, component) {
     var lastPosition = new THREE.Vector3();
     var lastQuaternion = new THREE.Quaternion();
 
-    return function () {
+    return function update() {
 
-      if (!(scope.cameraChanged || scope.autoRotate))
-        return false;
+      // if (!(scope.cameraChanged || scope.autoRotate))
+      //   return false;
 
       var position = scope.object.position;
 
@@ -142,43 +150,38 @@ var ThreeControls = function (object, component) {
       offset.applyQuaternion(quat);
 
       // angle from z-axis around y-axis
-
-      theta = Math.atan2(offset.x, offset.z);
-
-      // angle from y-axis
-
-      phi = Math.atan2(Math.sqrt(offset.x * offset.x + offset.z * offset.z), offset.y);
+      spherical.setFromVector3(offset);
 
       if (scope.autoRotate && state === STATE.NONE) {
 
-        thetaDelta = - getAutoRotationAngle();
-        theta = 0;
+        // theta = getAutoRotationAngle();
+        // thetaDelta = - getAutoRotationAngle();
+        // theta = 0;
+
+        rotateLeft(getAutoRotationAngle())
 
       }
 
-      theta += thetaDelta;
-      phi += phiDelta;
+      spherical.theta += sphericalDelta.theta;
+      spherical.phi += sphericalDelta.phi;
 
       // restrict theta to be between desired limits
-      theta = Math.max(scope.minAzimuthAngle, Math.min(scope.maxAzimuthAngle, theta));
+      spherical.theta = Math.max(scope.minAzimuthAngle, Math.min(scope.maxAzimuthAngle, spherical.theta));
 
       // restrict phi to be between desired limits
-      phi = Math.max(scope.minPolarAngle, Math.min(scope.maxPolarAngle, phi));
+      spherical.phi = Math.max(scope.minPolarAngle, Math.min(scope.maxPolarAngle, spherical.phi));
 
-      // restrict phi to be betwee EPS and PI-EPS
-      phi = Math.max(EPS, Math.min(Math.PI - EPS, phi));
+      spherical.makeSafe();
 
-      var radius = offset.length() * scale;
+      spherical.radius *= scale;
 
       // restrict radius to be between desired limits
-      radius = Math.max(scope.minDistance, Math.min(scope.maxDistance, radius));
+      spherical.radius = Math.max(scope.minDistance, Math.min(scope.maxDistance, spherical.radius));
 
       // move target to panned location
       scope.target.add(panOffset);
 
-      offset.x = radius * Math.sin(phi) * Math.sin(theta);
-      offset.y = radius * Math.cos(phi);
-      offset.z = radius * Math.sin(phi) * Math.cos(theta);
+      offset.setFromSpherical(spherical);
 
       // rotate offset back to "camera-up-vector-is-up" space
       offset.applyQuaternion(quatInverse);
@@ -189,13 +192,12 @@ var ThreeControls = function (object, component) {
 
       if (scope.enableDamping === true) {
 
-        thetaDelta *= (1 - scope.dampingFactor);
-        phiDelta *= (1 - scope.dampingFactor);
+        sphericalDelta.theta *= (1 - scope.dampingFactor);
+        sphericalDelta.phi *= (1 - scope.dampingFactor);
 
       } else {
 
-        thetaDelta = 0;
-        phiDelta = 0;
+        sphericalDelta.set(0, 0, 0);
 
       }
 
@@ -206,7 +208,10 @@ var ThreeControls = function (object, component) {
       // min(camera displacement, camera rotation in radians)^2 > EPS
       // using small-angle approximation cos(x/2) = 1 - x^2 / 8
 
-      if (scope.cameraChanged &&
+      // if ((scope.cameraChanged || zoomChanged) && (
+      //   lastPosition.distanceToSquared(scope.object.position) > EPS ||
+      //   8 * (1 - lastQuaternion.dot(scope.object.quaternion)) > EPS)) {
+      if (zoomChanged &&
         lastPosition.distanceToSquared(scope.object.position) > EPS ||
         8 * (1 - lastQuaternion.dot(scope.object.quaternion)) > EPS) {
 
@@ -215,6 +220,8 @@ var ThreeControls = function (object, component) {
 
         scope.component.invalidate();
         scope.cameraChanged = false;
+        zoomChanged = false;
+
         return true;
 
       }
@@ -305,6 +312,7 @@ var ThreeControls = function (object, component) {
     state = STATE.NONE;
 
     scope.component.threed_animate()
+    // scope.update();
   }
 
   this.onKeyDown = function (event) {
@@ -316,69 +324,69 @@ var ThreeControls = function (object, component) {
 
   this.onTouchStart = function (event) {
 
-      if ( this.enabled === false ) return;
+    if (this.enabled === false) return;
 
-      switch ( event.touches.length ) {
-        case 1: // one-fingered touch: rotate
-          if ( this.enableRotate === false ) return;
-          handleTouchStartRotate( event );
-          state = STATE.TOUCH_ROTATE;
-          break;
+    switch (event.touches.length) {
+      case 1: // one-fingered touch: rotate
+        if (this.enableRotate === false) return;
+        handleTouchStartRotate(event);
+        state = STATE.TOUCH_ROTATE;
+        break;
 
-        case 2: // two-fingered touch: pan
-          this.lastScale = event.scale
-          if (this.enablePan === false) return;
-          handleTouchStartPan( event );
-          state = STATE.TOUCH_PAN;
-          break;
-        // case 2: // two-fingered touch: dolly
-        //   if ( this.enableZoom === false ) return;
-        //   handleTouchStartDolly( event );
-        //   state = STATE.TOUCH_DOLLY;
-        //   break;
+      case 2: // two-fingered touch: pan
+        this.lastScale = event.scale
+        if (this.enablePan === false) return;
+        handleTouchStartPan(event);
+        state = STATE.TOUCH_PAN;
+        break;
+      // case 2: // two-fingered touch: dolly
+      //   if ( this.enableZoom === false ) return;
+      //   handleTouchStartDolly( event );
+      //   state = STATE.TOUCH_DOLLY;
+      //   break;
 
-        // case 3: // three-fingered touch: pan
-        //   if ( this.enablePan === false ) return;
-        //   handleTouchStartPan( event );
-        //   state = STATE.TOUCH_PAN;
-        //   break;
+      // case 3: // three-fingered touch: pan
+      //   if ( this.enablePan === false ) return;
+      //   handleTouchStartPan( event );
+      //   state = STATE.TOUCH_PAN;
+      //   break;
 
-        default:
-          state = STATE.NONE;
-      }
+      default:
+        state = STATE.NONE;
+    }
   }
 
   this.onTouchMove = function (event) {
-      if ( this.enabled === false ) return;
+    if (this.enabled === false) return;
 
-      switch ( event.touches.length ) {
-        case 1: // one-fingered touch: rotate
-          if ( this.enableRotate === false ) return;
-          if ( state !== STATE.TOUCH_ROTATE ) return; // is this needed?...
-          handleTouchMoveRotate( event );
-          break;
-        case 2: // two-fingered touch: pan
-          if (Math.abs(this.lastScale - event.scale) > 0.05) {
-            console.log(event.scale)
-            return;
-          }
-          if ( this.enablePan === false ) return;
-          if ( state !== STATE.TOUCH_PAN ) return; // is this needed?...
-          handleTouchMovePan( event );
-          break;
-        // case 2: // two-fingered touch: dolly
-        //   if ( this.enableZoom === false ) return;
-        //   if ( state !== STATE.TOUCH_DOLLY ) return; // is this needed?...
-        //   handleTouchMoveDolly( event );
-        //   break;
-        // case 3: // three-fingered touch: pan
-        //   if ( this.enablePan === false ) return;
-        //   if ( state !== STATE.TOUCH_PAN ) return; // is this needed?...
-        //   handleTouchMovePan( event );
-        //   break;
-        default:
-          state = STATE.NONE;
-      }
+    switch (event.touches.length) {
+      case 1: // one-fingered touch: rotate
+        if (this.enableRotate === false) return;
+        if (state !== STATE.TOUCH_ROTATE) return; // is this needed?...
+        handleTouchMoveRotate(event);
+        break;
+      case 2: // two-fingered touch: pan
+        if (Math.abs(this.lastScale - event.scale) > 0.05) {
+          console.log(event.scale)
+          return;
+        }
+        if (this.enablePan === false) return;
+        if (state !== STATE.TOUCH_PAN) return; // is this needed?...
+        handleTouchMovePan(event);
+        break;
+      // case 2: // two-fingered touch: dolly
+      //   if ( this.enableZoom === false ) return;
+      //   if ( state !== STATE.TOUCH_DOLLY ) return; // is this needed?...
+      //   handleTouchMoveDolly( event );
+      //   break;
+      // case 3: // three-fingered touch: pan
+      //   if ( this.enablePan === false ) return;
+      //   if ( state !== STATE.TOUCH_PAN ) return; // is this needed?...
+      //   handleTouchMovePan( event );
+      //   break;
+      default:
+        state = STATE.NONE;
+    }
   }
 
   this.onTouchEnd = function (event) {
@@ -388,6 +396,11 @@ var ThreeControls = function (object, component) {
     handleTouchEnd(event)
     // this.dispatchEvent( endEvent );
     state = STATE.NONE;
+  }
+
+  this.doAutoRotate = function (autoRotate) {
+    this.cameraChanged = true;
+    this.autoRotate = autoRotate;
   }
 
   //
@@ -407,11 +420,9 @@ var ThreeControls = function (object, component) {
   var EPS = 0.000001;
 
   // current position in spherical coordinates
-  var theta;
-  var phi;
+  var spherical = new THREE.Spherical();
+  var sphericalDelta = new THREE.Spherical();
 
-  var phiDelta = 0;
-  var thetaDelta = 0;
   var scale = 1;
   var panOffset = new THREE.Vector3();
   var zoomChanged = false;
@@ -428,14 +439,14 @@ var ThreeControls = function (object, component) {
   var dollyEnd = new THREE.Vector2();
   var dollyDelta = new THREE.Vector2();
 
-  var START_TIME = performance.now();
+  // var START_TIME = performance.now();
 
   function getAutoRotationAngle() {
-    var lastTime = performance.now() - START_TIME;
-    var progress = (lastTime / (60000 / scope.autoRotateSpeed));
+    // var lastTime = performance.now() - START_TIME;
+    // var progress = (lastTime / (60000 / scope.autoRotateSpeed));
 
-    return 2 * Math.PI * progress;
-    // return 2 * Math.PI / 60 / 60 * scope.autoRotateSpeed;
+    // return 2 * Math.PI * progress + spherical.theta;
+    return 2 * Math.PI / 60 / 60 * scope.autoRotateSpeed;
 
   }
 
@@ -447,13 +458,13 @@ var ThreeControls = function (object, component) {
 
   function rotateLeft(angle) {
 
-    thetaDelta -= angle;
+    sphericalDelta.theta -= angle;
 
   }
 
   function rotateUp(angle) {
 
-    phiDelta -= angle;
+    sphericalDelta.phi -= angle;
 
   }
 
@@ -463,14 +474,11 @@ var ThreeControls = function (object, component) {
 
     return function panLeft(distance, objectMatrix) {
 
-      var te = objectMatrix.elements;
-
-      // get X column of objectMatrix
-      v.set(te[0], te[1], te[2]);
-
+      v.setFromMatrixColumn(objectMatrix, 0); // get X column of objectMatrix
       v.multiplyScalar(- distance);
 
       panOffset.add(v);
+
     };
 
   }();
@@ -481,11 +489,7 @@ var ThreeControls = function (object, component) {
 
     return function panUp(distance, objectMatrix) {
 
-      var te = objectMatrix.elements;
-
-      // get Y column of objectMatrix
-      v.set(te[4], te[5], te[6]);
-
+      v.setFromMatrixColumn(objectMatrix, 1); // get Y column of objectMatrix
       v.multiplyScalar(distance);
 
       panOffset.add(v);
@@ -499,11 +503,11 @@ var ThreeControls = function (object, component) {
 
     var offset = new THREE.Vector3();
 
-    return function (deltaX, deltaY) {
+    return function pan(deltaX, deltaY) {
 
       var element = scope.component === document ? scope.component.body : scope.component;
 
-      if (scope.object instanceof THREE.PerspectiveCamera) {
+      if (scope.object.isPerspectiveCamera) {
 
         // perspective
         var position = scope.object.position;
@@ -519,12 +523,12 @@ var ThreeControls = function (object, component) {
         panUp(2 * deltaY * targetDistance / element.model.height, scope.object.matrix);
         // panUp( 2 * deltaY * targetDistance / element.clientHeight, scope.object.matrix );
 
-      } else if (scope.object instanceof THREE.OrthographicCamera) {
+      } else if (scope.object.isOrthographicCamera) {
 
         // orthographic
-        panLeft(deltaX * (scope.object.right - scope.object.left) / element.model.width, scope.object.matrix);
+        panLeft(deltaX * (scope.object.right - scope.object.left) / scope.object.zoom / element.model.width, scope.object.matrix);
         // panLeft( deltaX * ( scope.object.right - scope.object.left ) / element.clientWidth, scope.object.matrix );
-        panUp(deltaY * (scope.object.top - scope.object.bottom) / element.model.height, scope.object.matrix);
+        panUp(deltaY * (scope.object.top - scope.object.bottom) / scope.object.zoom / element.model.height, scope.object.matrix);
         // panUp( deltaY * ( scope.object.top - scope.object.bottom ) / element.clientHeight, scope.object.matrix );
 
       } else {
@@ -541,11 +545,11 @@ var ThreeControls = function (object, component) {
 
   function dollyIn(dollyScale) {
 
-    if (scope.object instanceof THREE.PerspectiveCamera) {
+    if (scope.object.isPerspectiveCamera) {
 
       scale /= dollyScale;
 
-    } else if (scope.object instanceof THREE.OrthographicCamera) {
+    } else if (scope.object.isOrthographicCamera) {
 
       scope.object.zoom = Math.max(scope.minZoom, Math.min(scope.maxZoom, scope.object.zoom * dollyScale));
       scope.object.updateProjectionMatrix();
@@ -562,11 +566,11 @@ var ThreeControls = function (object, component) {
 
   function dollyOut(dollyScale) {
 
-    if (scope.object instanceof THREE.PerspectiveCamera) {
+    if (scope.object.isPerspectiveCamera) {
 
       scale *= dollyScale;
 
-    } else if (scope.object instanceof THREE.OrthographicCamera) {
+    } else if (scope.object.isOrthographicCamera) {
 
       scope.object.zoom = Math.max(scope.minZoom, Math.min(scope.maxZoom, scope.object.zoom / dollyScale));
       scope.object.updateProjectionMatrix();
@@ -791,5 +795,129 @@ var ThreeControls = function (object, component) {
 
 ThreeControls.prototype = {} //Object.create( THREE.EventDispatcher.prototype );
 ThreeControls.prototype.constructor = ThreeControls;
+Object.defineProperties(ThreeControls.prototype, {
+
+  center: {
+
+    get: function () {
+
+      console.warn('THREE.OrbitControls: .center has been renamed to .target');
+      return this.target;
+
+    }
+
+  },
+
+  // backward compatibility
+
+  noZoom: {
+
+    get: function () {
+
+      console.warn('THREE.OrbitControls: .noZoom has been deprecated. Use .enableZoom instead.');
+      return !this.enableZoom;
+
+    },
+
+    set: function (value) {
+
+      console.warn('THREE.OrbitControls: .noZoom has been deprecated. Use .enableZoom instead.');
+      this.enableZoom = !value;
+
+    }
+
+  },
+
+  noRotate: {
+
+    get: function () {
+
+      console.warn('THREE.OrbitControls: .noRotate has been deprecated. Use .enableRotate instead.');
+      return !this.enableRotate;
+
+    },
+
+    set: function (value) {
+
+      console.warn('THREE.OrbitControls: .noRotate has been deprecated. Use .enableRotate instead.');
+      this.enableRotate = !value;
+
+    }
+
+  },
+
+  noPan: {
+
+    get: function () {
+
+      console.warn('THREE.OrbitControls: .noPan has been deprecated. Use .enablePan instead.');
+      return !this.enablePan;
+
+    },
+
+    set: function (value) {
+
+      console.warn('THREE.OrbitControls: .noPan has been deprecated. Use .enablePan instead.');
+      this.enablePan = !value;
+
+    }
+
+  },
+
+  noKeys: {
+
+    get: function () {
+
+      console.warn('THREE.OrbitControls: .noKeys has been deprecated. Use .enableKeys instead.');
+      return !this.enableKeys;
+
+    },
+
+    set: function (value) {
+
+      console.warn('THREE.OrbitControls: .noKeys has been deprecated. Use .enableKeys instead.');
+      this.enableKeys = !value;
+
+    }
+
+  },
+
+  staticMoving: {
+
+    get: function () {
+
+      console.warn('THREE.OrbitControls: .staticMoving has been deprecated. Use .enableDamping instead.');
+      return !this.enableDamping;
+
+    },
+
+    set: function (value) {
+
+      console.warn('THREE.OrbitControls: .staticMoving has been deprecated. Use .enableDamping instead.');
+      this.enableDamping = !value;
+
+    }
+
+  },
+
+  dynamicDampingFactor: {
+
+    get: function () {
+
+      console.warn('THREE.OrbitControls: .dynamicDampingFactor has been renamed. Use .dampingFactor instead.');
+      return this.dampingFactor;
+
+    },
+
+    set: function (value) {
+
+      console.warn('THREE.OrbitControls: .dynamicDampingFactor has been renamed. Use .dampingFactor instead.');
+      this.dampingFactor = value;
+
+    }
+
+  }
+
+});
 
 export default ThreeControls

@@ -656,8 +656,9 @@ export default class Visualizer extends Container {
       this.destroy_scene3d()
 
     if (after.hasOwnProperty('autoRotate')) {
-      if (this._controls)
-        this._controls.autoRotate = after.autoRotate
+      if (this._controls) {
+        this._controls.doAutoRotate(after.autoRotate)
+      }
     }
 
     if (after.hasOwnProperty('fov') ||
@@ -767,6 +768,13 @@ export default class Visualizer extends Container {
     }
   }
 
+  ondblclick(e) {
+    if (this._controls) {
+      this._controls.reset();
+      e.stopPropagation()
+    }
+  }
+
   ondragstart(e) {
     if (this._controls) {
       var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
@@ -792,6 +800,7 @@ export default class Visualizer extends Container {
 
   ondragend(e) {
     if (this._controls) {
+      this._controls.cameraChanged = true
       this._controls.onDragEnd(e)
       e.stopPropagation()
     }
