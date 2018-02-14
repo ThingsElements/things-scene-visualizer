@@ -110,6 +110,56 @@ function registerLoaders() {
   }
 }
 
+var progress;
+
+function createProgressbar(targetEl) {
+  if (progress)
+    return;
+
+  progress = document.createElement('div');
+
+  targetEl = targetEl || document.body;
+
+  progress.style.width = `200px`;
+  progress.style.height = `20px`;
+  progress.style.border = '2px solid #000';
+  progress.style.position = 'absolute';
+  progress.style.marginLeft = '-100px';
+  progress.style.left = '50%';
+  progress.style.marginTop = '-10px';
+  progress.style.top = '50%';
+  progress.style.fontSize = '12px'
+  progress.style.color = '#ccc'
+  progress.style.textAlign = 'center'
+  progress.style.lineHeight = '20px'
+  progress.innerText = 'Loading ...'
+
+  progress.style.background = `linear-gradient(90deg, #000 0%, transparent)`
+
+  targetEl.appendChild(progress);
+
+  progress.hidden = (targetEl.clientWidth <= 200 || targetEl.clientHeight <= 20)
+
+}
+
+function showProgressbar(targetEl, loaded, total) {
+  if (!progress)
+    createProgressbar(targetEl);
+
+  progress.style.background = `linear-gradient(90deg, #000 ${(loaded / total * 100)}%, transparent)`
+
+}
+
+function removeProgressBar(targetEl) {
+  targetEl = targetEl || document.body;
+
+  targetEl.removeChild(progress);
+
+  progress.remove();
+
+  progress = null;
+}
+
 export default class Visualizer extends Container {
 
   get legendTarget() {
@@ -187,10 +237,8 @@ export default class Visualizer extends Container {
 
     var floorGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
     var floor = new THREE.Mesh(floorGeometry, floorMaterial)
+
     floor.scale.set(width, height, 5);
-
-    // floor.receiveShadow = true
-
     floor.rotation.x = -Math.PI / 2
     floor.position.y = -2
 
@@ -202,26 +250,19 @@ export default class Visualizer extends Container {
   createObjects(components, canvasSize) {
 
     components.forEach(component => {
-      // requestAnimationFrame(() => {
       var clazz = scene.Component3d.register(component.model.type)
-
       if (!clazz) {
         console.warn("Class not found : 3d class is not exist");
         return;
       }
 
       var item = new clazz(component.hierarchy, canvasSize, this, component)
-
-
       if (item) {
-        // requestAnimationFrame(() => {
         item.name = component.model.id;
         this._scene3d.add(item)
         this.putObject(component.model.id, item);
-        // })
       }
     })
-    // })
   }
 
 
@@ -269,8 +310,25 @@ export default class Visualizer extends Container {
     if (this._scene3d)
       this.destroy_scene3d()
 
+    THREE.DefaultLoadingManager.onStart = function (item, loaded, total) {
+      createProgressbar(self.root.target_element);
+      self._loadComplete = false;
+    }
+
+    THREE.DefaultLoadingManager.onProgress = function (item, loaded, total) {
+      showProgressbar(self.root.target_element, loaded, total)
+    }
+    THREE.DefaultLoadingManager.onLoad = function (item, loaded, total) {
+      removeProgressBar(self.root.target_element)
+      self._loadComplete = true;
+    }
+
+    THREE.DefaultLoadingManager.onError = function (url) {
+      console.warn('There was an error loading ' + url);
+    }
+
     registerLoaders()
-    this._textureLoader = new THREE.TextureLoader()
+    this._textureLoader = new THREE.TextureLoader(THREE.DefaultLoadingManager)
     this._textureLoader.withCredential = true
     this._textureLoader.crossOrigin = 'use-credentials'
 
@@ -291,6 +349,8 @@ export default class Visualizer extends Container {
       precision = 'highp',
       legendTarget
     } = this.model
+
+    var self = this;
 
     var components = this.components || []
 
@@ -327,16 +387,9 @@ export default class Visualizer extends Container {
     if (this._noSupportWebgl)
       return
 
-
     this._renderer.autoClear = true
-
     this._renderer.setClearColor(0xffffff, 0) // transparent
-
     this._renderer.setSize(Math.min(width, window.innerWidth), Math.min(height, window.innerHeight))
-
-    // this._renderer.setSize(1600, 900)
-    // this._renderer.shadowMap.enabled = true
-    // this._renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     // this._renderer.setPixelRatio(window.devicePixelRatio)
 
     // CONTROLS
@@ -348,12 +401,8 @@ export default class Visualizer extends Container {
     _light.position.set(-this._camera.position.x, this._camera.position.y, -this._camera.position.z)
     this._camera.add(_light)
 
-    // this._camera.castShadow = true
-
     this._raycaster = new THREE.Raycaster()
-    // this._mouse = { x: 0, y: 0, originX: 0, originY : 0 }
     this._mouse = new THREE.Vector2()
-
 
     this._tick = 0
     this._clock = new THREE.Clock(true)
@@ -364,11 +413,6 @@ export default class Visualizer extends Container {
       width,
       height
     })
-
-    this._load_manager = new THREE.LoadingManager();
-    this._load_manager.onProgress = function (item, loaded, total) {
-
-    }
 
     this._onFocus = function () {
       this.render_threed();
@@ -381,26 +425,14 @@ export default class Visualizer extends Container {
     if (!this._controls)
       return;
 
-    // this._animationFrame = requestAnimationFrame(this._threed_animate_func);
-
     this._controls.update()
     this.render_threed();
 
   }
 
   stop() {
-    // cancelAnimationFrame(this._animationFrame)
-  }
 
-  // update() {
-  //   if (this._need_control_update || this.get('autoRotate')) {
-  //     this._controls.update()
-  //     this._need_control_update = false;
-  //   } else {
-  //     // this.invalidate()
-  //     // this.render_threed();
-  //   }
-  // }
+  }
 
   get scene3d() {
     if (!this._scene3d)
@@ -409,23 +441,7 @@ export default class Visualizer extends Container {
   }
 
   render_threed() {
-    // var delta
-    // if (this._clock)
-    //   delta = this._clock.getDelta();
-
-    // var mixers = this.mixers
-    // for (var i in mixers) {
-    //   if (mixers.hasOwnProperty(i)) {
-    //     var mixer = mixers[i];
-    //     if (mixer) {
-    //       mixer.update(delta);
-    //     }
-
-    //   }
-    // }
-
     if (this._renderer) {
-      // this._renderer.clear()
       this._renderer.render(this._scene3d, this._camera)
     }
   }
@@ -477,6 +493,9 @@ export default class Visualizer extends Container {
       if (this._dataChanged) {
         this._onDataChanged()
       }
+
+      if (this._loadComplete === false)
+        return;
 
       var rendererSize = this._renderer.getSize();
       var {
@@ -691,10 +710,6 @@ export default class Visualizer extends Container {
       }
     }
 
-    // if(after.hasOwnProperty('autoRotate')) {
-    //   this.model.autoRotate = after.autoRotate
-    // }
-
     this.invalidate()
   }
 
@@ -714,9 +729,6 @@ export default class Visualizer extends Container {
       var ref = this.model.popupScene
 
       var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
-
-      // this._mouse.originX = this.getContext().canvas.offsetLeft +e.offsetX;
-      // this._mouse.originY = this.getContext().canvas.offsetTop + e.offsetY;
 
       this._mouse.x = ((pointer.x - this.model.left) / (this.model.width)) * 2 - 1;
       this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
@@ -743,17 +755,14 @@ export default class Visualizer extends Container {
 
   onmousemove(e) {
     if (this._controls) {
-      var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
-
-      // this._mouse.originX = this.getContext().canvas.offsetLeft +e.offsetX;
-      // this._mouse.originY = this.getContext().canvas.offsetTop + e.offsetY;
+      var pointer = this.transcoordC2S(e.offsetX, e.offsetY);
 
       this._mouse.x = ((pointer.x - this.model.left) / (this.model.width)) * 2 - 1;
       this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
 
-      this._controls.onMouseMove(e)
+      this._controls.onMouseMove(e);
 
-      e.stopPropagation()
+      e.stopPropagation();
     }
   }
 
@@ -784,9 +793,6 @@ export default class Visualizer extends Container {
   ondragstart(e) {
     if (this._controls) {
       var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
-
-      // this._mouse.originX = this.getContext().canvas.offsetLeft +e.offsetX;
-      // this._mouse.originY = this.getContext().canvas.offsetTop + e.offsetY;
 
       this._mouse.x = ((pointer.x - this.model.left) / (this.model.width)) * 2 - 1;
       this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
@@ -868,13 +874,11 @@ export default class Visualizer extends Container {
       zoom = 100
 
     this.set('zoom', zoom)
-
   }
 
   onredraw() {
     this.threed_animate();
   }
-
 
 }
 

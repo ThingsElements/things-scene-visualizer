@@ -12,8 +12,8 @@ function init() {
 
   init.done = true
 
-  let objLoader = new THREE.OBJLoader();
-  let mtlLoader = new THREE.MTLLoader();
+  let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
+  let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
 
   objLoader.setPath('/obj/Fork_lift/')
   mtlLoader.setPath('/obj/Fork_lift/')

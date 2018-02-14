@@ -16,8 +16,8 @@ function init() {
 
   THREE.Loader.Handlers.add(/\.tga$/i, tgaLoader);
 
-  let objLoader = new THREE.OBJLoader();
-  let mtlLoader = new THREE.MTLLoader();
+  let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
+  let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
 
   objLoader.setPath('/obj/Casual_Man_02/')
   mtlLoader.setPath('/obj/Casual_Man_02/')

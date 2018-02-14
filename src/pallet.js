@@ -30,8 +30,8 @@ function init() {
 
   init.done = true
 
-  let objLoader = new THREE.OBJLoader();
-  let mtlLoader = new THREE.MTLLoader();
+  let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
+  let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
 
   mtlLoader.load('/obj/pallet/pallet2.mtl', function (materials) {
     materials.preload();
