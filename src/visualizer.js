@@ -4,6 +4,8 @@
 import ThreeLayout from './three-layout'
 import ThreeControls from './three-controls'
 
+import * as WHS from 'whs'
+
 THREE.Cache.enabled = true
 
 var {
@@ -185,18 +187,21 @@ export default class Visualizer extends Container {
     }
 
 
-    var floorGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
-    var floor = new THREE.Mesh(floorGeometry, floorMaterial)
-    floor.scale.set(width, height, 5);
+    var floor = new WHS.Box({
+      geometry: {
+        width: width,
+        height: height,
+        depth: 5
+      },
+      material: floorMaterial,
+      position: [0, -2, 0],
+      rotation: [0, -Math.PI / 2, 0]
+    });
 
-    // floor.receiveShadow = true
-
-    floor.rotation.x = -Math.PI / 2
-    floor.position.y = -2
 
     floor.name = 'floor'
 
-    this._scene3d.add(floor)
+    floor.addTo(this._threed_app)
   }
 
   createObjects(components, canvasSize) {
@@ -294,87 +299,104 @@ export default class Visualizer extends Container {
 
     var components = this.components || []
 
-    // SCENE
-    this._scene3d = new THREE.Scene()
+    this._threed_app = new WHS.App([
+      new WHS.ElementModule(),
+      new WHS.SceneModule(),
+      // new WHS.PerspectiveCamera({
+      //   position: new THREE.Vector3(0, 0, 50)
+      // }),
+      new WHS.DefineModule('camera', new WHS.PerspectiveCamera({
+        position: new THREE.Vector3(0, 0, 50)
+      })),
+      new WHS.RenderingModule({bgColor: 0xffffff}),
+      new WHS.ResizeModule()
+    ])
 
-    // CAMERA
-    var aspect = width / height
-
-    this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
-
-    this._scene3d.add(this._camera)
-    this._camera.position.set(height * 0.8, Math.floor(Math.min(width, height)), width * 0.8)
-    this._camera.lookAt(this._scene3d.position)
-    this._camera.zoom = this.model.zoom * 0.01
-
-    if (this.model.showAxis) {
-      var axisHelper = new THREE.AxisHelper(width);
-      this._scene3d.add(axisHelper);
-    }
-
-    try {
-      // RENDERER
-      this._renderer = new THREE.WebGLRenderer({
-        precision: precision,
-        alpha: true,
-        antialias: antialias
-      });
-
-    } catch (e) {
-      this._noSupportWebgl = true
-    }
-
-    if (this._noSupportWebgl)
-      return
-
-
-    this._renderer.autoClear = true
-
-    this._renderer.setClearColor(0xffffff, 0) // transparent
-
-    this._renderer.setSize(Math.min(width, window.innerWidth), Math.min(height, window.innerHeight))
-
-    // this._renderer.setSize(1600, 900)
-    // this._renderer.shadowMap.enabled = true
-    // this._renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    // this._renderer.setPixelRatio(window.devicePixelRatio)
-
-    // CONTROLS
-    this._controls = new ThreeControls(this._camera, this)
-
-    // LIGHT
-    var _light = new THREE.HemisphereLight(light, 0x000000, 1)
-
-    _light.position.set(-this._camera.position.x, this._camera.position.y, -this._camera.position.z)
-    this._camera.add(_light)
-
-    // this._camera.castShadow = true
-
-    this._raycaster = new THREE.Raycaster()
-    // this._mouse = { x: 0, y: 0, originX: 0, originY : 0 }
-    this._mouse = new THREE.Vector2()
-
-
-    this._tick = 0
-    this._clock = new THREE.Clock(true)
-    this.mixers = new Array();
+    this._threed_app.start();
 
     this.createFloor(fillStyle, width, height)
-    this.createObjects(components, {
-      width,
-      height
-    })
 
-    this._load_manager = new THREE.LoadingManager();
-    this._load_manager.onProgress = function (item, loaded, total) {
+    // // SCENE
+    // this._scene3d = new THREE.Scene()
 
-    }
+    // // CAMERA
+    // var aspect = width / height
 
-    this._onFocus = function () {
-      this.render_threed();
-    }.bind(this)
+    // this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
 
-    window.addEventListener('focus', this._onFocus);
+    // this._scene3d.add(this._camera)
+    // this._camera.position.set(height * 0.8, Math.floor(Math.min(width, height)), width * 0.8)
+    // this._camera.lookAt(this._scene3d.position)
+    // this._camera.zoom = this.model.zoom * 0.01
+
+    // if (this.model.showAxis) {
+    //   var axisHelper = new THREE.AxisHelper(width);
+    //   this._scene3d.add(axisHelper);
+    // }
+
+    // try {
+    //   // RENDERER
+    //   this._renderer = new THREE.WebGLRenderer({
+    //     precision: precision,
+    //     alpha: true,
+    //     antialias: antialias
+    //   });
+
+    // } catch (e) {
+    //   this._noSupportWebgl = true
+    // }
+
+    // if (this._noSupportWebgl)
+    //   return
+
+
+    // this._renderer.autoClear = true
+
+    // this._renderer.setClearColor(0xffffff, 0) // transparent
+
+    // this._renderer.setSize(Math.min(width, window.innerWidth), Math.min(height, window.innerHeight))
+
+    // // this._renderer.setSize(1600, 900)
+    // // this._renderer.shadowMap.enabled = true
+    // // this._renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    // // this._renderer.setPixelRatio(window.devicePixelRatio)
+
+    // // CONTROLS
+    // this._controls = new ThreeControls(this._camera, this)
+
+    // // LIGHT
+    // var _light = new THREE.HemisphereLight(light, 0x000000, 1)
+
+    // _light.position.set(-this._camera.position.x, this._camera.position.y, -this._camera.position.z)
+    // this._camera.add(_light)
+
+    // // this._camera.castShadow = true
+
+    // this._raycaster = new THREE.Raycaster()
+    // // this._mouse = { x: 0, y: 0, originX: 0, originY : 0 }
+    // this._mouse = new THREE.Vector2()
+
+
+    // this._tick = 0
+    // this._clock = new THREE.Clock(true)
+    // this.mixers = new Array();
+
+    // this.createFloor(fillStyle, width, height)
+    // this.createObjects(components, {
+    //   width,
+    //   height
+    // })
+
+    // this._load_manager = new THREE.LoadingManager();
+    // this._load_manager.onProgress = function (item, loaded, total) {
+
+    // }
+
+    // this._onFocus = function () {
+    //   this.render_threed();
+    // }.bind(this)
+
+    // window.addEventListener('focus', this._onFocus);
   }
 
   threed_animate() {
@@ -464,7 +486,7 @@ export default class Visualizer extends Container {
 
     if (threed) {
 
-      if (!this._scene3d) {
+      if (!this._threed_app) {
         this.init_scene3d()
         this.render_threed()
       }
@@ -478,14 +500,15 @@ export default class Visualizer extends Container {
         this._onDataChanged()
       }
 
-      var rendererSize = this._renderer.getSize();
+      var renderer = this._threed_app.get('renderer');
+      var rendererSize = renderer.getSize();
       var {
         width: rendererWidth,
         height: rendererHeight
       } = rendererSize;
 
       ctx.drawImage(
-        this._renderer.domElement, 0, 0, rendererWidth, rendererHeight,
+        renderer.domElement, 0, 0, rendererWidth, rendererHeight,
         left, top, width, height
       )
 
