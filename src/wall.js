@@ -65,6 +65,8 @@ export default class Wall extends Mesh {
     // this.castShadow = true
 
   }
+
+  raycast(raycaster, intersects) { }
 }
 
 export class Wall2d extends RectPath(Shape) {

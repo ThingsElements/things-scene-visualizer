@@ -149,36 +149,44 @@ export default class Stock extends Mesh {
     if (!(statusField && ranges))
       return
 
+    var data = this.userData.items ? this.userData.items : [this.userData];
 
-    var status = this.userData[statusField];
+    for (let i in data) {
+      let d = data[i];
 
-    if (status == undefined) {
-      // this.visible = !this._hideEmptyStock;
-      this.material = this._hideEmptyStock ? this.emptyMaterial : this.userDefineDefaultMaterial;
-      return
-    }
+      var status = d[statusField];
 
-
-    ranges.some((range, index) => {
-      let {
-        min,
-        max
-      } = range
-
-      if (max > status) {
-        if (min !== undefined) {
-          if (min <= status) {
-            this.material = this.getMaterial(index)
-          }
-        } else
-          this.material = this.getMaterial(index)
-
-        // this.visible = true;
-        return true;
-      } else {
-        this.material = this._hideEmptyStock ? this.emptyMaterial : this.userDefineDefaultMaterial
+      if (status == undefined) {
+        // this.visible = !this._hideEmptyStock;
+        this.material = this._hideEmptyStock ? this.emptyMaterial : this.userDefineDefaultMaterial;
+        return
       }
-    })
+
+
+      ranges.some((range, index) => {
+        let {
+          min,
+          max
+        } = range
+
+        min = Number(min) || min;
+        max = Number(max) || max;
+
+        if (max > status) {
+          if (min !== undefined) {
+            if (min <= status) {
+              this.material = this.getMaterial(index)
+            }
+          } else
+            this.material = this.getMaterial(index)
+
+          // this.visible = true;
+          return true;
+        } else {
+          this.material = this._hideEmptyStock ? this.emptyMaterial : this.userDefineDefaultMaterial
+        }
+      })
+    }
   }
 
   // onmousemove(e, visualizer) {

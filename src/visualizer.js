@@ -310,22 +310,25 @@ export default class Visualizer extends Container {
     if (this._scene3d)
       this.destroy_scene3d()
 
-    THREE.DefaultLoadingManager.onStart = function (item, loaded, total) {
-      createProgressbar(self.root.target_element);
-      self._loadComplete = false;
-    }
+    // var self = this;
 
-    THREE.DefaultLoadingManager.onProgress = function (item, loaded, total) {
-      showProgressbar(self.root.target_element, loaded, total)
-    }
-    THREE.DefaultLoadingManager.onLoad = function (item, loaded, total) {
-      removeProgressBar(self.root.target_element)
-      self._loadComplete = true;
-    }
+    // THREE.DefaultLoadingManager.onStart = function (item, loaded, total) {
+    //   createProgressbar(self.root.target_element);
+    //   self._loadComplete = false;
+    // }
 
-    THREE.DefaultLoadingManager.onError = function (url) {
-      console.warn('There was an error loading ' + url);
-    }
+    // THREE.DefaultLoadingManager.onProgress = function (item, loaded, total) {
+    //   var a = this;
+    //   showProgressbar(self.root.target_element, loaded, total)
+    // }
+    // THREE.DefaultLoadingManager.onLoad = function (item, loaded, total) {
+    //   removeProgressBar(self.root.target_element)
+    //   self._loadComplete = true;
+    // }
+
+    // THREE.DefaultLoadingManager.onError = function (url) {
+    //   console.warn('There was an error loading ' + url);
+    // }
 
     registerLoaders()
     this._textureLoader = new THREE.TextureLoader(THREE.DefaultLoadingManager)
@@ -350,7 +353,6 @@ export default class Visualizer extends Container {
       legendTarget
     } = this.model
 
-    var self = this;
 
     var components = this.components || []
 
@@ -621,16 +623,38 @@ export default class Visualizer extends Container {
          *  ...
          *  ])
          */
-        this._data.forEach(d => {
-          let data = d
 
-          let loc = data[locationField];
-          let object = this.getObject(loc)
-          if (object) {
-            object.userData = data;
-            object.onUserDataChanged()
+        this._data = this._data.reduce((acc, value, i, arr) => {
+          var val = JSON.parse(JSON.stringify(value))
+          if (acc[value[locationField]]) {
+
+            if (!acc[value[locationField]]["items"]) {
+              var clone = JSON.parse(JSON.stringify(acc[value[locationField]]))
+              acc[value[locationField]] = { items: [] }
+              acc[value[locationField]]["items"].push(clone)
+            }
+
+            acc[value[locationField]]["items"].push(val)
+
+          } else {
+            acc[value[locationField]] = val
           }
-        })
+
+          return acc
+        }, {})
+
+        return this._onDataChanged();
+
+        // this._data.forEach(d => {
+        //   let data = d
+
+        //   let loc = data[locationField];
+        //   let object = this.getObject(loc)
+        //   if (object) {
+        //     object.userData = data;
+        //     object.onUserDataChanged()
+        //   }
+        // })
       } else {
         /**
          *  Object type data
