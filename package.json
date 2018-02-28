@@ -27,9 +27,9 @@
   },
   "dependencies": {
     "@hatiolab/things-scene": "^2.2.36",
+    "heatmap.js": "^2.0.5",
     "three": "^0.90.0",
     "three-mtl-loader": "^1.0.2",
-    "three-obj-exporter": "^0.0.1",
     "three-obj-loader": "^1.1.3"
   }
 }

@@ -6,7 +6,7 @@ import './three-layout'
 
 import Component3d from './component-3d'
 
-import OBJExporter from 'three-obj-exporter'
+// import OBJExporter from 'three-obj-exporter'
 
 import {
   Component,
@@ -351,7 +351,7 @@ export default class Visualizer extends Container {
     this._textureLoader.withCredential = true
     this._textureLoader.crossOrigin = 'use-credentials'
 
-    this._exporter = new OBJExporter();
+    // this._exporter = new OBJExporter();
 
     var {
       width,
@@ -594,9 +594,9 @@ export default class Visualizer extends Container {
   }
 
   exportModel() {
-    var exported = this._exporter.parse(this._scene3d);
-    var blob = new Blob([exported], { type: "text/plain;charset=utf-8" });
-    console.log(exported)
+    // var exported = this._exporter.parse(this._scene3d);
+    // var blob = new Blob([exported], { type: "text/plain;charset=utf-8" });
+    // console.log(exported)
     // saveAs(blob, "exported.txt");
   }
 
