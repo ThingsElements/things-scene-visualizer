@@ -1,10 +1,11 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
+import Component3d from './component-3d'
 
 import Mesh from './mesh'
 
-var { Component, RectPath, Shape } = scene
+import { Component, RectPath, Shape } from '@hatiolab/things-scene'
 
 const NATURE = {
   mutable: false,
@@ -80,4 +81,4 @@ export class Wall2d extends RectPath(Shape) {
 }
 
 Component.register('wall', Wall2d)
-scene.Component3d.register('wall', Wall)
+Component3d.register('wall', Wall)

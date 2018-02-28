@@ -1,7 +1,8 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-var { Component, Rect } = scene
+import Component3d from './component-3d'
+import { Component, Rect } from '@hatiolab/things-scene'
 
 const NATURE = {
   mutable: false,
@@ -99,4 +100,4 @@ export class Cube2d extends Rect {
 
 
 Component.register('cube', Cube2d)
-scene.Component3d.register('cube', Cube)
+Component3d.register('cube', Cube)

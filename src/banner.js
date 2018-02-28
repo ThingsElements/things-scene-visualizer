@@ -1,10 +1,10 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-
 import Object3D from './object3d'
+import Component3d from './component-3d'
 
-var { Component, ImageView, Component3d } = scene
+import { Component, ImageView } from '@hatiolab/things-scene'
 
 const NATURE = {
   mutable: false,

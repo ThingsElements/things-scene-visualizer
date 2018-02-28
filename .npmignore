@@ -1,4 +1,13 @@
-bower_components
-node_modules
+DEPLOYMENT.md
+DEVELOPMENT.md
+dist/
 npm-debug.log
+node_modules
+bower_components
+.babelrc
+.editorconfig
+.gitignore
+.git
+boards
+things-scene-visualizer-min.js
 things-scene-visualizer.js

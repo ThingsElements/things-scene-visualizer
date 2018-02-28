@@ -1,8 +1,11 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-
 import Object3D from './object3d'
+import Component3d from './component-3d'
+
+import OBJLoader from 'three-obj-loader'
+import MTLLoader from 'three-mtl-loader'
 
 var extObj
 
@@ -12,12 +15,12 @@ function init() {
 
   init.done = true
 
-  let tgaLoader = new THREE.TGALoader();
+  // let tgaLoader = new THREE.TGALoader();
 
-  THREE.Loader.Handlers.add(/\.tga$/i, tgaLoader);
+  // THREE.Loader.Handlers.add(/\.tga$/i, tgaLoader);
 
-  let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
-  let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
+  let objLoader = new OBJLoader(THREE.DefaultLoadingManager);
+  let mtlLoader = new MTLLoader(THREE.DefaultLoadingManager);
 
   objLoader.setPath('/obj/Casual_Man_02/')
   mtlLoader.setPath('/obj/Casual_Man_02/')
@@ -93,4 +96,4 @@ export default class Person extends Object3D {
 
 }
 
-scene.Component3d.register('person', Person)
+Component3d.register('person', Person)

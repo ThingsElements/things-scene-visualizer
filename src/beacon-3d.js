@@ -1,12 +1,8 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-
 import Object3D from './object3d'
-
-var {
-  Component3d
-} = scene
+import Component3d from './component-3d'
 
 const STATUS_COLORS = ['#6666ff', '#ccccff', '#ffcccc', '#cc3300']
 

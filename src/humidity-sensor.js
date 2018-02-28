@@ -1,8 +1,10 @@
 /*
- * Copyright © HatioLab Inc. All rights reserved.
- */
-
+* Copyright © HatioLab Inc. All rights reserved.
+*/
 import Object3D from './object3d'
+import Component3d from './component-3d'
+
+import { Component, Ellipse } from '@hatiolab/things-scene'
 
 const STATUS_COLORS = ['#6666ff', '#ccccff', '#ffcccc', '#cc3300']
 
@@ -253,7 +255,6 @@ export default class HumiditySensor extends Object3D {
   }
 }
 
-var { Component, Ellipse } = scene
 
 export class Sensor extends Ellipse {
   is3dish() {
@@ -285,4 +286,4 @@ export class Sensor extends Ellipse {
 }
 
 Component.register('humidity-sensor', Sensor)
-scene.Component3d.register('humidity-sensor', HumiditySensor)
+Component3d.register('humidity-sensor', HumiditySensor)

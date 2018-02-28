@@ -1,7 +1,7 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-var { Component } = scene
+import Component3d from './component-3d'
 
 export default class Plane extends THREE.Mesh {
 
@@ -47,4 +47,4 @@ export default class Plane extends THREE.Mesh {
 
 }
 
-scene.Component3d.register('rect', Plane)
+Component3d.register('rect', Plane)

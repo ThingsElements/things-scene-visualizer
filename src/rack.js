@@ -3,6 +3,8 @@
  */
 
 import Object3D from './object3d'
+import Component3d from './component-3d'
+
 import Stock from './stock'
 
 export default class Rack extends Object3D {
@@ -251,5 +253,5 @@ export default class Rack extends Object3D {
 }
 
 
-scene.Component3d.register('rack', Rack)
+Component3d.register('rack', Rack)
 

@@ -1,17 +1,19 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import ThreeLayout from './three-layout'
+import Component3d from './component-3d'
+
 import ThreeControls from './three-controls'
 
-THREE.Cache.enabled = true
-
-var {
+import {
   Component,
   Container,
   Layout,
   Layer
-} = scene
+} from '@hatiolab/things-scene'
+
+THREE.Cache.enabled = true
+
 
 const NATURE = {
   mutable: false,
@@ -201,7 +203,7 @@ export default class Visualizer extends Container {
 
     components.forEach(component => {
       // requestAnimationFrame(() => {
-      var clazz = scene.Component3d.register(component.model.type)
+      var clazz = Component3d.register(component.model.type)
 
       if (!clazz) {
         console.warn("Class not found : 3d class is not exist");

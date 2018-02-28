@@ -1,7 +1,6 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-
 export default class Mesh extends THREE.Mesh {
   constructor(model) {
     super();

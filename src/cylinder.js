@@ -1,7 +1,9 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-var { Component, Ellipse } = scene
+import Component3d from './component-3d'
+
+import { Component, Ellipse } from '@hatiolab/things-scene'
 
 const NATURE = {
   mutable: false,
@@ -76,4 +78,4 @@ export class Cylinder2d extends Ellipse {
 
 
 Component.register('cylinder', Cylinder2d)
-scene.Component3d.register('cylinder', Cylinder)
+Component3d.register('cylinder', Cylinder)

@@ -1,10 +1,12 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-var {
+import Component3d from './component-3d'
+
+import {
   Component,
   Ellipse
-} = scene
+} from '@hatiolab/things-scene'
 
 const NATURE = {
   mutable: false,
@@ -84,5 +86,5 @@ export class Sphere2d extends Ellipse {
 
 
 Component.register('sphere', Sphere2d)
-scene.Component3d.register('sphere', Sphere)
+Component3d.register('sphere', Sphere)
 

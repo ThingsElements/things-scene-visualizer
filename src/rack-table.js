@@ -1,12 +1,17 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-
+import Component3d from './component-3d'
 import Group3D from './group3d'
 
-import RackTableCell from './rack-table-cell'
 import Rack from './rack'
 
+import {
+  Component,
+  Container,
+  Layout,
+  Model
+} from '@hatiolab/things-scene';
 
 const LABEL_WIDTH = 25
 const LABEL_HEIGHT = 25
@@ -15,14 +20,6 @@ function rgba(r, g, b, a) {
   return `rgba(${r}, ${g}, ${b}, ${a})`
 }
 
-var {
-  Table,
-  Component,
-  Component3d,
-  Container,
-  Layout,
-  Model
-} = scene;
 
 const NATURE = {
   mutable: false,

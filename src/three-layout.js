@@ -1,7 +1,9 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-var { Layout } = scene
+import {
+  Layout
+} from '@hatiolab/things-scene'
 
 /* 대상 컴포넌트의 bounds를 계산한다. */
 var ThreeLayout = {

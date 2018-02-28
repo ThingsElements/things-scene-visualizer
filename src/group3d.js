@@ -1,7 +1,6 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-
 export default class Group3D extends THREE.Group {
   constructor(model, canvasSize) {
     super();

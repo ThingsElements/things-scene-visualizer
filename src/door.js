@@ -1,7 +1,9 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-var { Component, Rect } = scene
+import Component3d from './component-3d'
+
+import { Component, Rect } from '@hatiolab/things-scene'
 
 export default class Door extends THREE.Mesh {
 
@@ -56,4 +58,4 @@ export class Door2d extends Rect {
 }
 
 Component.register('door', Door2d)
-scene.Component3d.register('door', Door)
+Component3d.register('door', Door)

@@ -1,7 +1,6 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-
 import Mesh from './mesh'
 
 const STOCK_COLOR = '#ccaa76'

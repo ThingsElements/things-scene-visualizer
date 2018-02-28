@@ -1,14 +1,10 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-var {
+import {
   Component,
-  Component3d,
-  Container,
-  RectPath,
-  Layout,
-  TableCell
-} = scene;
+  RectPath
+} from '@hatiolab/things-scene';
 
 const NATURE = {
   mutable: false,

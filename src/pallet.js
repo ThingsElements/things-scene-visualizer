@@ -1,16 +1,19 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-
 import Object3D from './object3d'
+import Component3d from './component-3d'
 
-var extObj
-var {
+import OBJLoader from 'three-obj-loader'
+import MTLLoader from 'three-mtl-loader'
+
+import {
   RectPath,
   Shape,
-  Component,
-  Component3d
-} = scene
+  Component
+} from '@hatiolab/things-scene'
+
+var extObj
 
 const NATURE = {
   mutable: false,
@@ -30,8 +33,8 @@ function init() {
 
   init.done = true
 
-  let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
-  let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
+  let objLoader = new OBJLoader(THREE.DefaultLoadingManager);
+  let mtlLoader = new MTLLoader(THREE.DefaultLoadingManager);
 
   mtlLoader.load('/obj/pallet/pallet2.mtl', function (materials) {
     materials.preload();

@@ -12,5 +12,3 @@ export default class Component3d {
   }
 
 }
-
-scene.Component3d = Component3d

@@ -1,8 +1,11 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-
 import Object3D from './object3d'
+import Component3d from './component-3d'
+
+import OBJLoader from 'three-obj-loader'
+import MTLLoader from 'three-mtl-loader'
 
 var extObj
 
@@ -12,8 +15,8 @@ function init() {
 
   init.done = true
 
-  let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
-  let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
+  let objLoader = new OBJLoader(THREE.DefaultLoadingManager);
+  let mtlLoader = new MTLLoader(THREE.DefaultLoadingManager);
 
   objLoader.setPath('/obj/Fork_lift/')
   mtlLoader.setPath('/obj/Fork_lift/')
@@ -23,7 +26,7 @@ function init() {
     objLoader.setMaterials(materials)
     materials.side = THREE.frontSide
 
-  objLoader.load('fork_lift.obj', function (obj) {
+    objLoader.load('fork_lift.obj', function (obj) {
       extObj = obj
     })
   })
@@ -84,4 +87,4 @@ export default class ForkLift extends Object3D {
 
 }
 
-scene.Component3d.register('forklift', ForkLift)
+Component3d.register('forklift', ForkLift)

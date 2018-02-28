@@ -1,17 +1,22 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import ThreeLayout from './three-layout'
 import ThreeControls from './three-controls'
+import './three-layout'
 
-THREE.Cache.enabled = true
+import Component3d from './component-3d'
 
-var {
+import OBJExporter from 'three-obj-exporter'
+
+import {
   Component,
   Container,
   Layout,
-  Layer
-} = scene
+  Layer,
+  ScriptLoader,
+  error,
+  FPS
+} from '@hatiolab/things-scene'
 
 const NATURE = {
   mutable: false,
@@ -105,7 +110,7 @@ const WEBGL_NO_SUPPORT_TEXT = 'WebGL no support'
 
 function registerLoaders() {
   if (!registerLoaders.done) {
-    THREE.Loader.Handlers.add(/\.tga$/i, new THREE.TGALoader());
+    // THREE.Loader.Handlers.add(/\.tga$/i, new THREE.TGALoader());
     registerLoaders.done = true
   }
 }
@@ -191,6 +196,17 @@ export default class Visualizer extends Container {
     return this._objects[id]
   }
 
+  added() {
+    if (!this.app.isViewMode)
+      return;
+
+    ScriptLoader.load('/node_modules/three/build/three.min.js')
+      .then(() => {
+        THREE.Cache.enabled = true
+        // ScriptLoader.load
+      }, error)
+  }
+
   /* THREE Object related .. */
 
   createFloor(color, width, height) {
@@ -250,7 +266,7 @@ export default class Visualizer extends Container {
   createObjects(components, canvasSize) {
 
     components.forEach(component => {
-      var clazz = scene.Component3d.register(component.model.type)
+      var clazz = Component3d.register(component.model.type)
       if (!clazz) {
         console.warn("Class not found : 3d class is not exist");
         return;
@@ -335,7 +351,7 @@ export default class Visualizer extends Container {
     this._textureLoader.withCredential = true
     this._textureLoader.crossOrigin = 'use-credentials'
 
-    this._exporter = new THREE.OBJExporter();
+    this._exporter = new OBJExporter();
 
     var {
       width,
@@ -499,6 +515,9 @@ export default class Visualizer extends Container {
       if (this._loadComplete === false)
         return;
 
+      if (!this._renderer)
+        return;
+
       var rendererSize = this._renderer.getSize();
       var {
         width: rendererWidth,
@@ -515,7 +534,7 @@ export default class Visualizer extends Container {
         ctx.textAlign = 'center'
         ctx.fillStyle = 'black'
         ctx.globalAlpha = 0.5
-        ctx.fillText(scene.FPS(), 100, 100)
+        ctx.fillText(FPS(), 100, 100)
         this.invalidate()
       }
 

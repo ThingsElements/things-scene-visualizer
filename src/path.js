@@ -1,7 +1,6 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-
 import Object3D from './object3d'
 
 const STATUS_COLORS = ['#6666ff', '#ccccff', '#ffcccc', '#cc3300']
@@ -28,10 +27,10 @@ export default class Path extends Object3D {
       location
     } = this.model
 
-    let x1 = (x1) - canvasSize.width / 2
-    let y1 = (y1) - canvasSize.height / 2
-    let x2 = (x2) - canvasSize.width / 2
-    let y2 = (y2) - canvasSize.height / 2
+    x1 = (x1) - canvasSize.width / 2
+    y1 = (y1) - canvasSize.height / 2
+    x2 = (x2) - canvasSize.width / 2
+    y2 = (y2) - canvasSize.height / 2
     let z = 0
 
     this.type = 'path'
