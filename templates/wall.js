@@ -1,24 +1,20 @@
+import icon from '../assets/wall.png';
+
 export default {
-  name: 'wall',
-  /* 다국어 키 표현을 어떻게.. */
-  description: '...',
-  /* 다국어 키 표현을 어떻게.. */
-  group: '3D',
-  /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */
-  icon: '../',
-  template: {
+  type: 'wall',
+  description: '3D wall',
+  group: '3D', /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */
+  icon,
+  model: {
     type: 'wall',
-    model: {
-      type: 'wall',
-      left: 100,
-      top: 100,
-      width: 100,
-      height: 100,
-      depth: 50,
-      fillStyle: '#ffffff',
-      strokeStyle: '#999',
-      lineWidth: 1,
-      alpha: 1
-    }
+    left: 100,
+    top: 100,
+    width: 100,
+    height: 100,
+    depth: 50,
+    fillStyle: '#ffffff',
+    strokeStyle: '#999',
+    lineWidth: 1,
+    alpha: 1
   }
 }
