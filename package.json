@@ -2,8 +2,8 @@
   "name": "@things-elements/things-scene-visualizer",
   "version": "0.1.7-alpha.5",
   "description": "An visualizer component for things-scene.",
+  "things-scene": true,
   "main": "src/index.js",
-  "things-shell": true,
   "directories": {
     "test": "test"
   },
@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/ThingsElements/things-scene-visualizer#readme",
   "devDependencies": {
-    "@hatiolab/things-shell": "^0.2.20"
+    "@hatiolab/things-shell": "^0.3.0"
   },
   "dependencies": {
     "@hatiolab/things-scene": "^2.2.36",
