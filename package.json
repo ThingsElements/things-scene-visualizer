@@ -1,6 +1,6 @@
 {
   "name": "@things-elements/things-scene-visualizer",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "An visualizer component for things-scene.",
   "things-scene": true,
   "main": "src/index.js",
