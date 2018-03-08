@@ -3,8 +3,9 @@
  */
 
 import Object3D from './object3d'
+import Component3d from './component-3d'
 
-import { Component, Component3d, Polygon } from '@hatiolab/things-scene'
+import { Component, Polygon } from '@hatiolab/things-scene'
 
 const NATURE = {
   mutable: false,
