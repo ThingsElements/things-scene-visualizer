@@ -7,11 +7,16 @@ import Component3d from './component-3d'
 import OBJLoader from 'three-obj-loader'
 import MTLLoader from 'three-mtl-loader'
 
+import personMtl from '../obj/Casual_Man_02/Casual_Man.mtl'
+import personObj from '../obj/Casual_Man_02/Casual_Man.obj'
+
 var extObj
 
 function init() {
   if (init.done)
     return
+
+  OBJLoader(THREE)
 
   init.done = true
 
@@ -19,18 +24,15 @@ function init() {
 
   // THREE.Loader.Handlers.add(/\.tga$/i, tgaLoader);
 
-  let objLoader = new OBJLoader(THREE.DefaultLoadingManager);
+  let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
   let mtlLoader = new MTLLoader(THREE.DefaultLoadingManager);
 
-  objLoader.setPath('/obj/Casual_Man_02/')
-  mtlLoader.setPath('/obj/Casual_Man_02/')
-
-  mtlLoader.load('Casual_Man.mtl', function (materials) {
+  mtlLoader.load(personMtl, function (materials) {
     materials.preload();
     objLoader.setMaterials(materials)
     materials.side = THREE.frontSide
 
-    objLoader.load('Casual_Man.obj', function (obj) {
+    objLoader.load(personObj, function (obj) {
       extObj = obj
     })
 

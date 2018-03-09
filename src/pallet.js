@@ -7,6 +7,9 @@ import Component3d from './component-3d'
 import OBJLoader from 'three-obj-loader'
 import MTLLoader from 'three-mtl-loader'
 
+import palletMtl from '../obj/pallet/pallet2.mtl'
+import palletObj from '../obj/pallet/pallet2.obj'
+
 import {
   RectPath,
   Shape,
@@ -31,17 +34,19 @@ function init() {
   if (init.done)
     return
 
+  OBJLoader(THREE)
+
   init.done = true
 
-  let objLoader = new OBJLoader(THREE.DefaultLoadingManager);
+  let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
   let mtlLoader = new MTLLoader(THREE.DefaultLoadingManager);
 
-  mtlLoader.load('/obj/pallet/pallet2.mtl', function (materials) {
+  mtlLoader.load(palletMtl, function (materials) {
     materials.preload();
     objLoader.setMaterials(materials)
     materials.side = THREE.frontSide
 
-    objLoader.load('/obj/pallet/pallet2.obj', function (obj) {
+    objLoader.load(palletObj, function (obj) {
       extObj = obj
     })
   })
@@ -104,7 +109,7 @@ export class Pallet2d extends RectPath(Shape) {
     return true
   }
 
-  get controls() { }
+  get controls() {}
 
   get nature() {
     return NATURE

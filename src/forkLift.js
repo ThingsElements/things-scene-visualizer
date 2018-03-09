@@ -7,26 +7,28 @@ import Component3d from './component-3d'
 import OBJLoader from 'three-obj-loader'
 import MTLLoader from 'three-mtl-loader'
 
+import forkLiftMtl from '../obj/Fork_lift/fork_lift.mtl'
+import forkLiftObj from '../obj/Fork_lift/fork_lift.obj'
+
 var extObj
 
 function init() {
   if (init.done)
     return
 
+  OBJLoader(THREE)
+
   init.done = true
 
-  let objLoader = new OBJLoader(THREE.DefaultLoadingManager);
+  let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
   let mtlLoader = new MTLLoader(THREE.DefaultLoadingManager);
 
-  objLoader.setPath('/obj/Fork_lift/')
-  mtlLoader.setPath('/obj/Fork_lift/')
-
-  mtlLoader.load('fork_lift.mtl', function (materials) {
+  mtlLoader.load(forkLiftMtl, function (materials) {
     materials.preload();
     objLoader.setMaterials(materials)
     materials.side = THREE.frontSide
 
-    objLoader.load('fork_lift.obj', function (obj) {
+    objLoader.load(forkLiftObj, function (obj) {
       extObj = obj
     })
   })
