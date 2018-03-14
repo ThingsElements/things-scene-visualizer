@@ -23,7 +23,13 @@
   },
   "homepage": "https://github.com/ThingsElements/things-scene-visualizer#readme",
   "devDependencies": {
-    "@hatiolab/things-shell": "^0.3.0"
+    "@hatiolab/things-shell": "^0.3.0",
+    "@things-scene/chartjs": "^3.0.0",
+    "@things-scene/form": "^0.2.4",
+    "@things-scene/indoor-map": "^2.1.0",
+    "@things-scene/legend": "^0.2.0",
+    "@things-scene/progressbar": "^2.1.0",
+    "@things-scene/restful": "^0.2.0"
   },
   "dependencies": {
     "@hatiolab/things-scene": "^2.2.36",

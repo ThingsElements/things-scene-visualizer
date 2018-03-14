@@ -1,0 +1,531 @@
+{
+  "width": 455,
+  "height": 405,
+  "type": "model-layer",
+  "translate": {
+    "x": 95.45679012345681,
+    "y": 0
+  },
+  "scale": {
+    "x": 2.2617283950617284,
+    "y": 2.2617283950617284
+  },
+  "left": 0,
+  "top": 0,
+  "components": [
+    {
+      "type": "rect",
+      "left": 1.6795816355053148,
+      "top": 2.2788004055454394,
+      "width": 451.1161436702673,
+      "height": 400.22699306132864,
+      "fillStyle": "rgba(41, 60, 66,.8)",
+      "strokeStyle": "#ccaa76",
+      "alpha": 1,
+      "hidden": false,
+      "lineWidth": 5,
+      "lineDash": "solid",
+      "lineCap": "butt",
+      "rotation": 0,
+      "round": 7.412331726774089,
+      "shadow": {
+        "left": 0,
+        "top": 0,
+        "blurSize": 0,
+        "color": ""
+      },
+      "id": "color",
+      "mappings": [
+        {
+          "rule": "value",
+          "target": "(self)",
+          "property": "strokeStyle"
+        }
+      ]
+    },
+    {
+      "type": "rect",
+      "left": 4.5772050358710885,
+      "top": 72.40859930865325,
+      "width": 445.4157521038116,
+      "height": 41.000000000000014,
+      "fillStyle": {
+        "type": "gradient",
+        "gradientType": "linear",
+        "colorStops": [
+          {
+            "color": "rgb(41, 60, 66)",
+            "position": 0.2857142857142857
+          },
+          {
+            "color": "rgb(31, 32, 33)",
+            "position": 1
+          }
+        ],
+        "rotation": 1.5707963267948966,
+        "center": "center",
+        "rotateWithShapes": true
+      },
+      "strokeStyle": "#000",
+      "alpha": "0.85",
+      "hidden": false,
+      "lineWidth": 0,
+      "lineDash": "solid",
+      "lineCap": "butt",
+      "rotation": 0,
+      "text": "SKU",
+      "fontSize": 22,
+      "fontColor": "#ffffff",
+      "textAlign": "left",
+      "fontFamily": "NanumBarunGothic",
+      "paddingLeft": 20,
+      "paddingTop": 1
+    },
+    {
+      "type": "rect",
+      "left": 4.5772050358710885,
+      "top": 112.92231046039001,
+      "width": 445.4157521038116,
+      "height": 41,
+      "fillStyle": {
+        "type": "gradient",
+        "gradientType": "linear",
+        "colorStops": [
+          {
+            "color": "rgb(41, 60, 66)",
+            "position": 0.2857142857142857
+          },
+          {
+            "color": "rgb(31, 32, 33)",
+            "position": 1
+          }
+        ],
+        "rotation": 1.5707963267948966,
+        "center": "center",
+        "rotateWithShapes": true
+      },
+      "strokeStyle": "#000",
+      "alpha": "0.85",
+      "hidden": false,
+      "lineWidth": 0,
+      "lineDash": "solid",
+      "lineCap": "butt",
+      "rotation": 0,
+      "text": "SKU Name",
+      "fontSize": 22,
+      "fontColor": "#ffffff",
+      "textAlign": "left",
+      "fontFamily": "NanumBarunGothic",
+      "paddingLeft": 20,
+      "paddingTop": 1
+    },
+    {
+      "type": "rect",
+      "left": 4.5772050358710885,
+      "top": 153.35923916240097,
+      "width": 445.4157521038116,
+      "height": 41,
+      "fillStyle": {
+        "type": "gradient",
+        "gradientType": "linear",
+        "colorStops": [
+          {
+            "color": "rgb(41, 60, 66)",
+            "position": 0.2857142857142857
+          },
+          {
+            "color": "rgb(31, 32, 33)",
+            "position": 1
+          }
+        ],
+        "rotation": 1.5707963267948966,
+        "center": "center",
+        "rotateWithShapes": true
+      },
+      "strokeStyle": "#000",
+      "alpha": "0.85",
+      "hidden": false,
+      "lineWidth": 0,
+      "lineDash": "solid",
+      "lineCap": "butt",
+      "rotation": 0,
+      "text": "Quantity",
+      "fontSize": 22,
+      "fontColor": "#ffffff",
+      "textAlign": "left",
+      "fontFamily": "NanumBarunGothic",
+      "paddingLeft": 20,
+      "paddingTop": 1
+    },
+    {
+      "type": "rect",
+      "left": 4.5772050358710885,
+      "top": 192.8729503141377,
+      "width": 445.4157521038116,
+      "height": 41,
+      "fillStyle": {
+        "type": "gradient",
+        "gradientType": "linear",
+        "colorStops": [
+          {
+            "color": "rgb(41, 60, 66)",
+            "position": 0.2857142857142857
+          },
+          {
+            "color": "rgb(31, 32, 33)",
+            "position": 1
+          }
+        ],
+        "rotation": 1.5707963267948966,
+        "center": "center",
+        "rotateWithShapes": true
+      },
+      "strokeStyle": "#000",
+      "alpha": "0.85",
+      "hidden": false,
+      "lineWidth": 0,
+      "lineDash": "solid",
+      "lineCap": "butt",
+      "rotation": 0,
+      "text": "Box/Innerpack",
+      "fontSize": 22,
+      "fontColor": "#ffffff",
+      "textAlign": "left",
+      "fontFamily": "NanumBarunGothic",
+      "paddingLeft": 20,
+      "paddingTop": 1
+    },
+    {
+      "type": "rect",
+      "left": 4.5772050358710885,
+      "top": 233.2842848662401,
+      "width": 445.4157521038116,
+      "height": 41,
+      "fillStyle": {
+        "type": "gradient",
+        "gradientType": "linear",
+        "colorStops": [
+          {
+            "color": "rgb(41, 60, 66)",
+            "position": 0.2857142857142857
+          },
+          {
+            "color": "rgb(31, 32, 33)",
+            "position": 1
+          }
+        ],
+        "rotation": 1.5707963267948966,
+        "center": "center",
+        "rotateWithShapes": true
+      },
+      "strokeStyle": "#000",
+      "alpha": "0.85",
+      "hidden": false,
+      "lineWidth": 0,
+      "lineDash": "solid",
+      "lineCap": "butt",
+      "rotation": 0,
+      "text": "Load Factor",
+      "fontSize": 22,
+      "fontColor": "#ffffff",
+      "textAlign": "left",
+      "fontFamily": "NanumBarunGothic",
+      "paddingLeft": 20,
+      "paddingTop": 1
+    },
+    {
+      "type": "rect",
+      "left": 4.5772050358710885,
+      "top": 273.79799601797686,
+      "width": 445.4157521038116,
+      "height": 41,
+      "fillStyle": {
+        "type": "gradient",
+        "gradientType": "linear",
+        "colorStops": [
+          {
+            "color": "rgb(41, 60, 66)",
+            "position": 0.2857142857142857
+          },
+          {
+            "color": "rgb(31, 32, 33)",
+            "position": 1
+          }
+        ],
+        "rotation": 1.5707963267948966,
+        "center": "center",
+        "rotateWithShapes": true
+      },
+      "strokeStyle": "#000",
+      "alpha": "0.85",
+      "hidden": false,
+      "lineWidth": 0,
+      "lineDash": "solid",
+      "lineCap": "butt",
+      "rotation": 0,
+      "text": "LOT(Date)",
+      "fontSize": 22,
+      "fontColor": "#ffffff",
+      "textAlign": "left",
+      "fontFamily": "NanumBarunGothic",
+      "paddingLeft": 20,
+      "paddingTop": 1
+    },
+    {
+      "type": "rect",
+      "left": 4.5772050358710885,
+      "top": 313.2349247199878,
+      "width": 445.4157521038116,
+      "height": 41,
+      "fillStyle": {
+        "type": "gradient",
+        "gradientType": "linear",
+        "colorStops": [
+          {
+            "color": "rgb(41, 60, 66)",
+            "position": 0.2857142857142857
+          },
+          {
+            "color": "rgb(31, 32, 33)",
+            "position": 1
+          }
+        ],
+        "rotation": 1.5707963267948966,
+        "center": "center",
+        "rotateWithShapes": true
+      },
+      "strokeStyle": "#000",
+      "alpha": "0.85",
+      "hidden": false,
+      "lineWidth": 0,
+      "lineDash": "solid",
+      "lineCap": "butt",
+      "rotation": 0,
+      "text": "Duration",
+      "fontSize": 22,
+      "fontColor": "#ffffff",
+      "textAlign": "left",
+      "fontFamily": "NanumBarunGothic",
+      "paddingLeft": 20,
+      "paddingTop": 1
+    },
+    {
+      "type": "rect",
+      "left": 4.5772050358710885,
+      "top": 353.82717984527255,
+      "width": 445.4157521038116,
+      "height": 41,
+      "fillStyle": {
+        "type": "gradient",
+        "gradientType": "linear",
+        "colorStops": [
+          {
+            "color": "rgb(41, 60, 66)",
+            "position": 0.2857142857142857
+          },
+          {
+            "color": "rgb(31, 32, 33)",
+            "position": 1
+          }
+        ],
+        "rotation": 1.5707963267948966,
+        "center": "center",
+        "rotateWithShapes": true
+      },
+      "strokeStyle": "#000",
+      "alpha": "0.85",
+      "hidden": false,
+      "lineWidth": 0,
+      "lineDash": "solid",
+      "lineCap": "butt",
+      "rotation": 0,
+      "text": "Remain",
+      "fontSize": 22,
+      "fontColor": "#ffffff",
+      "textAlign": "left",
+      "fontFamily": "NanumBarunGothic",
+      "paddingLeft": 20,
+      "paddingTop": 1
+    },
+    {
+      "type": "text",
+      "left": 22.37955246197413,
+      "top": 27.842609277403326,
+      "width": 411.24409448818915,
+      "height": 41.582677165354355,
+      "text": "",
+      "fillStyle": "#fff",
+      "strokeStyle": "#000",
+      "alpha": 1,
+      "hidden": false,
+      "lineWidth": 5,
+      "lineDash": "solid",
+      "lineCap": "butt",
+      "textAlign": "center",
+      "textBaseline": "top",
+      "textWrap": true,
+      "fontFamily": "NanumBarunGothic",
+      "fontSize": 40,
+      "rotation": 0,
+      "fontColor": "#fff",
+      "id": "location",
+      "data": "",
+      "mappings": [
+        {
+          "rule": "value",
+          "target": "(self)",
+          "property": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "left": 194.58427687142313,
+      "top": 80.79536518291519,
+      "width": 208.42519685039377,
+      "height": 323.59055118110257,
+      "text": "D17-1234\n\n960\n60 / 16\n100%\n2017-12-30\n365 day(s)\n37 (10%) day(s)",
+      "fillStyle": "#fff",
+      "strokeStyle": "#000",
+      "alpha": 1,
+      "hidden": false,
+      "lineWidth": 5,
+      "lineDash": "solid",
+      "lineCap": "butt",
+      "textAlign": "left",
+      "textBaseline": "top",
+      "textWrap": true,
+      "fontFamily": "NanumBarunGothic",
+      "fontSize": 22,
+      "rotation": 0,
+      "fontColor": "#fff",
+      "lineHeight": 40,
+      "data": ""
+    },
+    {
+      "type": "select",
+      "top": 10.318550712696705,
+      "left": 331.2248702315235,
+      "width": 113.25471698113228,
+      "height": 8.537735849056624,
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "fontSize": 14,
+      "fillStyle": "white",
+      "fontColor": "#585858",
+      "strokeStyle": "rgba(0,0,0,.4)",
+      "lineWidth": 1,
+      "lineDash": "solid",
+      "textAlign": "left",
+      "rotation": 0,
+      "id": "categories",
+      "mappings": [
+        {
+          "rule": "eval",
+          "param": "var index = 0;\nvar self = this;\nvar thisVal = this.value\n\nvar items = this.root.findById('items');\n\nvar data = items.data || [];\n\nreturn data[thisVal]",
+          "target": "#currData",
+          "property": "data"
+        }
+      ],
+      "submitOnChange": false,
+      "copyValueToData": true,
+      "hidden": true
+    },
+    {
+      "type": "text",
+      "left": -126.01378451663732,
+      "top": 179.38628250892404,
+      "width": 107.64150943396228,
+      "height": 50.00000000000003,
+      "text": "hidden",
+      "fillStyle": "#fff",
+      "strokeStyle": "#000",
+      "alpha": 1,
+      "hidden": true,
+      "lineWidth": 5,
+      "lineDash": "solid",
+      "lineCap": "butt",
+      "textAlign": "left",
+      "textBaseline": "top",
+      "textWrap": false,
+      "fontFamily": "serif",
+      "fontSize": 30,
+      "rotation": 0,
+      "mappings": [
+        {
+          "rule": "eval",
+          "accessor": "",
+          "target": "#categories",
+          "property": "options",
+          "param": "return (value || []).map(function (v, i) {\n\treturn {\n\t\ttext: v.category,\n\t\tvalue: i\n\t}\n})"
+        },
+        {
+          "rule": "eval",
+          "param": "if( !(value && value.length) )\n\treturn value\n\nreturn (value || [])[0]",
+          "target": "#currData",
+          "property": "data"
+        },
+        {
+          "rule": "eval",
+          "param": "if(!(value && value.length))\n\treturn true;\n\nreturn false;",
+          "target": "#categories",
+          "property": "hidden"
+        }
+      ],
+      "id": "items",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "left": -133.8224120346763,
+      "top": 69.12386522772195,
+      "width": 112.89418663946957,
+      "height": 50,
+      "text": "data",
+      "fillStyle": "#fff",
+      "strokeStyle": "#000",
+      "alpha": 1,
+      "hidden": true,
+      "lineWidth": 5,
+      "lineDash": "solid",
+      "lineCap": "butt",
+      "textAlign": "left",
+      "textBaseline": "top",
+      "textWrap": false,
+      "fontFamily": "serif",
+      "fontSize": 30,
+      "rotation": 0,
+      "id": "currData",
+      "mappings": [
+        {
+          "rule": "value",
+          "target": "(key)",
+          "property": "data"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "left": 192.60268405211104,
+      "top": 115.98687404007038,
+      "width": 200,
+      "height": 50.00000000000003,
+      "text": "#{data}",
+      "fillStyle": "#fff",
+      "strokeStyle": "#000",
+      "alpha": 1,
+      "hidden": false,
+      "lineWidth": 5,
+      "lineDash": "solid",
+      "lineCap": "butt",
+      "textAlign": "left",
+      "textBaseline": "top",
+      "textWrap": false,
+      "fontFamily": "NanumBarunGothic",
+      "fontSize": 22,
+      "rotation": 0,
+      "id": "category",
+      "fontColor": "#fff"
+    }
+  ]
+}
