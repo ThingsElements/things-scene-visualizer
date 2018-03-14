@@ -384,7 +384,7 @@
       "top": 80.79536518291519,
       "width": 208.42519685039377,
       "height": 323.59055118110257,
-      "text": "D17-1234\n\n960\n60 / 16\n100%\n2017-12-30\n365 day(s)\n37 (10%) day(s)",
+      "text": "D17-1234\n\n\n60 / 16\n100%\n2017-12-30\n365 day(s)\n37 (10%) day(s)",
       "fillStyle": "#fff",
       "strokeStyle": "#000",
       "alpha": 1,
@@ -429,7 +429,8 @@
       ],
       "submitOnChange": false,
       "copyValueToData": true,
-      "hidden": true
+      "hidden": true,
+      "size": null
     },
     {
       "type": "text",
@@ -526,6 +527,30 @@
       "rotation": 0,
       "id": "category",
       "fontColor": "#fff"
+    },
+    {
+      "type": "text",
+      "left": 192.60268405211104,
+      "top": 155.77945045928436,
+      "width": 200,
+      "height": 50.00000000000003,
+      "text": "#{data}",
+      "fillStyle": "#fff",
+      "strokeStyle": "#000",
+      "alpha": 1,
+      "hidden": false,
+      "lineWidth": 5,
+      "lineDash": "solid",
+      "lineCap": "butt",
+      "textAlign": "left",
+      "textBaseline": "top",
+      "textWrap": false,
+      "fontFamily": "NanumBarunGothic",
+      "fontSize": 22,
+      "rotation": 0,
+      "fontColor": "#fff",
+      "id": "quantity",
+      "textFormat": "#,##0"
     }
   ]
 }
