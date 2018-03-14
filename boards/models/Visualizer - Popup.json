@@ -3,12 +3,12 @@
   "height": 405,
   "type": "model-layer",
   "translate": {
-    "x": 95.45679012345681,
-    "y": 0
+    "x": 305.2518976446417,
+    "y": 70.81163500979125
   },
   "scale": {
-    "x": 2.2617283950617284,
-    "y": 2.2617283950617284
+    "x": 1.9160493827160492,
+    "y": 1.9160493827160492
   },
   "left": 0,
   "top": 0,
@@ -404,41 +404,42 @@
     },
     {
       "type": "select",
-      "top": 10.318550712696705,
-      "left": 331.2248702315235,
-      "width": 113.25471698113228,
-      "height": 8.537735849056624,
+      "top": 120.43490098826315,
+      "left": 188.7882616921517,
+      "width": 251.48193508879365,
+      "height": 25.87845285315005,
       "paddingLeft": 0,
       "paddingRight": 0,
       "fontSize": 14,
-      "fillStyle": "white",
+      "fillStyle": "",
       "fontColor": "#585858",
       "strokeStyle": "rgba(0,0,0,.4)",
       "lineWidth": 1,
       "lineDash": "solid",
       "textAlign": "left",
       "rotation": 0,
-      "id": "categories",
+      "id": "category",
       "mappings": [
         {
           "rule": "eval",
-          "param": "var index = 0;\nvar self = this;\nvar thisVal = this.value\n\nvar items = this.root.findById('items');\n\nvar data = items.data || [];\n\nreturn data[thisVal]",
-          "target": "#currData",
+          "param": "var items = this.root.findById('items');\n\nreturn (items.data || [])[value];",
+          "target": "#item-data",
           "property": "data"
         }
       ],
       "submitOnChange": false,
       "copyValueToData": true,
       "hidden": true,
-      "size": null
+      "size": null,
+      "alpha": 0.9
     },
     {
       "type": "text",
-      "left": -126.01378451663732,
-      "top": 179.38628250892404,
-      "width": 107.64150943396228,
+      "left": -119.67953070164202,
+      "top": -13.262441426511543,
+      "width": 83.65770775757547,
       "height": 50.00000000000003,
-      "text": "hidden",
+      "text": "items",
       "fillStyle": "#fff",
       "strokeStyle": "#000",
       "alpha": 1,
@@ -456,21 +457,9 @@
         {
           "rule": "eval",
           "accessor": "",
-          "target": "#categories",
+          "target": "#category",
           "property": "options",
-          "param": "return (value || []).map(function (v, i) {\n\treturn {\n\t\ttext: v.category,\n\t\tvalue: i\n\t}\n})"
-        },
-        {
-          "rule": "eval",
-          "param": "if( !(value && value.length) )\n\treturn value\n\nreturn (value || [])[0]",
-          "target": "#currData",
-          "property": "data"
-        },
-        {
-          "rule": "eval",
-          "param": "if(!(value && value.length))\n\treturn true;\n\nreturn false;",
-          "target": "#categories",
-          "property": "hidden"
+          "param": "targets[0].data = null;\ntargets[0].data = 0;\n\nreturn (value || []).map((item, index) => {\n  return {\n    text: item.category, \n    value: index\n  }\n});"
         }
       ],
       "id": "items",
@@ -478,11 +467,11 @@
     },
     {
       "type": "text",
-      "left": -133.8224120346763,
-      "top": 69.12386522772195,
-      "width": 112.89418663946957,
-      "height": 50,
-      "text": "data",
+      "left": -119.80815308902602,
+      "top": 28.849575014818328,
+      "width": 57.356527173269164,
+      "height": 50.000000000000114,
+      "text": "item-data",
       "fillStyle": "#fff",
       "strokeStyle": "#000",
       "alpha": 1,
@@ -496,7 +485,7 @@
       "fontFamily": "serif",
       "fontSize": 30,
       "rotation": 0,
-      "id": "currData",
+      "id": "item-data",
       "mappings": [
         {
           "rule": "value",
@@ -504,29 +493,6 @@
           "property": "data"
         }
       ]
-    },
-    {
-      "type": "text",
-      "left": 192.60268405211104,
-      "top": 115.98687404007038,
-      "width": 200,
-      "height": 50.00000000000003,
-      "text": "#{data}",
-      "fillStyle": "#fff",
-      "strokeStyle": "#000",
-      "alpha": 1,
-      "hidden": false,
-      "lineWidth": 5,
-      "lineDash": "solid",
-      "lineCap": "butt",
-      "textAlign": "left",
-      "textBaseline": "top",
-      "textWrap": false,
-      "fontFamily": "NanumBarunGothic",
-      "fontSize": 22,
-      "rotation": 0,
-      "id": "category",
-      "fontColor": "#fff"
     },
     {
       "type": "text",
