@@ -3,12 +3,12 @@
   "height": 405,
   "type": "model-layer",
   "translate": {
-    "x": 535.1784562636551,
-    "y": 47.27878464818767
+    "x": 127.23148148148158,
+    "y": 86.50254375254376
   },
   "scale": {
-    "x": 2.0160493827160493,
-    "y": 2.0160493827160493
+    "x": 1.0241758241758239,
+    "y": 1.0241758241758239
   },
   "left": 0,
   "top": 0,
@@ -431,7 +431,9 @@
       "copyValueToData": true,
       "hidden": true,
       "size": null,
-      "alpha": 0.9
+      "alpha": 0.9,
+      "textField": "category",
+      "valueField": "(index)"
     },
     {
       "type": "text",
@@ -455,11 +457,10 @@
       "rotation": 0,
       "mappings": [
         {
-          "rule": "eval",
+          "rule": "value",
           "accessor": "",
           "target": "#category",
-          "property": "options",
-          "param": "return (value || []).map((item, index) => {\n  return {\n    text: item.category, \n    value: index\n  }\n});"
+          "property": "options"
         },
         {
           "rule": "value",
