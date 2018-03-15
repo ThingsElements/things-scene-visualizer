@@ -3,12 +3,12 @@
   "height": 405,
   "type": "model-layer",
   "translate": {
-    "x": 305.2518976446417,
-    "y": 70.81163500979125
+    "x": 535.1784562636551,
+    "y": 47.27878464818767
   },
   "scale": {
-    "x": 1.9160493827160492,
-    "y": 1.9160493827160492
+    "x": 2.0160493827160493,
+    "y": 2.0160493827160493
   },
   "left": 0,
   "top": 0,
@@ -459,7 +459,13 @@
           "accessor": "",
           "target": "#category",
           "property": "options",
-          "param": "targets[0].data = null;\ntargets[0].data = 0;\n\nreturn (value || []).map((item, index) => {\n  return {\n    text: item.category, \n    value: index\n  }\n});"
+          "param": "return (value || []).map((item, index) => {\n  return {\n    text: item.category, \n    value: index\n  }\n});"
+        },
+        {
+          "rule": "value",
+          "target": "#item-data",
+          "property": "data",
+          "accessor": "0"
         }
       ],
       "id": "items",
@@ -469,7 +475,7 @@
       "type": "text",
       "left": -119.80815308902602,
       "top": 28.849575014818328,
-      "width": 57.356527173269164,
+      "width": 114.75943932689458,
       "height": 50.000000000000114,
       "text": "item-data",
       "fillStyle": "#fff",
