@@ -634,11 +634,11 @@ export default class Visualizer extends Container {
               acc[value[locationField]]["items"].push(clone)
             }
 
-            acc[value[locationField]]["items"].push(val)
-
           } else {
-            acc[value[locationField]] = val
+            acc[value[locationField]] = { items: [] };
           }
+
+          acc[value[locationField]]["items"].push(val)
 
           return acc
         }, {})
