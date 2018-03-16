@@ -46,6 +46,9 @@ export default class RectPillar extends Object3D {
       depth = 1,
       rotation = 0,
       fillStyle = 0xffffff,
+      strokeStyle = 0x636363,
+      lineWidth = 1,
+      lineDash = 'solid',
       round = 0
     } = this.model
 
@@ -66,7 +69,6 @@ export default class RectPillar extends Object3D {
       shape.quadraticCurveTo(0, height, 0, height - radius);
       shape.lineTo(0, radius);
       shape.quadraticCurveTo(0, 0, radius, 0);
-
     } else {
       shape.moveTo(0, 0);
       shape.lineTo(width, 0);
@@ -86,18 +88,30 @@ export default class RectPillar extends Object3D {
       bevelEnabled: false
     };
 
-    var points = shape.getPoints();
+    // var points = shape.getPoints();
 
-    var geometry = new THREE.BufferGeometry().setFromPoints(points);
-    // var geometry = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
+    // var geometry = new THREE.BufferGeometry().setFromPoints(points);
+    var geometry = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
+    geometry.center();
+
+    var edges = new THREE.EdgesGeometry(geometry);
+    var line = new THREE.LineSegments(edges, new THREE.LineDashedMaterial({
+      color: strokeStyle,
+      linewidth: lineWidth
+    }))
+
+    line.rotation.x = - Math.PI / 2
+    line.rotation.y = - Math.PI
+    line.rotation.z = - Math.PI
+
     var material;
 
     if (fillStyle.type == 'pattern' && fillStyle.image) {
 
       var texture = this._visualizer._textureLoader.load(this._visualizer.app.url(fillStyle.image), function (texture) {
         texture.minFilter = THREE.LinearFilter
-        self.render_threed()
-      })
+        this._visualizer.render_threed()
+      }.bind(this))
 
       material = new THREE.MeshLambertMaterial({
         map: texture
@@ -108,16 +122,18 @@ export default class RectPillar extends Object3D {
       })
     }
 
-    var mesh = new THREE.Line(geometry, material);
+    var mesh = new THREE.Mesh(geometry, material);
     mesh.rotation.x = - Math.PI / 2
     mesh.rotation.y = - Math.PI
     mesh.rotation.z = - Math.PI
 
     this.add( mesh );
+    this.add( line );
 
     let cx = (left + width / 2) - canvasSize.width / 2
     let cy = (top + height / 2) - canvasSize.height / 2
     let cz = zPos + depth
+
 
     // this.add(this.createCube(width, height, depth))
     // let textureBoard = this.createTextureBoard(width, depth)

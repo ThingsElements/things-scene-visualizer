@@ -75,6 +75,11 @@ const NATURE = {
     property: 'showAxis'
   }, {
     type: 'checkbox',
+    label: 'show-grid',
+    name: 'showGrid',
+    property: 'showGrid'
+  },{
+    type: 'checkbox',
     label: '3dmode',
     name: 'threed',
     property: 'threed'
@@ -261,6 +266,8 @@ export default class Visualizer extends Container {
     floor.name = 'floor'
 
     this._scene3d.add(floor)
+
+    return floor
   }
 
   createObjects(components, canvasSize) {
@@ -426,7 +433,14 @@ export default class Visualizer extends Container {
     this._clock = new THREE.Clock(true)
     this.mixers = new Array();
 
-    this.createFloor(fillStyle, width, height)
+    var floor = this.createFloor(fillStyle, width, height)
+
+    if (this.model.showGrid) {
+      var gridHelper = new THREE.GridHelper(width, width / 10, 0x666666, 0xffffff);
+      this._scene3d.add(gridHelper);
+      gridHelper.position.y = 1
+    }
+
     this.createObjects(components, {
       width,
       height

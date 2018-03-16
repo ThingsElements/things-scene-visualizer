@@ -3,5 +3,10 @@
     "name": "DEFAULT-GROUP",
     "description": "",
     "type": "group"
+  },
+  "2D Shapes": {
+    "name": "2D Shapes",
+    "description": "",
+    "type": "group"
   }
 }
