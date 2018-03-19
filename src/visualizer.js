@@ -78,7 +78,7 @@ const NATURE = {
     label: 'show-grid',
     name: 'showGrid',
     property: 'showGrid'
-  },{
+  }, {
     type: 'checkbox',
     label: '3dmode',
     name: 'threed',
@@ -220,32 +220,32 @@ export default class Visualizer extends Container {
 
     var floorMaterial
 
-    var self = this;
-
     if (fillStyle.type == 'pattern' && fillStyle.image) {
 
-      var floorTexture = this._textureLoader.load(this.app.url(fillStyle.image), function (texture) {
+      var floorTexture = this._textureLoader.load(this.app.url(fillStyle.image), texture => {
         texture.minFilter = THREE.LinearFilter
-        self.render_threed()
+
+        texture.repeat.set(1, 1)
+        this.render_threed()
       })
 
       var floorMaterial = [
-        floorMaterial = new THREE.MeshLambertMaterial({
+        new THREE.MeshLambertMaterial({
           color: color
         }),
-        floorMaterial = new THREE.MeshLambertMaterial({
+        new THREE.MeshLambertMaterial({
           color: color
         }),
-        floorMaterial = new THREE.MeshLambertMaterial({
+        new THREE.MeshLambertMaterial({
           color: color
         }),
-        floorMaterial = new THREE.MeshLambertMaterial({
+        new THREE.MeshLambertMaterial({
           color: color
         }),
         new THREE.MeshLambertMaterial({
           map: floorTexture
         }),
-        floorMaterial = new THREE.MeshLambertMaterial({
+        new THREE.MeshLambertMaterial({
           color: color
         })
       ]
@@ -393,7 +393,7 @@ export default class Visualizer extends Container {
     this._camera.zoom = this.model.zoom * 0.01
 
     if (this.model.showAxis) {
-      var axisHelper = new THREE.AxisHelper(width);
+      var axisHelper = new THREE.AxesHelper(width);
       this._scene3d.add(axisHelper);
     }
 

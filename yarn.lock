@@ -9938,7 +9938,11 @@ three@^0.87.1:
   version "0.87.1"
   resolved "https://registry.yarnpkg.com/three/-/three-0.87.1.tgz#466a34edc4543459ced9b9d7d276b65216fe2ba8"
 
-three@^0.90.0, "three@github:dmarcos/three.js#r90fixPose":
+three@^0.91.0:
+  version "0.91.0"
+  resolved "https://registry.yarnpkg.com/three/-/three-0.91.0.tgz#033fe745b64e56e679a86581957cfd1c5f9fe284"
+
+"three@github:dmarcos/three.js#r90fixPose":
   version "0.90.0"
   resolved "https://codeload.github.com/dmarcos/three.js/tar.gz/9be3a8056dead5edbdb4ff2b532138ea5e74054e"
 

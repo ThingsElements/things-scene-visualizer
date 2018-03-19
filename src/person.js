@@ -27,12 +27,12 @@ function init() {
   let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
   let mtlLoader = new MTLLoader(THREE.DefaultLoadingManager);
 
-  mtlLoader.load(personMtl, function (materials) {
+  mtlLoader.load(personMtl, materials => {
     materials.preload();
     objLoader.setMaterials(materials)
     materials.side = THREE.frontSide
 
-    objLoader.load(personObj, function (obj) {
+    objLoader.load(personObj, obj => {
       extObj = obj
     })
 

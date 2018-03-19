@@ -4,6 +4,7 @@
 
 import Object3D from './object3d'
 import Component3d from './component-3d'
+import BoundingUVGenerator from './bounding-uv-generator'
 
 import { Component, Polygon } from '@hatiolab/things-scene'
 
@@ -49,34 +50,47 @@ export default class Extrude extends Object3D {
       path = []
     } = this.model
 
-    if(path.length <= 1)
+    if (path.length <= 1)
       return;
 
     // 다각형을 그린다.
     var shape = new THREE.Shape();
     shape.moveTo(path[0].x, path[0].y)
-    for(let i = 1;i < path.length;i++)
+    for (let i = 1; i < path.length; i++)
       shape.lineTo(path[i].x, path[i].y)
 
+    var boundingUVGenerator = new BoundingUVGenerator();
     var extrudeSettings = {
       steps: 1,
       amount: depth,
-      bevelEnabled: false
+      bevelEnabled: false,
+      UVGenerator: boundingUVGenerator
     };
 
+    boundingUVGenerator.setShape({
+      extrudedShape: shape,
+      extrudedOptions: extrudeSettings
+    })
+
     var geometry = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
+    // geometry.center();
     var material;
 
     if (fillStyle.type == 'pattern' && fillStyle.image) {
 
-      var texture = this._visualizer._textureLoader.load(this._visualizer.app.url(fillStyle.image), function (texture) {
+      var texture = this._visualizer._textureLoader.load(this._visualizer.app.url(fillStyle.image), texture => {
         texture.minFilter = THREE.LinearFilter
-        self.render_threed()
+        this._visualizer.render_threed()
       })
 
-      material = new THREE.MeshLambertMaterial({
-        map: texture
-      })
+      material = [
+        new THREE.MeshLambertMaterial({
+          map: texture
+        }),
+        new THREE.MeshLambertMaterial({
+          color: fillStyle
+        })
+      ]
     } else {
       material = new THREE.MeshLambertMaterial({
         color: fillStyle
@@ -88,7 +102,7 @@ export default class Extrude extends Object3D {
     mesh.rotation.y = - Math.PI
     mesh.rotation.z = - Math.PI
 
-    this.add( mesh );
+    this.add(mesh);
 
     let cx = (left + width / 2) - canvasSize.width / 2
     let cy = (top + height / 2) - canvasSize.height / 2

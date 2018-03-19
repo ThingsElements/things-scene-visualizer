@@ -98,16 +98,19 @@ export default class Banner extends Object3D {
 
       var texture = this._visualizer._textureLoader.load(
         this._visualizer.app.url(fillStyle.image),
-        function () {
-          self._visualizer.render_threed()
+        () => {
+          texture.minFilter = THREE.LinearFilter
+          texture.repeat.set(1, 1)
+          this._visualizer.render_threed()
         }
       )
       // texture.wrapS = THREE.RepeatWrapping
       // texture.wrapT = THREE.RepeatWrapping
-      texture.repeat.set(1, 1)
-      texture.minFilter = THREE.LinearFilter
+      // texture.repeat.set(1, 1)
+      // texture.minFilter = THREE.LinearFilter
 
-      boardMaterial = new THREE.MeshBasicMaterial({ map: texture, side: THREE.FrontSide });
+      // boardMaterial = new THREE.MeshBasicMaterial({ map: texture, side: THREE.FrontSide });
+      boardMaterial = new THREE.MeshLambertMaterial({ map: texture });
 
     } else {
       boardMaterial = new THREE.MeshLambertMaterial({ color: fillStyle || '#ccaa76', side: THREE.FrontSide });

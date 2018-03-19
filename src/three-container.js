@@ -124,14 +124,12 @@ export default class ThreeContainer extends Container {
 
     var floorMaterial
 
-    var self = this;
-
     if (fillStyle.type == 'pattern' && fillStyle.image) {
 
-      var floorTexture = this._textureLoader.load(this.app.url(fillStyle.image), function (texture) {
+      var floorTexture = this._textureLoader.load(this.app.url(fillStyle.image), texture => {
         texture.minFilter = THREE.LinearFilter
-        self.render_threed()
-      })
+        this.render_threed()
+      });
 
       floorMaterial = new THREE.MeshBasicMaterial({
         map: floorTexture,
@@ -664,8 +662,8 @@ export default class ThreeContainer extends Container {
     this._camera.zoom = this.model.zoom * 0.01
 
     if (this.model.showAxis) {
-      var axisHelper = new THREE.AxisHelper( width );
-      this._scene3d.add( axisHelper );
+      var axisHelper = new THREE.AxesHelper(width);
+      this._scene3d.add(axisHelper);
     }
 
 
@@ -748,15 +746,15 @@ export default class ThreeContainer extends Container {
 
   render_threed() {
     var delta
-    if(this._clock)
+    if (this._clock)
       delta = this._clock.getDelta();
 
     var mixers = this.mixers
     for (var i in mixers) {
       if (mixers.hasOwnProperty(i)) {
         var mixer = mixers[i];
-        if ( mixer ) {
-          mixer.update( delta );
+        if (mixer) {
+          mixer.update(delta);
         }
 
       }

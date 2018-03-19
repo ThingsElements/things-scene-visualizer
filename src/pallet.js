@@ -41,12 +41,12 @@ function init() {
   let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
   let mtlLoader = new MTLLoader(THREE.DefaultLoadingManager);
 
-  mtlLoader.load(palletMtl, function (materials) {
+  mtlLoader.load(palletMtl, materials => {
     materials.preload();
     objLoader.setMaterials(materials)
     materials.side = THREE.frontSide
 
-    objLoader.load(palletObj, function (obj) {
+    objLoader.load(palletObj, obj => {
       extObj = obj
     })
   })
@@ -109,7 +109,7 @@ export class Pallet2d extends RectPath(Shape) {
     return true
   }
 
-  get controls() {}
+  get controls() { }
 
   get nature() {
     return NATURE

@@ -23,12 +23,12 @@ function init() {
   let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
   let mtlLoader = new MTLLoader(THREE.DefaultLoadingManager);
 
-  mtlLoader.load(forkLiftMtl, function (materials) {
+  mtlLoader.load(forkLiftMtl, materials => {
     materials.preload();
     objLoader.setMaterials(materials)
     materials.side = THREE.frontSide
 
-    objLoader.load(forkLiftObj, function (obj) {
+    objLoader.load(forkLiftObj, obj => {
       extObj = obj
     })
   })

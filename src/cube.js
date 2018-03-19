@@ -35,7 +35,7 @@ export default class Cube extends THREE.Mesh {
     this.updateMatrixWorld();
 
     if (model.showAxis) {
-      var axisHelper = new THREE.AxisHelper(100);
+      var axisHelper = new THREE.AxesHelper(100);
       this.add(axisHelper);
     }
 
