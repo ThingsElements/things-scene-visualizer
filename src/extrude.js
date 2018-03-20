@@ -16,6 +16,10 @@ export default class Extrude extends Object3D {
     this._canvasSize = canvasSize;
 
     this.createObject(canvasSize);
+
+    this.setPosition();
+    this.setRotation();
+
   }
 
   get cx() {
@@ -117,11 +121,7 @@ export default class Extrude extends Object3D {
       this.add(sideMesh)
     }
 
-    this.setPosition();
-    this.setRotation()
-
     this.opacity = alpha
-
   }
 
   createGeometry(shape, extrudeSettings) {
@@ -228,10 +228,14 @@ export default class Extrude extends Object3D {
 
   setRotation() {
     var {
-      rotation
+      rotationX = 0,
+      rotation = 0,
+      rotationZ = 0
     } = this.model
 
-    this.rotation.y = - rotation
+    this.rotation.x = - rotationX;
+    this.rotation.y = - rotation;
+    this.rotation.z = - rotationZ;
   }
 
   raycast(raycaster, intersects) {
