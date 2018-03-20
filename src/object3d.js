@@ -30,6 +30,13 @@ export default class Object3D extends THREE.Object3D {
     return this._model
   }
 
+  get type() {
+    return this.model.type || this._type
+  }
+  set type(type) {
+    this._type = type
+  }
+
   onUserDataChanged() {
     if (!this.userData)
       return

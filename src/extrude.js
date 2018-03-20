@@ -1,29 +1,10 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-
 import Object3D from './object3d'
-import Component3d from './component-3d'
+import tinycolor from 'tinycolor2'
+
 import BoundingUVGenerator from './bounding-uv-generator'
-
-import { Component, Polygon } from '@hatiolab/things-scene'
-
-const NATURE = {
-  mutable: false,
-  resizable: true,
-  rotatable: true,
-  properties: [{
-    type: 'number',
-    label: 'z-pos',
-    name: 'zPos',
-    property: 'zPos'
-  }, {
-    type: 'number',
-    label: 'depth',
-    name: 'depth',
-    property: 'depth'
-  }]
-}
 
 export default class Extrude extends Object3D {
 
@@ -32,48 +13,129 @@ export default class Extrude extends Object3D {
     super(model);
 
     this._visualizer = visualizer;
+    this._canvasSize = canvasSize;
 
     this.createObject(canvasSize);
   }
 
-  createObject(canvasSize) {
-    var {
-      type,
-      left = 0,
-      top = 0,
-      zPos = 0,
-      width = 1,
-      height = 1,
-      depth = 1,
-      rotation = 0,
-      fillStyle = 0xffffff,
-      path = []
-    } = this.model
+  get cx() {
+    if (!this._cx) {
+      var {
+        left = 0,
+        width = 0
+      } = this.model
+      var canvasSize = this._canvasSize;
 
-    if (path.length <= 1)
-      return;
+      this._cx = (left + width / 2) - canvasSize.width / 2
+    }
+    return this._cx
+  }
 
-    // 다각형을 그린다.
-    var shape = new THREE.Shape();
-    shape.moveTo(path[0].x, path[0].y)
-    for (let i = 1; i < path.length; i++)
-      shape.lineTo(path[i].x, path[i].y)
+  get cy() {
+    if (!this._cy) {
+      var {
+        top = 0,
+        height = 0
+      } = this.model
+      var canvasSize = this._canvasSize;
 
-    var boundingUVGenerator = new BoundingUVGenerator();
-    var extrudeSettings = {
+      this._cy = (top + height / 2) - canvasSize.height / 2
+    }
+    return this._cy
+  }
+
+  get cz() {
+    if (!this._cz) {
+      var {
+        zPos = 0,
+        depth = 1
+      } = this.model
+
+      this._cz = zPos + depth / 2
+    }
+
+    return this._cz
+  }
+
+  get shape() {
+    // console.warn('shape ')
+    return null
+  }
+
+  get extrudeSettings() {
+    var { depth = 1 } = this.model;
+
+    return {
       steps: 1,
       amount: depth,
-      bevelEnabled: false,
-      UVGenerator: boundingUVGenerator
+      bevelEnabled: false
     };
+  }
 
-    boundingUVGenerator.setShape({
-      extrudedShape: shape,
-      extrudedOptions: extrudeSettings
-    })
+  get boundingUVGenerator() {
+    if (!this._boundingUVGenerator)
+      this._boundingUVGenerator = new BoundingUVGenerator();
 
+    return this._boundingUVGenerator
+  }
+
+  createObject() {
+    var {
+      fillStyle = 0xffffff,
+      strokeStyle = 0x636363,
+      lineWidth = 1,
+      alpha = 1,
+    } = this.model
+
+    // 다각형 그리기
+    var shape = this.shape;
+    if (!shape)
+      return
+
+    var extrudeSettings = this.extrudeSettings;
+
+    var boundingUVGenerator = this.boundingUVGenerator;
+
+    if (boundingUVGenerator) {
+      boundingUVGenerator.setShape({
+        extrudedShape: shape,
+        extrudedOptions: extrudeSettings
+      })
+    }
+
+    var geometry = this.createGeometry(shape, extrudeSettings);
+
+    var material = this.createMaterial();
+
+    if (fillStyle && fillStyle != 'none') {
+      var mesh = this.createMesh(geometry, material);
+      this.add(mesh);
+    }
+
+    if (strokeStyle && strokeStyle != 'transparent' && lineWidth > 0) {
+      var sideMesh = this.createSideMesh(geometry, shape, extrudeSettings)
+      this.add(sideMesh)
+    }
+
+    this.setPosition();
+    this.setRotation()
+
+    this.opacity = alpha
+
+  }
+
+  createGeometry(shape, extrudeSettings) {
     var geometry = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
-    // geometry.center();
+    geometry.center();
+
+    return geometry
+  }
+
+  createMaterial() {
+    var {
+      fillStyle
+    } = this.model
+
     var material;
 
     if (fillStyle.type == 'pattern' && fillStyle.image) {
@@ -85,57 +147,94 @@ export default class Extrude extends Object3D {
 
       material = [
         new THREE.MeshLambertMaterial({
-          map: texture
+          map: texture,
+          side: THREE.DoubleSide
         }),
         new THREE.MeshLambertMaterial({
-          color: fillStyle
+          color: fillStyle,
+          side: THREE.DoubleSide
         })
       ]
     } else {
       material = new THREE.MeshLambertMaterial({
-        color: fillStyle
+        color: fillStyle,
+        transparent: true
       })
     }
 
+    material.transparent = true;
+    material.visible = fillStyle && fillStyle != 'none';
+
+    return material;
+  }
+
+  createMesh(geometry, material) {
     var mesh = new THREE.Mesh(geometry, material);
     mesh.rotation.x = - Math.PI / 2
     mesh.rotation.y = - Math.PI
     mesh.rotation.z = - Math.PI
 
-    this.add(mesh);
+    return mesh
+  }
 
-    let cx = (left + width / 2) - canvasSize.width / 2
-    let cy = (top + height / 2) - canvasSize.height / 2
-    let cz = zPos + depth
+  createSideMesh(geometry, shape) {
+    var {
+      strokeStyle = 0x000000,
+      depth = 0,
+      lineWidth = 0
+    } = this.model
 
-    // this.add(this.createCube(width, height, depth))
-    // let textureBoard = this.createTextureBoard(width, depth)
-    // this.add(textureBoard)
-    // textureBoard.position.set(0, 0, 0.5 * height)
+    var hole = new THREE.Path();
+    hole.setFromPoints(shape.getPoints());
 
-    this.type = type
+    var sideMaterial = new THREE.MeshLambertMaterial({
+      color: strokeStyle,
+      transparent: true
+    })
 
-    this.position.set(cx, cz, cy)
+    var tinyStrokeStyle = tinycolor(strokeStyle);
+    var strokeAlpha = tinyStrokeStyle.getAlpha();
+    sideMaterial.opacity = strokeAlpha;
+
+    // prevent overlapped layers flickering
+    sideMaterial.polygonOffset = true;
+    sideMaterial.polygonOffsetFactor = -0.1;
+
+    shape.holes.push(hole);
+
+    var sideExtrudeSettings = {
+      steps: 1,
+      amount: depth,
+      bevelEnabled: true,
+      bevelThickness: 0,
+      bevelSize: lineWidth,
+      bevelSizeSegments: 5
+    };
+
+    var sideGeometry = new THREE.ExtrudeBufferGeometry(shape, sideExtrudeSettings);
+    sideGeometry.center();
+
+    var sideMesh = new THREE.Mesh(sideGeometry, sideMaterial);
+    sideMesh.rotation.x = - Math.PI / 2
+    sideMesh.rotation.y = - Math.PI
+    sideMesh.rotation.z = - Math.PI
+
+    return sideMesh
+  }
+
+  setPosition() {
+    this.position.set(this.cx, this.cz, this.cy)
+  }
+
+  setRotation() {
+    var {
+      rotation
+    } = this.model
+
     this.rotation.y = - rotation
-
   }
 
   raycast(raycaster, intersects) {
 
   }
-
 }
-
-export class Extrude2d extends Polygon {
-  is3dish() {
-    return true
-  }
-
-  get nature() {
-    return NATURE
-  }
-}
-
-
-Component.register('extrude', Extrude2d)
-Component3d.register('extrude', Extrude)
