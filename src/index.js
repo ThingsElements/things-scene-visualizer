@@ -5,7 +5,6 @@ export { default } from './object-3d-overload'
 export { default as Component3d } from './component-3d'
 
 export { default as Visualizer } from './visualizer'
-export { default as ThreeContainer } from './three-container'
 export { default as VideoPlayer360 } from './video-player-360'
 
 export { default as RackTable } from './rack-table'

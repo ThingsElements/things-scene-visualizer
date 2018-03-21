@@ -370,7 +370,7 @@ export default class Visualizer extends Container {
     this._camera.zoom = this.model.zoom * 0.01
 
     if (this.model.showAxis) {
-      var axisHelper = new THREE.AxisHelper(width);
+      var axisHelper = new THREE.AxesHelper(width);
       this._scene3d.add(axisHelper);
     }
 
@@ -449,7 +449,7 @@ export default class Visualizer extends Container {
   }
 
   /* Container Overides .. */
-  _draw(ctx) {
+  render(ctx) {
     if (this.app.isViewMode) {
       if (!this.model.threed)
         this.model.threed = true
@@ -459,11 +459,11 @@ export default class Visualizer extends Container {
       return
     }
 
-    super._draw(ctx)
+    super.render(ctx)
 
   }
 
-  _post_draw(ctx) {
+  postrender(ctx) {
     var {
       left,
       top,
@@ -520,7 +520,7 @@ export default class Visualizer extends Container {
       }
 
     } else {
-      super._post_draw(ctx);
+      super.postrender(ctx);
     }
   }
 

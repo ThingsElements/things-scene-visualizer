@@ -302,7 +302,7 @@ export default class Visualizer extends Container {
     this._camera.zoom = this.model.zoom * 0.01
 
     if (this.model.showAxis) {
-      var axisHelper = new THREE.AxisHelper(width);
+      var axisHelper = new THREE.AxesHelper(width);
       this._scene3d.add(axisHelper);
     }
 
