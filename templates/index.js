@@ -7,6 +7,5 @@ import sphere from './sphere'
 import banner from './banner'
 import wall from './wall'
 import desk from './desk'
-import extrude from './extrude'
 
-export default [visualizer, rackTable, threeContainer, cube, cylinder, sphere, banner, wall, desk, extrude]
+export default [visualizer, rackTable, threeContainer, cube, cylinder, sphere, banner, wall, desk]
