@@ -47,6 +47,9 @@ export default class Rack extends Object3D {
         side: THREE.DoubleSide
       })
 
+      Rack._boardMaterial.polygonOffset = true;
+      Rack._boardMaterial.polygonOffsetFactor = -0.1;
+
     return Rack._boardMaterial
   }
 
