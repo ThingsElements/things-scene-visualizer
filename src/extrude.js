@@ -66,13 +66,18 @@ export default class Extrude extends Object3D {
     return null
   }
 
+  get sideShape() {
+    return null
+  }
+
   get extrudeSettings() {
     var { depth = 1 } = this.model;
 
     return {
       steps: 1,
       amount: depth,
-      bevelEnabled: false
+      bevelEnabled: false,
+      UVGenerator: this.boundingUVGenerator
     };
   }
 
@@ -97,7 +102,6 @@ export default class Extrude extends Object3D {
       return
 
     var extrudeSettings = this.extrudeSettings;
-
     var boundingUVGenerator = this.boundingUVGenerator;
 
     if (boundingUVGenerator) {
@@ -108,7 +112,6 @@ export default class Extrude extends Object3D {
     }
 
     var geometry = this.createGeometry(shape, extrudeSettings);
-
     var material = this.createMaterial();
 
     if (fillStyle && fillStyle != 'none') {
@@ -137,9 +140,7 @@ export default class Extrude extends Object3D {
     } = this.model
 
     var material;
-
     if (fillStyle.type == 'pattern' && fillStyle.image) {
-
       var texture = this._visualizer._textureLoader.load(this._visualizer.app.url(fillStyle.image), texture => {
         texture.minFilter = THREE.LinearFilter
         this._visualizer.render_threed()
@@ -157,13 +158,14 @@ export default class Extrude extends Object3D {
       ]
     } else {
       material = new THREE.MeshLambertMaterial({
-        color: fillStyle,
-        transparent: true
+        color: fillStyle
       })
     }
 
-    material.transparent = true;
-    material.visible = fillStyle && fillStyle != 'none';
+    var tinyFillStyle = tinycolor(fillStyle);
+    var fillAlpha = tinyFillStyle.getAlpha();
+    material.opacity = fillAlpha;
+    material.transparent = fillAlpha < 1
 
     return material;
   }
@@ -188,18 +190,19 @@ export default class Extrude extends Object3D {
     hole.setFromPoints(shape.getPoints());
 
     var sideMaterial = new THREE.MeshLambertMaterial({
-      color: strokeStyle,
-      transparent: true
+      color: strokeStyle
     })
 
     var tinyStrokeStyle = tinycolor(strokeStyle);
     var strokeAlpha = tinyStrokeStyle.getAlpha();
     sideMaterial.opacity = strokeAlpha;
+    sideMaterial.transparent = strokeAlpha < 1
 
     // prevent overlapped layers flickering
     sideMaterial.polygonOffset = true;
     sideMaterial.polygonOffsetFactor = -0.1;
 
+    shape = this.sideShape || shape;
     shape.holes.push(hole);
 
     var sideExtrudeSettings = {
