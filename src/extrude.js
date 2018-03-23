@@ -123,8 +123,6 @@ export default class Extrude extends Object3D {
       var sideMesh = this.createSideMesh(geometry, shape, extrudeSettings)
       this.add(sideMesh)
     }
-
-    this.opacity = alpha
   }
 
   createGeometry(shape, extrudeSettings) {
@@ -136,7 +134,8 @@ export default class Extrude extends Object3D {
 
   createMaterial() {
     var {
-      fillStyle
+      fillStyle,
+      alpha = 1
     } = this.model
 
     var material;
@@ -164,8 +163,8 @@ export default class Extrude extends Object3D {
 
     var tinyFillStyle = tinycolor(fillStyle);
     var fillAlpha = tinyFillStyle.getAlpha();
-    material.opacity = fillAlpha;
-    material.transparent = fillAlpha < 1
+    material.opacity = alpha * fillAlpha;
+    material.transparent = alpha < 1 || fillAlpha < 1
 
     return material;
   }
@@ -183,7 +182,8 @@ export default class Extrude extends Object3D {
     var {
       strokeStyle = 0x000000,
       depth = 0,
-      lineWidth = 0
+      lineWidth = 0,
+      alpha = 1
     } = this.model
 
     var hole = new THREE.Path();
@@ -195,8 +195,8 @@ export default class Extrude extends Object3D {
 
     var tinyStrokeStyle = tinycolor(strokeStyle);
     var strokeAlpha = tinyStrokeStyle.getAlpha();
-    sideMaterial.opacity = strokeAlpha;
-    sideMaterial.transparent = strokeAlpha < 1
+    sideMaterial.opacity = alpha * strokeAlpha;
+    sideMaterial.transparent = alpha < 1 || strokeAlpha < 1
 
     // prevent overlapped layers flickering
     sideMaterial.polygonOffset = true;
