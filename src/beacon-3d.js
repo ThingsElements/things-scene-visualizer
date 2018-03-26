@@ -12,32 +12,14 @@ const STATUS_COLORS = ['#6666ff', '#ccccff', '#ffcccc', '#cc3300']
 
 export default class Beacon3D extends Object3D {
 
-  constructor(model, canvasSize, visualizer) {
-
-    super(model);
-
-    this._visualizer = visualizer
-
-    this.createObject(canvasSize);
-
-  }
-
-  createObject(canvasSize) {
+  createObject() {
     var {
-      left,
-      top,
       width,
       height,
-      rotation = 0,
-      zPos,
       location,
     } = this.model
 
     var rx = Math.min(width, height);
-
-    var cx = (left) - canvasSize.width / 2
-    var cy = (top) - canvasSize.height / 2
-    var cz = (zPos || 0) + (rx / 2)
 
     this.type = 'beacon'
 
@@ -50,10 +32,21 @@ export default class Beacon3D extends Object3D {
       mesh.material.opacity = 0.5 - (i * 0.15)
     }
 
+  }
 
-    this.position.set(cx, cz, cy)
-    this.rotation.y = rotation
+  get cz() {
+    var {
+      width = 0,
+      height = 0,
+      zPos = 0
+    } = this.model
 
+    var rx = Math.min(width, height);
+
+    if (!this._cz)
+      this._cz = zPos + rx
+
+    return this._cz;
   }
 
   createSensor(w, i) {

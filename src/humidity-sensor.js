@@ -25,41 +25,52 @@ const NATURE = {
 
 export default class HumiditySensor extends Object3D {
 
-  constructor(model, canvasSize, container) {
-
-    super(model);
-
-    this._container = container
-
+  constructor(model, canvasSize, visualizer) {
+    super(model, canvasSize, visualizer);
     this.userData.temperature = model.humidity ? model.humidity[0] : 0
     this.userData.humidity = model.humidity ? model.humidity[1] : 0
-
-    // this.raycast = THREE.Mesh.prototype.raycast
-
-    this.createObject(canvasSize);
-
   }
 
-  createObject(canvasSize) {
+  get cx() {
+    var {
+      cx = 0
+    } = this.model
+    if (!this._cx)
+      this._cx = cx - this._canvasSize.width / 2
+
+    return this._cx;
+  }
+
+  get cy() {
+    var {
+      cy = 0
+    } = this.model
+    if (!this._cy)
+      this._cy = cy - this._canvasSize.height / 2
+
+    return this._cy;
+  }
+
+  get cz() {
+    var {
+      zPos = 0,
+      rx = 0
+    } = this.model
+
+    if (!this._cz)
+      this._cz = zPos + rx
+
+    return this._cz;
+  }
+
+  createObject() {
 
     var {
-      left,
-      top,
-      width,
-      height,
       depth,
-      cx,
-      cy,
       rx,
       ry,
-      zPos,
-      rotation = 0,
       location
     } = this.model;
-
-    cx = (cx) - canvasSize.width / 2
-    cy = (cy) - canvasSize.height / 2
-    var cz = (zPos || 0) + (depth / 2)
 
     this.type = 'humidity-sensor'
 
@@ -71,36 +82,35 @@ export default class HumiditySensor extends Object3D {
       mesh.material.opacity = 0.5 - (i * 0.15)
     }
 
-    this.position.set(cx, cz, cy)
-    this.rotation.y = rotation
+    if (this._visualizer._heatmap) {
+      this._visualizer._heatmap.addData({
+        x: Math.floor(this.cx),
+        y: Math.floor(this.cy),
+        value: this.userData.temperature
+      })
 
-    this._container._heatmap.addData({
-      x: Math.floor(cx),
-      y: Math.floor(cy),
-      value: this.userData.temperature
-    })
-
-    this._container.updateHeatmapTexture()
+      this._visualizer.updateHeatmapTexture()
+    }
 
     // var self = this
     //
     // setInterval(function(){
     //
-    //   var data = self._container._heatmap._store._data
+    //   var data = self._visualizer._heatmap._store._data
     //
-    //   // var value = self._container._heatmap.getValueAt({x:model.cx, y: model.cy})
+    //   // var value = self._visualizer._heatmap.getValueAt({x:model.cx, y: model.cy})
     //   var value = data[model.cx][model.cy]
     //
-    //   self._container._heatmap.addData({
+    //   self._visualizer._heatmap.addData({
     //     x: model.cx,
     //     y: model.cy,
     //     // min: -100,
     //     // value: -1
     //     value: (Math.random() * 40 - 10) - value
     //   })
-    //   self._container._heatmap.repaint()
+    //   self._visualizer._heatmap.repaint()
     //
-    //   self._container.render_threed()
+    //   self._visualizer.render_threed()
     // }, 1000)
 
   }
@@ -166,22 +176,25 @@ export default class HumiditySensor extends Object3D {
       sphere.material.color.set(STATUS_COLORS[colorIndex])
     }
 
-    var data = this._container._heatmap._store._data
+    if (!this._visualizer._heatmap)
+      return;
 
-    // var value = self._container._heatmap.getValueAt({x:model.cx, y: model.cy})
+    var data = this._visualizer._heatmap._store._data
+
+    // var value = self._visualizer._heatmap.getValueAt({x:model.cx, y: model.cy})
     var value = data[cx][cy]
 
-    this._container._heatmap.addData({
+    this._visualizer._heatmap.addData({
       x: cx,
       y: cy,
       // min: -100,
       // value: -1
       value: temperature - value
     })
-    this._container._heatmap.repaint()
+    this._visualizer._heatmap.repaint()
 
-    // this._container.render_threed()
-    this._container.updateHeatmapTexture()
+    // this._visualizer.render_threed()
+    this._visualizer.updateHeatmapTexture()
 
   }
 

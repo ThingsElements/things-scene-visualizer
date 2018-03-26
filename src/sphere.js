@@ -34,21 +34,28 @@ export default class Sphere extends THREE.Mesh {
 
   createObject(model, canvasSize) {
 
-    let cx = (model.cx) - canvasSize.width / 2
-    let cy = (model.cy) - canvasSize.height / 2
-    let cz = this.model.rx
+    var {
+      cx = 0,
+      cy = 0,
+      zPos = 0,
+      rx = 0
+    } = this.model
+
+    cx -= canvasSize.width / 2
+    cy -= canvasSize.height / 2
+    let cz = zPos + rx
 
     let rotation = model.rotation
     this.type = model.type
 
-    this.createSphere(this.model.rx, this.model.rz)
+    this.createSphere(rx)
 
     this.position.set(cx, cz, cy) // z좌표는 땅에 붙어있게 함
-    this.rotation.y = rotation || 0
+    this.rotation.y = - rotation || 0
 
   }
 
-  createSphere(rx, rz) {
+  createSphere(rx) {
 
     let {
       fillStyle = 'lightgray'

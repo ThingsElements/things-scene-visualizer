@@ -35,30 +35,13 @@ const NATURE = {
 
 export default class Banner extends Object3D {
 
-  constructor(model, canvasSize, visualizer) {
-
-    super(model);
-
-    this._visualizer = visualizer;
-
-    this.createObject(canvasSize);
-  }
-
   createObject(canvasSize) {
     var {
       type,
-      left = 0,
-      top = 0,
-      zPos = 0,
       width = 1,
       height = 1,
-      depth = 1,
-      rotation = 0
+      depth = 1
     } = this.model
-
-    let cx = (left + width / 2) - canvasSize.width / 2
-    let cy = (top + height / 2) - canvasSize.height / 2
-    let cz = zPos + 0.5 * depth
 
     this.add(this.createCube(width, height, depth))
     let textureBoard = this.createTextureBoard(width, depth)
@@ -66,9 +49,6 @@ export default class Banner extends Object3D {
     textureBoard.position.set(0, 0, 0.5 * height)
 
     this.type = type
-
-    this.position.set(cx, cz, cy)
-    this.rotation.y = - rotation
 
   }
 
@@ -117,10 +97,6 @@ export default class Banner extends Object3D {
     var board = new THREE.Mesh(boardGeometry, boardMaterial);
 
     return board
-  }
-
-  raycast(raycaster, intersects) {
-
   }
 
 }
