@@ -25,15 +25,6 @@ const NATURE = {
 
 export default class Desk extends Object3D {
 
-  constructor(model, canvasSize, visualizer, sceneComponent) {
-
-    super(model);
-
-    this._visualizer = visualizer;
-
-    this.createObject(canvasSize);
-  }
-
   get boardThickness() {
     var {
       depth
@@ -56,22 +47,15 @@ export default class Desk extends Object3D {
     return Math.min(this.legThickness / 5, 2);
   }
 
-  createObject(canvasSize) {
+  createObject() {
 
     var {
-      type,
       left,
       top,
       width,
       height,
-      depth,
-      rotation = 0,
-
+      depth
     } = this.model;
-
-    let cx = (left + (width / 2)) - canvasSize.width / 2
-    let cy = (top + (height / 2)) - canvasSize.height / 2
-    let cz = 0.5 * depth
 
     var legs = this.createDeskLegs(width, height, depth)
     this.add(legs)
@@ -82,9 +66,6 @@ export default class Desk extends Object3D {
     board.rotation.x = Math.PI / 2;
 
     this.add(board)
-
-    this.position.set(cx, cz, cy)
-    this.rotation.y = rotation || 0
   }
 
   createDeskLegs(w, h, d) {
@@ -96,11 +77,11 @@ export default class Desk extends Object3D {
     var legs = new THREE.Group()
     var posX = w / 2 - legThickness / 2 - margin;
     var posY = h / 2 - legThickness / 2 - margin;
-    var posZ = 0;
+    var posZ = -1;
 
     for (var i = 0; i < 4; i++) {
       var geometry = new THREE.BoxBufferGeometry(legThickness, d, legThickness);
-      var material = new THREE.MeshBasicMaterial({
+      var material = new THREE.MeshLambertMaterial({
         color: this.model.legColor || '#252525'
       });
       var leg = new THREE.Mesh(geometry, material);
@@ -129,51 +110,13 @@ export default class Desk extends Object3D {
 
     var d = 10;
 
-    var boardMaterial = new THREE.MeshBasicMaterial({
+    var boardMaterial = new THREE.MeshLambertMaterial({
       color: this.model.fillStyle || '#ccaa76'
     });
-    var boardGeometry = new THREE.BoxGeometry(w, h, d, 1, 1);
+    var boardGeometry = new THREE.BoxBufferGeometry(w, h, d, 1, 1);
     var board = new THREE.Mesh(boardGeometry, boardMaterial);
 
     return board
-  }
-
-  cube(size) {
-
-    var w = size.width * 0.5;
-    var h = size.height * 0.5;
-    var d = size.depth * 0.5;
-
-    var geometry = new THREE.Geometry();
-    geometry.vertices.push(
-      new THREE.Vector3(-w, -h, -d),
-      new THREE.Vector3(-w, h, -d),
-      new THREE.Vector3(-w, h, -d),
-      new THREE.Vector3(w, h, -d),
-      new THREE.Vector3(w, h, -d),
-      new THREE.Vector3(w, -h, -d),
-      new THREE.Vector3(w, -h, -d),
-      new THREE.Vector3(-w, -h, -d),
-      new THREE.Vector3(-w, -h, d),
-      new THREE.Vector3(-w, h, d),
-      new THREE.Vector3(-w, h, d),
-      new THREE.Vector3(w, h, d),
-      new THREE.Vector3(w, h, d),
-      new THREE.Vector3(w, -h, d),
-      new THREE.Vector3(w, -h, d),
-      new THREE.Vector3(-w, -h, d),
-      new THREE.Vector3(-w, -h, -d),
-      new THREE.Vector3(-w, -h, d),
-      new THREE.Vector3(-w, h, -d),
-      new THREE.Vector3(-w, h, d),
-      new THREE.Vector3(w, h, -d),
-      new THREE.Vector3(w, h, d),
-      new THREE.Vector3(w, -h, -d),
-      new THREE.Vector3(w, -h, d)
-    );
-
-    return geometry;
-
   }
 
   raycast(raycaster, intersects) {

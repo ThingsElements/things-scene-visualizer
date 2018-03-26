@@ -4,7 +4,7 @@
 import Object3D from './object3d'
 import Component3d from './component-3d'
 
-import { Component, ImageView } from '@hatiolab/things-scene'
+import { Component, Rect } from '@hatiolab/things-scene'
 
 const NATURE = {
   mutable: false,
@@ -35,41 +35,17 @@ const NATURE = {
 
 export default class Banner extends Object3D {
 
-  constructor(model, canvasSize, visualizer) {
-
-    super(model);
-
-    this._visualizer = visualizer;
-
-    this.createObject(canvasSize);
-  }
-
-  createObject(canvasSize) {
+  createObject() {
     var {
-      type,
-      left = 0,
-      top = 0,
-      zPos = 0,
       width = 1,
       height = 1,
-      depth = 1,
-      rotation = 0
+      depth = 1
     } = this.model
-
-    let cx = (left + width / 2) - canvasSize.width / 2
-    let cy = (top + height / 2) - canvasSize.height / 2
-    let cz = zPos + 0.5 * depth
 
     this.add(this.createCube(width, height, depth))
     let textureBoard = this.createTextureBoard(width, depth)
     this.add(textureBoard)
     textureBoard.position.set(0, 0, 0.5 * height)
-
-    this.type = type
-
-    this.position.set(cx, cz, cy)
-    this.rotation.y = - rotation
-
   }
 
   createCube(w, h, d) {
@@ -88,7 +64,6 @@ export default class Banner extends Object3D {
   createTextureBoard(w, h) {
 
     var boardMaterial
-    var self = this
 
     let {
       fillStyle = '#ccaa76'
@@ -128,7 +103,7 @@ export default class Banner extends Object3D {
 
 }
 
-export class Banner2d extends ImageView {
+export class Banner2d extends Rect {
   is3dish() {
     return true
   }
@@ -136,6 +111,8 @@ export class Banner2d extends ImageView {
   get nature() {
     return NATURE
   }
+
+  get controls() { }
 }
 
 

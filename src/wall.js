@@ -5,7 +5,7 @@ import Component3d from './component-3d'
 
 import Mesh from './mesh'
 
-import { Component, RectPath, Shape } from '@hatiolab/things-scene'
+import { Component, Rect } from '@hatiolab/things-scene'
 
 const NATURE = {
   mutable: false,
@@ -36,12 +36,13 @@ export default class Wall extends Mesh {
       height,
       depth = 1,
       rotation = 0,
-      alpha = 0.7
+      zPos = 0,
+      alpha = 1
     } = this.model
 
     let cx = (left + (width / 2)) - canvasSize.width / 2
     let cy = (top + (height / 2)) - canvasSize.height / 2
-    let cz = 0.5 * depth
+    let cz = zPos + 0.5 * depth
 
     this.type = type
 
@@ -70,7 +71,7 @@ export default class Wall extends Mesh {
   raycast(raycaster, intersects) { }
 }
 
-export class Wall2d extends RectPath(Shape) {
+export class Wall2d extends Rect {
   is3dish() {
     return true
   }
@@ -78,6 +79,8 @@ export class Wall2d extends RectPath(Shape) {
   get nature() {
     return NATURE
   }
+
+  get controls() { }
 }
 
 Component.register('wall', Wall2d)

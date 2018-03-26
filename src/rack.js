@@ -10,16 +10,10 @@ import Stock from './stock'
 export default class Rack extends Object3D {
 
   constructor(model, canvasSize, visualizer) {
-
-    super(model, canvasSize);
-
-    this._visualizer = visualizer;
+    super(model, canvasSize, visualizer);
 
     this._frames = [];
     this._boards = [];
-
-    this.createObject(canvasSize);
-    // this.castShadow = true
   }
 
   dispose() {
@@ -73,15 +67,12 @@ export default class Rack extends Object3D {
     return this._boards;
   }
 
-  createObject(canvasSize) {
+  createObject() {
     var {
       type,
-      left,
-      top,
       width,
       height,
       depth,
-      rotation = 0,
       fillStyle,
       hideRackFrame,
       shelves,
@@ -90,10 +81,6 @@ export default class Rack extends Object3D {
     } = this.model;
 
     let scale = stockScale;
-
-    let cx = (left + (width / 2)) - canvasSize.width / 2
-    let cy = (top + (height / 2)) - canvasSize.height / 2
-    let cz = 0.5 * depth * shelves
 
     this.type = type
 
@@ -135,9 +122,6 @@ export default class Rack extends Object3D {
       this.add(stock)
       this._visualizer.putObject(stock.name, stock);
     }
-
-    this.position.set(cx, cz, cy)
-    this.rotation.y = - rotation
 
   }
 
