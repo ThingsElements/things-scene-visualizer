@@ -3,12 +3,12 @@
   "height": 405,
   "type": "model-layer",
   "translate": {
-    "x": 127.23148148148158,
-    "y": 86.50254375254376
+    "x": 151.8765432098765,
+    "y": 0
   },
   "scale": {
-    "x": 1.0241758241758239,
-    "y": 1.0241758241758239
+    "x": 2.2049382716049384,
+    "y": 2.2049382716049384
   },
   "left": 0,
   "top": 0,
@@ -404,10 +404,10 @@
     },
     {
       "type": "select",
-      "top": 120.43490098826315,
-      "left": 188.7882616921517,
-      "width": 251.48193508879365,
-      "height": 25.87845285315005,
+      "top": 120.15569354419031,
+      "left": 193.36563875807525,
+      "width": 251.48193508879382,
+      "height": 25.878452853150065,
       "paddingLeft": 0,
       "paddingRight": 0,
       "fontSize": 14,
@@ -418,13 +418,18 @@
       "lineDash": "solid",
       "textAlign": "left",
       "rotation": 0,
-      "id": "category",
+      "id": "category-selector",
       "mappings": [
         {
-          "rule": "eval",
-          "param": "var items = this.root.findById('items');\n\nreturn (items.data || [])[value];",
-          "target": "#item-data",
+          "rule": "value",
+          "target": "(key)",
           "property": "data"
+        },
+        {
+          "rule": "eval",
+          "param": "console.log('data', value);\nreturn false;",
+          "target": "(self)",
+          "property": "hidden"
         }
       ],
       "submitOnChange": false,
@@ -433,7 +438,7 @@
       "size": null,
       "alpha": 0.9,
       "textField": "category",
-      "valueField": "(index)"
+      "valueField": ""
     },
     {
       "type": "text",
@@ -459,14 +464,15 @@
         {
           "rule": "value",
           "accessor": "",
-          "target": "#category",
+          "target": "#category-selector",
           "property": "options"
         },
         {
-          "rule": "value",
-          "target": "#item-data",
-          "property": "data",
-          "accessor": "0"
+          "rule": "eval",
+          "param": "return value.length == 1;",
+          "accessor": "",
+          "target": "#category-selector",
+          "property": "hidden"
         }
       ],
       "id": "items",
@@ -474,36 +480,7 @@
     },
     {
       "type": "text",
-      "left": -119.80815308902602,
-      "top": 28.849575014818328,
-      "width": 114.75943932689458,
-      "height": 50.000000000000114,
-      "text": "item-data",
-      "fillStyle": "#fff",
-      "strokeStyle": "#000",
-      "alpha": 1,
-      "hidden": true,
-      "lineWidth": 5,
-      "lineDash": "solid",
-      "lineCap": "butt",
-      "textAlign": "left",
-      "textBaseline": "top",
-      "textWrap": false,
-      "fontFamily": "serif",
-      "fontSize": 30,
-      "rotation": 0,
-      "id": "item-data",
-      "mappings": [
-        {
-          "rule": "value",
-          "target": "(key)",
-          "property": "data"
-        }
-      ]
-    },
-    {
-      "type": "text",
-      "left": 192.60268405211104,
+      "left": 194.60268405211104,
       "top": 155.77945045928436,
       "width": 200,
       "height": 50.00000000000003,
@@ -524,6 +501,30 @@
       "fontColor": "#fff",
       "id": "quantity",
       "textFormat": "#,##0"
+    },
+    {
+      "type": "text",
+      "left": 192.60268405211104,
+      "top": 120.82016707166221,
+      "width": 200,
+      "height": 29.455386292276643,
+      "text": "#{data}",
+      "fillStyle": "#fff",
+      "strokeStyle": "#000",
+      "alpha": 1,
+      "hidden": false,
+      "lineWidth": 5,
+      "lineDash": "solid",
+      "lineCap": "butt",
+      "textAlign": "left",
+      "textBaseline": "top",
+      "textWrap": false,
+      "fontFamily": "NanumBarunGothic",
+      "fontSize": 22,
+      "rotation": 0,
+      "fontColor": "#fff",
+      "textFormat": "",
+      "id": "category"
     }
   ]
 }
