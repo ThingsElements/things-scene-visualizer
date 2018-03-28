@@ -7,8 +7,8 @@ import Component3d from './component-3d'
 import OBJLoader from 'three-obj-loader'
 import MTLLoader from 'three-mtl-loader'
 
-import personMtl from '../obj/Casual_Man_02/Casual_Man.mtl'
-import personObj from '../obj/Casual_Man_02/Casual_Man.obj'
+import personMtl from '../obj/Casual_Man_02/Casual_Man.mtl?3d'
+import personObj from '../obj/Casual_Man_02/Casual_Man.obj?3d'
 
 var extObj
 
@@ -34,22 +34,17 @@ function init() {
 
     objLoader.load(personObj, obj => {
       extObj = obj
+      if (extObj && extObj.children && extObj.children.length > 0) {
+        extObj = extObj.children[0];
+      }
+
+      extObj.geometry.center();
     })
 
   })
 }
 
 export default class Person extends Object3D {
-
-  constructor(model, canvasSize, visualizer) {
-
-    super(model);
-
-    this._visualizer = visualizer;
-
-    this.createObject(canvasSize);
-
-  }
 
   static get extObject() {
     if (!extObj)
@@ -58,28 +53,18 @@ export default class Person extends Object3D {
     return extObj
   }
 
-  createObject(canvasSize) {
+  createObject() {
 
     var {
-      left,
-      top,
       width,
       height,
-      depth,
-      rotation = 0
+      depth
     } = this.model
 
     if (!Person.extObject) {
-      setTimeout(this.createObject.bind(this, canvasSize), 50)
+      setTimeout(this.createObject.bind(this), 50)
       return;
     }
-
-    let cx = (left + (width / 2)) - canvasSize.width / 2
-    let cy = (top + (height / 2)) - canvasSize.height / 2
-    let cz = 0.5 * depth
-
-    left -= canvasSize.width / 2
-    top -= canvasSize.height / 2
 
     this.type = 'person'
     let person = Person.extObject.clone()
@@ -91,9 +76,6 @@ export default class Person extends Object3D {
     depth /= 3.7
 
     this.scale.set(width, depth, height)
-    this.position.set(cx, 0, cy)
-    this.rotation.y = rotation
-
   }
 
 }

@@ -25,9 +25,11 @@
   "devDependencies": {
     "@hatiolab/things-shell": "^0.3.0",
     "@things-scene/chartjs": "^3.0.0",
+    "@things-scene/forklift": "^2.0.5",
     "@things-scene/form": "^0.2.4",
     "@things-scene/indoor-map": "^2.1.0",
     "@things-scene/legend": "^0.2.0",
+    "@things-scene/person": "^2.0.5",
     "@things-scene/progressbar": "^2.1.0",
     "@things-scene/restful": "^0.2.0"
   },

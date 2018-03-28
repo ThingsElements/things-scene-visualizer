@@ -10,6 +10,8 @@ export default class Object3D extends THREE.Object3D {
     this._visualizer = visualizer;
     this._canvasSize = canvasSize;
 
+    this.name = this.model.id;
+
     this.createObject();
 
     this.setPosition();

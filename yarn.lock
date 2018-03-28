@@ -566,6 +566,12 @@
     chart.js "2.4.0"
     tinycolor2 "^1.4.1"
 
+"@things-scene/forklift@^2.0.5":
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/@things-scene/forklift/-/forklift-2.0.5.tgz#0956e758a528829aeb19b7fecc1e78754dd928fa"
+  dependencies:
+    "@hatiolab/things-scene" "^2.2.36"
+
 "@things-scene/form@^0.2.4":
   version "0.2.7"
   resolved "https://registry.yarnpkg.com/@things-scene/form/-/form-0.2.7.tgz#46fb7cfa600836faba749870c7ea3119d0175a2a"
@@ -581,6 +587,12 @@
 "@things-scene/legend@^0.2.0":
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/@things-scene/legend/-/legend-0.2.0.tgz#79584150d36c6d933aa364d3c77af2d45304af1a"
+  dependencies:
+    "@hatiolab/things-scene" "^2.2.36"
+
+"@things-scene/person@^2.0.5":
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/@things-scene/person/-/person-2.0.5.tgz#f46deb9b618ffb574d028e303e3e993c520ffa5b"
   dependencies:
     "@hatiolab/things-scene" "^2.2.36"
 
@@ -2977,7 +2989,7 @@ debug@^3.0.0, debug@^3.1.0:
   dependencies:
     ms "2.0.0"
 
-"debug@github:ngokevin/debug#noTimestamp":
+debug@ngokevin/debug#noTimestamp:
   version "2.2.0"
   resolved "https://codeload.github.com/ngokevin/debug/tar.gz/ef5f8e66d49ce8bc64c6f282c15f8b7164409e3a"
 
@@ -3190,7 +3202,7 @@ doctrine@^2.1.0:
   dependencies:
     esutils "^2.0.2"
 
-"document-register-element@github:dmarcos/document-register-element#8ccc532b7":
+document-register-element@dmarcos/document-register-element#8ccc532b7:
   version "0.5.4"
   resolved "https://codeload.github.com/dmarcos/document-register-element/tar.gz/8ccc532b7f3744be954574caf3072a5fd260ca90"
 
@@ -7231,7 +7243,7 @@ pluralize@^7.0.0:
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/pluralize/-/pluralize-7.0.0.tgz#298b89df8b93b0221dbf421ad2b1b1ea23fc6777"
 
-"polymer-redux@github:tur-nr/polymer-redux#polymer-3":
+polymer-redux@tur-nr/polymer-redux#polymer-3:
   version "1.0.4"
   resolved "https://codeload.github.com/tur-nr/polymer-redux/tar.gz/6fb60876f3e4b6d406ccb105f0649c9957957b4a"
   dependencies:
@@ -8292,7 +8304,7 @@ remark-heading-gap@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/remark-heading-gap/-/remark-heading-gap-3.0.0.tgz#f52ac47a27995ef3248a59eb7544b5620b4736a6"
 
-"remark-license@github:niftylettuce/remark-license":
+remark-license@niftylettuce/remark-license:
   version "4.0.1"
   resolved "https://codeload.github.com/niftylettuce/remark-license/tar.gz/17ecb8f64f8f6082414d14f9267a12764e6ddbfb"
   dependencies:
