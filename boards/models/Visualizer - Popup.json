@@ -3,12 +3,12 @@
   "height": 405,
   "type": "model-layer",
   "translate": {
-    "x": 151.8765432098765,
-    "y": 0
+    "x": 275.09876543209873,
+    "y": -5.684341886080802e-14
   },
   "scale": {
-    "x": 2.2049382716049384,
-    "y": 2.2049382716049384
+    "x": 2.3160493827160495,
+    "y": 2.3160493827160495
   },
   "left": 0,
   "top": 0,
@@ -405,16 +405,16 @@
     {
       "type": "select",
       "top": 120.15569354419031,
-      "left": 193.36563875807525,
-      "width": 251.48193508879382,
+      "left": 185.61833688699363,
+      "width": 259.22923695987544,
       "height": 25.878452853150065,
       "paddingLeft": 0,
       "paddingRight": 0,
-      "fontSize": 14,
-      "fillStyle": "",
-      "fontColor": "#585858",
+      "fontSize": 18,
+      "fillStyle": "rgba(0,0,0,.2)",
+      "fontColor": "white",
       "strokeStyle": "rgba(0,0,0,.4)",
-      "lineWidth": 1,
+      "lineWidth": 0,
       "lineDash": "solid",
       "textAlign": "left",
       "rotation": 0,
@@ -469,10 +469,16 @@
         },
         {
           "rule": "eval",
-          "param": "return value.length == 1;",
+          "param": "return !value || !value.length || value.length == 1;",
           "accessor": "",
           "target": "#category-selector",
           "property": "hidden"
+        },
+        {
+          "rule": "eval",
+          "target": "#category",
+          "property": "hidden",
+          "param": "return !value || !value.length || value.length > 1;"
         }
       ],
       "id": "items",
@@ -513,7 +519,7 @@
       "strokeStyle": "#000",
       "alpha": 1,
       "hidden": false,
-      "lineWidth": 5,
+      "lineWidth": null,
       "lineDash": "solid",
       "lineCap": "butt",
       "textAlign": "left",
