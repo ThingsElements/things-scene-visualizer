@@ -40,21 +40,16 @@ function init() {
 
     objLoader.load('/obj/pallet/pallet2.obj', function (obj) {
       extObj = obj
+      if (extObj && extObj.children && extObj.children.length > 0) {
+        extObj = extObj.children[0];
+      }
+
+      extObj.geometry.center();
     })
   })
 }
 
 export default class Pallet extends Object3D {
-
-  constructor(model, canvasSize, visualizer) {
-
-    super(model, canvasSize);
-
-    this._visualizer = visualizer;
-
-    this.createObject(canvasSize);
-  }
-
   static get extObject() {
     if (!extObj)
       init()
@@ -62,35 +57,23 @@ export default class Pallet extends Object3D {
     return extObj
   }
 
-  createObject(canvasSize) {
+  createObject() {
 
     var {
-      left,
-      top,
       width,
       height,
-      depth,
-      rotation = 0
+      depth
     } = this.model
 
     if (!Pallet.extObject) {
-      setTimeout(this.createObject.bind(this, canvasSize), 50)
+      setTimeout(this.createObject.bind(this), 50)
       return;
     }
-
-    let cx = (left + (width / 2)) - canvasSize.width / 2
-    let cy = (top + (height / 2)) - canvasSize.height / 2
-    var cz = 0.5 * depth
-
-    var left = left - canvasSize.width / 2
-    var top = top - canvasSize.height / 2
 
     this.type = 'pallet'
 
     this.add(Pallet.extObject.clone())
     this.scale.set(width, depth, height)
-    this.position.set(cx, 0, cy)
-    this.rotation.y = rotation
 
   }
 

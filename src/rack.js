@@ -14,6 +14,19 @@ export default class Rack extends Object3D {
     this._boards = [];
   }
 
+  get cz() {
+    if (!this._cz) {
+      var {
+        shelves = 1,
+        depth = 1
+      } = this.model
+
+      this._cz = 0.5 * depth * shelves
+    }
+
+    return this._cz
+  }
+
   dispose() {
     super.dispose()
 
