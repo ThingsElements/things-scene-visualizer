@@ -22,6 +22,19 @@ export default class Rack extends Object3D {
     delete this._visualizer
   }
 
+  get cz() {
+    if (!this._cz) {
+      var {
+        shelves = 1,
+        depth = 1
+      } = this.model
+
+      this._cz = 0.5 * depth * shelves
+    }
+
+    return this._cz
+  }
+
   static get rackFrameGeometry() {
     if (!Rack._rackFrameGeometry)
       Rack._rackFrameGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
