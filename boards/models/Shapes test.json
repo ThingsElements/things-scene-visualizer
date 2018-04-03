@@ -82,6 +82,62 @@
           "rotation": 0,
           "round": 21.86927306047647,
           "depth": 500
+        },
+        {
+          "type": "text",
+          "xx": 0,
+          "left": 12.314410480349324,
+          "top": 909.3231441048035,
+          "width": 200.00000000000028,
+          "height": 50,
+          "text": "Text",
+          "fillStyle": "#fff",
+          "strokeStyle": "#000",
+          "alpha": 1,
+          "hidden": false,
+          "lineWidth": 5,
+          "lineDash": "solid",
+          "lineCap": "butt",
+          "textAlign": "left",
+          "textBaseline": "top",
+          "textWrap": false,
+          "fontFamily": "serif",
+          "fontSize": 30,
+          "rotation": 0,
+          "id": "text"
+        }
+      ]
+    },
+    {
+      "type": "rect",
+      "xx": 0,
+      "left": 234.99999999999994,
+      "top": 291.9213973799127,
+      "width": 100.00000000000011,
+      "height": 100.00000000000034,
+      "fillStyle": "#fff",
+      "strokeStyle": "#000",
+      "alpha": 1,
+      "hidden": false,
+      "lineWidth": 1,
+      "lineDash": "solid",
+      "lineCap": "butt",
+      "rotation": 0,
+      "text": "Click me",
+      "event": {
+        "hover": {},
+        "tap": {
+          "target": "$clickme",
+          "value": "[         {             \"location\": \"A01-0101\",             \"shipping_frequency\": 80,             \"expiration_date\": \"40.33\",             \"category\": \"Toner\",             \"quantity\": 372         },         {             \"location\": \"A01-0101\",             \"shipping_frequency\": 93,             \"expiration_date\": \"70.21\",             \"category\": \"Foam Cleanser\",             \"quantity\": 301         },         {             \"location\": \"A01-0102\",             \"shipping_frequency\": 71,             \"expiration_date\": \"2.93\",             \"category\": \"Toner\",             \"quantity\": 24         },         {             \"location\": \"A01-0102\",             \"shipping_frequency\": 0,             \"expiration_date\": \"93.28\",             \"category\": \"Foam Cleanser\",             \"quantity\": 885         },         {             \"location\": \"A01-0103\",             \"shipping_frequency\": 61,             \"expiration_date\": \"35.49\",             \"category\": \"Toner\",             \"quantity\": 222         },         {             \"location\": \"A01-0103\",             \"shipping_frequency\": 82,             \"expiration_date\": \"69.00\",             \"category\": \"Foam Cleanser\",             \"quantity\": 865         }, {             \"id\": \"text\",             \"data\": \"hahahaha\"         }     ]"
+        }
+      },
+      "id": "clickme",
+      "mappings": [
+        {
+          "rule": "eval",
+          "param": "return JSON.parse(value || {})",
+          "target": "#visualizer",
+          "property": "data"
         }
       ]
     }
