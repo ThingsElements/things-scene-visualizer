@@ -658,20 +658,24 @@ export default class Visualizer extends Container {
          */
 
         this._data = this._data.reduce((acc, value, i, arr) => {
-          var val = JSON.parse(JSON.stringify(value))
-          if (acc[value[locationField]]) {
+          var val = JSON.parse(JSON.stringify(value));
+          var id = locationField;
+          if (!val[id]) // Rack 데이터가 아니면
+            id = "id";
 
-            if (!acc[value[locationField]]["items"]) {
-              var clone = JSON.parse(JSON.stringify(acc[value[locationField]]))
-              acc[value[locationField]] = { items: [] }
-              acc[value[locationField]]["items"].push(clone)
+          if (acc[value[id]]) {
+
+            if (!acc[value[id]]["items"]) {
+              var clone = JSON.parse(JSON.stringify(acc[value[id]]))
+              acc[value[id]] = { items: [] }
+              acc[value[id]]["items"].push(clone)
             }
 
           } else {
-            acc[value[locationField]] = { items: [] };
+            acc[value[id]] = { items: [] };
           }
 
-          acc[value[locationField]]["items"].push(val)
+          acc[value[id]]["items"].push(val)
 
           return acc
         }, {})
@@ -696,11 +700,11 @@ export default class Visualizer extends Container {
          *    ...
          *  })
          */
-        for (var loc in this._data) {
-          let location = loc
-          if (this._data.hasOwnProperty(location)) {
-            let d = this._data[location]
-            let object = this.getObject(location)
+        for (var key in this._data) {
+          let id = key
+          if (this._data.hasOwnProperty(id)) {
+            let d = this._data[id]
+            let object = this.getObject(id)
             if (object) {
               object.userData = d;
               object.onUserDataChanged()

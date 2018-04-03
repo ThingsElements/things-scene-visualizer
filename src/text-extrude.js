@@ -106,11 +106,11 @@ export default class TextExtrude extends Object3D {
       this._fontLoaded = true;
       this.setPosition();
 
-      setInterval(() => {
-        var t = Math.round(Math.random() * 1000)
-        this.model.text = t;
-        this.changeText()
-      }, 10000)
+      // setInterval(() => {
+      //   var t = Math.round(Math.random() * 1000)
+      //   this.model.text = t;
+      //   this.changeText()
+      // }, 10000)
     })
 
   }
@@ -146,11 +146,27 @@ export default class TextExtrude extends Object3D {
     if (this.children && this.children[0]) {
       this.children[0].geometry.dispose();
       this.children[0].geometry = this.createTextGeometry();
+
+      this._cx = this._cy = null
+
+      this.setPosition();
     }
   }
 
   raycast(raycaster, intersects) {
 
+  }
+
+  onUserDataChanged() {
+    super.onUserDataChanged();
+
+    if (!(this.userData && this.userData.items && this.userData.items.length > 0))
+      return
+
+    var data = this.userData.items[0].data
+
+    this.model.text = data;
+    this.changeText();
   }
 
 }
