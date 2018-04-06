@@ -119,8 +119,8 @@ export default class Extrude extends Object3D {
   createMesh(geometry, material) {
     var mesh = new THREE.Mesh(geometry, material);
     mesh.rotation.x = - Math.PI / 2
-    mesh.rotation.y = - Math.PI
-    mesh.rotation.z = - Math.PI
+    // mesh.rotation.y = - Math.PI
+    // mesh.rotation.z = - Math.PI
 
     return mesh
   }
