@@ -297,7 +297,10 @@ export default class Stock extends Mesh {
 
     if (!this.userData || Object.keys(this.userData).length === 0)
       this.userData = {
-        loc: this.name
+        loc: this.name,
+        items: [{
+          loc: this.name
+        }]
       };
 
     if (callback && typeof callback == 'function') {

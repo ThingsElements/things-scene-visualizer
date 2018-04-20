@@ -5,12 +5,13 @@
 import Object3D from './object3d'
 
 var extObj
+var initDone = false
 
 function init() {
-  if (init.done)
+  if (initDone)
     return
 
-  init.done = true
+  initDone = true
 
   let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
   let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);

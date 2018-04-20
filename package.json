@@ -33,6 +33,7 @@
     "gulp": "^3.8.5",
     "gulp-header-license": "^1.0.9",
     "html-webpack-plugin": "^2.30.1",
+    "jszip": "^2.6.1",
     "mocha": "^4.0.1",
     "polymer-webpack-loader": "^2.0.0",
     "should": "^13.1.3",

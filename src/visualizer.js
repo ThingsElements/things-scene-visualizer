@@ -396,6 +396,7 @@ export default class Visualizer extends Container {
 
     // CONTROLS
     this._controls = new ThreeControls(this._camera, this)
+    this._controls.cameraChanged = true
 
     // LIGHT
     var _light = new THREE.HemisphereLight(light, 0x000000, 1)
@@ -416,11 +417,15 @@ export default class Visualizer extends Container {
       height
     })
 
+    this._camera.updateProjectionMatrix();
+
     this._onFocus = function () {
       this.render_threed();
     }.bind(this)
 
     window.addEventListener('focus', this._onFocus);
+
+    this.invalidate();
   }
 
   threed_animate() {
@@ -761,7 +766,11 @@ export default class Visualizer extends Container {
 
       if (object && object.onmouseup) {
         if (ref)
-          object.onmouseup(e, this, popup.show.bind(this, this, ref))
+          object.onmouseup(e, this, function() {
+            popup.hide(this, ref);
+            popup.show(this, ref);
+
+          }.bind(this))
 
         object._focused = true;
         object._focusedAt = performance.now();

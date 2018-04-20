@@ -5,6 +5,8 @@
 import Object3D from './object3d'
 
 var extObj
+var initDone = false
+
 var {
   RectPath,
   Shape,
@@ -25,24 +27,30 @@ const NATURE = {
 }
 
 function init() {
-  if (init.done)
+  if (initDone)
     return
 
-  init.done = true
+  initDone = true
 
   let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
   let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
 
-  mtlLoader.load('/obj/pallet/pallet2.mtl', function (materials) {
+  mtlLoader.load('/obj/pallet/pallet4.mtl', function (materials) {
     materials.preload();
     objLoader.setMaterials(materials)
-    materials.side = THREE.frontSide
+    if(materials && materials.length > 0) {
+      materials.forEach(m => {
+        m.transparent = true;
+      })
+    }
 
-    objLoader.load('/obj/pallet/pallet2.obj', function (obj) {
+    objLoader.load('/obj/pallet/pallet4.obj', function (obj) {
       extObj = obj
-      if (extObj && extObj.children && extObj.children.length > 0) {
-        extObj = extObj.children[0];
-      }
+      var newObj = new Mesh()
+
+      // if (extObj && extObj.children && extObj.children.length > 0) {
+      //   extObj = extObj.children[0];
+      // }
 
       extObj.geometry.center();
     })
@@ -71,6 +79,10 @@ export default class Pallet extends Object3D {
     }
 
     this.type = 'pallet'
+
+    width /= 2
+    height /= 2
+    depth /= 2
 
     this.add(Pallet.extObject.clone())
     this.scale.set(width, depth, height)
