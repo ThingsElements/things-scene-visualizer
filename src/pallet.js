@@ -26,67 +26,59 @@ const NATURE = {
   }]
 }
 
-function init() {
-  if (initDone)
-    return
+export default class Pallet extends Object3D {
+  static get threedObjectLoader() {
+    if (!Pallet._threedObjectLoader) {
+      Pallet._threedObjectLoader = new Promise((resolve, reject) => {
+        let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
+        let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
 
-  initDone = true
+        mtlLoader.setPath('obj/pallet/');
+        objLoader.setPath('obj/pallet/');
 
-  let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
-  let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
+        mtlLoader.load('new_pallet.mtl', (materials) => {
+          materials.preload();
+          objLoader.setMaterials(materials)
+          materials.side = THREE.frontSide
 
-  mtlLoader.load('/obj/pallet/pallet4.mtl', function (materials) {
-    materials.preload();
-    objLoader.setMaterials(materials)
-    if(materials && materials.length > 0) {
-      materials.forEach(m => {
-        m.transparent = true;
-      })
+          objLoader.load('new_pallet.obj', (obj) => {
+            var extObj = obj
+            if (extObj && extObj.children && extObj.children.length > 0) {
+              extObj = extObj.children[0];
+            }
+
+            extObj.geometry.center();
+            resolve(extObj);
+          })
+        })
+      });
     }
 
-    objLoader.load('/obj/pallet/pallet4.obj', function (obj) {
-      extObj = obj
-      var newObj = new Mesh()
-
-      // if (extObj && extObj.children && extObj.children.length > 0) {
-      //   extObj = extObj.children[0];
-      // }
-
-      extObj.geometry.center();
-    })
-  })
-}
-
-export default class Pallet extends Object3D {
-  static get extObject() {
-    if (!extObj)
-      init()
-
-    return extObj
+    return Pallet._threedObjectLoader;
   }
 
   createObject() {
+    Pallet.threedObjectLoader.then(this.addObject.bind(this));
+  }
 
+  addObject(extObject) {
     var {
       width,
       height,
-      depth
+      depth,
+      rotation = 0
     } = this.model
-
-    if (!Pallet.extObject) {
-      setTimeout(this.createObject.bind(this), 50)
-      return;
-    }
 
     this.type = 'pallet'
 
-    width /= 2
-    height /= 2
-    depth /= 2
+    width /= 63.173
+    height /= 72.1887
+    depth /= 9.0388
 
-    this.add(Pallet.extObject.clone())
+    var object = extObject.clone();
+    this.add(object)
+
     this.scale.set(width, depth, height)
-
   }
 
 }

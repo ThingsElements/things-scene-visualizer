@@ -4,48 +4,47 @@
 
 import Object3D from './object3d'
 
-var extObj
-var initDone = false
-
-function init() {
-  if (initDone)
-    return
-
-  initDone = true
-
-  let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
-  let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
-
-  objLoader.setPath('/obj/Fork_lift/')
-  mtlLoader.setPath('/obj/Fork_lift/')
-
-  mtlLoader.load('fork_lift.mtl', function (materials) {
-    materials.preload();
-    objLoader.setMaterials(materials)
-    materials.side = THREE.frontSide
-
-  objLoader.load('fork_lift.obj', function (obj) {
-    extObj = obj
-      if (extObj && extObj.children && extObj.children.length > 0) {
-        extObj = extObj.children[0];
-      }
-
-      extObj.geometry.center();
-    })
-  })
-}
+var {
+  Component3d
+} = scene
 
 export default class ForkLift extends Object3D {
 
-   static get extObject() {
-    if (!extObj)
-      init()
+  static get threedObjectLoader() {
+    if (!ForkLift._threedObjectLoader) {
+      ForkLift._threedObjectLoader = new Promise((resolve, reject) => {
+        let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
+        let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
 
-    return extObj
+        objLoader.setPath('/obj/Fork_lift/')
+        mtlLoader.setPath('/obj/Fork_lift/')
+
+        mtlLoader.load('fork_lift.mtl', (materials) => {
+          materials.preload();
+          objLoader.setMaterials(materials)
+          materials.side = THREE.frontSide
+
+          objLoader.load('fork_lift.obj', (obj) => {
+            var extObj = obj
+            if (extObj && extObj.children && extObj.children.length > 0) {
+              extObj = extObj.children[0];
+            }
+
+            extObj.geometry.center();
+            resolve(extObj);
+          })
+        })
+      });
+    }
+
+    return ForkLift._threedObjectLoader;
   }
 
   createObject() {
+    ForkLift.threedObjectLoader.then(this.addObject.bind(this));
+  }
 
+  addObject(extObject) {
     var {
       width,
       height,
@@ -53,14 +52,9 @@ export default class ForkLift extends Object3D {
       rotation = 0
     } = this.model
 
-    if (!ForkLift.extObject) {
-      setTimeout(this.createObject.bind(this), 50)
-      return;
-    }
-
     this.type = 'forklift'
 
-    var object = ForkLift.extObject.clone();
+    var object = extObject.clone();
 
     this.add(object)
 
@@ -69,4 +63,4 @@ export default class ForkLift extends Object3D {
 
 }
 
-scene.Component3d.register('forklift', ForkLift)
+Component3d.register('forklift', ForkLift)

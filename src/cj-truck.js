@@ -6,8 +6,6 @@ import Object3D from './object3d'
 import ThreeControls from './three-controls';
 import ZipLoader from './zip-loader';
 
-var extObj
-var initDone = false;
 var {
   RectPath,
   Shape,
@@ -27,93 +25,114 @@ const NATURE = {
   }]
 }
 
-function init() {
-  if (initDone)
-    return
+// function init() {
+//   if (initDone)
+//     return
 
-  initDone = true
+//   initDone = true
 
-  // let zipLoader = new ZipLoader();
+//   // let zipLoader = new ZipLoader();
 
-  // zipLoader.load('/obj/untitled/untitle.zip', function(obj) {
-  //   extObj = obj;
-  // })
+//   // zipLoader.load('/obj/untitled/untitle.zip', function(obj) {
+//   //   extObj = obj;
+//   // })
 
-  // let tdsLoader = new THREE.TDSLoader(THREE.DefaultLoadingManager);
+//   let tdsLoader = new THREE.TDSLoader(THREE.DefaultLoadingManager);
 
-  // tdsLoader.setPath( '/obj/untitled5/' );
-  // tdsLoader.load( '/obj/untitled5/untitled5.3ds', function ( object ) {
-  //   extObj = object;
-  // });
-  // let colladaLoader = new THREE.ColladaLoader(THREE.DefaultLoadingManager);
+//   tdsLoader.setPath( '/obj/CJ_Truck/' );
+//   tdsLoader.load( '/obj/CJ_Truck/Commercial_Truck_Transfer.3ds', function ( object ) {
+//     extObj = object;
+//   });
+//   // let colladaLoader = new THREE.ColladaLoader(THREE.DefaultLoadingManager);
 
-  // colladaLoader.load('/obj/untitled4/untitled4.dae', function (collada) {
-  //   extObj = collada.scene;
-  //   // if (extObj && extObj.children && extObj.children.length > 0) {
-  //   //   extObj = extObj.children[0];
-  //   // }
+//   // colladaLoader.load('/obj/CJ_Truck/Commercial_Truck_Transfer.dae', function (collada) {
+//   //   extObj = collada.scene;
+//   //   // if (extObj && extObj.children && extObj.children.length > 0) {
+//   //   //   extObj = extObj.children[0];
+//   //   // }
 
-  //   // extObj.geometry.center();
-  // })
-  let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
-  let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
+//   //   // extObj.geometry.center();
+//   // })
+// //   let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
+// //   let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
 
-  mtlLoader.setPath('/obj/CJ_Truck/');
-  objLoader.setPath('/obj/CJ_Truck/');
+// //   mtlLoader.setPath('/obj/CJ_Truck/');
+// //   objLoader.setPath('/obj/CJ_Truck/');
 
-  mtlLoader.load('CJ_Truck.mtl', function (materials) {
-    materials.preload();
-    objLoader.setMaterials(materials)
-    if(materials && materials.length > 0) {
-      materials.forEach(m => {
-        m.side = THREE.DoubleSide;
-        m.transparent = true;
-      })
-    }
+// //   mtlLoader.load('CJ_Truck.mtl', function (materials) {
+// //     materials.preload();
+// //     objLoader.setMaterials(materials)
+// //     if(materials && materials.length > 0) {
+// //       materials.forEach(m => {
+// //         m.side = THREE.DoubleSide;
+// //         m.transparent = true;
+// //       })
+// //     }
 
 
-    objLoader.load('CJ_Truck.obj', function (obj) {
-      extObj = obj
-      // if (extObj && extObj.children && extObj.children.length > 0) {
-      //   extObj = extObj.children[0];
-      // }
+// //     objLoader.load('CJ_Truck.obj', function (obj) {
+// //       extObj = obj
+// //       // if (extObj && extObj.children && extObj.children.length > 0) {
+// //       //   extObj = extObj.children[0];
+// //       // }
 
-      // extObj.geometry.center();
-    })
-  })
-}
+// //       // extObj.geometry.center();
+// //     })
+// //   })
+// }
 
 export default class CJTruck extends Object3D {
-  static get extObject() {
-    if (!extObj)
-      init()
+  static get threedObjectLoader() {
+    if (!CJTruck._threedObjectLoader) {
+      CJTruck._threedObjectLoader = new Promise((resolve, reject) => {
+        let colladaLoader = new THREE.ColladaLoader(THREE.DefaultLoadingManager);
+          colladaLoader.load('obj/CJ_Truck/Commercial_Truck_Transfer.dae', (collada) => {
+            var extObj = collada.scene;
 
-    return extObj
+            // if (extObj && extObj.children && extObj.children.length > 0) {
+            //   extObj = extObj.children[0];
+            // }
+
+            // extObj.geometry.center();
+
+            // var extObj = obj
+            // if (extObj && extObj.children && extObj.children.length > 0) {
+            //   extObj = extObj.children[0];
+            // }
+
+            // extObj.geometry.center();
+            resolve(extObj);
+        })
+      });
+    }
+
+    return CJTruck._threedObjectLoader;
   }
 
   createObject() {
+    CJTruck.threedObjectLoader.then(this.addObject.bind(this));
+  }
 
+  addObject(extObject) {
     var {
       width,
       height,
-      depth
+      depth,
+      rotation = 0
     } = this.model
 
-    if (!CJTruck.extObject) {
-      setTimeout(this.createObject.bind(this), 50)
-      return;
-    }
-
-    this.type = 'cj-truck'
-
-    this.add(CJTruck.extObject.clone())
-
-    // width /= 630.674
-    // height /= 185.159
-    // depth /= 125.607
+    this.type = 'cj-truck';
 
     this.scale.set(width, depth, height)
 
+    width /= 63.173
+    height /= 72.1887
+    depth /= 9.0388
+
+    var object = extObject.clone();
+    this.add(object)
+
+    this.scale.set(width, depth, height)
   }
 
 }
