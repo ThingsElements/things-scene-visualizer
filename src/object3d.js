@@ -92,13 +92,13 @@ export default class Object3D extends THREE.Object3D {
   setRotation() {
     var {
       rotationX = 0,
-      rotation = 0,
-      rotationZ = 0
+      rotationY = 0,
+      rotation = 0
     } = this.model
 
     this.rotation.x = - rotationX;
     this.rotation.y = - rotation;
-    this.rotation.z = - rotationZ;
+    this.rotation.z = - rotationY;
   }
 
   onUserDataChanged() {

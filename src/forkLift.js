@@ -10,60 +10,48 @@ import MTLLoader from 'three-mtl-loader'
 import forkLiftMtl from '../obj/Fork_lift/fork_lift.mtl?3d'
 import forkLiftObj from '../obj/Fork_lift/fork_lift.obj?3d'
 
-var extObj
-
-function init() {
-  if (init.done)
-    return
-
-  OBJLoader(THREE)
-
-  init.done = true
-
-  let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
-  let mtlLoader = new MTLLoader(THREE.DefaultLoadingManager);
-
-  mtlLoader.load(forkLiftMtl, materials => {
-    materials.preload();
-    objLoader.setMaterials(materials)
-    materials.side = THREE.frontSide
-
-    objLoader.load(forkLiftObj, obj => {
-      extObj = obj
-      if (extObj && extObj.children && extObj.children.length > 0) {
-        extObj = extObj.children[0];
-      }
-
-      extObj.geometry.center();
-    })
-  })
-}
-
 export default class ForkLift extends Object3D {
 
-  static get extObject() {
-    if (!extObj)
-      init()
+  static get threedObjectLoader() {
+    if (!ForkLift._threedObjectLoader) {
+      ForkLift._threedObjectLoader = new Promise((resolve, reject) => {
+        let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
+        let mtlLoader = new MTLLoader(THREE.DefaultLoadingManager);
 
-    return extObj
+        mtlLoader.load(forkLiftMtl, materials => {
+          materials.preload();
+          objLoader.setMaterials(materials)
+
+          objLoader.load(forkLiftObj, obj => {
+            var extObj = obj
+            // if (extObj && extObj.children && extObj.children.length > 0) {
+            //   extObj = extObj.children[0];
+            // }
+
+            // extObj.geometry.center();
+            resolve(obj)
+          })
+        })
+      });
+    }
+
+    return ForkLift._threedObjectLoader;
   }
 
   createObject() {
+    ForkLift.threedObjectLoader.then(this.addObject.bind(this));
+  }
 
+  addObject(extObject) {
     var {
       width,
       height,
       depth
     } = this.model
 
-    if (!ForkLift.extObject) {
-      setTimeout(this.createObject.bind(this), 50)
-      return;
-    }
-
     this.type = 'forklift'
 
-    var object = ForkLift.extObject.clone();
+    var object = extObject.clone();
     this.add(object)
 
     this.scale.set(width, depth, height)

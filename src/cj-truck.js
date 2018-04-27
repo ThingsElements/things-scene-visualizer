@@ -1,14 +1,15 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
+
 import Object3D from './object3d'
 import Component3d from './component-3d'
 
 import OBJLoader from 'three-obj-loader'
 import MTLLoader from 'three-mtl-loader'
 
-import palletMtl from '../obj/pallet/pallet2.mtl?3d'
-import palletObj from '../obj/pallet/pallet2.obj?3d'
+import truckMtl from '../obj/CJ_Truck/CJ_Truck.mtl?3d'
+import truckObj from '../obj/CJ_Truck/CJ_Truck.obj?3d'
 
 import {
   RectPath,
@@ -28,19 +29,18 @@ const NATURE = {
   }]
 }
 
-export default class Pallet extends Object3D {
-
+export default class CJTruck extends Object3D {
   static get threedObjectLoader() {
-    if (!Pallet._threedObjectLoader) {
-      Pallet._threedObjectLoader = new Promise((resolve, reject) => {
+    if (!CJTruck._threedObjectLoader) {
+      CJTruck._threedObjectLoader = new Promise((resolve, reject) => {
         let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
         let mtlLoader = new MTLLoader(THREE.DefaultLoadingManager);
 
-        mtlLoader.load(palletMtl, materials => {
+        mtlLoader.load(truckMtl, materials => {
           materials.preload();
           objLoader.setMaterials(materials)
 
-          objLoader.load(palletObj, obj => {
+          objLoader.load(truckObj, obj => {
             var extObj = obj
             // if (extObj && extObj.children && extObj.children.length > 0) {
             //   extObj = extObj.children[0];
@@ -53,11 +53,11 @@ export default class Pallet extends Object3D {
       });
     }
 
-    return Pallet._threedObjectLoader;
+    return CJTruck._threedObjectLoader;
   }
 
   createObject() {
-    Pallet.threedObjectLoader.then(this.addObject.bind(this));
+    CJTruck.threedObjectLoader.then(this.addObject.bind(this));
   }
 
   addObject(extObject) {
@@ -67,16 +67,21 @@ export default class Pallet extends Object3D {
       depth
     } = this.model
 
-    this.type = 'pallet'
+    this.type = 'cj-truck'
 
     var object = extObject.clone();
-    this.add(object);
+    this.add(object)
+
+    width /= 630.674
+    height /= 185.159
+    depth /= 125.607
+
     this.scale.set(width, depth, height)
   }
 
 }
 
-export class Pallet2d extends RectPath(Shape) {
+export class CJTruck2D extends RectPath(Shape) {
   is3dish() {
     return true
   }
@@ -88,5 +93,5 @@ export class Pallet2d extends RectPath(Shape) {
   }
 }
 
-Component.register('pallet', Pallet2d)
-Component3d.register('pallet', Pallet)
+Component.register('cj-truck', CJTruck2D)
+Component3d.register('cj-truck', CJTruck)

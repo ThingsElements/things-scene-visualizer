@@ -3,3 +3,4 @@ node_modules
 npm-debug.log
 things-scene-visualizer.js
 yarn-error.log
+.DS_Store

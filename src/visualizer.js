@@ -75,11 +75,6 @@ const NATURE = {
     property: 'showAxis'
   }, {
     type: 'checkbox',
-    label: 'show-grid',
-    name: 'showGrid',
-    property: 'showGrid'
-  }, {
-    type: 'checkbox',
     label: '3dmode',
     name: 'threed',
     property: 'threed'
@@ -419,6 +414,7 @@ export default class Visualizer extends Container {
 
     // CONTROLS
     this._controls = new ThreeControls(this._camera, this)
+    this._controls.cameraChanged = true
 
     // LIGHT
     var _light = new THREE.HemisphereLight(light, 0x000000, 1)
@@ -433,24 +429,21 @@ export default class Visualizer extends Container {
     this._clock = new THREE.Clock(true)
     this.mixers = new Array();
 
-    var floor = this.createFloor(fillStyle, width, height)
-
-    if (this.model.showGrid) {
-      var gridHelper = new THREE.GridHelper(width, width / 10, 0x666666, 0xffffff);
-      this._scene3d.add(gridHelper);
-      gridHelper.position.y = 1
-    }
-
+    this.createFloor(fillStyle, width, height)
     this.createObjects(components, {
       width,
       height
     })
+
+    this._camera.updateProjectionMatrix();
 
     this._onFocus = function () {
       this.render_threed();
     }.bind(this)
 
     window.addEventListener('focus', this._onFocus);
+
+    this.invalidate();
   }
 
   threed_animate() {

@@ -58,6 +58,20 @@ const NATURE = {
       placeholder: '{z}{s}-{u}-{sh}'
     }
   }, {
+    type: 'number',
+    label: 'section-digits',
+    name: 'sectionDigits',
+    property: {
+      placeholder: '1, 2, 3, ...'
+    }
+  }, {
+    type: 'number',
+    label: 'unit-digits',
+    name: 'unitDigits',
+    property: {
+      placeholder: '1, 2, 3, ...'
+    }
+  }, {
     type: 'string',
     label: 'shelf-pattern',
     name: 'shelfPattern',
@@ -290,8 +304,8 @@ export default class RackTable3d extends Group3D {
       height,
       rotation = 0,
       zone,
-      locPattern,
-      shelfPattern,
+      locPattern = '{z}{s}-{u}{sh}',
+      shelfPattern = '00',
       shelves = 1,
       depth = 1,
       columns,
@@ -1154,14 +1168,19 @@ export class RackTable extends Container {
   }
 
   setLocations(sections, startSection, startUnit) {
+    var {
+      sectionDigits = 2,
+      unitDigits = 2
+    } = this.model
+
     var sectionNumber = Number(startSection) || 1;
 
     sections.forEach(section => {
       var unitNumber = Number(startUnit) || 1;
       section.forEach(c => {
         if (!c.isEmpty) {
-          c.set('section', String(sectionNumber).padStart(2, 0))
-          c.set('unit', String(unitNumber).padStart(2, 0))
+          c.set('section', String(sectionNumber).padStart(sectionDigits, 0))
+          c.set('unit', String(unitNumber).padStart(unitDigits, 0))
         } else {
           c.set('section', null)
           c.set('unit', null)
