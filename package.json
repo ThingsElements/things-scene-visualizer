@@ -1,6 +1,6 @@
 {
   "name": "@things-scene/visualizer",
-  "version": "0.3.0",
+  "version": "0.5.0",
   "description": "The visualizer component for things-scene.",
   "things-scene": true,
   "main": "src/index.js",
@@ -10,6 +10,7 @@
   "scripts": {
     "serve": "things-shell",
     "serve:dev": "things-shell-dev",
+    "build:client": "webpack --config node_modules/@hatiolab/things-shell/webpack.config.js",
     "build": "webpack",
     "prepublish": "webpack"
   },

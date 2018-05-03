@@ -1,7 +1,7 @@
 import locales from './locales'
 import templates from './templates'
 
-module.exports = {
+export default {
   templates,
   locales
 };
