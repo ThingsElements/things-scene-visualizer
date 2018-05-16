@@ -4,8 +4,8 @@
 import Object3D from './object3d'
 import Component3d from './component-3d'
 
-import personMtl from '../obj/Casual_Man_02/Casual_Man.mtl?3d'
-import personObj from '../obj/Casual_Man_02/Casual_Man.obj?3d'
+import path from 'path'
+const personPath = path.resolve('../obj/Casual_Man_02')
 
 import * as THREE from 'three'
 
@@ -17,17 +17,20 @@ export default class Person extends Object3D {
         let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
         let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
 
-        mtlLoader.load(personMtl, materials => {
+        objLoader.setPath(`${personPath}/`)
+        mtlLoader.setPath(`${personPath}/`)
+
+        mtlLoader.load('Casual_Man.mtl', materials => {
           materials.preload();
           objLoader.setMaterials(materials)
 
-          objLoader.load(personObj, obj => {
+          objLoader.load('Casual_Man.obj', obj => {
             var extObj = obj
-            // if (extObj && extObj.children && extObj.children.length > 0) {
-            //   extObj = extObj.children[0];
-            // }
+            if (extObj && extObj.children && extObj.children.length > 0) {
+              extObj = extObj.children[0];
+            }
 
-            // extObj.geometry.center();
+            extObj.geometry.center();
             resolve(obj)
           })
         })

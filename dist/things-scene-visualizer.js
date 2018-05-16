@@ -66,7 +66,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 47);
+/******/ 	return __webpack_require__(__webpack_require__.s = 46);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -46897,6 +46897,237 @@ exports.default = Extrude;
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/* WEBPACK VAR INJECTION */(function(process) {// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+// resolves . and .. elements in a path array with directory names there
+// must be no slashes, empty elements, or device names (c:\) in the array
+// (so also no leading and trailing slashes - it does not distinguish
+// relative and absolute paths)
+function normalizeArray(parts, allowAboveRoot) {
+  // if the path tries to go above the root, `up` ends up > 0
+  var up = 0;
+  for (var i = parts.length - 1; i >= 0; i--) {
+    var last = parts[i];
+    if (last === '.') {
+      parts.splice(i, 1);
+    } else if (last === '..') {
+      parts.splice(i, 1);
+      up++;
+    } else if (up) {
+      parts.splice(i, 1);
+      up--;
+    }
+  }
+
+  // if the path is allowed to go above the root, restore leading ..s
+  if (allowAboveRoot) {
+    for (; up--; up) {
+      parts.unshift('..');
+    }
+  }
+
+  return parts;
+}
+
+// Split a filename into [root, dir, basename, ext], unix version
+// 'root' is just a slash, or nothing.
+var splitPathRe =
+    /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
+var splitPath = function(filename) {
+  return splitPathRe.exec(filename).slice(1);
+};
+
+// path.resolve([from ...], to)
+// posix version
+exports.resolve = function() {
+  var resolvedPath = '',
+      resolvedAbsolute = false;
+
+  for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
+    var path = (i >= 0) ? arguments[i] : process.cwd();
+
+    // Skip empty and invalid entries
+    if (typeof path !== 'string') {
+      throw new TypeError('Arguments to path.resolve must be strings');
+    } else if (!path) {
+      continue;
+    }
+
+    resolvedPath = path + '/' + resolvedPath;
+    resolvedAbsolute = path.charAt(0) === '/';
+  }
+
+  // At this point the path should be resolved to a full absolute path, but
+  // handle relative paths to be safe (might happen when process.cwd() fails)
+
+  // Normalize the path
+  resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function(p) {
+    return !!p;
+  }), !resolvedAbsolute).join('/');
+
+  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
+};
+
+// path.normalize(path)
+// posix version
+exports.normalize = function(path) {
+  var isAbsolute = exports.isAbsolute(path),
+      trailingSlash = substr(path, -1) === '/';
+
+  // Normalize the path
+  path = normalizeArray(filter(path.split('/'), function(p) {
+    return !!p;
+  }), !isAbsolute).join('/');
+
+  if (!path && !isAbsolute) {
+    path = '.';
+  }
+  if (path && trailingSlash) {
+    path += '/';
+  }
+
+  return (isAbsolute ? '/' : '') + path;
+};
+
+// posix version
+exports.isAbsolute = function(path) {
+  return path.charAt(0) === '/';
+};
+
+// posix version
+exports.join = function() {
+  var paths = Array.prototype.slice.call(arguments, 0);
+  return exports.normalize(filter(paths, function(p, index) {
+    if (typeof p !== 'string') {
+      throw new TypeError('Arguments to path.join must be strings');
+    }
+    return p;
+  }).join('/'));
+};
+
+
+// path.relative(from, to)
+// posix version
+exports.relative = function(from, to) {
+  from = exports.resolve(from).substr(1);
+  to = exports.resolve(to).substr(1);
+
+  function trim(arr) {
+    var start = 0;
+    for (; start < arr.length; start++) {
+      if (arr[start] !== '') break;
+    }
+
+    var end = arr.length - 1;
+    for (; end >= 0; end--) {
+      if (arr[end] !== '') break;
+    }
+
+    if (start > end) return [];
+    return arr.slice(start, end - start + 1);
+  }
+
+  var fromParts = trim(from.split('/'));
+  var toParts = trim(to.split('/'));
+
+  var length = Math.min(fromParts.length, toParts.length);
+  var samePartsLength = length;
+  for (var i = 0; i < length; i++) {
+    if (fromParts[i] !== toParts[i]) {
+      samePartsLength = i;
+      break;
+    }
+  }
+
+  var outputParts = [];
+  for (var i = samePartsLength; i < fromParts.length; i++) {
+    outputParts.push('..');
+  }
+
+  outputParts = outputParts.concat(toParts.slice(samePartsLength));
+
+  return outputParts.join('/');
+};
+
+exports.sep = '/';
+exports.delimiter = ':';
+
+exports.dirname = function(path) {
+  var result = splitPath(path),
+      root = result[0],
+      dir = result[1];
+
+  if (!root && !dir) {
+    // No dirname whatsoever
+    return '.';
+  }
+
+  if (dir) {
+    // It has a dirname, strip trailing slash
+    dir = dir.substr(0, dir.length - 1);
+  }
+
+  return root + dir;
+};
+
+
+exports.basename = function(path, ext) {
+  var f = splitPath(path)[2];
+  // TODO: make this comparison case-insensitive on windows?
+  if (ext && f.substr(-1 * ext.length) === ext) {
+    f = f.substr(0, f.length - ext.length);
+  }
+  return f;
+};
+
+
+exports.extname = function(path) {
+  return splitPath(path)[3];
+};
+
+function filter (xs, f) {
+    if (xs.filter) return xs.filter(f);
+    var res = [];
+    for (var i = 0; i < xs.length; i++) {
+        if (f(xs[i], i, xs)) res.push(xs[i]);
+    }
+    return res;
+}
+
+// String.prototype.substr - negative index don't work in IE8
+var substr = 'ab'.substr(-1) === 'b'
+    ? function (str, start, len) { return str.substr(start, len) }
+    : function (str, start, len) {
+        if (start < 0) start = str.length + start;
+        return str.substr(start, len);
+    }
+;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(28)))
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
 "use strict";
 
 
@@ -46955,7 +47186,7 @@ var Mesh = function (_ThreeMesh) {
 exports.default = Mesh;
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -46969,7 +47200,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _mesh = __webpack_require__(5);
+var _mesh = __webpack_require__(6);
 
 var _mesh2 = _interopRequireDefault(_mesh);
 
@@ -47351,7 +47582,7 @@ var Stock = function (_Mesh) {
 exports.default = Stock;
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -47377,7 +47608,7 @@ var _three = __webpack_require__(0);
 
 var THREE = _interopRequireWildcard(_three);
 
-var _stock = __webpack_require__(6);
+var _stock = __webpack_require__(7);
 
 var _stock2 = _interopRequireDefault(_stock);
 
@@ -47664,7 +47895,7 @@ exports.default = Rack;
 _component3d2.default.register('rack', Rack);
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -47701,7 +47932,7 @@ _thingsScene.Layout.register('three', ThreeLayout);
 exports.default = ThreeLayout;
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -48577,13 +48808,13 @@ Object.defineProperties(ThreeControls.prototype, {
 exports.default = ThreeControls;
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "obj/fonts/nanum_gothic.json";
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -48605,7 +48836,7 @@ var _component3d = __webpack_require__(1);
 
 var _component3d2 = _interopRequireDefault(_component3d);
 
-var _nanum_gothic = __webpack_require__(10);
+var _nanum_gothic = __webpack_require__(11);
 
 var _nanum_gothic2 = _interopRequireDefault(_nanum_gothic);
 
@@ -48823,7 +49054,7 @@ exports.default = TextExtrude;
 _component3d2.default.register('text', TextExtrude);
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -48935,7 +49166,7 @@ exports.default = EllipseExtrude;
 _component3d2.default.register('ellipse', EllipseExtrude);
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -49077,16 +49308,10 @@ exports.default = PolygonExtrude;
 _component3d2.default.register('polygon', PolygonExtrude);
 
 /***/ }),
-/* 14 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__.p + "obj/pallet/pallet2.obj";
-
-/***/ }),
 /* 15 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-module.exports = __webpack_require__.p + "obj/pallet/pallet2.mtl";
+module.exports = "data:image/png;base64,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"
 
 /***/ }),
 /* 16 */
@@ -49110,13 +49335,13 @@ var _component3d = __webpack_require__(1);
 
 var _component3d2 = _interopRequireDefault(_component3d);
 
-var _pallet = __webpack_require__(15);
+var _pallet_symbol = __webpack_require__(15);
 
-var _pallet2 = _interopRequireDefault(_pallet);
+var _pallet_symbol2 = _interopRequireDefault(_pallet_symbol);
 
-var _pallet3 = __webpack_require__(14);
+var _path = __webpack_require__(5);
 
-var _pallet4 = _interopRequireDefault(_pallet3);
+var _path2 = _interopRequireDefault(_path);
 
 var _thingsScene = __webpack_require__(2);
 
@@ -49137,16 +49362,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 */
 
 
+var palletPath = _path2.default.resolve('../obj/pallet');
+
 var NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
-  properties: [{
-    type: 'number',
-    label: 'depth',
-    name: 'depth',
-    property: 'depth'
-  }]
+  properties: []
 };
 
 var Pallet = function (_Object3D) {
@@ -49169,10 +49391,16 @@ var Pallet = function (_Object3D) {
       var _model = this.model,
           width = _model.width,
           height = _model.height,
-          depth = _model.depth;
+          depth = _model.depth,
+          _model$rotation = _model.rotation,
+          rotation = _model$rotation === undefined ? 0 : _model$rotation;
 
 
       this.type = 'pallet';
+
+      width /= 63.173;
+      height /= 72.1887;
+      depth /= 9.0388;
 
       var object = extObject.clone();
       this.add(object);
@@ -49186,18 +49414,21 @@ var Pallet = function (_Object3D) {
           var objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
           var mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
 
-          mtlLoader.load(_pallet2.default, function (materials) {
+          objLoader.setPath(palletPath + '/');
+          mtlLoader.setPath(palletPath + '/');
+
+          mtlLoader.load('new_pallet.mtl', function (materials) {
             materials.preload();
             objLoader.setMaterials(materials);
 
-            objLoader.load(_pallet4.default, function (obj) {
+            objLoader.load('new_pallet.obj', function (obj) {
               var extObj = obj;
-              // if (extObj && extObj.children && extObj.children.length > 0) {
-              //   extObj = extObj.children[0];
-              // }
+              if (extObj && extObj.children && extObj.children.length > 0) {
+                extObj = extObj.children[0];
+              }
 
-              // extObj.geometry.center();
-              resolve(obj);
+              extObj.geometry.center();
+              resolve(extObj);
             });
           });
         });
@@ -49227,12 +49458,32 @@ var Pallet2d = exports.Pallet2d = function (_RectPath) {
       return true;
     }
   }, {
-    key: 'controls',
-    get: function get() {}
+    key: 'render',
+    value: function render(context) {
+      var _bounds = this.bounds,
+          left = _bounds.left,
+          top = _bounds.top,
+          width = _bounds.width,
+          height = _bounds.height;
+
+
+      context.beginPath();
+      context.drawImage(Pallet2d.image, left, top, width, height);
+    }
   }, {
     key: 'nature',
     get: function get() {
       return NATURE;
+    }
+  }], [{
+    key: 'image',
+    get: function get() {
+      if (!Pallet2d._image) {
+        Pallet2d._image = new Image();
+        Pallet2d._image.src = _pallet_symbol2.default;
+      }
+
+      return Pallet2d._image;
     }
   }]);
 
@@ -50359,7 +50610,7 @@ var _component3d = __webpack_require__(1);
 
 var _component3d2 = _interopRequireDefault(_component3d);
 
-var _mesh = __webpack_require__(5);
+var _mesh = __webpack_require__(6);
 
 var _mesh2 = _interopRequireDefault(_mesh);
 
@@ -51872,18 +52123,196 @@ _component3d2.default.register('rect', RectExtrude);
 
 /***/ }),
 /* 28 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-module.exports = __webpack_require__.p + "obj/Casual_Man_02/Casual_Man.obj";
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
 
 /***/ }),
 /* 29 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__.p + "obj/Casual_Man_02/Casual_Man.mtl";
-
-/***/ }),
-/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -51903,13 +52332,9 @@ var _component3d = __webpack_require__(1);
 
 var _component3d2 = _interopRequireDefault(_component3d);
 
-var _Casual_Man = __webpack_require__(29);
+var _path = __webpack_require__(5);
 
-var _Casual_Man2 = _interopRequireDefault(_Casual_Man);
-
-var _Casual_Man3 = __webpack_require__(28);
-
-var _Casual_Man4 = _interopRequireDefault(_Casual_Man3);
+var _path2 = _interopRequireDefault(_path);
 
 var _three = __webpack_require__(0);
 
@@ -51927,6 +52352,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 * Copyright © HatioLab Inc. All rights reserved.
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 */
 
+
+var personPath = _path2.default.resolve('../obj/Casual_Man_02');
 
 var Person = function (_Object3D) {
   _inherits(Person, _Object3D);
@@ -51969,17 +52396,20 @@ var Person = function (_Object3D) {
           var objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
           var mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
 
-          mtlLoader.load(_Casual_Man2.default, function (materials) {
+          objLoader.setPath(personPath + '/');
+          mtlLoader.setPath(personPath + '/');
+
+          mtlLoader.load('Casual_Man.mtl', function (materials) {
             materials.preload();
             objLoader.setMaterials(materials);
 
-            objLoader.load(_Casual_Man4.default, function (obj) {
+            objLoader.load('Casual_Man.obj', function (obj) {
               var extObj = obj;
-              // if (extObj && extObj.children && extObj.children.length > 0) {
-              //   extObj = extObj.children[0];
-              // }
+              if (extObj && extObj.children && extObj.children.length > 0) {
+                extObj = extObj.children[0];
+              }
 
-              // extObj.geometry.center();
+              extObj.geometry.center();
               resolve(obj);
             });
           });
@@ -51999,7 +52429,7 @@ exports.default = Person;
 _component3d2.default.register('person', Person);
 
 /***/ }),
-/* 31 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52377,19 +52807,19 @@ _thingsScene.Component.register('humidity-sensor', Sensor);
 _component3d2.default.register('humidity-sensor', HumiditySensor);
 
 /***/ }),
-/* 32 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "obj/Fork_lift/fork_lift.obj";
 
 /***/ }),
-/* 33 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "obj/Fork_lift/fork_lift.mtl";
 
 /***/ }),
-/* 34 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52409,11 +52839,11 @@ var _component3d = __webpack_require__(1);
 
 var _component3d2 = _interopRequireDefault(_component3d);
 
-var _fork_lift = __webpack_require__(33);
+var _fork_lift = __webpack_require__(32);
 
 var _fork_lift2 = _interopRequireDefault(_fork_lift);
 
-var _fork_lift3 = __webpack_require__(32);
+var _fork_lift3 = __webpack_require__(31);
 
 var _fork_lift4 = _interopRequireDefault(_fork_lift3);
 
@@ -52478,11 +52908,11 @@ var ForkLift = function (_Object3D) {
 
             objLoader.load(_fork_lift4.default, function (obj) {
               var extObj = obj;
-              // if (extObj && extObj.children && extObj.children.length > 0) {
-              //   extObj = extObj.children[0];
-              // }
+              if (extObj && extObj.children && extObj.children.length > 0) {
+                extObj = extObj.children[0];
+              }
 
-              // extObj.geometry.center();
+              extObj.geometry.center();
               resolve(obj);
             });
           });
@@ -52501,7 +52931,7 @@ exports.default = ForkLift;
 _component3d2.default.register('forklift', ForkLift);
 
 /***/ }),
-/* 35 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52611,7 +53041,7 @@ _thingsScene.Component.register('door', Door2d);
 _component3d2.default.register('door', Door);
 
 /***/ }),
-/* 36 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53071,7 +53501,7 @@ exports.default = RackTableCell;
 _thingsScene.Component.register('rack-table-cell', RackTableCell);
 
 /***/ }),
-/* 37 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53189,7 +53619,7 @@ exports.default = Group3D;
 _component3d2.default.register('group', Group3D);
 
 /***/ }),
-/* 38 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53208,11 +53638,11 @@ var _component3d = __webpack_require__(1);
 
 var _component3d2 = _interopRequireDefault(_component3d);
 
-var _group3d = __webpack_require__(37);
+var _group3d = __webpack_require__(36);
 
 var _group3d2 = _interopRequireDefault(_group3d);
 
-var _rack = __webpack_require__(7);
+var _rack = __webpack_require__(8);
 
 var _rack2 = _interopRequireDefault(_rack);
 
@@ -54607,7 +55037,7 @@ _thingsScene.Component.register('rack-table', RackTable);
 _component3d2.default.register('rack-table', RackTable3d);
 
 /***/ }),
-/* 39 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55138,7 +55568,7 @@ exports.default = VideoPlayer360;
 _thingsScene.Component.register('video-player-360', VideoPlayer360);
 
 /***/ }),
-/* 40 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55152,11 +55582,11 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _threeLayout = __webpack_require__(8);
+var _threeLayout = __webpack_require__(9);
 
 var _threeLayout2 = _interopRequireDefault(_threeLayout);
 
-var _threeControls = __webpack_require__(9);
+var _threeControls = __webpack_require__(10);
 
 var _threeControls2 = _interopRequireDefault(_threeControls);
 
@@ -56581,7 +57011,7 @@ exports.default = ThreeContainer;
 _thingsScene.Component.register('three-container', ThreeContainer);
 
 /***/ }),
-/* 41 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*** IMPORTS FROM imports-loader ***/
@@ -57131,7 +57561,7 @@ THREE.TGALoader.prototype = {
 
 
 /***/ }),
-/* 42 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*** IMPORTS FROM imports-loader ***/
@@ -57694,7 +58124,7 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 
 
 /***/ }),
-/* 43 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*** IMPORTS FROM imports-loader ***/
@@ -58495,7 +58925,7 @@ THREE.OBJLoader = ( function () {
 
 
 /***/ }),
-/* 44 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -58509,11 +58939,11 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _threeControls = __webpack_require__(9);
+var _threeControls = __webpack_require__(10);
 
 var _threeControls2 = _interopRequireDefault(_threeControls);
 
-__webpack_require__(8);
+__webpack_require__(9);
 
 var _three = __webpack_require__(0);
 
@@ -58540,9 +58970,9 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 // import OBJExporter from 'three-obj-exporter'
 
-__webpack_require__(43);
 __webpack_require__(42);
 __webpack_require__(41);
+__webpack_require__(40);
 
 var NATURE = {
   mutable: false,
@@ -58636,7 +59066,7 @@ var WEBGL_NO_SUPPORT_TEXT = 'WebGL no support';
 
 function registerLoaders() {
   if (!registerLoaders.done) {
-    // THREE.Loader.Handlers.add(/\.tga$/i, new THREE.TGALoader());
+    THREE.Loader.Handlers.add(/\.tga$/i, new THREE.TGALoader());
     registerLoaders.done = true;
   }
 }
@@ -58800,7 +59230,7 @@ var Visualizer = function (_Container) {
       components.forEach(function (component) {
         var clazz = _component3d2.default.register(component.model.type);
         if (!clazz) {
-          console.warn("Class not found : 3d class is not exist");
+          console.warn('Class not found : 3d ' + component.model.type + ' class is not exist');
           return;
         }
 
@@ -59486,7 +59916,7 @@ exports.default = Visualizer;
 _thingsScene.Component.register('visualizer', Visualizer);
 
 /***/ }),
-/* 45 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -59600,7 +60030,7 @@ if (THREE && THREE.Object3D) {
 }
 
 /***/ }),
-/* 46 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -59610,7 +60040,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _object3dOverload = __webpack_require__(45);
+var _object3dOverload = __webpack_require__(44);
 
 Object.defineProperty(exports, 'default', {
   enumerable: true,
@@ -59628,7 +60058,7 @@ Object.defineProperty(exports, 'Component3d', {
   }
 });
 
-var _visualizer = __webpack_require__(44);
+var _visualizer = __webpack_require__(43);
 
 Object.defineProperty(exports, 'Visualizer', {
   enumerable: true,
@@ -59637,7 +60067,7 @@ Object.defineProperty(exports, 'Visualizer', {
   }
 });
 
-var _threeContainer = __webpack_require__(40);
+var _threeContainer = __webpack_require__(39);
 
 Object.defineProperty(exports, 'ThreeContainer', {
   enumerable: true,
@@ -59646,7 +60076,7 @@ Object.defineProperty(exports, 'ThreeContainer', {
   }
 });
 
-var _videoPlayer = __webpack_require__(39);
+var _videoPlayer = __webpack_require__(38);
 
 Object.defineProperty(exports, 'VideoPlayer360', {
   enumerable: true,
@@ -59655,7 +60085,7 @@ Object.defineProperty(exports, 'VideoPlayer360', {
   }
 });
 
-var _rackTable = __webpack_require__(38);
+var _rackTable = __webpack_require__(37);
 
 Object.defineProperty(exports, 'RackTable', {
   enumerable: true,
@@ -59664,7 +60094,7 @@ Object.defineProperty(exports, 'RackTable', {
   }
 });
 
-var _rackTableCell = __webpack_require__(36);
+var _rackTableCell = __webpack_require__(35);
 
 Object.defineProperty(exports, 'RackTableCell', {
   enumerable: true,
@@ -59673,7 +60103,7 @@ Object.defineProperty(exports, 'RackTableCell', {
   }
 });
 
-var _door = __webpack_require__(35);
+var _door = __webpack_require__(34);
 
 Object.defineProperty(exports, 'Door', {
   enumerable: true,
@@ -59682,7 +60112,7 @@ Object.defineProperty(exports, 'Door', {
   }
 });
 
-var _forkLift = __webpack_require__(34);
+var _forkLift = __webpack_require__(33);
 
 Object.defineProperty(exports, 'ForkLift', {
   enumerable: true,
@@ -59691,7 +60121,7 @@ Object.defineProperty(exports, 'ForkLift', {
   }
 });
 
-var _humiditySensor = __webpack_require__(31);
+var _humiditySensor = __webpack_require__(30);
 
 Object.defineProperty(exports, 'HumiditySensor', {
   enumerable: true,
@@ -59700,7 +60130,7 @@ Object.defineProperty(exports, 'HumiditySensor', {
   }
 });
 
-var _person = __webpack_require__(30);
+var _person = __webpack_require__(29);
 
 Object.defineProperty(exports, 'Person', {
   enumerable: true,
@@ -59718,7 +60148,7 @@ Object.defineProperty(exports, 'RectExtrude', {
   }
 });
 
-var _rack = __webpack_require__(7);
+var _rack = __webpack_require__(8);
 
 Object.defineProperty(exports, 'Rack', {
   enumerable: true,
@@ -59727,7 +60157,7 @@ Object.defineProperty(exports, 'Rack', {
   }
 });
 
-var _stock = __webpack_require__(6);
+var _stock = __webpack_require__(7);
 
 Object.defineProperty(exports, 'Stock', {
   enumerable: true,
@@ -59817,7 +60247,7 @@ Object.defineProperty(exports, 'Pallet', {
   }
 });
 
-var _polygonExtrude = __webpack_require__(13);
+var _polygonExtrude = __webpack_require__(14);
 
 Object.defineProperty(exports, 'PolygonExtrude', {
   enumerable: true,
@@ -59826,7 +60256,7 @@ Object.defineProperty(exports, 'PolygonExtrude', {
   }
 });
 
-var _ellipseExtrude = __webpack_require__(12);
+var _ellipseExtrude = __webpack_require__(13);
 
 Object.defineProperty(exports, 'EllipseExtrude', {
   enumerable: true,
@@ -59835,7 +60265,7 @@ Object.defineProperty(exports, 'EllipseExtrude', {
   }
 });
 
-var _textExtrude = __webpack_require__(11);
+var _textExtrude = __webpack_require__(12);
 
 Object.defineProperty(exports, 'TextExtrude', {
   enumerable: true,
@@ -59847,10 +60277,10 @@ Object.defineProperty(exports, 'TextExtrude', {
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ }),
-/* 47 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(46);
+module.exports = __webpack_require__(45);
 
 
 /***/ })

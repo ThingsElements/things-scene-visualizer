@@ -62,7 +62,8 @@ module.exports = {
       loader: 'url-loader?limit=25000',
       query: {
         limit: 10000,
-        name: '[path][name].[hash:8].[ext]'
+        name: '[path][name].[hash:8].[ext]',
+        emitFile: false
       }
     }, {
       test: /obj[\w\/]+\.\w+$/,

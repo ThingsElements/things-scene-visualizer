@@ -116,7 +116,7 @@ const WEBGL_NO_SUPPORT_TEXT = 'WebGL no support'
 
 function registerLoaders() {
   if (!registerLoaders.done) {
-    // THREE.Loader.Handlers.add(/\.tga$/i, new THREE.TGALoader());
+    THREE.Loader.Handlers.add(/\.tga$/i, new THREE.TGALoader());
     registerLoaders.done = true
   }
 }
@@ -291,7 +291,7 @@ export default class Visualizer extends Container {
     components.forEach(component => {
       var clazz = Component3d.register(component.model.type)
       if (!clazz) {
-        console.warn("Class not found : 3d class is not exist");
+        console.warn(`Class not found : 3d ${component.model.type} class is not exist`);
         return;
       }
 

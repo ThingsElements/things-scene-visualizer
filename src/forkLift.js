@@ -23,11 +23,11 @@ export default class ForkLift extends Object3D {
 
           objLoader.load(forkLiftObj, obj => {
             var extObj = obj
-            // if (extObj && extObj.children && extObj.children.length > 0) {
-            //   extObj = extObj.children[0];
-            // }
+            if (extObj && extObj.children && extObj.children.length > 0) {
+              extObj = extObj.children[0];
+            }
 
-            // extObj.geometry.center();
+            extObj.geometry.center();
             resolve(obj)
           })
         })
