@@ -4,11 +4,10 @@
 import Object3D from './object3d'
 import Component3d from './component-3d'
 
-import OBJLoader from 'three-obj-loader'
-import MTLLoader from 'three-mtl-loader'
-
 import personMtl from '../obj/Casual_Man_02/Casual_Man.mtl?3d'
 import personObj from '../obj/Casual_Man_02/Casual_Man.obj?3d'
+
+import * as THREE from 'three'
 
 export default class Person extends Object3D {
 
@@ -16,7 +15,7 @@ export default class Person extends Object3D {
     if (!Person._threedObjectLoader) {
       Person._threedObjectLoader = new Promise((resolve, reject) => {
         let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
-        let mtlLoader = new MTLLoader(THREE.DefaultLoadingManager);
+        let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
 
         mtlLoader.load(personMtl, materials => {
           materials.preload();

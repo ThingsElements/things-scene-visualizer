@@ -2,8 +2,9 @@
  * Copyright © HatioLab Inc. All rights reserved.
  */
 import Component3d from './component-3d'
+import { Group } from 'three'
 
-export default class Group3D extends THREE.Group {
+export default class Group3D extends Group {
   constructor(model, canvasSize, visualizer) {
     super();
 

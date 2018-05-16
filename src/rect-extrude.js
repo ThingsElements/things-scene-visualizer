@@ -4,6 +4,8 @@
 import Extrude from './extrude'
 import Component3d from './component-3d'
 
+import * as THREE from 'three'
+
 export default class RectExtrude extends Extrude {
 
   get shape() {

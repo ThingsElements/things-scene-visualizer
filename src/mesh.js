@@ -1,7 +1,9 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-export default class Mesh extends THREE.Mesh {
+import { Mesh as ThreeMesh } from 'three'
+
+export default class Mesh extends ThreeMesh {
   constructor(model) {
     super();
 

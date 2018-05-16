@@ -5,6 +5,8 @@ import Rack from './rack'
 import ForkLift from './forkLift'
 import Person from './person'
 
+import * as THREE from 'three'
+
 export default class WebGL3dViewer {
 
   constructor(target, model, data) {

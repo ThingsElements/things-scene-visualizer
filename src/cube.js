@@ -21,7 +21,9 @@ const NATURE = {
   }]
 }
 
-export default class Cube extends THREE.Mesh {
+import { Mesh } from 'three'
+
+export default class Cube extends Mesh {
 
   constructor(model, canvasSize, visualizer) {
 

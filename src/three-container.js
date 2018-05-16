@@ -6,6 +6,8 @@ import ThreeControls from './three-controls'
 
 import Component3d from './component-3d'
 
+import * as THREE from 'three'
+
 import {
   Component,
   Container,

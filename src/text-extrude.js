@@ -6,6 +6,8 @@ import Object3D from './object3d'
 import Component3d from './component-3d'
 import NanumGothicFont from "../obj/fonts/nanum_gothic.json?3d"
 
+import * as THREE from 'three'
+
 import { Component, Text } from '@hatiolab/things-scene'
 
 const NATURE = {

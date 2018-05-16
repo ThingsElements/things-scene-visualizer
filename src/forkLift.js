@@ -4,11 +4,10 @@
 import Object3D from './object3d'
 import Component3d from './component-3d'
 
-import OBJLoader from 'three-obj-loader'
-import MTLLoader from 'three-mtl-loader'
-
 import forkLiftMtl from '../obj/Fork_lift/fork_lift.mtl?3d'
 import forkLiftObj from '../obj/Fork_lift/fork_lift.obj?3d'
+
+import * as THREE from 'three'
 
 export default class ForkLift extends Object3D {
 
@@ -16,7 +15,7 @@ export default class ForkLift extends Object3D {
     if (!ForkLift._threedObjectLoader) {
       ForkLift._threedObjectLoader = new Promise((resolve, reject) => {
         let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
-        let mtlLoader = new MTLLoader(THREE.DefaultLoadingManager);
+        let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
 
         mtlLoader.load(forkLiftMtl, materials => {
           materials.preload();

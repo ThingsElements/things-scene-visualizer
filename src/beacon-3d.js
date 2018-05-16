@@ -4,6 +4,8 @@
 import Object3D from './object3d'
 import Component3d from './component-3d'
 
+import * as THREE from 'three'
+
 const STATUS_COLORS = ['#6666ff', '#ccccff', '#ffcccc', '#cc3300']
 
 export default class Beacon3D extends Object3D {

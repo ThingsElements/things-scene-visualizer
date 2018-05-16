@@ -7,6 +7,8 @@ import Mesh from './mesh'
 
 import { Component, Rect } from '@hatiolab/things-scene'
 
+import * as THREE from 'three'
+
 const NATURE = {
   mutable: false,
   resizable: true,

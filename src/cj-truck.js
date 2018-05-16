@@ -11,6 +11,8 @@ import MTLLoader from 'three-mtl-loader'
 import truckMtl from '../obj/CJ_Truck/CJ_Truck.mtl?3d'
 import truckObj from '../obj/CJ_Truck/CJ_Truck.obj?3d'
 
+import * as THREE from 'three'
+
 import {
   RectPath,
   Shape,

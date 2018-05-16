@@ -4,9 +4,6 @@
 import Object3D from './object3d'
 import Component3d from './component-3d'
 
-import OBJLoader from 'three-obj-loader'
-import MTLLoader from 'three-mtl-loader'
-
 import palletMtl from '../obj/pallet/pallet2.mtl?3d'
 import palletObj from '../obj/pallet/pallet2.obj?3d'
 
@@ -15,6 +12,8 @@ import {
   Shape,
   Component
 } from '@hatiolab/things-scene'
+
+import * as THREE from 'three'
 
 const NATURE = {
   mutable: false,
@@ -34,7 +33,7 @@ export default class Pallet extends Object3D {
     if (!Pallet._threedObjectLoader) {
       Pallet._threedObjectLoader = new Promise((resolve, reject) => {
         let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
-        let mtlLoader = new MTLLoader(THREE.DefaultLoadingManager);
+        let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
 
         mtlLoader.load(palletMtl, materials => {
           materials.preload();
