@@ -4,6 +4,8 @@
 
 import Mesh from './mesh'
 
+import * as THREE from 'three'
+
 const STOCK_COLOR = '#ccaa76'
 // const STATUS_COLORS = {
 //   A: 'black',

@@ -3,12 +3,11 @@
  */
 import Object3D from './object3d'
 import Component3d from './component-3d'
+import palletSymbol from '../assets/pallet_symbol.png'
 
-import OBJLoader from 'three-obj-loader'
-import MTLLoader from 'three-mtl-loader'
+import path from 'path'
 
-import palletMtl from '../obj/pallet/pallet2.mtl?3d'
-import palletObj from '../obj/pallet/pallet2.obj?3d'
+const palletPath = path.resolve('../obj/pallet')
 
 import {
   RectPath,
@@ -16,16 +15,13 @@ import {
   Component
 } from '@hatiolab/things-scene'
 
+import * as THREE from 'three'
+
 const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
-  properties: [{
-    type: 'number',
-    label: 'depth',
-    name: 'depth',
-    property: 'depth'
-  }]
+  properties: []
 }
 
 export default class Pallet extends Object3D {
@@ -34,20 +30,23 @@ export default class Pallet extends Object3D {
     if (!Pallet._threedObjectLoader) {
       Pallet._threedObjectLoader = new Promise((resolve, reject) => {
         let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
-        let mtlLoader = new MTLLoader(THREE.DefaultLoadingManager);
+        let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
 
-        mtlLoader.load(palletMtl, materials => {
+        objLoader.setPath(`${palletPath}/`)
+        mtlLoader.setPath(`${palletPath}/`)
+
+        mtlLoader.load('new_pallet.mtl', materials => {
           materials.preload();
           objLoader.setMaterials(materials)
 
-          objLoader.load(palletObj, obj => {
+          objLoader.load('new_pallet.obj', obj => {
             var extObj = obj
-            // if (extObj && extObj.children && extObj.children.length > 0) {
-            //   extObj = extObj.children[0];
-            // }
+            if (extObj && extObj.children && extObj.children.length > 0) {
+              extObj = extObj.children[0];
+            }
 
-            // extObj.geometry.center();
-            resolve(obj)
+            extObj.geometry.center();
+            resolve(extObj)
           })
         })
       });
@@ -64,10 +63,15 @@ export default class Pallet extends Object3D {
     var {
       width,
       height,
-      depth
+      depth,
+      rotation = 0
     } = this.model
 
     this.type = 'pallet'
+
+    width /= 63.173
+    height /= 72.1887
+    depth /= 9.0388
 
     var object = extObject.clone();
     this.add(object);
@@ -81,7 +85,26 @@ export class Pallet2d extends RectPath(Shape) {
     return true
   }
 
-  get controls() { }
+  static get image() {
+    if (!Pallet2d._image) {
+      Pallet2d._image = new Image()
+      Pallet2d._image.src = palletSymbol
+    }
+
+    return Pallet2d._image
+  }
+
+  render(context) {
+    var {
+      left,
+      top,
+      width,
+      height
+    } = this.bounds;
+
+    context.beginPath();
+    context.drawImage(Pallet2d.image, left, top, width, height);
+  }
 
   get nature() {
     return NATURE

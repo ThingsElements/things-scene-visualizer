@@ -6,6 +6,8 @@ import tinycolor from 'tinycolor2'
 
 import BoundingUVGenerator from './bounding-uv-generator'
 
+import * as THREE from 'three'
+
 export default class Extrude extends Object3D {
 
   get shape() {

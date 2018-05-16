@@ -4,6 +4,8 @@
 import ThreeControls from './three-controls'
 import './three-layout'
 
+import * as THREE from 'three'
+
 import Component3d from './component-3d'
 
 // import OBJExporter from 'three-obj-exporter'
@@ -17,6 +19,10 @@ import {
   error,
   FPS
 } from '@hatiolab/things-scene'
+
+require("imports-loader?THREE=three!three/examples/js/loaders/OBJLoader.js");
+require("imports-loader?THREE=three!three/examples/js/loaders/MTLLoader.js");
+require("imports-loader?THREE=three!three/examples/js/loaders/TGALoader.js");
 
 const NATURE = {
   mutable: false,
@@ -110,7 +116,7 @@ const WEBGL_NO_SUPPORT_TEXT = 'WebGL no support'
 
 function registerLoaders() {
   if (!registerLoaders.done) {
-    // THREE.Loader.Handlers.add(/\.tga$/i, new THREE.TGALoader());
+    THREE.Loader.Handlers.add(/\.tga$/i, new THREE.TGALoader());
     registerLoaders.done = true
   }
 }
@@ -200,11 +206,26 @@ export default class Visualizer extends Container {
     if (!this.app.isViewMode)
       return;
 
-    ScriptLoader.load('/node_modules/three/build/three.min.js')
-      .then(() => {
-        THREE.Cache.enabled = true
-        // ScriptLoader.load
-      }, error)
+    var loadLoaders = () => {
+      if(!THREE)
+        return;
+
+      // ScriptLoader.load(OBJLoader);
+      // ScriptLoader.load(MTLLoader);
+      // ScriptLoader.load(TGALoader);
+    }
+
+    if(!THREE) {
+      ScriptLoader.load(three)
+        .then(() => {
+          THREE.Cache.enabled = true
+          // require('./object-3d-overload');
+          // ScriptLoader.load
+          // loadLoaders();
+        }, error)
+    }
+    //  else
+    //   loadLoaders();
   }
 
   /* THREE Object related .. */
@@ -270,7 +291,7 @@ export default class Visualizer extends Container {
     components.forEach(component => {
       var clazz = Component3d.register(component.model.type)
       if (!clazz) {
-        console.warn("Class not found : 3d class is not exist");
+        console.warn(`Class not found : 3d ${component.model.type} class is not exist`);
         return;
       }
 

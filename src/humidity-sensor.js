@@ -6,6 +6,8 @@ import Component3d from './component-3d'
 
 import { Component, Ellipse } from '@hatiolab/things-scene'
 
+import * as THREE from 'three'
+
 const STATUS_COLORS = ['#6666ff', '#ccccff', '#ffcccc', '#cc3300']
 
 const NATURE = {

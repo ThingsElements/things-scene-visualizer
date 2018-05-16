@@ -5,6 +5,8 @@ import Object3D from './object3d'
 
 const STATUS_COLORS = ['#6666ff', '#ccccff', '#ffcccc', '#cc3300']
 
+import * as THREE from 'three'
+
 export default class Path extends Object3D {
 
   constructor(model, canvasSize, container) {
