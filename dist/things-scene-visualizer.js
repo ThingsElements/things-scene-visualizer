@@ -46363,32 +46363,19 @@ function LensFlare() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
 var registry = {};
 
-var Component3d = function () {
-  function Component3d() {
-    _classCallCheck(this, Component3d);
+class Component3d {
+
+  static register(type, clazz) {
+    if (!clazz) return registry[type];
+    registry[type] = clazz;
   }
 
-  _createClass(Component3d, null, [{
-    key: "register",
-    value: function register(type, clazz) {
-      if (!clazz) return registry[type];
-      registry[type] = clazz;
-    }
-  }]);
-
-  return Component3d;
-}();
-
+}
 exports.default = Component3d;
 
 /***/ }),
@@ -46408,248 +46395,199 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 var _three = __webpack_require__(0);
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+class Object3D extends _three.Object3D {
+  constructor(model, canvasSize, visualizer) {
+    super();
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+    this._model = model;
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+    this._visualizer = visualizer;
+    this._canvasSize = canvasSize;
 
+    this.name = this.model.id;
 
-var Object3D = function (_ThreeObject3D) {
-  _inherits(Object3D, _ThreeObject3D);
+    this.createObject();
 
-  function Object3D(model, canvasSize, visualizer) {
-    _classCallCheck(this, Object3D);
-
-    var _this = _possibleConstructorReturn(this, (Object3D.__proto__ || Object.getPrototypeOf(Object3D)).call(this));
-
-    _this._model = model;
-
-    _this._visualizer = visualizer;
-    _this._canvasSize = canvasSize;
-
-    _this.name = _this.model.id;
-
-    _this.createObject();
-
-    _this.setPosition();
-    _this.setRotation();
-    return _this;
+    this.setPosition();
+    this.setRotation();
   }
 
-  _createClass(Object3D, [{
-    key: 'dispose',
-    value: function dispose() {
-      var _this2 = this;
+  get model() {
+    return this._model;
+  }
 
-      this.children.slice().forEach(function (child) {
-        if (child.dispose) child.dispose();
-        if (child.geometry && child.geometry.dispose) child.geometry.dispose();
-        if (child.material && child.material.dispose) child.material.dispose();
-        if (child.texture && child.texture.dispose) child.texture.dispose();
-        _this2.remove(child);
+  get type() {
+    return this.model.type || this._type;
+  }
+  set type(type) {
+    this._type = type;
+  }
+
+  get cx() {
+    if (!this._cx) {
+      var {
+        left = 0,
+        width = 0
+      } = this.model;
+      var canvasSize = this._canvasSize;
+
+      this._cx = left + width / 2 - canvasSize.width / 2;
+    }
+    return this._cx;
+  }
+
+  get cy() {
+    if (!this._cy) {
+      var {
+        top = 0,
+        height = 0
+      } = this.model;
+      var canvasSize = this._canvasSize;
+
+      this._cy = top + height / 2 - canvasSize.height / 2;
+    }
+    return this._cy;
+  }
+
+  get cz() {
+    if (!this._cz) {
+      var {
+        zPos = 0,
+        depth = 1
+      } = this.model;
+
+      this._cz = zPos + depth / 2;
+    }
+
+    return this._cz;
+  }
+
+  dispose() {
+
+    this.children.slice().forEach(child => {
+      if (child.dispose) child.dispose();
+      if (child.geometry && child.geometry.dispose) child.geometry.dispose();
+      if (child.material && child.material.dispose) child.material.dispose();
+      if (child.texture && child.texture.dispose) child.texture.dispose();
+      this.remove(child);
+    });
+  }
+
+  createObject() {}
+
+  setPosition() {
+    this.position.set(this.cx, this.cz, this.cy);
+  }
+
+  setRotation() {
+    var {
+      rotationX = 0,
+      rotationY = 0,
+      rotation = 0
+    } = this.model;
+
+    this.rotation.x = -rotationX;
+    this.rotation.y = -rotation;
+    this.rotation.z = -rotationY;
+  }
+
+  onUserDataChanged() {
+    if (!this.userData) return;
+
+    if (this.userData.hasOwnProperty('position')) {
+      if (!this._visualizer) return;
+
+      this._setPosition(this._visualizer.transcoord2dTo3d(this.userData.position));
+    }
+
+    if (this.userData.hasOwnProperty('euler')) {
+      this._setEuler({
+        yaw: this.userData.euler.yaw,
+        pitch: this.userData.euler.pitch,
+        roll: this.userData.euler.roll
       });
     }
-  }, {
-    key: 'createObject',
-    value: function createObject() {}
-  }, {
-    key: 'setPosition',
-    value: function setPosition() {
-      this.position.set(this.cx, this.cz, this.cy);
+
+    if (this.userData.hasOwnProperty('quaternion')) {
+      this._setQuaternion({
+        x: this.userData.quaternion.qx,
+        y: this.userData.quaternion.qy,
+        z: this.userData.quaternion.qz,
+        w: this.userData.quaternion.qw
+      });
     }
-  }, {
-    key: 'setRotation',
-    value: function setRotation() {
-      var _model = this.model,
-          _model$rotationX = _model.rotationX,
-          rotationX = _model$rotationX === undefined ? 0 : _model$rotationX,
-          _model$rotationY = _model.rotationY,
-          rotationY = _model$rotationY === undefined ? 0 : _model$rotationY,
-          _model$rotation = _model.rotation,
-          rotation = _model$rotation === undefined ? 0 : _model$rotation;
+  }
 
+  _setPosition(location) {
+    var { x, y } = location;
 
-      this.rotation.x = -rotationX;
-      this.rotation.y = -rotation;
-      this.rotation.z = -rotationY;
+    var index = this._visualizer.mixers.indexOf(this._mixer);
+    if (index >= 0) {
+      this._visualizer.mixers.splice(index, 1);
     }
-  }, {
-    key: 'onUserDataChanged',
-    value: function onUserDataChanged() {
-      if (!this.userData) return;
 
-      if (this.userData.hasOwnProperty('position')) {
-        if (!this._visualizer) return;
+    this._mixer = new THREE.AnimationMixer(this);
+    this._visualizer.mixers.push(this._mixer);
 
-        this._setPosition(this._visualizer.transcoord2dTo3d(this.userData.position));
-      }
+    var positionKF = new THREE.VectorKeyframeTrack('.position', [0, 1], [this.position.x, this.position.y, this.position.z, x, this.position.y, y]);
+    var clip = new THREE.AnimationClip('Move', 2, [positionKF]);
 
-      if (this.userData.hasOwnProperty('euler')) {
-        this._setEuler({
-          yaw: this.userData.euler.yaw,
-          pitch: this.userData.euler.pitch,
-          roll: this.userData.euler.roll
-        });
-      }
+    // create a ClipAction and set it to play
+    var clipAction = this._mixer.clipAction(clip);
+    clipAction.clampWhenFinished = true;
+    clipAction.loop = THREE.LoopOnce;
+    clipAction.play();
+  }
 
-      if (this.userData.hasOwnProperty('quaternion')) {
-        this._setQuaternion({
-          x: this.userData.quaternion.qx,
-          y: this.userData.quaternion.qy,
-          z: this.userData.quaternion.qz,
-          w: this.userData.quaternion.qw
-        });
-      }
-    }
-  }, {
-    key: '_setPosition',
-    value: function _setPosition(location) {
-      var x = location.x,
-          y = location.y;
+  _setQuaternion(quaternion) {
+    var { x, y, z, w } = quaternion;
 
+    // var euler = new THREE.Euler();
 
-      var index = this._visualizer.mixers.indexOf(this._mixer);
-      if (index >= 0) {
-        this._visualizer.mixers.splice(index, 1);
-      }
+    // // var currentRotation = this.rotation;
 
-      this._mixer = new THREE.AnimationMixer(this);
-      this._visualizer.mixers.push(this._mixer);
+    // // console.log(currentRotation)
 
-      var positionKF = new THREE.VectorKeyframeTrack('.position', [0, 1], [this.position.x, this.position.y, this.position.z, x, this.position.y, y]);
-      var clip = new THREE.AnimationClip('Move', 2, [positionKF]);
+    var q = new THREE.Quaternion();
 
-      // create a ClipAction and set it to play
-      var clipAction = this._mixer.clipAction(clip);
-      clipAction.clampWhenFinished = true;
-      clipAction.loop = THREE.LoopOnce;
-      clipAction.play();
-    }
-  }, {
-    key: '_setQuaternion',
-    value: function _setQuaternion(quaternion) {
-      var x = quaternion.x,
-          y = quaternion.y,
-          z = quaternion.z,
-          w = quaternion.w;
+    q.set(x, y, z, w);
 
-      // var euler = new THREE.Euler();
+    // euler.setFromQuaternion(q, 'ZYX');
 
-      // // var currentRotation = this.rotation;
+    // // euler.z -= Math.PI / 2;
+    // euler.z -= Math.PI / 2;
 
-      // // console.log(currentRotation)
+    // var mat = new THREE.Matrix4();
+    // mat.makeRotationFromQuaternion(q);
+    // mat.transpose();
 
-      var q = new THREE.Quaternion();
+    // q.setFromRotationMatrix(mat);
 
-      q.set(x, y, z, w);
+    // this.setRotationFromEuler(euler);
 
-      // euler.setFromQuaternion(q, 'ZYX');
+    this.setRotationFromQuaternion(q);
+    this.rotateOnAxis(new THREE.Vector3(1, 0, 0), -Math.PI);
+    this.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI);
+    this.rotateOnAxis(new THREE.Vector3(0, 0, 1), -Math.PI / 2);
+    // this.rotateOnAxis(new THREE.Vector3(0, 0, 1), -Math.PI);
+    // this.updateMatrix()
+  }
 
-      // // euler.z -= Math.PI / 2;
-      // euler.z -= Math.PI / 2;
+  _setEuler(euler) {
+    var { yaw, pitch, roll } = euler;
+    var e = new THREE.Euler();
 
-      // var mat = new THREE.Matrix4();
-      // mat.makeRotationFromQuaternion(q);
-      // mat.transpose();
+    e.set(yaw, pitch, roll, 'ZYX');
 
-      // q.setFromRotationMatrix(mat);
+    this.setRotationFromEuler(e);
+  }
 
-      // this.setRotationFromEuler(euler);
-
-      this.setRotationFromQuaternion(q);
-      this.rotateOnAxis(new THREE.Vector3(1, 0, 0), -Math.PI);
-      this.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI);
-      this.rotateOnAxis(new THREE.Vector3(0, 0, 1), -Math.PI / 2);
-      // this.rotateOnAxis(new THREE.Vector3(0, 0, 1), -Math.PI);
-      // this.updateMatrix()
-    }
-  }, {
-    key: '_setEuler',
-    value: function _setEuler(euler) {
-      var yaw = euler.yaw,
-          pitch = euler.pitch,
-          roll = euler.roll;
-
-      var e = new THREE.Euler();
-
-      e.set(yaw, pitch, roll, 'ZYX');
-
-      this.setRotationFromEuler(e);
-    }
-  }, {
-    key: 'model',
-    get: function get() {
-      return this._model;
-    }
-  }, {
-    key: 'type',
-    get: function get() {
-      return this.model.type || this._type;
-    },
-    set: function set(type) {
-      this._type = type;
-    }
-  }, {
-    key: 'cx',
-    get: function get() {
-      if (!this._cx) {
-        var _model2 = this.model,
-            _model2$left = _model2.left,
-            left = _model2$left === undefined ? 0 : _model2$left,
-            _model2$width = _model2.width,
-            width = _model2$width === undefined ? 0 : _model2$width;
-
-        var canvasSize = this._canvasSize;
-
-        this._cx = left + width / 2 - canvasSize.width / 2;
-      }
-      return this._cx;
-    }
-  }, {
-    key: 'cy',
-    get: function get() {
-      if (!this._cy) {
-        var _model3 = this.model,
-            _model3$top = _model3.top,
-            top = _model3$top === undefined ? 0 : _model3$top,
-            _model3$height = _model3.height,
-            height = _model3$height === undefined ? 0 : _model3$height;
-
-        var canvasSize = this._canvasSize;
-
-        this._cy = top + height / 2 - canvasSize.height / 2;
-      }
-      return this._cy;
-    }
-  }, {
-    key: 'cz',
-    get: function get() {
-      if (!this._cz) {
-        var _model4 = this.model,
-            _model4$zPos = _model4.zPos,
-            zPos = _model4$zPos === undefined ? 0 : _model4$zPos,
-            _model4$depth = _model4.depth,
-            depth = _model4$depth === undefined ? 1 : _model4$depth;
-
-
-        this._cz = zPos + depth / 2;
-      }
-
-      return this._cz;
-    }
-  }]);
-
-  return Object3D;
-}(_three.Object3D);
-
-exports.default = Object3D;
+}
+exports.default = Object3D; /*
+                             * Copyright © HatioLab Inc. All rights reserved.
+                             */
 
 /***/ }),
 /* 4 */
@@ -46661,8 +46599,6 @@ exports.default = Object3D;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _object3d = __webpack_require__(3);
 
@@ -46684,213 +46620,172 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+/*
+ * Copyright © HatioLab Inc. All rights reserved.
+ */
+class Extrude extends _object3d2.default {
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
-
-
-var Extrude = function (_Object3D) {
-  _inherits(Extrude, _Object3D);
-
-  function Extrude() {
-    _classCallCheck(this, Extrude);
-
-    return _possibleConstructorReturn(this, (Extrude.__proto__ || Object.getPrototypeOf(Extrude)).apply(this, arguments));
+  get shape() {
+    // console.warn('shape ')
+    return null;
   }
 
-  _createClass(Extrude, [{
-    key: 'createObject',
-    value: function createObject() {
-      var _model = this.model,
-          _model$fillStyle = _model.fillStyle,
-          fillStyle = _model$fillStyle === undefined ? 0xffffff : _model$fillStyle,
-          _model$strokeStyle = _model.strokeStyle,
-          strokeStyle = _model$strokeStyle === undefined ? 0x636363 : _model$strokeStyle,
-          _model$lineWidth = _model.lineWidth,
-          lineWidth = _model$lineWidth === undefined ? 1 : _model$lineWidth,
-          _model$alpha = _model.alpha,
-          alpha = _model$alpha === undefined ? 1 : _model$alpha;
+  get sideShape() {
+    return null;
+  }
 
-      // 다각형 그리기
+  get extrudeSettings() {
+    var { depth = 1 } = this.model;
 
-      var shape = this.shape;
-      if (!shape) return;
+    return {
+      steps: 1,
+      amount: depth,
+      bevelEnabled: false,
+      UVGenerator: this.boundingUVGenerator
+    };
+  }
 
-      var extrudeSettings = this.extrudeSettings;
-      var boundingUVGenerator = this.boundingUVGenerator;
+  get boundingUVGenerator() {
+    if (!this._boundingUVGenerator) this._boundingUVGenerator = new _boundingUvGenerator2.default();
 
-      if (boundingUVGenerator) {
-        boundingUVGenerator.setShape({
-          extrudedShape: shape,
-          extrudedOptions: extrudeSettings
-        });
-      }
+    return this._boundingUVGenerator;
+  }
 
-      var geometry = this.createGeometry(shape, extrudeSettings);
-      var material = this.createMaterial();
+  createObject() {
+    var {
+      fillStyle = 0xffffff,
+      strokeStyle = 0x636363,
+      lineWidth = 1,
+      alpha = 1
+    } = this.model;
 
-      if (fillStyle && fillStyle != 'none') {
-        var mesh = this.createMesh(geometry, material);
-        this.add(mesh);
-      }
+    // 다각형 그리기
+    var shape = this.shape;
+    if (!shape) return;
 
-      if (strokeStyle && strokeStyle != 'transparent' && lineWidth > 0) {
-        var sideMesh = this.createSideMesh(geometry, shape, extrudeSettings);
-        this.add(sideMesh);
-      }
+    var extrudeSettings = this.extrudeSettings;
+    var boundingUVGenerator = this.boundingUVGenerator;
+
+    if (boundingUVGenerator) {
+      boundingUVGenerator.setShape({
+        extrudedShape: shape,
+        extrudedOptions: extrudeSettings
+      });
     }
-  }, {
-    key: 'createGeometry',
-    value: function createGeometry(shape, extrudeSettings) {
-      var geometry = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
-      geometry.center();
 
-      return geometry;
+    var geometry = this.createGeometry(shape, extrudeSettings);
+    var material = this.createMaterial();
+
+    if (fillStyle && fillStyle != 'none') {
+      var mesh = this.createMesh(geometry, material);
+      this.add(mesh);
     }
-  }, {
-    key: 'createMaterial',
-    value: function createMaterial() {
-      var _this2 = this;
 
-      var _model2 = this.model,
-          fillStyle = _model2.fillStyle,
-          _model2$alpha = _model2.alpha,
-          alpha = _model2$alpha === undefined ? 1 : _model2$alpha;
-
-
-      var material;
-      if (fillStyle.type == 'pattern' && fillStyle.image) {
-        var texture = this._visualizer._textureLoader.load(this._visualizer.app.url(fillStyle.image), function (texture) {
-          texture.minFilter = THREE.LinearFilter;
-          _this2._visualizer.render_threed();
-        });
-
-        material = [new THREE.MeshLambertMaterial({
-          map: texture,
-          side: THREE.DoubleSide
-        }), new THREE.MeshLambertMaterial({
-          color: fillStyle,
-          side: THREE.DoubleSide
-        })];
-      } else {
-        material = new THREE.MeshLambertMaterial({
-          color: fillStyle
-        });
-      }
-
-      var tinyFillStyle = (0, _tinycolor2.default)(fillStyle);
-      var fillAlpha = tinyFillStyle.getAlpha();
-      material.opacity = alpha * fillAlpha;
-      material.transparent = alpha < 1 || fillAlpha < 1;
-
-      return material;
+    if (strokeStyle && strokeStyle != 'transparent' && lineWidth > 0) {
+      var sideMesh = this.createSideMesh(geometry, shape, extrudeSettings);
+      this.add(sideMesh);
     }
-  }, {
-    key: 'createMesh',
-    value: function createMesh(geometry, material) {
-      var mesh = new THREE.Mesh(geometry, material);
-      mesh.rotation.x = -Math.PI / 2;
-      mesh.rotation.y = -Math.PI;
-      mesh.rotation.z = -Math.PI;
+  }
 
-      return mesh;
-    }
-  }, {
-    key: 'createSideMesh',
-    value: function createSideMesh(geometry, shape) {
-      var _model3 = this.model,
-          _model3$strokeStyle = _model3.strokeStyle,
-          strokeStyle = _model3$strokeStyle === undefined ? 0x000000 : _model3$strokeStyle,
-          _model3$depth = _model3.depth,
-          depth = _model3$depth === undefined ? 0 : _model3$depth,
-          _model3$lineWidth = _model3.lineWidth,
-          lineWidth = _model3$lineWidth === undefined ? 0 : _model3$lineWidth,
-          _model3$alpha = _model3.alpha,
-          alpha = _model3$alpha === undefined ? 1 : _model3$alpha;
+  createGeometry(shape, extrudeSettings) {
+    var geometry = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
+    geometry.center();
 
+    return geometry;
+  }
 
-      var hole = new THREE.Path();
-      hole.setFromPoints(shape.getPoints());
+  createMaterial() {
+    var {
+      fillStyle,
+      alpha = 1
+    } = this.model;
 
-      var sideMaterial = new THREE.MeshLambertMaterial({
-        color: strokeStyle
+    var material;
+    if (fillStyle.type == 'pattern' && fillStyle.image) {
+      var texture = this._visualizer._textureLoader.load(this._visualizer.app.url(fillStyle.image), texture => {
+        texture.minFilter = THREE.LinearFilter;
+        this._visualizer.render_threed();
       });
 
-      var tinyStrokeStyle = (0, _tinycolor2.default)(strokeStyle);
-      var strokeAlpha = tinyStrokeStyle.getAlpha();
-      sideMaterial.opacity = alpha * strokeAlpha;
-      sideMaterial.transparent = alpha < 1 || strokeAlpha < 1;
-
-      // prevent overlapped layers flickering
-      sideMaterial.polygonOffset = true;
-      sideMaterial.polygonOffsetFactor = -0.1;
-
-      shape = this.sideShape || shape;
-      shape.holes.push(hole);
-
-      var sideExtrudeSettings = {
-        steps: 1,
-        amount: depth,
-        bevelEnabled: true,
-        bevelThickness: 0,
-        bevelSize: lineWidth,
-        bevelSizeSegments: 5
-      };
-
-      var sideGeometry = new THREE.ExtrudeBufferGeometry(shape, sideExtrudeSettings);
-      sideGeometry.center();
-
-      var sideMesh = new THREE.Mesh(sideGeometry, sideMaterial);
-      sideMesh.rotation.x = -Math.PI / 2;
-      sideMesh.rotation.y = -Math.PI;
-      sideMesh.rotation.z = -Math.PI;
-
-      return sideMesh;
+      material = [new THREE.MeshLambertMaterial({
+        map: texture,
+        side: THREE.DoubleSide
+      }), new THREE.MeshLambertMaterial({
+        color: fillStyle,
+        side: THREE.DoubleSide
+      })];
+    } else {
+      material = new THREE.MeshLambertMaterial({
+        color: fillStyle
+      });
     }
-  }, {
-    key: 'raycast',
-    value: function raycast(raycaster, intersects) {}
-  }, {
-    key: 'shape',
-    get: function get() {
-      // console.warn('shape ')
-      return null;
-    }
-  }, {
-    key: 'sideShape',
-    get: function get() {
-      return null;
-    }
-  }, {
-    key: 'extrudeSettings',
-    get: function get() {
-      var _model$depth = this.model.depth,
-          depth = _model$depth === undefined ? 1 : _model$depth;
 
+    var tinyFillStyle = (0, _tinycolor2.default)(fillStyle);
+    var fillAlpha = tinyFillStyle.getAlpha();
+    material.opacity = alpha * fillAlpha;
+    material.transparent = alpha < 1 || fillAlpha < 1;
 
-      return {
-        steps: 1,
-        amount: depth,
-        bevelEnabled: false,
-        UVGenerator: this.boundingUVGenerator
-      };
-    }
-  }, {
-    key: 'boundingUVGenerator',
-    get: function get() {
-      if (!this._boundingUVGenerator) this._boundingUVGenerator = new _boundingUvGenerator2.default();
+    return material;
+  }
 
-      return this._boundingUVGenerator;
-    }
-  }]);
+  createMesh(geometry, material) {
+    var mesh = new THREE.Mesh(geometry, material);
+    mesh.rotation.x = -Math.PI / 2;
+    mesh.rotation.y = -Math.PI;
+    mesh.rotation.z = -Math.PI;
 
-  return Extrude;
-}(_object3d2.default);
+    return mesh;
+  }
 
+  createSideMesh(geometry, shape) {
+    var {
+      strokeStyle = 0x000000,
+      depth = 0,
+      lineWidth = 0,
+      alpha = 1
+    } = this.model;
+
+    var hole = new THREE.Path();
+    hole.setFromPoints(shape.getPoints());
+
+    var sideMaterial = new THREE.MeshLambertMaterial({
+      color: strokeStyle
+    });
+
+    var tinyStrokeStyle = (0, _tinycolor2.default)(strokeStyle);
+    var strokeAlpha = tinyStrokeStyle.getAlpha();
+    sideMaterial.opacity = alpha * strokeAlpha;
+    sideMaterial.transparent = alpha < 1 || strokeAlpha < 1;
+
+    // prevent overlapped layers flickering
+    sideMaterial.polygonOffset = true;
+    sideMaterial.polygonOffsetFactor = -0.1;
+
+    shape = this.sideShape || shape;
+    shape.holes.push(hole);
+
+    var sideExtrudeSettings = {
+      steps: 1,
+      amount: depth,
+      bevelEnabled: true,
+      bevelThickness: 0,
+      bevelSize: lineWidth,
+      bevelSizeSegments: 5
+    };
+
+    var sideGeometry = new THREE.ExtrudeBufferGeometry(shape, sideExtrudeSettings);
+    sideGeometry.center();
+
+    var sideMesh = new THREE.Mesh(sideGeometry, sideMaterial);
+    sideMesh.rotation.x = -Math.PI / 2;
+    sideMesh.rotation.y = -Math.PI;
+    sideMesh.rotation.z = -Math.PI;
+
+    return sideMesh;
+  }
+
+  raycast(raycaster, intersects) {}
+}
 exports.default = Extrude;
 
 /***/ }),
@@ -47135,55 +47030,32 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 var _three = __webpack_require__(0);
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+class Mesh extends _three.Mesh {
+  constructor(model) {
+    super();
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
-
-
-var Mesh = function (_ThreeMesh) {
-  _inherits(Mesh, _ThreeMesh);
-
-  function Mesh(model) {
-    _classCallCheck(this, Mesh);
-
-    var _this = _possibleConstructorReturn(this, (Mesh.__proto__ || Object.getPrototypeOf(Mesh)).call(this));
-
-    _this._model = model;
-    return _this;
+    this._model = model;
   }
 
-  _createClass(Mesh, [{
-    key: 'dispose',
-    value: function dispose() {
-      var _this2 = this;
+  dispose() {
+    this.children.slice().forEach(child => {
+      if (child.dispose) child.dispose();
+      if (child.geometry && child.geometry.dispose) child.geometry.dispose();
+      if (child.material && child.material.dispose) child.material.dispose();
+      if (child.texture && child.texture.dispose) child.texture.dispose();
+      this.remove(child);
+    });
+  }
 
-      this.children.slice().forEach(function (child) {
-        if (child.dispose) child.dispose();
-        if (child.geometry && child.geometry.dispose) child.geometry.dispose();
-        if (child.material && child.material.dispose) child.material.dispose();
-        if (child.texture && child.texture.dispose) child.texture.dispose();
-        _this2.remove(child);
-      });
-    }
-  }, {
-    key: 'model',
-    get: function get() {
-      return this._model;
-    }
-  }]);
-
-  return Mesh;
-}(_three.Mesh);
-
-exports.default = Mesh;
+  get model() {
+    return this._model;
+  }
+}
+exports.default = Mesh; /*
+                         * Copyright © HatioLab Inc. All rights reserved.
+                         */
 
 /***/ }),
 /* 7 */
@@ -47195,10 +47067,6 @@ exports.default = Mesh;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _mesh = __webpack_require__(6);
 
@@ -47212,15 +47080,11 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+/*
+ * Copyright � HatioLab Inc. All rights reserved.
+ */
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright � HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
-
-var STOCK_COLOR = '#ccaa76';
+const STOCK_COLOR = '#ccaa76';
 // const STATUS_COLORS = {
 //   A: 'black',
 //   B: '#ccaa76',
@@ -47229,356 +47093,333 @@ var STOCK_COLOR = '#ccaa76';
 //   E: '#6ac428'
 // }
 
-var Stock = function (_Mesh) {
-  _inherits(Stock, _Mesh);
+class Stock extends _mesh2.default {
 
-  function Stock(model, visualizer) {
-    _classCallCheck(this, Stock);
+  constructor(model, visualizer) {
 
-    var _this = _possibleConstructorReturn(this, (Stock.__proto__ || Object.getPrototypeOf(Stock)).call(this, model));
+    super(model);
 
-    _this._visualizer = visualizer;
-    _this._hideEmptyStock = visualizer && visualizer.model.hideEmptyStock;
+    this._visualizer = visualizer;
+    this._hideEmptyStock = visualizer && visualizer.model.hideEmptyStock;
 
-    _this.createObject();
-
-    return _this;
+    this.createObject();
   }
 
-  _createClass(Stock, [{
-    key: 'dispose',
-    value: function dispose() {
-      _get(Stock.prototype.__proto__ || Object.getPrototypeOf(Stock.prototype), 'dispose', this).call(this);
+  dispose() {
+    super.dispose();
 
-      delete this._visualizer;
-    }
-  }, {
-    key: 'getMaterial',
-    value: function getMaterial(index) {
-      if (!this.stockMaterials[index]) {
-        if (!(this._visualizer && this._visualizer && this._visualizer.legendTarget && this._visualizer.legendTarget.get('status'))) return this.userDefineDefaultMaterial;
+    delete this._visualizer;
+  }
 
-        var stockStatus = this._visualizer.legendTarget.get('status');
-        var range = stockStatus.ranges[index];
-
-        if (!(range && range.color)) this.stockMaterials[index] = this.userDefineDefaultMaterial;
-
-        this.stockMaterials[index] = new THREE.MeshLambertMaterial({
-          color: range.color,
-          side: THREE.FrontSide
-        });
-      }
-
-      return this.stockMaterials[index];
-    }
-  }, {
-    key: 'createObject',
-    value: function createObject() {
-      var _model = this.model,
-          width = _model.width,
-          height = _model.height,
-          depth = _model.depth;
-
-
-      this.createStock(width, height, depth);
-    }
-  }, {
-    key: 'createStock',
-    value: function createStock(w, h, d) {
-
-      this.geometry = Stock.stockGeometry;
-      this.material = this._hideEmptyStock ? this.emptyMaterial : this.userDefineDefaultMaterial;
-      this.type = 'stock';
-
-      this.scale.set(w, d, h);
-
-      // this.castShadow = true
-    }
-  }, {
-    key: 'onUserDataChanged',
-    value: function onUserDataChanged() {
-      var _this2 = this;
-
-      _get(Stock.prototype.__proto__ || Object.getPrototypeOf(Stock.prototype), 'onUserDataChanged', this).call(this);
-
-      if (!(this._visualizer && this._visualizer && this._visualizer.legendTarget && this._visualizer.legendTarget.get('status'))) return;
+  getMaterial(index) {
+    if (!this.stockMaterials[index]) {
+      if (!(this._visualizer && this._visualizer && this._visualizer.legendTarget && this._visualizer.legendTarget.get('status'))) return this.userDefineDefaultMaterial;
 
       var stockStatus = this._visualizer.legendTarget.get('status');
-      var statusField = stockStatus.field;
-      var ranges = stockStatus.ranges;
+      var range = stockStatus.ranges[index];
 
-      if (!(statusField && ranges)) return;
+      if (!(range && range.color)) this.stockMaterials[index] = this.userDefineDefaultMaterial;
 
-      var data = this.userData.items ? this.userData.items : [this.userData];
-
-      for (var i in data) {
-        var d = data[i];
-
-        var status = d[statusField];
-
-        if (status == undefined) {
-          // this.visible = !this._hideEmptyStock;
-          this.material = this._hideEmptyStock ? this.emptyMaterial : this.userDefineDefaultMaterial;
-          return;
-        }
-
-        ranges.some(function (range, index) {
-          var min = range.min,
-              max = range.max;
-
-
-          min = Number(min) || min;
-          max = Number(max) || max;
-
-          if (max > status) {
-            if (min !== undefined) {
-              if (min <= status) {
-                _this2.material = _this2.getMaterial(index);
-              }
-            } else _this2.material = _this2.getMaterial(index);
-
-            // this.visible = true;
-            return true;
-          } else {
-            _this2.material = _this2._hideEmptyStock ? _this2.emptyMaterial : _this2.userDefineDefaultMaterial;
-          }
-        });
-      }
-    }
-
-    // onmousemove(e, visualizer) {
-
-    //   var tooltip = visualizer.tooltip || visualizer._scene2d.getObjectByName("tooltip")
-
-    //   if (tooltip) {
-    //     visualizer._scene2d.remove(tooltip)
-    //     visualizer.tooltip = null
-    //     visualizer.render_threed()
-    //   }
-
-    //   if (!this.visible)
-    //     return;
-
-    //   if (!this.userData)
-    //     this.userData = {};
-
-    //   var tooltipText = '';
-
-    //   for (let key in this.userData) {
-    //     // exclude private data
-    //     if (/^__/.test(key))
-    //       continue;
-
-    //     if (this.userData[key] && typeof this.userData[key] != 'object') {
-    //       tooltipText += key + ": " + this.userData[key] + "\n"
-    //     }
-    //   }
-
-    //   // tooltipText = 'loc : ' + loc
-
-    //   if (tooltipText.length > 0) {
-    //     tooltip = visualizer.tooltip = visualizer.makeTextSprite(tooltipText)
-
-    //     var vector = new THREE.Vector3()
-    //     var vector2 = new THREE.Vector3()
-
-    //     vector.set(visualizer._mouse.x, visualizer._mouse.y, 0.5)
-    //     vector2.set(tooltip.scale.x / 2, - tooltip.scale.y / 2, 0)
-    //     //
-    //     // vector2.normalize()
-    //     //
-    //     // vector2.subScalar(0.5)
-    //     //
-    //     // vector2.y = -vector2.y
-    //     // vector2.z = 0
-
-    //     // vector.add(vector2)
-
-    //     vector.unproject(visualizer._2dCamera)
-    //     vector.add(vector2)
-    //     tooltip.position.set(vector.x, vector.y, vector.z)
-    //     tooltip.name = "tooltip"
-
-    //     visualizer._scene2d.add(tooltip)
-    //     visualizer._renderer && visualizer._renderer.render(visualizer._scene2d, visualizer._2dCamera)
-    //     visualizer.invalidate()
-    //   }
-
-    // }
-
-  }, {
-    key: 'onBeforeRender',
-    value: function onBeforeRender() {
-      // if (!this._originScale)
-      //   this._originScale = this.scale.toArray();
-
-      if (this._focused) {
-        var lastTime = performance.now() - this._focusedAt;
-        var progress = lastTime / 2000;
-
-        // if (progress > 1)
-        //   progress %= 1
-
-        // var currScale = new THREE.Vector3().fromArray(this._originScale);
-        // var total_scale = 0.5;
-
-        // currScale.multiplyScalar(1 + total_scale * progress)
-
-        // this.scale.copy(currScale);
-        this.rotation.y = 2 * Math.PI * progress;
-        this._visualizer.invalidate();
-      } else {
-        if (this._focusedAt) {
-          delete this._focusedAt;
-          this.rotation.y = 0;
-          this._visualizer.invalidate();
-        }
-
-        // this.scale.fromArray(this._originScale);
-      }
-    }
-  }, {
-    key: 'onmouseup',
-    value: function onmouseup(e, visualizer, callback) {
-
-      // var tooltip = visualizer.tooltip || visualizer._scene2d.getObjectByName("tooltip")
-
-      // if (tooltip) {
-      //   visualizer._scene2d.remove(tooltip)
-      //   visualizer.tooltip = null
-      //   visualizer.render_threed()
-      // }
-
-      if (!this.visible) return;
-
-      if (!this.userData || Object.keys(this.userData).length === 0) this.userData = {
-        loc: this.name,
-        items: [{
-          loc: this.name
-        }]
-      };
-
-      if (callback && typeof callback == 'function') {
-        var data = Object.assign({
-          color: '#' + this.material.color.getHexString()
-        }, this.userData);
-
-        callback.call(this, {
-          data: data,
-          location: 'right-top'
-        });
-      }
-
-      // var tooltipText = '';
-
-      // for (let key in this.userData) {
-      //   // exclude private data
-      //   if (/^__/.test(key))
-      //     continue;
-
-      //   if (this.userData[key] && typeof this.userData[key] != 'object') {
-      //     tooltipText += key + ": " + this.userData[key] + "\n"
-      //   }
-      // }
-
-      // // tooltipText = 'loc : ' + loc
-
-      // if (tooltipText.length > 0) {
-      //   tooltip = visualizer.tooltip = visualizer.makeTextSprite(tooltipText)
-
-      //   var vector = new THREE.Vector3()
-      //   var vector2 = new THREE.Vector3()
-
-      //   vector.set(visualizer._mouse.x, visualizer._mouse.y, 0.5)
-      //   vector2.set(tooltip.scale.x / 2, - tooltip.scale.y / 2, 0)
-      //   //
-      //   // vector2.normalize()
-      //   //
-      //   // vector2.subScalar(0.5)
-      //   //
-      //   // vector2.y = -vector2.y
-      //   // vector2.z = 0
-
-      //   // vector.add(vector2)
-
-      //   vector.unproject(visualizer._2dCamera)
-      //   vector.add(vector2)
-      //   tooltip.position.set(vector.x, vector.y, vector.z)
-      //   tooltip.name = "tooltip"
-
-      //   visualizer._scene2d.add(tooltip)
-      //   visualizer._renderer && visualizer._renderer.render(visualizer._scene2d, visualizer._2dCamera)
-      //   visualizer.invalidate()
-      // }
-
-    }
-  }, {
-    key: 'stockMaterials',
-    get: function get() {
-      if (!this._visualizer._stock_materials) this._visualizer._stock_materials = [];
-
-      return this._visualizer._stock_materials;
-    }
-  }, {
-    key: 'userDefineDefaultMaterial',
-    get: function get() {
-      if (!this._visualizer._default_material) {
-        if (!(this._visualizer && this._visualizer && this._visualizer.legendTarget && this._visualizer.legendTarget.get('status'))) return Stock.defaultMaterial;
-
-        var stockStatus = this._visualizer.legendTarget.get('status');
-        var defaultColor = stockStatus.defaultColor;
-
-        if (!defaultColor) return Stock.defaultMaterial;
-
-        this._visualizer._default_material = new THREE.MeshLambertMaterial({
-          color: defaultColor,
-          side: THREE.FrontSide
-        });
-      }
-
-      return this._visualizer._default_material;
-    }
-  }, {
-    key: 'emptyMaterial',
-    get: function get() {
-      var defaultColor = STOCK_COLOR;
-      if (!this._visualizer._empty_material) {
-        if (this._visualizer && this._visualizer && this._visualizer.legendTarget && this._visualizer.legendTarget.get('status')) {
-          var stockStatus = this._visualizer.legendTarget.get('status');
-          defaultColor = stockStatus.defaultColor || STOCK_COLOR;
-        }
-
-        this._visualizer._empty_material = new THREE.MeshBasicMaterial({
-          color: defaultColor
-        });
-        this._visualizer._empty_material.opacity = 0.33;
-        this._visualizer._empty_material.transparent = true;
-      }
-
-      return this._visualizer._empty_material;
-    }
-  }], [{
-    key: 'stockGeometry',
-    get: function get() {
-      if (!Stock._geometry) Stock._geometry = new THREE.BoxBufferGeometry(1, 1, 1);
-
-      return Stock._geometry;
-    }
-  }, {
-    key: 'defaultMaterial',
-    get: function get() {
-      if (!Stock._material_default) Stock._material_default = new THREE.MeshLambertMaterial({
-        color: STOCK_COLOR,
+      this.stockMaterials[index] = new THREE.MeshLambertMaterial({
+        color: range.color,
         side: THREE.FrontSide
       });
-
-      return Stock._material_default;
     }
-  }]);
 
-  return Stock;
-}(_mesh2.default);
+    return this.stockMaterials[index];
+  }
 
+  static get stockGeometry() {
+    if (!Stock._geometry) Stock._geometry = new THREE.BoxBufferGeometry(1, 1, 1);
+
+    return Stock._geometry;
+  }
+
+  get stockMaterials() {
+    if (!this._visualizer._stock_materials) this._visualizer._stock_materials = [];
+
+    return this._visualizer._stock_materials;
+  }
+
+  get userDefineDefaultMaterial() {
+    if (!this._visualizer._default_material) {
+      if (!(this._visualizer && this._visualizer && this._visualizer.legendTarget && this._visualizer.legendTarget.get('status'))) return Stock.defaultMaterial;
+
+      var stockStatus = this._visualizer.legendTarget.get('status');
+      var defaultColor = stockStatus.defaultColor;
+
+      if (!defaultColor) return Stock.defaultMaterial;
+
+      this._visualizer._default_material = new THREE.MeshLambertMaterial({
+        color: defaultColor,
+        side: THREE.FrontSide
+      });
+    }
+
+    return this._visualizer._default_material;
+  }
+
+  get emptyMaterial() {
+    var defaultColor = STOCK_COLOR;
+    if (!this._visualizer._empty_material) {
+      if (this._visualizer && this._visualizer && this._visualizer.legendTarget && this._visualizer.legendTarget.get('status')) {
+        var stockStatus = this._visualizer.legendTarget.get('status');
+        defaultColor = stockStatus.defaultColor || STOCK_COLOR;
+      }
+
+      this._visualizer._empty_material = new THREE.MeshBasicMaterial({
+        color: defaultColor
+      });
+      this._visualizer._empty_material.opacity = 0.33;
+      this._visualizer._empty_material.transparent = true;
+    }
+
+    return this._visualizer._empty_material;
+  }
+
+  static get defaultMaterial() {
+    if (!Stock._material_default) Stock._material_default = new THREE.MeshLambertMaterial({
+      color: STOCK_COLOR,
+      side: THREE.FrontSide
+    });
+
+    return Stock._material_default;
+  }
+
+  createObject() {
+    var {
+      width,
+      height,
+      depth
+    } = this.model;
+
+    this.createStock(width, height, depth);
+  }
+
+  createStock(w, h, d) {
+
+    this.geometry = Stock.stockGeometry;
+    this.material = this._hideEmptyStock ? this.emptyMaterial : this.userDefineDefaultMaterial;
+    this.type = 'stock';
+
+    this.scale.set(w, d, h);
+
+    // this.castShadow = true
+  }
+
+  onUserDataChanged() {
+    super.onUserDataChanged();
+
+    if (!(this._visualizer && this._visualizer && this._visualizer.legendTarget && this._visualizer.legendTarget.get('status'))) return;
+
+    var stockStatus = this._visualizer.legendTarget.get('status');
+    var statusField = stockStatus.field;
+    var ranges = stockStatus.ranges;
+
+    if (!(statusField && ranges)) return;
+
+    var data = this.userData.items ? this.userData.items : [this.userData];
+
+    for (let i in data) {
+      let d = data[i];
+
+      var status = d[statusField];
+
+      if (status == undefined) {
+        // this.visible = !this._hideEmptyStock;
+        this.material = this._hideEmptyStock ? this.emptyMaterial : this.userDefineDefaultMaterial;
+        return;
+      }
+
+      ranges.some((range, index) => {
+        let {
+          min,
+          max
+        } = range;
+
+        min = Number(min) || min;
+        max = Number(max) || max;
+
+        if (max > status) {
+          if (min !== undefined) {
+            if (min <= status) {
+              this.material = this.getMaterial(index);
+            }
+          } else this.material = this.getMaterial(index);
+
+          // this.visible = true;
+          return true;
+        } else {
+          this.material = this._hideEmptyStock ? this.emptyMaterial : this.userDefineDefaultMaterial;
+        }
+      });
+    }
+  }
+
+  // onmousemove(e, visualizer) {
+
+  //   var tooltip = visualizer.tooltip || visualizer._scene2d.getObjectByName("tooltip")
+
+  //   if (tooltip) {
+  //     visualizer._scene2d.remove(tooltip)
+  //     visualizer.tooltip = null
+  //     visualizer.render_threed()
+  //   }
+
+  //   if (!this.visible)
+  //     return;
+
+  //   if (!this.userData)
+  //     this.userData = {};
+
+  //   var tooltipText = '';
+
+  //   for (let key in this.userData) {
+  //     // exclude private data
+  //     if (/^__/.test(key))
+  //       continue;
+
+  //     if (this.userData[key] && typeof this.userData[key] != 'object') {
+  //       tooltipText += key + ": " + this.userData[key] + "\n"
+  //     }
+  //   }
+
+  //   // tooltipText = 'loc : ' + loc
+
+  //   if (tooltipText.length > 0) {
+  //     tooltip = visualizer.tooltip = visualizer.makeTextSprite(tooltipText)
+
+  //     var vector = new THREE.Vector3()
+  //     var vector2 = new THREE.Vector3()
+
+  //     vector.set(visualizer._mouse.x, visualizer._mouse.y, 0.5)
+  //     vector2.set(tooltip.scale.x / 2, - tooltip.scale.y / 2, 0)
+  //     //
+  //     // vector2.normalize()
+  //     //
+  //     // vector2.subScalar(0.5)
+  //     //
+  //     // vector2.y = -vector2.y
+  //     // vector2.z = 0
+
+  //     // vector.add(vector2)
+
+  //     vector.unproject(visualizer._2dCamera)
+  //     vector.add(vector2)
+  //     tooltip.position.set(vector.x, vector.y, vector.z)
+  //     tooltip.name = "tooltip"
+
+  //     visualizer._scene2d.add(tooltip)
+  //     visualizer._renderer && visualizer._renderer.render(visualizer._scene2d, visualizer._2dCamera)
+  //     visualizer.invalidate()
+  //   }
+
+  // }
+
+  onBeforeRender() {
+    // if (!this._originScale)
+    //   this._originScale = this.scale.toArray();
+
+    if (this._focused) {
+      var lastTime = performance.now() - this._focusedAt;
+      var progress = lastTime / 2000;
+
+      // if (progress > 1)
+      //   progress %= 1
+
+      // var currScale = new THREE.Vector3().fromArray(this._originScale);
+      // var total_scale = 0.5;
+
+      // currScale.multiplyScalar(1 + total_scale * progress)
+
+      // this.scale.copy(currScale);
+      this.rotation.y = 2 * Math.PI * progress;
+      this._visualizer.invalidate();
+    } else {
+      if (this._focusedAt) {
+        delete this._focusedAt;
+        this.rotation.y = 0;
+        this._visualizer.invalidate();
+      }
+
+      // this.scale.fromArray(this._originScale);
+    }
+  }
+
+  onmouseup(e, visualizer, callback) {
+
+    // var tooltip = visualizer.tooltip || visualizer._scene2d.getObjectByName("tooltip")
+
+    // if (tooltip) {
+    //   visualizer._scene2d.remove(tooltip)
+    //   visualizer.tooltip = null
+    //   visualizer.render_threed()
+    // }
+
+    if (!this.visible) return;
+
+    if (!this.userData || Object.keys(this.userData).length === 0) this.userData = {
+      loc: this.name,
+      items: [{
+        loc: this.name
+      }]
+    };
+
+    if (callback && typeof callback == 'function') {
+      var data = Object.assign({
+        color: '#' + this.material.color.getHexString()
+      }, this.userData);
+
+      callback.call(this, {
+        data: data,
+        location: 'right-top'
+      });
+    }
+
+    // var tooltipText = '';
+
+    // for (let key in this.userData) {
+    //   // exclude private data
+    //   if (/^__/.test(key))
+    //     continue;
+
+    //   if (this.userData[key] && typeof this.userData[key] != 'object') {
+    //     tooltipText += key + ": " + this.userData[key] + "\n"
+    //   }
+    // }
+
+    // // tooltipText = 'loc : ' + loc
+
+    // if (tooltipText.length > 0) {
+    //   tooltip = visualizer.tooltip = visualizer.makeTextSprite(tooltipText)
+
+    //   var vector = new THREE.Vector3()
+    //   var vector2 = new THREE.Vector3()
+
+    //   vector.set(visualizer._mouse.x, visualizer._mouse.y, 0.5)
+    //   vector2.set(tooltip.scale.x / 2, - tooltip.scale.y / 2, 0)
+    //   //
+    //   // vector2.normalize()
+    //   //
+    //   // vector2.subScalar(0.5)
+    //   //
+    //   // vector2.y = -vector2.y
+    //   // vector2.z = 0
+
+    //   // vector.add(vector2)
+
+    //   vector.unproject(visualizer._2dCamera)
+    //   vector.add(vector2)
+    //   tooltip.position.set(vector.x, vector.y, vector.z)
+    //   tooltip.name = "tooltip"
+
+    //   visualizer._scene2d.add(tooltip)
+    //   visualizer._renderer && visualizer._renderer.render(visualizer._scene2d, visualizer._2dCamera)
+    //   visualizer.invalidate()
+    // }
+
+  }
+}
 exports.default = Stock;
 
 /***/ }),
@@ -47591,10 +47432,6 @@ exports.default = Stock;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _object3d = __webpack_require__(3);
 
@@ -47616,282 +47453,247 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+/*
+ * Copyright © HatioLab Inc. All rights reserved.
+ */
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+class Rack extends _object3d2.default {
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+  constructor(model, canvasSize, visualizer) {
+    super(model, canvasSize, visualizer);
 
-var Rack = function (_Object3D) {
-  _inherits(Rack, _Object3D);
-
-  function Rack(model, canvasSize, visualizer) {
-    _classCallCheck(this, Rack);
-
-    var _this = _possibleConstructorReturn(this, (Rack.__proto__ || Object.getPrototypeOf(Rack)).call(this, model, canvasSize, visualizer));
-
-    _this._frames = [];
-    _this._boards = [];
-    return _this;
+    this._frames = [];
+    this._boards = [];
   }
 
-  _createClass(Rack, [{
-    key: 'dispose',
-    value: function dispose() {
-      _get(Rack.prototype.__proto__ || Object.getPrototypeOf(Rack.prototype), 'dispose', this).call(this);
+  dispose() {
+    super.dispose();
 
-      delete this._visualizer;
+    delete this._visualizer;
+  }
+
+  get cz() {
+    if (!this._cz) {
+      var {
+        shelves = 1,
+        depth = 1
+      } = this.model;
+
+      this._cz = 0.5 * depth * shelves;
     }
-  }, {
-    key: 'createObject',
-    value: function createObject() {
-      var _model = this.model,
-          type = _model.type,
-          width = _model.width,
-          height = _model.height,
-          depth = _model.depth,
-          fillStyle = _model.fillStyle,
-          hideRackFrame = _model.hideRackFrame,
-          shelves = _model.shelves,
-          shelfPattern = _model.shelfPattern,
-          _model$stockScale = _model.stockScale,
-          stockScale = _model$stockScale === undefined ? 0.7 : _model$stockScale;
 
+    return this._cz;
+  }
 
-      var scale = stockScale;
+  static get rackFrameGeometry() {
+    if (!Rack._rackFrameGeometry) Rack._rackFrameGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
 
-      this.type = type;
+    return Rack._rackFrameGeometry;
+  }
 
-      if (!hideRackFrame) {
-        var frame = this.createRackFrame(width, height, depth * shelves);
-        // this._frames.push(frame)
+  static get boardGeometry() {
+    if (!Rack._boardGeometry) Rack._boardGeometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1);
 
-        this.add(frame);
+    return Rack._boardGeometry;
+  }
+
+  static get boardMaterial() {
+    if (!Rack._boardMaterial) Rack._boardMaterial = new THREE.MeshBasicMaterial({
+      color: '#dedede',
+      side: THREE.DoubleSide
+    });
+
+    Rack._boardMaterial.polygonOffset = true;
+    Rack._boardMaterial.polygonOffsetFactor = -0.1;
+
+    return Rack._boardMaterial;
+  }
+
+  static get frameMaterial() {
+    if (!Rack._frameMaterial) Rack._frameMaterial = new THREE.MeshLambertMaterial({
+      color: 0xcccccc
+    });
+    // Rack._frameMaterial = new THREE.LineBasicMaterial({ color: 0xcccccc, linewidth: 3 })
+
+    return Rack._frameMaterial;
+  }
+
+  get frames() {
+    return this._frames;
+  }
+
+  get boards() {
+    return this._boards;
+  }
+
+  createObject() {
+    var {
+      type,
+      width,
+      height,
+      depth,
+      fillStyle,
+      hideRackFrame,
+      shelves,
+      shelfPattern,
+      stockScale = 0.7
+    } = this.model;
+
+    let scale = stockScale;
+
+    this.type = type;
+
+    if (!hideRackFrame) {
+      var frame = this.createRackFrame(width, height, depth * shelves);
+      // this._frames.push(frame)
+
+      this.add(frame);
+    }
+
+    for (var i = 0; i < shelves; i++) {
+
+      let bottom = -depth * shelves * 0.5;
+      if (i > 0 && !hideRackFrame) {
+        let board = this.createRackBoard(width, height);
+        board.position.set(0, bottom + depth * i, 0);
+        board.rotation.x = Math.PI / 2;
+        board.material.opacity = 0.5;
+        board.material.transparent = true;
+
+        this.add(board);
+        // frame.geometry.merge(board.geometry, board.matrix)
+
+        // this._boards.push(board)
       }
 
-      for (var i = 0; i < shelves; i++) {
+      let stock = new _stock2.default({
+        width: width * scale,
+        height: height * scale,
+        depth: depth * scale,
+        fillStyle: fillStyle
+      }, this._visualizer);
 
-        var bottom = -depth * shelves * 0.5;
-        if (i > 0 && !hideRackFrame) {
-          var board = this.createRackBoard(width, height);
-          board.position.set(0, bottom + depth * i, 0);
-          board.rotation.x = Math.PI / 2;
-          board.material.opacity = 0.5;
-          board.material.transparent = true;
+      let stockDepth = depth * scale;
 
-          this.add(board);
-          // frame.geometry.merge(board.geometry, board.matrix)
+      stock.position.set(0, bottom + depth * i + stockDepth * 0.5, 0);
+      stock.name = this.makeLocationString(this.makeShelfString(shelfPattern, i + 1, shelves));
 
-          // this._boards.push(board)
-        }
-
-        var stock = new _stock2.default({
-          width: width * scale,
-          height: height * scale,
-          depth: depth * scale,
-          fillStyle: fillStyle
-        }, this._visualizer);
-
-        var stockDepth = depth * scale;
-
-        stock.position.set(0, bottom + depth * i + stockDepth * 0.5, 0);
-        stock.name = this.makeLocationString(this.makeShelfString(shelfPattern, i + 1, shelves));
-
-        this.add(stock);
-        this._visualizer.putObject(stock.name, stock);
-      }
+      this.add(stock);
+      this._visualizer.putObject(stock.name, stock);
     }
-  }, {
-    key: 'createRackFrame',
-    value: function createRackFrame(w, h, d) {
+  }
 
-      // this.geometry = this.cube({
-      //   width: w,
-      //   height : d,
-      //   depth : h
-      // })
+  createRackFrame(w, h, d) {
 
-      var frameWeight = Math.round(Math.min(w, h) / 10);
+    // this.geometry = this.cube({
+    //   width: w,
+    //   height : d,
+    //   depth : h
+    // })
 
-      var frames = new THREE.Group();
-      for (var i = 0; i < 4; i++) {
-        var geometry = Rack.rackFrameGeometry;
-        var material = Rack.frameMaterial;
-        var frame = new THREE.Mesh(geometry, material);
-        frame.scale.set(frameWeight, d, frameWeight);
-        switch (i) {
-          case 0:
-            frame.position.set(w / 2, 0, h / 2);
-            break;
-          case 1:
-            frame.position.set(w / 2, 0, -h / 2);
-            break;
-          case 2:
-            frame.position.set(-w / 2, 0, h / 2);
-            break;
-          case 3:
-            frame.position.set(-w / 2, 0, -h / 2);
-            break;
-        }
+    var frameWeight = Math.round(Math.min(w, h) / 10);
 
-        frames.add(frame);
+    var frames = new THREE.Group();
+    for (var i = 0; i < 4; i++) {
+      var geometry = Rack.rackFrameGeometry;
+      var material = Rack.frameMaterial;
+      var frame = new THREE.Mesh(geometry, material);
+      frame.scale.set(frameWeight, d, frameWeight);
+      switch (i) {
+        case 0:
+          frame.position.set(w / 2, 0, h / 2);
+          break;
+        case 1:
+          frame.position.set(w / 2, 0, -h / 2);
+          break;
+        case 2:
+          frame.position.set(-w / 2, 0, h / 2);
+          break;
+        case 3:
+          frame.position.set(-w / 2, 0, -h / 2);
+          break;
       }
 
-      return frames;
-
-      // return new THREE.LineSegments(
-      //   this.geometry,
-      //   Rack.frameMaterial
-      // );
+      frames.add(frame);
     }
-  }, {
-    key: 'createRackBoard',
-    value: function createRackBoard(w, h) {
 
-      var boardMaterial = Rack.boardMaterial;
-      var boardGeometry = Rack.boardGeometry;
-      // var boardGeometry = new THREE.PlaneGeometry(w, h, 1, 1);
-      var board = new THREE.Mesh(boardGeometry, boardMaterial);
+    return frames;
 
-      board.scale.set(w, h, 1);
+    // return new THREE.LineSegments(
+    //   this.geometry,
+    //   Rack.frameMaterial
+    // );
+  }
 
-      return board;
-    }
-  }, {
-    key: 'makeLocationString',
-    value: function makeLocationString(shelfString) {
-      var _model2 = this._model,
-          _model2$locPattern = _model2.locPattern,
-          locPattern = _model2$locPattern === undefined ? "{z}{s}-{u}-{sh}" : _model2$locPattern,
-          _model2$zone = _model2.zone,
-          zone = _model2$zone === undefined ? "" : _model2$zone,
-          _model2$section = _model2.section,
-          section = _model2$section === undefined ? "" : _model2$section,
-          _model2$unit = _model2.unit,
-          unit = _model2$unit === undefined ? "" : _model2$unit;
+  createRackBoard(w, h) {
 
+    var boardMaterial = Rack.boardMaterial;
+    var boardGeometry = Rack.boardGeometry;
+    // var boardGeometry = new THREE.PlaneGeometry(w, h, 1, 1);
+    var board = new THREE.Mesh(boardGeometry, boardMaterial);
 
-      var locationString = locPattern;
+    board.scale.set(w, h, 1);
 
-      locationString = locationString.replace(/{z}/i, zone);
-      locationString = locationString.replace(/{s}/i, section);
-      locationString = locationString.replace(/{u}/i, unit);
-      locationString = locationString.replace(/{sh}/i, shelfString);
+    return board;
+  }
 
-      return locationString;
-    }
-  }, {
-    key: 'makeShelfString',
-    value: function makeShelfString(pattern, shelf, length) {
-      /**
-       *  pattern #: 숫자
-       *  pattern 0: 고정 자리수
-       *  pattern -: 역순
-       */
+  makeLocationString(shelfString) {
+    var {
+      locPattern = "{z}{s}-{u}-{sh}",
+      zone = "",
+      section = "",
+      unit = ""
+    } = this._model;
 
-      if (!pattern || !shelf || !length) return;
+    var locationString = locPattern;
 
-      var isReverse = /^\-/.test(pattern);
-      pattern = pattern.replace(/#+/, '#');
+    locationString = locationString.replace(/{z}/i, zone);
+    locationString = locationString.replace(/{s}/i, section);
+    locationString = locationString.replace(/{u}/i, unit);
+    locationString = locationString.replace(/{sh}/i, shelfString);
 
-      var fixedLength = (pattern.match(/0/g) || []).length || 0;
-      var shelfString = String(isReverse ? length - shelf + 1 : shelf);
+    return locationString;
+  }
 
-      if (shelfString.length > fixedLength && fixedLength > 0) {
-        shelfString = shelfString.split('').shift(shelfString.length - fixedLength).join('');
-      } else {
-        var prefix = '';
-        for (var i = 0; i < fixedLength - shelfString.length; i++) {
-          prefix += '0';
-        }
-        shelfString = prefix + shelfString;
+  makeShelfString(pattern, shelf, length) {
+    /**
+     *  pattern #: 숫자
+     *  pattern 0: 고정 자리수
+     *  pattern -: 역순
+     */
+
+    if (!pattern || !shelf || !length) return;
+
+    var isReverse = /^\-/.test(pattern);
+    pattern = pattern.replace(/#+/, '#');
+
+    var fixedLength = (pattern.match(/0/g) || []).length || 0;
+    var shelfString = String(isReverse ? length - shelf + 1 : shelf);
+
+    if (shelfString.length > fixedLength && fixedLength > 0) {
+      shelfString = shelfString.split('').shift(shelfString.length - fixedLength).join('');
+    } else {
+      var prefix = '';
+      for (var i = 0; i < fixedLength - shelfString.length; i++) {
+        prefix += '0';
       }
-
-      return shelfString;
+      shelfString = prefix + shelfString;
     }
-  }, {
-    key: 'raycast',
-    value: function raycast(raycaster, intersects) {}
-  }, {
-    key: 'onchange',
-    value: function onchange(after, before) {
-      if (after.hasOwnProperty("data")) {
-        this.data = after.data;
-      }
+
+    return shelfString;
+  }
+
+  raycast(raycaster, intersects) {}
+
+  onchange(after, before) {
+    if (after.hasOwnProperty("data")) {
+      this.data = after.data;
     }
-  }, {
-    key: 'cz',
-    get: function get() {
-      if (!this._cz) {
-        var _model3 = this.model,
-            _model3$shelves = _model3.shelves,
-            shelves = _model3$shelves === undefined ? 1 : _model3$shelves,
-            _model3$depth = _model3.depth,
-            depth = _model3$depth === undefined ? 1 : _model3$depth;
+  }
 
-
-        this._cz = 0.5 * depth * shelves;
-      }
-
-      return this._cz;
-    }
-  }, {
-    key: 'frames',
-    get: function get() {
-      return this._frames;
-    }
-  }, {
-    key: 'boards',
-    get: function get() {
-      return this._boards;
-    }
-  }], [{
-    key: 'rackFrameGeometry',
-    get: function get() {
-      if (!Rack._rackFrameGeometry) Rack._rackFrameGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
-
-      return Rack._rackFrameGeometry;
-    }
-  }, {
-    key: 'boardGeometry',
-    get: function get() {
-      if (!Rack._boardGeometry) Rack._boardGeometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1);
-
-      return Rack._boardGeometry;
-    }
-  }, {
-    key: 'boardMaterial',
-    get: function get() {
-      if (!Rack._boardMaterial) Rack._boardMaterial = new THREE.MeshBasicMaterial({
-        color: '#dedede',
-        side: THREE.DoubleSide
-      });
-
-      Rack._boardMaterial.polygonOffset = true;
-      Rack._boardMaterial.polygonOffsetFactor = -0.1;
-
-      return Rack._boardMaterial;
-    }
-  }, {
-    key: 'frameMaterial',
-    get: function get() {
-      if (!Rack._frameMaterial) Rack._frameMaterial = new THREE.MeshLambertMaterial({
-        color: 0xcccccc
-      });
-      // Rack._frameMaterial = new THREE.LineBasicMaterial({ color: 0xcccccc, linewidth: 3 })
-
-      return Rack._frameMaterial;
-    }
-  }]);
-
-  return Rack;
-}(_object3d2.default);
+}
 
 exports.default = Rack;
-
-
 _component3d2.default.register('rack', Rack);
 
 /***/ }),
@@ -47909,17 +47711,17 @@ var _thingsScene = __webpack_require__(2);
 
 /* 대상 컴포넌트의 bounds를 계산한다. */
 var ThreeLayout = {
-  reflow: function reflow(container, component) {},
+  reflow: function (container, component) {},
 
-  capturables: function capturables(container) {
+  capturables: function (container) {
     return container.get('threed') ? [] : container.components;
   },
 
-  drawables: function drawables(container) {
+  drawables: function (container) {
     return container.get('threed') ? [] : container.components;
   },
 
-  isStuck: function isStuck(component) {
+  isStuck: function (component) {
     return false;
   }
 }; /*
@@ -47948,7 +47750,7 @@ var THREE = _interopRequireWildcard(_three);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-var ThreeControls = function ThreeControls(object, component) {
+var ThreeControls = function (object, component) {
 
   this.object = object;
 
@@ -48697,7 +48499,7 @@ Object.defineProperties(ThreeControls.prototype, {
 
   center: {
 
-    get: function get() {
+    get: function () {
 
       console.warn('THREE.OrbitControls: .center has been renamed to .target');
       return this.target;
@@ -48709,13 +48511,13 @@ Object.defineProperties(ThreeControls.prototype, {
 
   noZoom: {
 
-    get: function get() {
+    get: function () {
 
       console.warn('THREE.OrbitControls: .noZoom has been deprecated. Use .enableZoom instead.');
       return !this.enableZoom;
     },
 
-    set: function set(value) {
+    set: function (value) {
 
       console.warn('THREE.OrbitControls: .noZoom has been deprecated. Use .enableZoom instead.');
       this.enableZoom = !value;
@@ -48725,13 +48527,13 @@ Object.defineProperties(ThreeControls.prototype, {
 
   noRotate: {
 
-    get: function get() {
+    get: function () {
 
       console.warn('THREE.OrbitControls: .noRotate has been deprecated. Use .enableRotate instead.');
       return !this.enableRotate;
     },
 
-    set: function set(value) {
+    set: function (value) {
 
       console.warn('THREE.OrbitControls: .noRotate has been deprecated. Use .enableRotate instead.');
       this.enableRotate = !value;
@@ -48741,13 +48543,13 @@ Object.defineProperties(ThreeControls.prototype, {
 
   noPan: {
 
-    get: function get() {
+    get: function () {
 
       console.warn('THREE.OrbitControls: .noPan has been deprecated. Use .enablePan instead.');
       return !this.enablePan;
     },
 
-    set: function set(value) {
+    set: function (value) {
 
       console.warn('THREE.OrbitControls: .noPan has been deprecated. Use .enablePan instead.');
       this.enablePan = !value;
@@ -48757,13 +48559,13 @@ Object.defineProperties(ThreeControls.prototype, {
 
   noKeys: {
 
-    get: function get() {
+    get: function () {
 
       console.warn('THREE.OrbitControls: .noKeys has been deprecated. Use .enableKeys instead.');
       return !this.enableKeys;
     },
 
-    set: function set(value) {
+    set: function (value) {
 
       console.warn('THREE.OrbitControls: .noKeys has been deprecated. Use .enableKeys instead.');
       this.enableKeys = !value;
@@ -48773,13 +48575,13 @@ Object.defineProperties(ThreeControls.prototype, {
 
   staticMoving: {
 
-    get: function get() {
+    get: function () {
 
       console.warn('THREE.OrbitControls: .staticMoving has been deprecated. Use .enableDamping instead.');
       return !this.enableDamping;
     },
 
-    set: function set(value) {
+    set: function (value) {
 
       console.warn('THREE.OrbitControls: .staticMoving has been deprecated. Use .enableDamping instead.');
       this.enableDamping = !value;
@@ -48789,13 +48591,13 @@ Object.defineProperties(ThreeControls.prototype, {
 
   dynamicDampingFactor: {
 
-    get: function get() {
+    get: function () {
 
       console.warn('THREE.OrbitControls: .dynamicDampingFactor has been renamed. Use .dampingFactor instead.');
       return this.dampingFactor;
     },
 
-    set: function set(value) {
+    set: function (value) {
 
       console.warn('THREE.OrbitControls: .dynamicDampingFactor has been renamed. Use .dampingFactor instead.');
       this.dampingFactor = value;
@@ -48824,10 +48626,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
 var _object3d = __webpack_require__(3);
 
 var _object3d2 = _interopRequireDefault(_object3d);
@@ -48850,15 +48648,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
-
-var NATURE = {
+const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
@@ -48873,184 +48663,151 @@ var NATURE = {
     name: 'depth',
     property: 'depth'
   }]
-};
+}; /*
+    * Copyright © HatioLab Inc. All rights reserved.
+    */
 
-var TextExtrude = function (_Object3D) {
-  _inherits(TextExtrude, _Object3D);
+class TextExtrude extends _object3d2.default {
 
-  function TextExtrude() {
-    _classCallCheck(this, TextExtrude);
+  get fontLoader() {
+    if (!this._fontLoader) {
+      this._fontLoader = new THREE.FontLoader();
+    }
 
-    return _possibleConstructorReturn(this, (TextExtrude.__proto__ || Object.getPrototypeOf(TextExtrude)).apply(this, arguments));
+    return this._fontLoader;
   }
 
-  _createClass(TextExtrude, [{
-    key: 'createObject',
-    value: function createObject() {
-      var _this2 = this;
+  get cx() {
+    if (!this._cx) {
+      var {
+        left = 0,
+        width = 1
+        // width = 0
+      } = this.model;
+      var canvasSize = this._canvasSize;
 
-      var _model = this.model,
-          type = _model.type,
-          _model$depth = _model.depth,
-          depth = _model$depth === undefined ? 1 : _model$depth,
-          _model$fontSize = _model.fontSize,
-          fontSize = _model$fontSize === undefined ? 10 : _model$fontSize,
-          _model$text = _model.text,
-          text = _model$text === undefined ? '' : _model$text,
-          _model$fontColor = _model.fontColor,
-          fontColor = _model$fontColor === undefined ? 0x000000 : _model$fontColor;
+      var width = this.children[0].geometry.boundingBox.max.x - this.children[0].geometry.boundingBox.min.x;
 
-
-      this.fontLoader.load(_nanum_gothic2.default, function (font) {
-        _this2.fontJSON = font;
-
-        var geometry = _this2.createTextGeometry();
-        var materials = [new THREE.MeshLambertMaterial({ color: fontColor }), // front
-        new THREE.MeshLambertMaterial({ color: fontColor }) // side
-        ];
-
-        var mesh = new THREE.Mesh(geometry, materials);
-        mesh.rotation.x = -Math.PI / 2;
-
-        _this2.add(mesh);
-        _this2._fontLoaded = true;
-        _this2.setPosition();
-
-        // setInterval(() => {
-        //   var t = Math.round(Math.random() * 1000)
-        //   this.model.text = t;
-        //   this.changeText()
-        // }, 10000)
-      });
+      this._cx = left + width / 2 - canvasSize.width / 2;
     }
-  }, {
-    key: 'setPosition',
-    value: function setPosition() {
-      if (!this._fontLoaded) return;
+    return this._cx;
+  }
 
-      _get(TextExtrude.prototype.__proto__ || Object.getPrototypeOf(TextExtrude.prototype), 'setPosition', this).call(this);
+  get cy() {
+    if (!this._cy) {
+      var {
+        top = 0,
+        height = 0
+      } = this.model;
+      var canvasSize = this._canvasSize;
+
+      var height = this.children[0].geometry.boundingBox.max.y - this.children[0].geometry.boundingBox.min.y;
+
+      this._cy = top + height / 2 - canvasSize.height / 2;
     }
-  }, {
-    key: 'createTextGeometry',
-    value: function createTextGeometry() {
-      var _model2 = this.model,
-          _model2$fontSize = _model2.fontSize,
-          fontSize = _model2$fontSize === undefined ? 10 : _model2$fontSize,
-          _model2$depth = _model2.depth,
-          depth = _model2$depth === undefined ? 1 : _model2$depth,
-          _model2$text = _model2.text,
-          text = _model2$text === undefined ? '' : _model2$text;
+    return this._cy;
+  }
 
-      var font = this.fontJSON;
+  set fontJSON(font) {
+    this._fontJSON = font;
+  }
+  get fontJSON() {
+    return this._fontJSON;
+  }
 
-      var fontSettings = Object.assign(this.fontSettings, {
-        font: font,
-        size: fontSize,
-        height: depth
-      });
+  get fontSettings() {
+    return {
+      steps: 1,
+      curveSegments: 8,
+      bevelEnabled: false
+    };
+  }
 
-      var geometry = new THREE.TextGeometry(text, fontSettings);
-      geometry.center();
+  createObject() {
+    var {
+      type,
+      depth = 1,
+      fontSize = 10,
+      text = '',
+      fontColor = 0x000000
+    } = this.model;
 
-      return geometry;
+    this.fontLoader.load(_nanum_gothic2.default, font => {
+      this.fontJSON = font;
+
+      var geometry = this.createTextGeometry();
+      var materials = [new THREE.MeshLambertMaterial({ color: fontColor }), // front
+      new THREE.MeshLambertMaterial({ color: fontColor }) // side
+      ];
+
+      var mesh = new THREE.Mesh(geometry, materials);
+      mesh.rotation.x = -Math.PI / 2;
+
+      this.add(mesh);
+      this._fontLoaded = true;
+      this.setPosition();
+
+      // setInterval(() => {
+      //   var t = Math.round(Math.random() * 1000)
+      //   this.model.text = t;
+      //   this.changeText()
+      // }, 10000)
+    });
+  }
+
+  setPosition() {
+    if (!this._fontLoaded) return;
+
+    super.setPosition();
+  }
+
+  createTextGeometry() {
+    var {
+      fontSize = 10,
+      depth = 1,
+      text = ''
+    } = this.model;
+    var font = this.fontJSON;
+
+    var fontSettings = Object.assign(this.fontSettings, {
+      font: font,
+      size: fontSize,
+      height: depth
+    });
+
+    var geometry = new THREE.TextGeometry(text, fontSettings);
+    geometry.center();
+
+    return geometry;
+  }
+
+  changeText() {
+    if (this.children && this.children[0]) {
+      this.children[0].geometry.dispose();
+      this.children[0].geometry = this.createTextGeometry();
+
+      this._cx = this._cy = null;
+
+      this.setPosition();
     }
-  }, {
-    key: 'changeText',
-    value: function changeText() {
-      if (this.children && this.children[0]) {
-        this.children[0].geometry.dispose();
-        this.children[0].geometry = this.createTextGeometry();
+  }
 
-        this._cx = this._cy = null;
+  raycast(raycaster, intersects) {}
 
-        this.setPosition();
-      }
-    }
-  }, {
-    key: 'raycast',
-    value: function raycast(raycaster, intersects) {}
-  }, {
-    key: 'onUserDataChanged',
-    value: function onUserDataChanged() {
-      _get(TextExtrude.prototype.__proto__ || Object.getPrototypeOf(TextExtrude.prototype), 'onUserDataChanged', this).call(this);
+  onUserDataChanged() {
+    super.onUserDataChanged();
 
-      if (!(this.userData && this.userData.items && this.userData.items.length > 0)) return;
+    if (!(this.userData && this.userData.items && this.userData.items.length > 0)) return;
 
-      var data = this.userData.items[0].data;
+    var data = this.userData.items[0].data;
 
-      this.model.text = data;
-      this.changeText();
-    }
-  }, {
-    key: 'fontLoader',
-    get: function get() {
-      if (!this._fontLoader) {
-        this._fontLoader = new THREE.FontLoader();
-      }
+    this.model.text = data;
+    this.changeText();
+  }
 
-      return this._fontLoader;
-    }
-  }, {
-    key: 'cx',
-    get: function get() {
-      if (!this._cx) {
-        var _model3 = this.model,
-            _model3$left = _model3.left,
-            left = _model3$left === undefined ? 0 : _model3$left,
-            _model3$width = _model3.width,
-            width = _model3$width === undefined ? 1 : _model3$width;
-
-        var canvasSize = this._canvasSize;
-
-        var width = this.children[0].geometry.boundingBox.max.x - this.children[0].geometry.boundingBox.min.x;
-
-        this._cx = left + width / 2 - canvasSize.width / 2;
-      }
-      return this._cx;
-    }
-  }, {
-    key: 'cy',
-    get: function get() {
-      if (!this._cy) {
-        var _model4 = this.model,
-            _model4$top = _model4.top,
-            top = _model4$top === undefined ? 0 : _model4$top,
-            _model4$height = _model4.height,
-            height = _model4$height === undefined ? 0 : _model4$height;
-
-        var canvasSize = this._canvasSize;
-
-        var height = this.children[0].geometry.boundingBox.max.y - this.children[0].geometry.boundingBox.min.y;
-
-        this._cy = top + height / 2 - canvasSize.height / 2;
-      }
-      return this._cy;
-    }
-  }, {
-    key: 'fontJSON',
-    set: function set(font) {
-      this._fontJSON = font;
-    },
-    get: function get() {
-      return this._fontJSON;
-    }
-  }, {
-    key: 'fontSettings',
-    get: function get() {
-      return {
-        steps: 1,
-        curveSegments: 8,
-        bevelEnabled: false
-      };
-    }
-  }]);
-
-  return TextExtrude;
-}(_object3d2.default);
+}
 
 exports.default = TextExtrude;
-
-
 _component3d2.default.register('text', TextExtrude);
 
 /***/ }),
@@ -49063,8 +48820,6 @@ _component3d2.default.register('text', TextExtrude);
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _extrude = __webpack_require__(4);
 
@@ -49082,86 +48837,58 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+class EllipseExtrude extends _extrude2.default {
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+  get cx() {
+    if (!this._cx) {
+      var {
+        cx = 0
+      } = this.model;
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+      var canvasSize = this._canvasSize;
 
+      this._cx = cx - canvasSize.width / 2;
+    }
 
-var EllipseExtrude = function (_Extrude) {
-  _inherits(EllipseExtrude, _Extrude);
-
-  function EllipseExtrude() {
-    _classCallCheck(this, EllipseExtrude);
-
-    return _possibleConstructorReturn(this, (EllipseExtrude.__proto__ || Object.getPrototypeOf(EllipseExtrude)).apply(this, arguments));
+    return this._cx;
   }
 
-  _createClass(EllipseExtrude, [{
-    key: 'cx',
-    get: function get() {
-      if (!this._cx) {
-        var _model$cx = this.model.cx,
-            cx = _model$cx === undefined ? 0 : _model$cx;
+  get cy() {
+    if (!this._cy) {
+      var {
+        cy = 0
+      } = this.model;
 
+      var canvasSize = this._canvasSize;
 
-        var canvasSize = this._canvasSize;
-
-        this._cx = cx - canvasSize.width / 2;
-      }
-
-      return this._cx;
+      this._cy = cy - canvasSize.height / 2;
     }
-  }, {
-    key: 'cy',
-    get: function get() {
-      if (!this._cy) {
-        var _model$cy = this.model.cy,
-            cy = _model$cy === undefined ? 0 : _model$cy;
 
+    return this._cy;
+  }
 
-        var canvasSize = this._canvasSize;
+  get shape() {
+    var {
+      cx = 0,
+      cy = 0,
+      rx = 1,
+      ry = 1,
+      startAngle = 0,
+      endAngle = 2 * Math.PI,
+      anticlockwise = false
+    } = this.model;
+    var shape = new THREE.Shape();
 
-        this._cy = cy - canvasSize.height / 2;
-      }
+    shape.ellipse(cx, cy, Math.abs(rx), Math.abs(ry), 0, startAngle, endAngle, anticlockwise);
 
-      return this._cy;
-    }
-  }, {
-    key: 'shape',
-    get: function get() {
-      var _model = this.model,
-          _model$cx2 = _model.cx,
-          cx = _model$cx2 === undefined ? 0 : _model$cx2,
-          _model$cy2 = _model.cy,
-          cy = _model$cy2 === undefined ? 0 : _model$cy2,
-          _model$rx = _model.rx,
-          rx = _model$rx === undefined ? 1 : _model$rx,
-          _model$ry = _model.ry,
-          ry = _model$ry === undefined ? 1 : _model$ry,
-          _model$startAngle = _model.startAngle,
-          startAngle = _model$startAngle === undefined ? 0 : _model$startAngle,
-          _model$endAngle = _model.endAngle,
-          endAngle = _model$endAngle === undefined ? 2 * Math.PI : _model$endAngle,
-          _model$anticlockwise = _model.anticlockwise,
-          anticlockwise = _model$anticlockwise === undefined ? false : _model$anticlockwise;
+    return shape;
+  }
 
-      var shape = new THREE.Shape();
+}
 
-      shape.ellipse(cx, cy, Math.abs(rx), Math.abs(ry), 0, startAngle, endAngle, anticlockwise);
-
-      return shape;
-    }
-  }]);
-
-  return EllipseExtrude;
-}(_extrude2.default);
-
-exports.default = EllipseExtrude;
-
+exports.default = EllipseExtrude; /*
+                                   * Copyright © HatioLab Inc. All rights reserved.
+                                   */
 
 _component3d2.default.register('ellipse', EllipseExtrude);
 
@@ -49176,8 +48903,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 var _extrude = __webpack_require__(4);
 
 var _extrude2 = _interopRequireDefault(_extrude);
@@ -49194,116 +48919,95 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+class PolygonExtrude extends _extrude2.default {
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+  get shape() {
+    var {
+      path = []
+    } = this.model;
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+    var shape = new THREE.Shape();
+    shape.moveTo(path[0].x, path[0].y);
+    for (let i = 1; i < path.length; i++) shape.lineTo(path[i].x, path[i].y);
 
-var PolygonExtrude = function (_Extrude) {
-  _inherits(PolygonExtrude, _Extrude);
-
-  function PolygonExtrude() {
-    _classCallCheck(this, PolygonExtrude);
-
-    return _possibleConstructorReturn(this, (PolygonExtrude.__proto__ || Object.getPrototypeOf(PolygonExtrude)).apply(this, arguments));
+    return shape;
   }
 
-  _createClass(PolygonExtrude, [{
-    key: 'raycast',
-    value: function raycast(raycaster, intersects) {}
-  }, {
-    key: 'shape',
-    get: function get() {
-      var _model$path = this.model.path,
-          path = _model$path === undefined ? [] : _model$path;
+  get minMax() {
+    if (!this._minMax) {
+      var {
+        path
+      } = this.model;
 
+      var minX;
+      var minY;
+      var maxX;
+      var maxY;
 
-      var shape = new THREE.Shape();
-      shape.moveTo(path[0].x, path[0].y);
-      for (var i = 1; i < path.length; i++) {
-        shape.lineTo(path[i].x, path[i].y);
-      }return shape;
+      path.forEach((p, i) => {
+        if (i == 0) {
+          minX = maxX = p.x;
+          minY = maxY = p.y;
+          return;
+        }
+
+        minX = Math.min(minX, p.x);
+        maxX = Math.max(maxX, p.x);
+        minY = Math.min(minY, p.y);
+        maxY = Math.max(maxY, p.y);
+      });
+
+      this._minMax = {
+        minX,
+        minY,
+        maxX,
+        maxY
+      };
     }
-  }, {
-    key: 'minMax',
-    get: function get() {
-      if (!this._minMax) {
-        var path = this.model.path;
 
+    return this._minMax;
+  }
 
-        var minX;
-        var minY;
-        var maxX;
-        var maxY;
+  get cx() {
+    if (!this._cx) {
+      var {
+        minX,
+        maxX
+      } = this.minMax;
 
-        path.forEach(function (p, i) {
-          if (i == 0) {
-            minX = maxX = p.x;
-            minY = maxY = p.y;
-            return;
-          }
+      var left = minX;
+      var width = maxX - minX;
 
-          minX = Math.min(minX, p.x);
-          maxX = Math.max(maxX, p.x);
-          minY = Math.min(minY, p.y);
-          maxY = Math.max(maxY, p.y);
-        });
+      var canvasSize = this._canvasSize;
 
-        this._minMax = {
-          minX: minX,
-          minY: minY,
-          maxX: maxX,
-          maxY: maxY
-        };
-      }
-
-      return this._minMax;
+      this._cx = left + width / 2 - canvasSize.width / 2;
     }
-  }, {
-    key: 'cx',
-    get: function get() {
-      if (!this._cx) {
-        var _minMax = this.minMax,
-            minX = _minMax.minX,
-            maxX = _minMax.maxX;
+    return this._cx;
+  }
 
+  get cy() {
+    if (!this._cy) {
+      var {
+        minY,
+        maxY
+      } = this.minMax;
 
-        var left = minX;
-        var width = maxX - minX;
+      var top = minY;
+      var height = maxY - minY;
+      var canvasSize = this._canvasSize;
 
-        var canvasSize = this._canvasSize;
-
-        this._cx = left + width / 2 - canvasSize.width / 2;
-      }
-      return this._cx;
+      this._cy = top + height / 2 - canvasSize.height / 2;
     }
-  }, {
-    key: 'cy',
-    get: function get() {
-      if (!this._cy) {
-        var _minMax2 = this.minMax,
-            minY = _minMax2.minY,
-            maxY = _minMax2.maxY;
+    return this._cy;
+  }
 
+  raycast(raycaster, intersects) {}
 
-        var top = minY;
-        var height = maxY - minY;
-        var canvasSize = this._canvasSize;
+}
 
-        this._cy = top + height / 2 - canvasSize.height / 2;
-      }
-      return this._cy;
-    }
-  }]);
-
-  return PolygonExtrude;
-}(_extrude2.default);
-
-exports.default = PolygonExtrude;
-
+exports.default = PolygonExtrude; /*
+                                   * Copyright © HatioLab Inc. All rights reserved.
+                                   */
 
 _component3d2.default.register('polygon', PolygonExtrude);
 
@@ -49324,8 +49028,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.Pallet2d = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _object3d = __webpack_require__(3);
 
@@ -49353,143 +49055,107 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+/*
+ * Copyright © HatioLab Inc. All rights reserved.
+ */
+const palletPath = _path2.default.resolve('../obj/pallet');
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
-
-
-var palletPath = _path2.default.resolve('../obj/pallet');
-
-var NATURE = {
+const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
   properties: []
 };
 
-var Pallet = function (_Object3D) {
-  _inherits(Pallet, _Object3D);
+class Pallet extends _object3d2.default {
 
-  function Pallet() {
-    _classCallCheck(this, Pallet);
+  static get threedObjectLoader() {
+    if (!Pallet._threedObjectLoader) {
+      Pallet._threedObjectLoader = new Promise((resolve, reject) => {
+        let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
+        let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
 
-    return _possibleConstructorReturn(this, (Pallet.__proto__ || Object.getPrototypeOf(Pallet)).apply(this, arguments));
-  }
+        objLoader.setPath(`${palletPath}/`);
+        mtlLoader.setPath(`${palletPath}/`);
 
-  _createClass(Pallet, [{
-    key: 'createObject',
-    value: function createObject() {
-      Pallet.threedObjectLoader.then(this.addObject.bind(this));
-    }
-  }, {
-    key: 'addObject',
-    value: function addObject(extObject) {
-      var _model = this.model,
-          width = _model.width,
-          height = _model.height,
-          depth = _model.depth,
-          _model$rotation = _model.rotation,
-          rotation = _model$rotation === undefined ? 0 : _model$rotation;
+        mtlLoader.load('new_pallet.mtl', materials => {
+          materials.preload();
+          objLoader.setMaterials(materials);
 
+          objLoader.load('new_pallet.obj', obj => {
+            var extObj = obj;
+            if (extObj && extObj.children && extObj.children.length > 0) {
+              extObj = extObj.children[0];
+            }
 
-      this.type = 'pallet';
-
-      width /= 63.173;
-      height /= 72.1887;
-      depth /= 9.0388;
-
-      var object = extObject.clone();
-      this.add(object);
-      this.scale.set(width, depth, height);
-    }
-  }], [{
-    key: 'threedObjectLoader',
-    get: function get() {
-      if (!Pallet._threedObjectLoader) {
-        Pallet._threedObjectLoader = new Promise(function (resolve, reject) {
-          var objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
-          var mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
-
-          objLoader.setPath(palletPath + '/');
-          mtlLoader.setPath(palletPath + '/');
-
-          mtlLoader.load('new_pallet.mtl', function (materials) {
-            materials.preload();
-            objLoader.setMaterials(materials);
-
-            objLoader.load('new_pallet.obj', function (obj) {
-              var extObj = obj;
-              if (extObj && extObj.children && extObj.children.length > 0) {
-                extObj = extObj.children[0];
-              }
-
-              extObj.geometry.center();
-              resolve(extObj);
-            });
+            extObj.geometry.center();
+            resolve(extObj);
           });
         });
-      }
-
-      return Pallet._threedObjectLoader;
+      });
     }
-  }]);
 
-  return Pallet;
-}(_object3d2.default);
-
-exports.default = Pallet;
-
-var Pallet2d = exports.Pallet2d = function (_RectPath) {
-  _inherits(Pallet2d, _RectPath);
-
-  function Pallet2d() {
-    _classCallCheck(this, Pallet2d);
-
-    return _possibleConstructorReturn(this, (Pallet2d.__proto__ || Object.getPrototypeOf(Pallet2d)).apply(this, arguments));
+    return Pallet._threedObjectLoader;
   }
 
-  _createClass(Pallet2d, [{
-    key: 'is3dish',
-    value: function is3dish() {
-      return true;
+  createObject() {
+    Pallet.threedObjectLoader.then(this.addObject.bind(this));
+  }
+
+  addObject(extObject) {
+    var {
+      width,
+      height,
+      depth,
+      rotation = 0
+    } = this.model;
+
+    this.type = 'pallet';
+
+    width /= 63.173;
+    height /= 72.1887;
+    depth /= 9.0388;
+
+    var object = extObject.clone();
+    this.add(object);
+    this.scale.set(width, depth, height);
+  }
+
+}
+
+exports.default = Pallet;
+class Pallet2d extends (0, _thingsScene.RectPath)(_thingsScene.Shape) {
+  is3dish() {
+    return true;
+  }
+
+  static get image() {
+    if (!Pallet2d._image) {
+      Pallet2d._image = new Image();
+      Pallet2d._image.src = _pallet_symbol2.default;
     }
-  }, {
-    key: 'render',
-    value: function render(context) {
-      var _bounds = this.bounds,
-          left = _bounds.left,
-          top = _bounds.top,
-          width = _bounds.width,
-          height = _bounds.height;
 
+    return Pallet2d._image;
+  }
 
-      context.beginPath();
-      context.drawImage(Pallet2d.image, left, top, width, height);
-    }
-  }, {
-    key: 'nature',
-    get: function get() {
-      return NATURE;
-    }
-  }], [{
-    key: 'image',
-    get: function get() {
-      if (!Pallet2d._image) {
-        Pallet2d._image = new Image();
-        Pallet2d._image.src = _pallet_symbol2.default;
-      }
+  render(context) {
+    var {
+      left,
+      top,
+      width,
+      height
+    } = this.bounds;
 
-      return Pallet2d._image;
-    }
-  }]);
+    context.beginPath();
+    context.drawImage(Pallet2d.image, left, top, width, height);
+  }
 
-  return Pallet2d;
-}((0, _thingsScene.RectPath)(_thingsScene.Shape));
+  get nature() {
+    return NATURE;
+  }
+}
 
+exports.Pallet2d = Pallet2d;
 _thingsScene.Component.register('pallet', Pallet2d);
 _component3d2.default.register('pallet', Pallet);
 
@@ -49503,8 +49169,6 @@ _component3d2.default.register('pallet', Pallet);
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _object3d = __webpack_require__(3);
 
@@ -49522,92 +49186,66 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+const STATUS_COLORS = ['#6666ff', '#ccccff', '#ffcccc', '#cc3300']; /*
+                                                                     * Copyright © HatioLab Inc. All rights reserved.
+                                                                     */
+class Beacon3D extends _object3d2.default {
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+  get cz() {
+    var {
+      width = 0,
+      height = 0,
+      zPos = 0
+    } = this.model;
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+    if (!this._cz) {
+      var rx = Math.min(width, height);
+      this._cz = zPos + rx;
+    }
 
-
-var STATUS_COLORS = ['#6666ff', '#ccccff', '#ffcccc', '#cc3300'];
-
-var Beacon3D = function (_Object3D) {
-  _inherits(Beacon3D, _Object3D);
-
-  function Beacon3D() {
-    _classCallCheck(this, Beacon3D);
-
-    return _possibleConstructorReturn(this, (Beacon3D.__proto__ || Object.getPrototypeOf(Beacon3D)).apply(this, arguments));
+    return this._cz;
   }
 
-  _createClass(Beacon3D, [{
-    key: 'createObject',
-    value: function createObject() {
-      var _model = this.model,
-          width = _model.width,
-          height = _model.height,
-          location = _model.location;
+  createObject() {
+    var {
+      width,
+      height,
+      location
+    } = this.model;
 
+    var rx = Math.min(width, height);
 
-      var rx = Math.min(width, height);
+    if (location) this.name = location;
 
-      if (location) this.name = location;
-
-      for (var i = 0; i < 3; i++) {
-        var mesh = this.createSensor(rx * (1 + 0.5 * i) / 2, i);
-        mesh.material.opacity = 0.5 - i * 0.15;
-      }
+    for (var i = 0; i < 3; i++) {
+      let mesh = this.createSensor(rx * (1 + 0.5 * i) / 2, i);
+      mesh.material.opacity = 0.5 - i * 0.15;
     }
-  }, {
-    key: 'createSensor',
-    value: function createSensor(w, i) {
+  }
 
-      var isFirst = i === 0;
+  createSensor(w, i) {
 
-      var geometry = new THREE.SphereBufferGeometry(w, 32, 32);
-      var material;
-      if (isFirst) {
-        material = new THREE.MeshLambertMaterial({ color: '#57a1d6', side: THREE.FrontSide });
-      } else {
-        material = new THREE.MeshBasicMaterial({ color: '#57a1d6', side: THREE.FrontSide, wireframe: true, wireframeLinewidth: 1 });
-      }
+    var isFirst = i === 0;
 
-      var mesh = new THREE.Mesh(geometry, material);
-      mesh.material.transparent = true;
-
-      this.add(mesh);
-
-      return mesh;
+    let geometry = new THREE.SphereBufferGeometry(w, 32, 32);
+    var material;
+    if (isFirst) {
+      material = new THREE.MeshLambertMaterial({ color: '#57a1d6', side: THREE.FrontSide });
+    } else {
+      material = new THREE.MeshBasicMaterial({ color: '#57a1d6', side: THREE.FrontSide, wireframe: true, wireframeLinewidth: 1 });
     }
-  }, {
-    key: 'cz',
-    get: function get() {
-      var _model2 = this.model,
-          _model2$width = _model2.width,
-          width = _model2$width === undefined ? 0 : _model2$width,
-          _model2$height = _model2.height,
-          height = _model2$height === undefined ? 0 : _model2$height,
-          _model2$zPos = _model2.zPos,
-          zPos = _model2$zPos === undefined ? 0 : _model2$zPos;
 
+    var mesh = new THREE.Mesh(geometry, material);
+    mesh.material.transparent = true;
 
-      if (!this._cz) {
-        var rx = Math.min(width, height);
-        this._cz = zPos + rx;
-      }
+    this.add(mesh);
 
-      return this._cz;
-    }
-  }]);
+    return mesh;
+  }
 
-  return Beacon3D;
-}(_object3d2.default);
+}
 
 exports.default = Beacon3D;
-
-
 _component3d2.default.register('beacon', Beacon3D);
 
 /***/ }),
@@ -49621,8 +49259,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.Desk2d = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _object3d = __webpack_require__(3);
 
@@ -49642,16 +49278,10 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
-
-
-var NATURE = {
+/*
+ * Copyright © HatioLab Inc. All rights reserved.
+ */
+const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
@@ -49668,158 +49298,126 @@ var NATURE = {
   }]
 };
 
-var Desk = function (_Object3D) {
-  _inherits(Desk, _Object3D);
+class Desk extends _object3d2.default {
 
-  function Desk() {
-    _classCallCheck(this, Desk);
+  get boardThickness() {
+    var {
+      depth
+    } = this.model;
 
-    return _possibleConstructorReturn(this, (Desk.__proto__ || Object.getPrototypeOf(Desk)).apply(this, arguments));
+    return Math.min(10, depth / 10);
   }
 
-  _createClass(Desk, [{
-    key: 'createObject',
-    value: function createObject() {
-      var _model = this.model,
-          left = _model.left,
-          top = _model.top,
-          width = _model.width,
-          height = _model.height,
-          depth = _model.depth;
+  get legThickness() {
+    var {
+      width, height
+    } = this.model;
 
+    var min = Math.min(width, height);
 
-      var legs = this.createDeskLegs(width, height, depth);
-      this.add(legs);
+    return Math.min(10, min / 10);
+  }
 
-      top = depth / 2 - this.boardThickness;
-      var board = this.createDeskBoard(width, height);
-      board.position.set(0, top, 0);
-      board.rotation.x = Math.PI / 2;
+  get margin() {
+    return Math.min(this.legThickness / 5, 2);
+  }
 
-      this.add(board);
-    }
-  }, {
-    key: 'createDeskLegs',
-    value: function createDeskLegs(w, h, d) {
+  createObject() {
 
-      var legThickness = this.legThickness;
-      var margin = this.margin;
-      d = d - this.boardThickness;
+    var {
+      left,
+      top,
+      width,
+      height,
+      depth
+    } = this.model;
 
-      var legs = new THREE.Group();
-      var posX = w / 2 - legThickness / 2 - margin;
-      var posY = h / 2 - legThickness / 2 - margin;
-      var posZ = -1;
+    var legs = this.createDeskLegs(width, height, depth);
+    this.add(legs);
 
-      for (var i = 0; i < 4; i++) {
-        var geometry = new THREE.BoxBufferGeometry(legThickness, d, legThickness);
-        var material = new THREE.MeshLambertMaterial({
-          color: this.model.legColor || '#252525'
-        });
-        var leg = new THREE.Mesh(geometry, material);
-        switch (i) {
-          case 0:
-            leg.position.set(posX, posZ, posY);
-            break;
-          case 1:
-            leg.position.set(posX, posZ, -posY);
-            break;
-          case 2:
-            leg.position.set(-posX, posZ, posY);
-            break;
-          case 3:
-            leg.position.set(-posX, posZ, -posY);
-            break;
-        }
+    top = depth / 2 - this.boardThickness;
+    let board = this.createDeskBoard(width, height);
+    board.position.set(0, top, 0);
+    board.rotation.x = Math.PI / 2;
 
-        legs.add(leg);
-      }
+    this.add(board);
+  }
 
-      return legs;
-    }
-  }, {
-    key: 'createDeskBoard',
-    value: function createDeskBoard(w, h) {
+  createDeskLegs(w, h, d) {
 
-      var d = 10;
+    var legThickness = this.legThickness;
+    var margin = this.margin;
+    d = d - this.boardThickness;
 
-      var boardMaterial = new THREE.MeshLambertMaterial({
-        color: this.model.fillStyle || '#ccaa76'
+    var legs = new THREE.Group();
+    var posX = w / 2 - legThickness / 2 - margin;
+    var posY = h / 2 - legThickness / 2 - margin;
+    var posZ = -1;
+
+    for (var i = 0; i < 4; i++) {
+      var geometry = new THREE.BoxBufferGeometry(legThickness, d, legThickness);
+      var material = new THREE.MeshLambertMaterial({
+        color: this.model.legColor || '#252525'
       });
-      var boardGeometry = new THREE.BoxBufferGeometry(w, h, d, 1, 1);
-      var board = new THREE.Mesh(boardGeometry, boardMaterial);
-
-      return board;
-    }
-  }, {
-    key: 'raycast',
-    value: function raycast(raycaster, intersects) {}
-  }, {
-    key: 'onchange',
-    value: function onchange(after, before) {
-      if (after.hasOwnProperty("data")) {
-        this.data = after.data;
+      var leg = new THREE.Mesh(geometry, material);
+      switch (i) {
+        case 0:
+          leg.position.set(posX, posZ, posY);
+          break;
+        case 1:
+          leg.position.set(posX, posZ, -posY);
+          break;
+        case 2:
+          leg.position.set(-posX, posZ, posY);
+          break;
+        case 3:
+          leg.position.set(-posX, posZ, -posY);
+          break;
       }
+
+      legs.add(leg);
     }
-  }, {
-    key: 'boardThickness',
-    get: function get() {
-      var depth = this.model.depth;
 
+    return legs;
+  }
 
-      return Math.min(10, depth / 10);
+  createDeskBoard(w, h) {
+
+    var d = 10;
+
+    var boardMaterial = new THREE.MeshLambertMaterial({
+      color: this.model.fillStyle || '#ccaa76'
+    });
+    var boardGeometry = new THREE.BoxBufferGeometry(w, h, d, 1, 1);
+    var board = new THREE.Mesh(boardGeometry, boardMaterial);
+
+    return board;
+  }
+
+  raycast(raycaster, intersects) {}
+
+  onchange(after, before) {
+    if (after.hasOwnProperty("data")) {
+      this.data = after.data;
     }
-  }, {
-    key: 'legThickness',
-    get: function get() {
-      var _model2 = this.model,
-          width = _model2.width,
-          height = _model2.height;
+  }
 
-
-      var min = Math.min(width, height);
-
-      return Math.min(10, min / 10);
-    }
-  }, {
-    key: 'margin',
-    get: function get() {
-      return Math.min(this.legThickness / 5, 2);
-    }
-  }]);
-
-  return Desk;
-}(_object3d2.default);
+}
 
 exports.default = Desk;
-
-var Desk2d = exports.Desk2d = function (_Rect) {
-  _inherits(Desk2d, _Rect);
-
-  function Desk2d() {
-    _classCallCheck(this, Desk2d);
-
-    return _possibleConstructorReturn(this, (Desk2d.__proto__ || Object.getPrototypeOf(Desk2d)).apply(this, arguments));
+class Desk2d extends _thingsScene.Rect {
+  is3dish() {
+    return true;
   }
 
-  _createClass(Desk2d, [{
-    key: 'is3dish',
-    value: function is3dish() {
-      return true;
-    }
-  }, {
-    key: 'controls',
-    get: function get() {}
-  }, {
-    key: 'nature',
-    get: function get() {
-      return NATURE;
-    }
-  }]);
+  get controls() {}
 
-  return Desk2d;
-}(_thingsScene.Rect);
+  get nature() {
+    return NATURE;
+  }
+}
 
+exports.Desk2d = Desk2d;
 _thingsScene.Component.register('desk', Desk2d);
 _component3d2.default.register('desk', Desk);
 
@@ -49834,8 +49432,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.Banner2d = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _object3d = __webpack_require__(3);
 
@@ -49855,16 +49451,10 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
-
-
-var NATURE = {
+/*
+ * Copyright © HatioLab Inc. All rights reserved.
+ */
+const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
@@ -49891,117 +49481,83 @@ var NATURE = {
   }]
 };
 
-var Banner = function (_Object3D) {
-  _inherits(Banner, _Object3D);
+class Banner extends _object3d2.default {
 
-  function Banner() {
-    _classCallCheck(this, Banner);
+  createObject() {
+    var {
+      width = 1,
+      height = 1,
+      depth = 1
+    } = this.model;
 
-    return _possibleConstructorReturn(this, (Banner.__proto__ || Object.getPrototypeOf(Banner)).apply(this, arguments));
+    this.add(this.createCube(width, height, depth));
+    let textureBoard = this.createTextureBoard(width, depth);
+    this.add(textureBoard);
+    textureBoard.position.set(0, 0, 0.5 * height);
   }
 
-  _createClass(Banner, [{
-    key: 'createObject',
-    value: function createObject() {
-      var _model = this.model,
-          _model$width = _model.width,
-          width = _model$width === undefined ? 1 : _model$width,
-          _model$height = _model.height,
-          height = _model$height === undefined ? 1 : _model$height,
-          _model$depth = _model.depth,
-          depth = _model$depth === undefined ? 1 : _model$depth;
+  createCube(w, h, d) {
 
+    var { boxColor = '#ccaa76' } = this.model;
 
-      this.add(this.createCube(width, height, depth));
-      var textureBoard = this.createTextureBoard(width, depth);
-      this.add(textureBoard);
-      textureBoard.position.set(0, 0, 0.5 * height);
+    var geometry = new THREE.BoxBufferGeometry(w, d, h);
+    var material = new THREE.MeshLambertMaterial({ color: boxColor, side: THREE.FrontSide });
+
+    var cube = new THREE.Mesh(geometry, material);
+
+    return cube;
+  }
+
+  createTextureBoard(w, h) {
+
+    var boardMaterial;
+
+    let {
+      fillStyle = '#ccaa76'
+    } = this.model;
+
+    if (fillStyle && fillStyle.type == 'pattern' && fillStyle.image) {
+
+      var texture = this._visualizer._textureLoader.load(this._visualizer.app.url(fillStyle.image), () => {
+        texture.minFilter = THREE.LinearFilter;
+        texture.repeat.set(1, 1);
+        this._visualizer.render_threed();
+      });
+      // texture.wrapS = THREE.RepeatWrapping
+      // texture.wrapT = THREE.RepeatWrapping
+      // texture.repeat.set(1, 1)
+      // texture.minFilter = THREE.LinearFilter
+
+      // boardMaterial = new THREE.MeshBasicMaterial({ map: texture, side: THREE.FrontSide });
+      boardMaterial = new THREE.MeshLambertMaterial({ map: texture });
+    } else {
+      boardMaterial = new THREE.MeshLambertMaterial({ color: fillStyle || '#ccaa76', side: THREE.FrontSide });
     }
-  }, {
-    key: 'createCube',
-    value: function createCube(w, h, d) {
-      var _model$boxColor = this.model.boxColor,
-          boxColor = _model$boxColor === undefined ? '#ccaa76' : _model$boxColor;
 
+    var boardGeometry = new THREE.PlaneBufferGeometry(w, h, 1, 1);
+    var board = new THREE.Mesh(boardGeometry, boardMaterial);
 
-      var geometry = new THREE.BoxBufferGeometry(w, d, h);
-      var material = new THREE.MeshLambertMaterial({ color: boxColor, side: THREE.FrontSide });
+    return board;
+  }
 
-      var cube = new THREE.Mesh(geometry, material);
+  raycast(raycaster, intersects) {}
 
-      return cube;
-    }
-  }, {
-    key: 'createTextureBoard',
-    value: function createTextureBoard(w, h) {
-      var _this2 = this;
-
-      var boardMaterial;
-
-      var _model$fillStyle = this.model.fillStyle,
-          fillStyle = _model$fillStyle === undefined ? '#ccaa76' : _model$fillStyle;
-
-
-      if (fillStyle && fillStyle.type == 'pattern' && fillStyle.image) {
-
-        var texture = this._visualizer._textureLoader.load(this._visualizer.app.url(fillStyle.image), function () {
-          texture.minFilter = THREE.LinearFilter;
-          texture.repeat.set(1, 1);
-          _this2._visualizer.render_threed();
-        });
-        // texture.wrapS = THREE.RepeatWrapping
-        // texture.wrapT = THREE.RepeatWrapping
-        // texture.repeat.set(1, 1)
-        // texture.minFilter = THREE.LinearFilter
-
-        // boardMaterial = new THREE.MeshBasicMaterial({ map: texture, side: THREE.FrontSide });
-        boardMaterial = new THREE.MeshLambertMaterial({ map: texture });
-      } else {
-        boardMaterial = new THREE.MeshLambertMaterial({ color: fillStyle || '#ccaa76', side: THREE.FrontSide });
-      }
-
-      var boardGeometry = new THREE.PlaneBufferGeometry(w, h, 1, 1);
-      var board = new THREE.Mesh(boardGeometry, boardMaterial);
-
-      return board;
-    }
-  }, {
-    key: 'raycast',
-    value: function raycast(raycaster, intersects) {}
-  }]);
-
-  return Banner;
-}(_object3d2.default);
+}
 
 exports.default = Banner;
-
-var Banner2d = exports.Banner2d = function (_Rect) {
-  _inherits(Banner2d, _Rect);
-
-  function Banner2d() {
-    _classCallCheck(this, Banner2d);
-
-    return _possibleConstructorReturn(this, (Banner2d.__proto__ || Object.getPrototypeOf(Banner2d)).apply(this, arguments));
+class Banner2d extends _thingsScene.Rect {
+  is3dish() {
+    return true;
   }
 
-  _createClass(Banner2d, [{
-    key: 'is3dish',
-    value: function is3dish() {
-      return true;
-    }
-  }, {
-    key: 'nature',
-    get: function get() {
-      return NATURE;
-    }
-  }, {
-    key: 'controls',
-    get: function get() {}
-  }]);
+  get nature() {
+    return NATURE;
+  }
 
-  return Banner2d;
-}(_thingsScene.Rect);
+  get controls() {}
+}
 
+exports.Banner2d = Banner2d;
 _thingsScene.Component.register('banner', Banner2d);
 _component3d2.default.register('banner', Banner);
 
@@ -50017,8 +49573,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Cone2d = undefined;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 var _component3d = __webpack_require__(1);
 
 var _component3d2 = _interopRequireDefault(_component3d);
@@ -50033,16 +49587,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
-
-
-var NATURE = {
+const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
@@ -50052,114 +49597,82 @@ var NATURE = {
     name: 'rz',
     property: 'rz'
   }]
-};
+}; /*
+    * Copyright © HatioLab Inc. All rights reserved.
+    */
+class Cone extends THREE.Mesh {
 
-var Cone = function (_THREE$Mesh) {
-  _inherits(Cone, _THREE$Mesh);
+  constructor(model, canvasSize) {
 
-  function Cone(model, canvasSize) {
-    _classCallCheck(this, Cone);
+    super();
 
-    var _this = _possibleConstructorReturn(this, (Cone.__proto__ || Object.getPrototypeOf(Cone)).call(this));
+    this._model = model;
 
-    _this._model = model;
-
-    _this.createObject(model, canvasSize);
-
-    return _this;
+    this.createObject(model, canvasSize);
   }
 
-  _createClass(Cone, [{
-    key: 'createObject',
-    value: function createObject(model, canvasSize) {
+  createObject(model, canvasSize) {
 
-      var cx = model.cx - canvasSize.width / 2;
-      var cy = model.cy - canvasSize.height / 2;
-      var cz = this.model.rx;
+    let cx = model.cx - canvasSize.width / 2;
+    let cy = model.cy - canvasSize.height / 2;
+    let cz = this.model.rx;
 
-      var rotation = model.rotation;
-      this.type = model.type;
+    let rotation = model.rotation;
+    this.type = model.type;
 
-      this.createCone(this.model.rx, this.model.rz);
+    this.createCone(this.model.rx, this.model.rz);
 
-      this.position.set(cx, cz, cy); // z좌표는 땅에 붙어있게 함
-      this.rotation.y = rotation || 0;
-    }
-  }, {
-    key: 'createCone',
-    value: function createCone(rx, rz) {
-      var _model$fillStyle = this.model.fillStyle,
-          fillStyle = _model$fillStyle === undefined ? 'lightgray' : _model$fillStyle;
+    this.position.set(cx, cz, cy); // z좌표는 땅에 붙어있게 함
+    this.rotation.y = rotation || 0;
+  }
 
+  createCone(rx, rz) {
 
-      this.geometry = new THREE.ConeBufferGeometry(rx, rz, 20);
-      this.material = new THREE.MeshLambertMaterial({
-        color: fillStyle,
-        side: THREE.FrontSide
-      });
+    let {
+      fillStyle = 'lightgray'
+    } = this.model;
 
-      // this.castShadow = true
-    }
-  }, {
-    key: 'setEuler',
-    value: function setEuler(euler) {
-      var yaw = euler.yaw,
-          pitch = euler.pitch,
-          roll = euler.roll;
+    this.geometry = new THREE.ConeBufferGeometry(rx, rz, 20);
+    this.material = new THREE.MeshLambertMaterial({
+      color: fillStyle,
+      side: THREE.FrontSide
+    });
 
+    // this.castShadow = true
+  }
 
-      this.setRotationFromEuler(new THREE.Vector3(roll, pitch, yaw));
-    }
-  }, {
-    key: 'setQuaternion',
-    value: function setQuaternion(quaternion) {
-      var x = quaternion.x,
-          y = quaternion.y,
-          z = quaternion.z,
-          w = quaternion.w;
+  setEuler(euler) {
+    var { yaw, pitch, roll } = euler;
 
+    this.setRotationFromEuler(new THREE.Vector3(roll, pitch, yaw));
+  }
 
-      this.setRotationFromQuaternion(new THREE.Quaternion(x, y, z, w));
-    }
-  }, {
-    key: 'model',
-    get: function get() {
-      return this._model;
-    }
-  }]);
+  setQuaternion(quaternion) {
+    var { x, y, z, w } = quaternion;
 
-  return Cone;
-}(THREE.Mesh);
+    this.setRotationFromQuaternion(new THREE.Quaternion(x, y, z, w));
+  }
+
+  get model() {
+    return this._model;
+  }
+
+}
 
 exports.default = Cone;
-
-var Cone2d = exports.Cone2d = function (_Ellipse) {
-  _inherits(Cone2d, _Ellipse);
-
-  function Cone2d() {
-    _classCallCheck(this, Cone2d);
-
-    return _possibleConstructorReturn(this, (Cone2d.__proto__ || Object.getPrototypeOf(Cone2d)).apply(this, arguments));
+class Cone2d extends _thingsScene.Ellipse {
+  is3dish() {
+    return true;
   }
 
-  _createClass(Cone2d, [{
-    key: 'is3dish',
-    value: function is3dish() {
-      return true;
-    }
-  }, {
-    key: 'controls',
-    get: function get() {}
-  }, {
-    key: 'nature',
-    get: function get() {
-      return NATURE;
-    }
-  }]);
+  get controls() {}
 
-  return Cone2d;
-}(_thingsScene.Ellipse);
+  get nature() {
+    return NATURE;
+  }
+}
 
+exports.Cone2d = Cone2d;
 _thingsScene.Component.register('cone', Cone2d);
 _component3d2.default.register('cone', Cone);
 
@@ -50175,8 +49688,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Sphere2d = undefined;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 var _component3d = __webpack_require__(1);
 
 var _component3d2 = _interopRequireDefault(_component3d);
@@ -50191,16 +49702,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
-
-
-var NATURE = {
+const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
@@ -50210,104 +49712,78 @@ var NATURE = {
     name: 'rz',
     property: 'rz'
   }]
-};
+}; /*
+    * Copyright © HatioLab Inc. All rights reserved.
+    */
+class Sphere extends THREE.Mesh {
 
-var Sphere = function (_THREE$Mesh) {
-  _inherits(Sphere, _THREE$Mesh);
+  constructor(model, canvasSize, visualizer) {
 
-  function Sphere(model, canvasSize, visualizer) {
-    _classCallCheck(this, Sphere);
+    super();
 
-    var _this = _possibleConstructorReturn(this, (Sphere.__proto__ || Object.getPrototypeOf(Sphere)).call(this));
+    this._model = model;
+    this._visualizer = visualizer;
 
-    _this._model = model;
-    _this._visualizer = visualizer;
-
-    _this.createObject(model, canvasSize);
-
-    return _this;
+    this.createObject(model, canvasSize);
   }
 
-  _createClass(Sphere, [{
-    key: 'createObject',
-    value: function createObject(model, canvasSize) {
-      var _model = this.model,
-          _model$cx = _model.cx,
-          cx = _model$cx === undefined ? 0 : _model$cx,
-          _model$cy = _model.cy,
-          cy = _model$cy === undefined ? 0 : _model$cy,
-          _model$zPos = _model.zPos,
-          zPos = _model$zPos === undefined ? 0 : _model$zPos,
-          _model$rx = _model.rx,
-          rx = _model$rx === undefined ? 0 : _model$rx;
+  createObject(model, canvasSize) {
 
+    var {
+      cx = 0,
+      cy = 0,
+      zPos = 0,
+      rx = 0
+    } = this.model;
 
-      cx -= canvasSize.width / 2;
-      cy -= canvasSize.height / 2;
-      var cz = zPos + rx;
+    cx -= canvasSize.width / 2;
+    cy -= canvasSize.height / 2;
+    let cz = zPos + rx;
 
-      var rotation = model.rotation;
-      this.type = model.type;
+    let rotation = model.rotation;
+    this.type = model.type;
 
-      this.createSphere(rx);
+    this.createSphere(rx);
 
-      this.position.set(cx, cz, cy); // z좌표는 땅에 붙어있게 함
-      this.rotation.y = -rotation || 0;
-    }
-  }, {
-    key: 'createSphere',
-    value: function createSphere(rx) {
-      var _model$fillStyle = this.model.fillStyle,
-          fillStyle = _model$fillStyle === undefined ? 'lightgray' : _model$fillStyle;
+    this.position.set(cx, cz, cy); // z좌표는 땅에 붙어있게 함
+    this.rotation.y = -rotation || 0;
+  }
 
+  createSphere(rx) {
 
-      this.geometry = new THREE.SphereBufferGeometry(rx, 20, 20);
-      this.material = new THREE.MeshLambertMaterial({
-        color: fillStyle,
-        side: THREE.FrontSide
-      });
+    let {
+      fillStyle = 'lightgray'
+    } = this.model;
 
-      // this.castShadow = true
-    }
-  }, {
-    key: 'model',
-    get: function get() {
-      return this._model;
-    }
-  }]);
+    this.geometry = new THREE.SphereBufferGeometry(rx, 20, 20);
+    this.material = new THREE.MeshLambertMaterial({
+      color: fillStyle,
+      side: THREE.FrontSide
+    });
 
-  return Sphere;
-}(THREE.Mesh);
+    // this.castShadow = true
+  }
+
+  get model() {
+    return this._model;
+  }
+
+}
 
 exports.default = Sphere;
-
-var Sphere2d = exports.Sphere2d = function (_Ellipse) {
-  _inherits(Sphere2d, _Ellipse);
-
-  function Sphere2d() {
-    _classCallCheck(this, Sphere2d);
-
-    return _possibleConstructorReturn(this, (Sphere2d.__proto__ || Object.getPrototypeOf(Sphere2d)).apply(this, arguments));
+class Sphere2d extends _thingsScene.Ellipse {
+  is3dish() {
+    return true;
   }
 
-  _createClass(Sphere2d, [{
-    key: 'is3dish',
-    value: function is3dish() {
-      return true;
-    }
-  }, {
-    key: 'controls',
-    get: function get() {}
-  }, {
-    key: 'nature',
-    get: function get() {
-      return NATURE;
-    }
-  }]);
+  get controls() {}
 
-  return Sphere2d;
-}(_thingsScene.Ellipse);
+  get nature() {
+    return NATURE;
+  }
+}
 
+exports.Sphere2d = Sphere2d;
 _thingsScene.Component.register('sphere', Sphere2d);
 _component3d2.default.register('sphere', Sphere);
 
@@ -50323,8 +49799,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Cylinder2d = undefined;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 var _component3d = __webpack_require__(1);
 
 var _component3d2 = _interopRequireDefault(_component3d);
@@ -50335,16 +49809,10 @@ var _three = __webpack_require__(0);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
-
-
-var NATURE = {
+/*
+ * Copyright © HatioLab Inc. All rights reserved.
+ */
+const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
@@ -50356,88 +49824,64 @@ var NATURE = {
   }]
 };
 
-var Cylinder = function (_Mesh) {
-  _inherits(Cylinder, _Mesh);
+class Cylinder extends _three.Mesh {
 
-  function Cylinder(model, canvasSize) {
-    _classCallCheck(this, Cylinder);
+  constructor(model, canvasSize) {
 
-    var _this = _possibleConstructorReturn(this, (Cylinder.__proto__ || Object.getPrototypeOf(Cylinder)).call(this));
+    super();
 
-    _this._model = model;
+    this._model = model;
 
-    _this.createObject(model, canvasSize);
-
-    return _this;
+    this.createObject(model, canvasSize);
   }
 
-  _createClass(Cylinder, [{
-    key: 'createObject',
-    value: function createObject(model, canvasSize) {
+  createObject(model, canvasSize) {
 
-      var cx = model.cx - canvasSize.width / 2;
-      var cy = model.cy - canvasSize.height / 2;
-      var cz = this.model.rz / 2;
+    let cx = model.cx - canvasSize.width / 2;
+    let cy = model.cy - canvasSize.height / 2;
+    let cz = this.model.rz / 2;
 
-      var rotation = model.rotation;
-      this.type = model.type;
+    let rotation = model.rotation;
+    this.type = model.type;
 
-      this.createCylinder(this.model.rx, this.model.rz);
+    this.createCylinder(this.model.rx, this.model.rz);
 
-      this.position.set(cx, cz, cy); // z좌표는 땅에 붙어있게 함
-      this.rotation.y = rotation || 0;
-    }
-  }, {
-    key: 'createCylinder',
-    value: function createCylinder(rx, rz) {
-      var _model$fillStyle = this.model.fillStyle,
-          fillStyle = _model$fillStyle === undefined ? 'lightgray' : _model$fillStyle;
+    this.position.set(cx, cz, cy); // z좌표는 땅에 붙어있게 함
+    this.rotation.y = rotation || 0;
+  }
 
+  createCylinder(rx, rz) {
 
-      this.geometry = new THREE.CylinderBufferGeometry(rx, rx, rz, 25);
-      this.material = new THREE.MeshLambertMaterial({ color: fillStyle, side: THREE.FrontSide });
+    let {
+      fillStyle = 'lightgray'
+    } = this.model;
 
-      // this.castShadow = true
-    }
-  }, {
-    key: 'model',
-    get: function get() {
-      return this._model;
-    }
-  }]);
+    this.geometry = new THREE.CylinderBufferGeometry(rx, rx, rz, 25);
+    this.material = new THREE.MeshLambertMaterial({ color: fillStyle, side: THREE.FrontSide });
 
-  return Cylinder;
-}(_three.Mesh);
+    // this.castShadow = true
+  }
+
+  get model() {
+    return this._model;
+  }
+
+}
 
 exports.default = Cylinder;
-
-var Cylinder2d = exports.Cylinder2d = function (_Ellipse) {
-  _inherits(Cylinder2d, _Ellipse);
-
-  function Cylinder2d() {
-    _classCallCheck(this, Cylinder2d);
-
-    return _possibleConstructorReturn(this, (Cylinder2d.__proto__ || Object.getPrototypeOf(Cylinder2d)).apply(this, arguments));
+class Cylinder2d extends _thingsScene.Ellipse {
+  is3dish() {
+    return true;
   }
 
-  _createClass(Cylinder2d, [{
-    key: 'is3dish',
-    value: function is3dish() {
-      return true;
-    }
-  }, {
-    key: 'controls',
-    get: function get() {}
-  }, {
-    key: 'nature',
-    get: function get() {
-      return NATURE;
-    }
-  }]);
+  get controls() {}
 
-  return Cylinder2d;
-}(_thingsScene.Ellipse);
+  get nature() {
+    return NATURE;
+  }
+}
 
+exports.Cylinder2d = Cylinder2d;
 _thingsScene.Component.register('cylinder', Cylinder2d);
 _component3d2.default.register('cylinder', Cylinder);
 
@@ -50453,8 +49897,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Cube2d = undefined;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 var _component3d = __webpack_require__(1);
 
 var _component3d2 = _interopRequireDefault(_component3d);
@@ -50465,16 +49907,10 @@ var _three = __webpack_require__(0);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
-
-
-var NATURE = {
+/*
+ * Copyright © HatioLab Inc. All rights reserved.
+ */
+const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
@@ -50491,104 +49927,79 @@ var NATURE = {
   }]
 };
 
-var Cube = function (_Mesh) {
-  _inherits(Cube, _Mesh);
+class Cube extends _three.Mesh {
 
-  function Cube(model, canvasSize, visualizer) {
-    _classCallCheck(this, Cube);
+  constructor(model, canvasSize, visualizer) {
 
-    var _this = _possibleConstructorReturn(this, (Cube.__proto__ || Object.getPrototypeOf(Cube)).call(this));
+    super();
 
-    _this._model = model;
-    _this._visualizer = visualizer;
+    this._model = model;
+    this._visualizer = visualizer;
 
-    _this.createObject(model, canvasSize);
+    this.createObject(model, canvasSize);
 
-    _this.updateMatrixWorld();
+    this.updateMatrixWorld();
 
     if (model.showAxis) {
       var axisHelper = new THREE.AxesHelper(100);
-      _this.add(axisHelper);
+      this.add(axisHelper);
     }
-
-    return _this;
   }
 
-  _createClass(Cube, [{
-    key: 'createObject',
-    value: function createObject(model, canvasSize) {
+  createObject(model, canvasSize) {
 
-      var cx = model.left + model.width / 2 - canvasSize.width / 2;
-      var cy = model.top + model.height / 2 - canvasSize.height / 2;
-      var cz = model.zPos || 0.5 * model.depth;
+    let cx = model.left + model.width / 2 - canvasSize.width / 2;
+    let cy = model.top + model.height / 2 - canvasSize.height / 2;
+    let cz = model.zPos || 0.5 * model.depth;
 
-      var rotation = model.rotation;
-      this.type = model.type;
+    let rotation = model.rotation;
+    this.type = model.type;
 
-      this.createCube(model.width, model.height, model.depth);
+    this.createCube(model.width, model.height, model.depth);
 
-      this.position.set(cx, cz, cy);
-      this.rotation.y = rotation || 0;
+    this.position.set(cx, cz, cy);
+    this.rotation.y = rotation || 0;
+  }
+
+  createCube(w, h, d) {
+
+    let {
+      fillStyle = 'lightgray'
+    } = this.model;
+
+    this.geometry = new THREE.BoxBufferGeometry(w, d, h);
+    this.material = new THREE.MeshLambertMaterial({ color: fillStyle, side: THREE.FrontSide });
+  }
+
+  get model() {
+    return this._model;
+  }
+
+  get mixer() {
+    if (!this._mixer) {
+      this._mixer = new THREE.AnimationMixer(this);
+      this._visualizer.mixers.push(this._mixer);
     }
-  }, {
-    key: 'createCube',
-    value: function createCube(w, h, d) {
-      var _model$fillStyle = this.model.fillStyle,
-          fillStyle = _model$fillStyle === undefined ? 'lightgray' : _model$fillStyle;
 
+    return this._mixer;
+  }
 
-      this.geometry = new THREE.BoxBufferGeometry(w, d, h);
-      this.material = new THREE.MeshLambertMaterial({ color: fillStyle, side: THREE.FrontSide });
-    }
-  }, {
-    key: 'model',
-    get: function get() {
-      return this._model;
-    }
-  }, {
-    key: 'mixer',
-    get: function get() {
-      if (!this._mixer) {
-        this._mixer = new THREE.AnimationMixer(this);
-        this._visualizer.mixers.push(this._mixer);
-      }
-
-      return this._mixer;
-    }
-  }]);
-
-  return Cube;
-}(_three.Mesh);
+}
 
 exports.default = Cube;
-
-var Cube2d = exports.Cube2d = function (_Rect) {
-  _inherits(Cube2d, _Rect);
-
-  function Cube2d() {
-    _classCallCheck(this, Cube2d);
-
-    return _possibleConstructorReturn(this, (Cube2d.__proto__ || Object.getPrototypeOf(Cube2d)).apply(this, arguments));
+class Cube2d extends _thingsScene.Rect {
+  is3dish() {
+    return true;
   }
 
-  _createClass(Cube2d, [{
-    key: 'is3dish',
-    value: function is3dish() {
-      return true;
-    }
-  }, {
-    key: 'controls',
-    get: function get() {}
-  }, {
-    key: 'nature',
-    get: function get() {
-      return NATURE;
-    }
-  }]);
+  get controls() {}
 
-  return Cube2d;
-}(_thingsScene.Rect);
+  get nature() {
+    return NATURE;
+  }
+}
 
+exports.Cube2d = Cube2d;
 _thingsScene.Component.register('cube', Cube2d);
 _component3d2.default.register('cube', Cube);
 
@@ -50603,8 +50014,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.Wall2d = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _component3d = __webpack_require__(1);
 
@@ -50624,16 +50033,10 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
-
-
-var NATURE = {
+/*
+ * Copyright © HatioLab Inc. All rights reserved.
+ */
+const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
@@ -50645,100 +50048,71 @@ var NATURE = {
   }]
 };
 
-var Wall = function (_Mesh) {
-  _inherits(Wall, _Mesh);
+class Wall extends _mesh2.default {
 
-  function Wall(model, canvasSize) {
-    _classCallCheck(this, Wall);
+  constructor(model, canvasSize) {
+    super(model);
 
-    var _this = _possibleConstructorReturn(this, (Wall.__proto__ || Object.getPrototypeOf(Wall)).call(this, model));
-
-    _this.createObject(canvasSize);
-    return _this;
+    this.createObject(canvasSize);
   }
 
-  _createClass(Wall, [{
-    key: 'createObject',
-    value: function createObject(canvasSize) {
-      var _model = this.model,
-          type = _model.type,
-          left = _model.left,
-          top = _model.top,
-          width = _model.width,
-          height = _model.height,
-          _model$depth = _model.depth,
-          depth = _model$depth === undefined ? 1 : _model$depth,
-          _model$rotation = _model.rotation,
-          rotation = _model$rotation === undefined ? 0 : _model$rotation,
-          _model$zPos = _model.zPos,
-          zPos = _model$zPos === undefined ? 0 : _model$zPos,
-          _model$alpha = _model.alpha,
-          alpha = _model$alpha === undefined ? 1 : _model$alpha;
+  createObject(canvasSize) {
+    var {
+      type,
+      left,
+      top,
+      width,
+      height,
+      depth = 1,
+      rotation = 0,
+      zPos = 0,
+      alpha = 1
+    } = this.model;
 
+    let cx = left + width / 2 - canvasSize.width / 2;
+    let cy = top + height / 2 - canvasSize.height / 2;
+    let cz = zPos + 0.5 * depth;
 
-      var cx = left + width / 2 - canvasSize.width / 2;
-      var cy = top + height / 2 - canvasSize.height / 2;
-      var cz = zPos + 0.5 * depth;
+    this.type = type;
 
-      this.type = type;
+    this.createWall(width, height, depth);
 
-      this.createWall(width, height, depth);
+    this.position.set(cx, cz, cy);
+    this.rotation.y = rotation;
 
-      this.position.set(cx, cz, cy);
-      this.rotation.y = rotation;
+    this.material.opacity = alpha;
+    this.material.transparent = alpha < 1;
+  }
 
-      this.material.opacity = alpha;
-      this.material.transparent = alpha < 1;
-    }
-  }, {
-    key: 'createWall',
-    value: function createWall(w, h, d) {
-      var _model$fillStyle = this.model.fillStyle,
-          fillStyle = _model$fillStyle === undefined ? 'gray' : _model$fillStyle;
+  createWall(w, h, d) {
 
+    let {
+      fillStyle = 'gray'
+    } = this.model;
 
-      this.geometry = new THREE.BoxBufferGeometry(w, d, h);
-      this.material = new THREE.MeshLambertMaterial({ color: fillStyle, side: THREE.FrontSide });
+    this.geometry = new THREE.BoxBufferGeometry(w, d, h);
+    this.material = new THREE.MeshLambertMaterial({ color: fillStyle, side: THREE.FrontSide });
 
-      // this.castShadow = true
-    }
-  }, {
-    key: 'raycast',
-    value: function raycast(raycaster, intersects) {}
-  }]);
+    // this.castShadow = true
+  }
 
-  return Wall;
-}(_mesh2.default);
+  raycast(raycaster, intersects) {}
+}
 
 exports.default = Wall;
-
-var Wall2d = exports.Wall2d = function (_Rect) {
-  _inherits(Wall2d, _Rect);
-
-  function Wall2d() {
-    _classCallCheck(this, Wall2d);
-
-    return _possibleConstructorReturn(this, (Wall2d.__proto__ || Object.getPrototypeOf(Wall2d)).apply(this, arguments));
+class Wall2d extends _thingsScene.Rect {
+  is3dish() {
+    return true;
   }
 
-  _createClass(Wall2d, [{
-    key: 'is3dish',
-    value: function is3dish() {
-      return true;
-    }
-  }, {
-    key: 'nature',
-    get: function get() {
-      return NATURE;
-    }
-  }, {
-    key: 'controls',
-    get: function get() {}
-  }]);
+  get nature() {
+    return NATURE;
+  }
 
-  return Wall2d;
-}(_thingsScene.Rect);
+  get controls() {}
+}
 
+exports.Wall2d = Wall2d;
 _thingsScene.Component.register('wall', Wall2d);
 _component3d2.default.register('wall', Wall);
 
@@ -50753,38 +50127,27 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /* from https://bl.ocks.org/sfpgmr/61fe805bb2a72bda86eff955838fda94 */
-
-
 var _three = __webpack_require__(0);
 
 var THREE = _interopRequireWildcard(_three);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+class BoundUVGenerator {
 
-var BoundUVGenerator = function () {
-  function BoundUVGenerator() {
-    _classCallCheck(this, BoundUVGenerator);
+  setShape({
+    extrudedShape,
+    extrudedOptions
+  }) {
+    this.extrudedShape = extrudedShape;
+    this.bb = new THREE.Box2();
+
+    this.bb.setFromPoints(this.extrudedShape.extractPoints().shape);
+    this.extrudedOptions = extrudedOptions;
   }
 
-  _createClass(BoundUVGenerator, [{
-    key: 'setShape',
-    value: function setShape(_ref) {
-      var extrudedShape = _ref.extrudedShape,
-          extrudedOptions = _ref.extrudedOptions;
-
-      this.extrudedShape = extrudedShape;
-      this.bb = new THREE.Box2();
-
-      this.bb.setFromPoints(this.extrudedShape.extractPoints().shape);
-      this.extrudedOptions = extrudedOptions;
-    }
-  }, {
-    key: 'generateTopUV',
-    value: function generateTopUV(geometry, vertices, indexA, indexB, indexC) {
-      var ax = vertices[indexA * 3],
+  generateTopUV(geometry, vertices, indexA, indexB, indexC) {
+    const ax = vertices[indexA * 3],
           ay = vertices[indexA * 3 + 1],
           bx = vertices[indexB * 3],
           by = vertices[indexB * 3 + 1],
@@ -50792,15 +50155,14 @@ var BoundUVGenerator = function () {
           cy = vertices[indexC * 3 + 1],
           bb = this.bb,
           //extrudedShape.getBoundingBox(),
-      bbx = bb.max.x - bb.min.x,
+    bbx = bb.max.x - bb.min.x,
           bby = bb.max.y - bb.min.y;
 
-      return [new THREE.Vector2((ax - bb.min.x) / bbx, 1.0 - (ay - bb.min.y) / bby), new THREE.Vector2((bx - bb.min.x) / bbx, 1.0 - (by - bb.min.y) / bby), new THREE.Vector2((cx - bb.min.x) / bbx, 1.0 - (cy - bb.min.y) / bby)];
-    }
-  }, {
-    key: 'generateSideWallUV',
-    value: function generateSideWallUV(geometry, vertices, indexA, indexB, indexC, indexD) {
-      var ax = vertices[indexA * 3],
+    return [new THREE.Vector2((ax - bb.min.x) / bbx, 1.0 - (ay - bb.min.y) / bby), new THREE.Vector2((bx - bb.min.x) / bbx, 1.0 - (by - bb.min.y) / bby), new THREE.Vector2((cx - bb.min.x) / bbx, 1.0 - (cy - bb.min.y) / bby)];
+  }
+
+  generateSideWallUV(geometry, vertices, indexA, indexB, indexC, indexD) {
+    const ax = vertices[indexA * 3],
           ay = vertices[indexA * 3 + 1],
           az = vertices[indexA * 3 + 2],
           bx = vertices[indexB * 3],
@@ -50813,24 +50175,20 @@ var BoundUVGenerator = function () {
           dy = vertices[indexD * 3 + 1],
           dz = vertices[indexD * 3 + 2];
 
-      var amt = this.extrudedOptions.amount,
+    const amt = this.extrudedOptions.amount,
           bb = this.bb,
           //extrudedShape.getBoundingBox(),
-      bbx = bb.max.x - bb.min.x,
+    bbx = bb.max.x - bb.min.x,
           bby = bb.max.y - bb.min.y;
 
-      if (Math.abs(ay - by) < 0.01) {
-        return [new THREE.Vector2(ax / bbx, 1.0 - az / amt), new THREE.Vector2(bx / bbx, 1.0 - bz / amt), new THREE.Vector2(cx / bbx, 1.0 - cz / amt), new THREE.Vector2(dx / bbx, 1.0 - dz / amt)];
-      } else {
-        return [new THREE.Vector2(ay / bby, 1.0 - az / amt), new THREE.Vector2(by / bby, 1.0 - bz / amt), new THREE.Vector2(cy / bby, 1.0 - cz / amt), new THREE.Vector2(dy / bby, 1.0 - dz / amt)];
-      }
+    if (Math.abs(ay - by) < 0.01) {
+      return [new THREE.Vector2(ax / bbx, 1.0 - az / amt), new THREE.Vector2(bx / bbx, 1.0 - bz / amt), new THREE.Vector2(cx / bbx, 1.0 - cz / amt), new THREE.Vector2(dx / bbx, 1.0 - dz / amt)];
+    } else {
+      return [new THREE.Vector2(ay / bby, 1.0 - az / amt), new THREE.Vector2(by / bby, 1.0 - bz / amt), new THREE.Vector2(cy / bby, 1.0 - cz / amt), new THREE.Vector2(dy / bby, 1.0 - dz / amt)];
     }
-  }]);
-
-  return BoundUVGenerator;
-}();
-
-exports.default = BoundUVGenerator;
+  }
+}
+exports.default = BoundUVGenerator; /* from https://bl.ocks.org/sfpgmr/61fe805bb2a72bda86eff955838fda94 */
 
 /***/ }),
 /* 26 */
@@ -52043,8 +51401,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 var _extrude = __webpack_require__(4);
 
 var _extrude2 = _interopRequireDefault(_extrude);
@@ -52061,63 +51417,44 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+class RectExtrude extends _extrude2.default {
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+  get shape() {
+    var {
+      width,
+      height,
+      round
+    } = this.model;
+    var shape = new THREE.Shape();
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+    if (round > 0) {
+      var radius = round / 100 * (width / 2);
 
+      shape.moveTo(radius, 0);
+      shape.lineTo(width - radius, 0);
+      shape.quadraticCurveTo(width, 0, width, radius);
+      shape.lineTo(width, height - radius);
+      shape.quadraticCurveTo(width, height, width - radius, height);
+      shape.lineTo(radius, height);
+      shape.quadraticCurveTo(0, height, 0, height - radius);
+      shape.lineTo(0, radius);
+      shape.quadraticCurveTo(0, 0, radius, 0);
+    } else {
+      shape.moveTo(0, 0);
+      shape.lineTo(width, 0);
+      shape.lineTo(width, height);
+      shape.lineTo(0, height);
+      shape.lineTo(0, 0);
+    }
 
-var RectExtrude = function (_Extrude) {
-  _inherits(RectExtrude, _Extrude);
-
-  function RectExtrude() {
-    _classCallCheck(this, RectExtrude);
-
-    return _possibleConstructorReturn(this, (RectExtrude.__proto__ || Object.getPrototypeOf(RectExtrude)).apply(this, arguments));
+    return shape;
   }
 
-  _createClass(RectExtrude, [{
-    key: 'shape',
-    get: function get() {
-      var _model = this.model,
-          width = _model.width,
-          height = _model.height,
-          round = _model.round;
+}
 
-      var shape = new THREE.Shape();
-
-      if (round > 0) {
-        var radius = round / 100 * (width / 2);
-
-        shape.moveTo(radius, 0);
-        shape.lineTo(width - radius, 0);
-        shape.quadraticCurveTo(width, 0, width, radius);
-        shape.lineTo(width, height - radius);
-        shape.quadraticCurveTo(width, height, width - radius, height);
-        shape.lineTo(radius, height);
-        shape.quadraticCurveTo(0, height, 0, height - radius);
-        shape.lineTo(0, radius);
-        shape.quadraticCurveTo(0, 0, radius, 0);
-      } else {
-        shape.moveTo(0, 0);
-        shape.lineTo(width, 0);
-        shape.lineTo(width, height);
-        shape.lineTo(0, height);
-        shape.lineTo(0, 0);
-      }
-
-      return shape;
-    }
-  }]);
-
-  return RectExtrude;
-}(_extrude2.default);
-
-exports.default = RectExtrude;
-
+exports.default = RectExtrude; /*
+                                * Copyright © HatioLab Inc. All rights reserved.
+                                */
 
 _component3d2.default.register('rect', RectExtrude);
 
@@ -52322,8 +51659,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 var _object3d = __webpack_require__(3);
 
 var _object3d2 = _interopRequireDefault(_object3d);
@@ -52344,88 +51679,65 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+const personPath = _path2.default.resolve('../obj/Casual_Man_02'); /*
+                                                                    * Copyright © HatioLab Inc. All rights reserved.
+                                                                    */
+class Person extends _object3d2.default {
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+  static get threedObjectLoader() {
+    if (!Person._threedObjectLoader) {
+      Person._threedObjectLoader = new Promise((resolve, reject) => {
+        let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
+        let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+        objLoader.setPath(`${personPath}/`);
+        mtlLoader.setPath(`${personPath}/`);
 
+        mtlLoader.load('Casual_Man.mtl', materials => {
+          materials.preload();
+          objLoader.setMaterials(materials);
 
-var personPath = _path2.default.resolve('../obj/Casual_Man_02');
+          objLoader.load('Casual_Man.obj', obj => {
+            var extObj = obj;
+            if (extObj && extObj.children && extObj.children.length > 0) {
+              extObj = extObj.children[0];
+            }
 
-var Person = function (_Object3D) {
-  _inherits(Person, _Object3D);
-
-  function Person() {
-    _classCallCheck(this, Person);
-
-    return _possibleConstructorReturn(this, (Person.__proto__ || Object.getPrototypeOf(Person)).apply(this, arguments));
-  }
-
-  _createClass(Person, [{
-    key: 'createObject',
-    value: function createObject() {
-      Person.threedObjectLoader.then(this.addObject.bind(this));
-    }
-  }, {
-    key: 'addObject',
-    value: function addObject(extObject) {
-      var _model = this.model,
-          width = _model.width,
-          height = _model.height,
-          depth = _model.depth;
-
-
-      this.type = 'person';
-      var object = extObject.clone();
-      this.add(object);
-
-      width /= 3.7;
-      height /= 3.7;
-      depth /= 3.7;
-
-      this.scale.set(width, depth, height);
-    }
-  }], [{
-    key: 'threedObjectLoader',
-    get: function get() {
-      if (!Person._threedObjectLoader) {
-        Person._threedObjectLoader = new Promise(function (resolve, reject) {
-          var objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
-          var mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
-
-          objLoader.setPath(personPath + '/');
-          mtlLoader.setPath(personPath + '/');
-
-          mtlLoader.load('Casual_Man.mtl', function (materials) {
-            materials.preload();
-            objLoader.setMaterials(materials);
-
-            objLoader.load('Casual_Man.obj', function (obj) {
-              var extObj = obj;
-              if (extObj && extObj.children && extObj.children.length > 0) {
-                extObj = extObj.children[0];
-              }
-
-              extObj.geometry.center();
-              resolve(obj);
-            });
+            extObj.geometry.center();
+            resolve(obj);
           });
         });
-      }
-
-      return Person._threedObjectLoader;
+      });
     }
-  }]);
 
-  return Person;
-}(_object3d2.default);
+    return Person._threedObjectLoader;
+  }
+
+  createObject() {
+    Person.threedObjectLoader.then(this.addObject.bind(this));
+  }
+
+  addObject(extObject) {
+    var {
+      width,
+      height,
+      depth
+    } = this.model;
+
+    this.type = 'person';
+    let object = extObject.clone();
+    this.add(object);
+
+    width /= 3.7;
+    height /= 3.7;
+    depth /= 3.7;
+
+    this.scale.set(width, depth, height);
+  }
+
+}
 
 exports.default = Person;
-
-
 _component3d2.default.register('person', Person);
 
 /***/ }),
@@ -52439,10 +51751,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.Sensor = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _object3d = __webpack_require__(3);
 
@@ -52462,18 +51770,12 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+/*
+* Copyright © HatioLab Inc. All rights reserved.
+*/
+const STATUS_COLORS = ['#6666ff', '#ccccff', '#ffcccc', '#cc3300'];
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               */
-
-
-var STATUS_COLORS = ['#6666ff', '#ccccff', '#ffcccc', '#cc3300'];
-
-var NATURE = {
+const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
@@ -52490,319 +51792,262 @@ var NATURE = {
   }]
 };
 
-var HumiditySensor = function (_Object3D) {
-  _inherits(HumiditySensor, _Object3D);
+class HumiditySensor extends _object3d2.default {
 
-  function HumiditySensor(model, canvasSize, visualizer) {
-    _classCallCheck(this, HumiditySensor);
-
-    var _this = _possibleConstructorReturn(this, (HumiditySensor.__proto__ || Object.getPrototypeOf(HumiditySensor)).call(this, model, canvasSize, visualizer));
-
-    _this.userData.temperature = model.humidity ? model.humidity[0] : 0;
-    _this.userData.humidity = model.humidity ? model.humidity[1] : 0;
-    return _this;
+  constructor(model, canvasSize, visualizer) {
+    super(model, canvasSize, visualizer);
+    this.userData.temperature = model.humidity ? model.humidity[0] : 0;
+    this.userData.humidity = model.humidity ? model.humidity[1] : 0;
   }
 
-  _createClass(HumiditySensor, [{
-    key: 'createObject',
-    value: function createObject(canvasSize) {
-      var _model = this.model,
-          depth = _model.depth,
-          cx = _model.cx,
-          cy = _model.cy,
-          rx = _model.rx,
-          ry = _model.ry,
-          _model$rotation = _model.rotation,
-          rotation = _model$rotation === undefined ? 0 : _model$rotation,
-          location = _model.location;
+  get cx() {
+    var {
+      cx = 0
+    } = this.model;
+    if (!this._cx) this._cx = cx - this._canvasSize.width / 2;
 
+    return this._cx;
+  }
 
-      this.type = 'humidity-sensor';
+  get cy() {
+    var {
+      cy = 0
+    } = this.model;
+    if (!this._cy) this._cy = cy - this._canvasSize.height / 2;
 
-      if (location) this.name = location;
+    return this._cy;
+  }
 
-      for (var i = 0; i < 3; i++) {
-        var mesh = this.createSensor(rx * (1 + 0.5 * i), ry * (1 + 0.5 * i), depth * (1 + 0.5 * i), i);
-        mesh.material.opacity = 0.5 - i * 0.15;
-      }
+  get cz() {
+    var {
+      zPos = 0,
+      rx = 0
+    } = this.model;
 
-      if (this._visualizer._heatmap) {
-        this._visualizer._heatmap.addData({
-          x: Math.floor(cx),
-          y: Math.floor(cy),
-          value: this.userData.temperature
-        });
-        this._visualizer.updateHeatmapTexture();
-      }
+    if (!this._cz) this._cz = zPos + rx;
 
-      // var self = this
-      //
-      // setInterval(function(){
-      //
-      //   var data = self._visualizer._heatmap._store._data
-      //
-      //   // var value = self._visualizer._heatmap.getValueAt({x:model.cx, y: model.cy})
-      //   var value = data[model.cx][model.cy]
-      //
-      //   self._visualizer._heatmap.addData({
-      //     x: model.cx,
-      //     y: model.cy,
-      //     // min: -100,
-      //     // value: -1
-      //     value: (Math.random() * 40 - 10) - value
-      //   })
-      //   self._visualizer._heatmap.repaint()
-      //
-      //   self._visualizer.render_threed()
-      // }, 1000)
+    return this._cz;
+  }
+
+  createObject(canvasSize) {
+
+    var {
+      depth,
+      cx,
+      cy,
+      rx,
+      ry,
+      rotation = 0,
+      location
+    } = this.model;
+
+    this.type = 'humidity-sensor';
+
+    if (location) this.name = location;
+
+    for (var i = 0; i < 3; i++) {
+      let mesh = this.createSensor(rx * (1 + 0.5 * i), ry * (1 + 0.5 * i), depth * (1 + 0.5 * i), i);
+      mesh.material.opacity = 0.5 - i * 0.15;
     }
-  }, {
-    key: 'createSensor',
-    value: function createSensor(w, h, d, i) {
 
-      var isFirst = i === 0;
-
-      var geometry = new THREE.SphereBufferGeometry(w, 32, 32);
-      // let geometry = new THREE.SphereGeometry(w, d, h);
-      var material;
-      if (isFirst) {
-        // var texture = new THREE.TextureLoader().load('./images/drop-34055_1280.png')
-        // texture.repeat.set(1,1)
-        // // texture.premultiplyAlpha = true
-        //  material = new THREE.MeshBasicMaterial( { color : '#cc3300', side: THREE.FrontSide, wireframe: true, wireframeLinewidth : 1} );
-        material = new THREE.MeshLambertMaterial({ color: '#cc3300', side: THREE.FrontSide });
-        // material = new THREE.MeshLambertMaterial( { color : '#74e98a', side: THREE.FrontSide} );
-      } else {
-        material = new THREE.MeshBasicMaterial({ color: '#cc3300', side: THREE.FrontSide, wireframe: true, wireframeLinewidth: 1 });
-        // material = new THREE.MeshBasicMaterial( { color : '#74e98a', side: THREE.FrontSide, wireframe: true, wireframeLinewidth : 1} );
-      }
-
-      // let material = new THREE.MeshBasicMaterial( { color : '#ff3300', side: THREE.DoubleSide, wireframe: true, wireframeLinewidth : 1} );
-
-      var mesh = new THREE.Mesh(geometry, material);
-      mesh.material.transparent = true;
-
-      if (isFirst) mesh.onmousemove = this.onmousemove;else mesh.raycast = function () {};
-
-      this.add(mesh);
-
-      return mesh;
-    }
-  }, {
-    key: 'onUserDataChanged',
-    value: function onUserDataChanged() {
-
-      _get(HumiditySensor.prototype.__proto__ || Object.getPrototypeOf(HumiditySensor.prototype), 'onUserDataChanged', this).call(this);
-
-      var _model2 = this._model,
-          cx = _model2.cx,
-          cy = _model2.cy;
-
-      cx = Math.floor(cx);
-      cy = Math.floor(cy);
-
-      var temperature = this.userData.temperature;
-
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
-
-      try {
-        for (var _iterator = this.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var sphere = _step.value;
-
-          var colorIndex = 0;
-          if (temperature < 0) {
-            colorIndex = 0;
-          } else if (temperature < 10) {
-            colorIndex = 1;
-          } else if (temperature < 20) {
-            colorIndex = 2;
-          } else {
-            colorIndex = 3;
-          }
-
-          sphere.material.color.set(STATUS_COLORS[colorIndex]);
-        }
-      } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator.return) {
-            _iterator.return();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
-        }
-      }
-
-      if (!this._visualizer._heatmap) return;
-
-      var data = this._visualizer._heatmap._store._data;
-
-      // var value = self._visualizer._heatmap.getValueAt({x:model.cx, y: model.cy})
-      var value = data[cx][cy];
-
+    if (this._visualizer._heatmap) {
       this._visualizer._heatmap.addData({
-        x: cx,
-        y: cy,
-        // min: -100,
-        // value: -1
-        value: temperature - value
+        x: Math.floor(cx),
+        y: Math.floor(cy),
+        value: this.userData.temperature
       });
-      this._visualizer._heatmap.repaint();
-
-      // this._visualizer.render_threed()
       this._visualizer.updateHeatmapTexture();
     }
-  }, {
-    key: 'onmousemove',
-    value: function onmousemove(e, visualizer) {
 
-      var tooltip = visualizer.tooltip || visualizer._scene2d.getObjectByName("tooltip");
-
-      if (tooltip) {
-        visualizer._scene2d.remove(tooltip);
-        visualizer.tooltip = null;
-        visualizer.render_threed();
-      }
-
-      if (!this.parent.visible) return;
-
-      if (!this.parent.userData) this.parent.userData = {};
-
-      var tooltipText = '';
-
-      for (var key in this.parent.userData) {
-        if (this.parent.userData[key]) tooltipText += key + ": " + this.parent.userData[key] + "\n";
-      }
-
-      // tooltipText = 'loc : ' + loc
-
-      // currentLabel.lookAt( camera.position );
-
-      if (tooltipText.length > 0) {
-        tooltip = visualizer.tooltip = visualizer.makeTextSprite(tooltipText);
-
-        var vector = new THREE.Vector3();
-        var vector2 = tooltip.getWorldScale().clone();
-
-        var widthMultiplier = vector2.x / visualizer.model.width;
-        var heightMultiplier = vector2.y / visualizer.model.height;
-
-        vector.set(visualizer._mouse.x, visualizer._mouse.y, 0.5);
-        vector2.normalize();
-
-        vector2.x = vector2.x / 2 * widthMultiplier;
-        vector2.y = -vector2.y / 2 * heightMultiplier;
-        vector2.z = 0;
-
-        vector.add(vector2);
-
-        vector.unproject(visualizer._2dCamera);
-        tooltip.position.set(vector.x, vector.y, vector.z);
-        tooltip.name = "tooltip";
-
-        tooltip.scale.x = tooltip.scale.x * widthMultiplier;
-        tooltip.scale.y = tooltip.scale.y * heightMultiplier;
-
-        // tooltip.position.set(this.getWorldPosition().x, this.getWorldPosition().y, this.getWorldPosition().z)
-        // visualizer._scene3d.add(tooltip)
-
-
-        visualizer._scene2d.add(tooltip);
-        visualizer._renderer && visualizer._renderer.render(visualizer._scene2d, visualizer._2dCamera);
-        visualizer.invalidate();
-      }
-    }
-  }, {
-    key: 'cx',
-    get: function get() {
-      var _model$cx = this.model.cx,
-          cx = _model$cx === undefined ? 0 : _model$cx;
-
-      if (!this._cx) this._cx = cx - this._canvasSize.width / 2;
-
-      return this._cx;
-    }
-  }, {
-    key: 'cy',
-    get: function get() {
-      var _model$cy = this.model.cy,
-          cy = _model$cy === undefined ? 0 : _model$cy;
-
-      if (!this._cy) this._cy = cy - this._canvasSize.height / 2;
-
-      return this._cy;
-    }
-  }, {
-    key: 'cz',
-    get: function get() {
-      var _model3 = this.model,
-          _model3$zPos = _model3.zPos,
-          zPos = _model3$zPos === undefined ? 0 : _model3$zPos,
-          _model3$rx = _model3.rx,
-          rx = _model3$rx === undefined ? 0 : _model3$rx;
-
-
-      if (!this._cz) this._cz = zPos + rx;
-
-      return this._cz;
-    }
-  }]);
-
-  return HumiditySensor;
-}(_object3d2.default);
-
-exports.default = HumiditySensor;
-
-var Sensor = exports.Sensor = function (_Ellipse) {
-  _inherits(Sensor, _Ellipse);
-
-  function Sensor() {
-    _classCallCheck(this, Sensor);
-
-    return _possibleConstructorReturn(this, (Sensor.__proto__ || Object.getPrototypeOf(Sensor)).apply(this, arguments));
+    // var self = this
+    //
+    // setInterval(function(){
+    //
+    //   var data = self._visualizer._heatmap._store._data
+    //
+    //   // var value = self._visualizer._heatmap.getValueAt({x:model.cx, y: model.cy})
+    //   var value = data[model.cx][model.cy]
+    //
+    //   self._visualizer._heatmap.addData({
+    //     x: model.cx,
+    //     y: model.cy,
+    //     // min: -100,
+    //     // value: -1
+    //     value: (Math.random() * 40 - 10) - value
+    //   })
+    //   self._visualizer._heatmap.repaint()
+    //
+    //   self._visualizer.render_threed()
+    // }, 1000)
   }
 
-  _createClass(Sensor, [{
-    key: 'is3dish',
-    value: function is3dish() {
-      return true;
+  createSensor(w, h, d, i) {
+
+    var isFirst = i === 0;
+
+    let geometry = new THREE.SphereBufferGeometry(w, 32, 32);
+    // let geometry = new THREE.SphereGeometry(w, d, h);
+    var material;
+    if (isFirst) {
+      // var texture = new THREE.TextureLoader().load('./images/drop-34055_1280.png')
+      // texture.repeat.set(1,1)
+      // // texture.premultiplyAlpha = true
+      //  material = new THREE.MeshBasicMaterial( { color : '#cc3300', side: THREE.FrontSide, wireframe: true, wireframeLinewidth : 1} );
+      material = new THREE.MeshLambertMaterial({ color: '#cc3300', side: THREE.FrontSide });
+      // material = new THREE.MeshLambertMaterial( { color : '#74e98a', side: THREE.FrontSide} );
+    } else {
+      material = new THREE.MeshBasicMaterial({ color: '#cc3300', side: THREE.FrontSide, wireframe: true, wireframeLinewidth: 1 });
+      // material = new THREE.MeshBasicMaterial( { color : '#74e98a', side: THREE.FrontSide, wireframe: true, wireframeLinewidth : 1} );
     }
-  }, {
-    key: '_draw',
-    value: function _draw(context) {
-      var _bounds = this.bounds,
-          left = _bounds.left,
-          top = _bounds.top,
-          width = _bounds.width,
-          height = _bounds.height;
 
+    // let material = new THREE.MeshBasicMaterial( { color : '#ff3300', side: THREE.DoubleSide, wireframe: true, wireframeLinewidth : 1} );
 
-      context.beginPath();
-      context.rect(left, top, width, height);
+    var mesh = new THREE.Mesh(geometry, material);
+    mesh.material.transparent = true;
 
-      this.model.fillStyle = {
-        type: 'pattern',
-        fitPattern: true,
-        image: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAABBCAYAAACTiffeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyppVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTMyIDc5LjE1OTI4NCwgMjAxNi8wNC8xOS0xMzoxMzo0MCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTUuNSAoTWFjaW50b3NoKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpDQ0E1QkUzRTRDMDcxMUU2QkMyRDk3MzlGN0EzMTI2NSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDpDQ0E1QkUzRjRDMDcxMUU2QkMyRDk3MzlGN0EzMTI2NSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjJFQ0Q4QzE5NEI1MjExRTZCQzJEOTczOUY3QTMxMjY1IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjJFQ0Q4QzFBNEI1MjExRTZCQzJEOTczOUY3QTMxMjY1Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+tgU1kQAAB4pJREFU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"
-      };
-      this.drawFill(context);
+    if (isFirst) mesh.onmousemove = this.onmousemove;else mesh.raycast = function () {};
+
+    this.add(mesh);
+
+    return mesh;
+  }
+
+  onUserDataChanged() {
+
+    super.onUserDataChanged();
+
+    var { cx, cy } = this._model;
+    cx = Math.floor(cx);
+    cy = Math.floor(cy);
+
+    var temperature = this.userData.temperature;
+
+    for (let sphere of this.children) {
+      var colorIndex = 0;
+      if (temperature < 0) {
+        colorIndex = 0;
+      } else if (temperature < 10) {
+        colorIndex = 1;
+      } else if (temperature < 20) {
+        colorIndex = 2;
+      } else {
+        colorIndex = 3;
+      }
+
+      sphere.material.color.set(STATUS_COLORS[colorIndex]);
     }
-  }, {
-    key: 'nature',
-    get: function get() {
-      return NATURE;
+
+    if (!this._visualizer._heatmap) return;
+
+    var data = this._visualizer._heatmap._store._data;
+
+    // var value = self._visualizer._heatmap.getValueAt({x:model.cx, y: model.cy})
+    var value = data[cx][cy];
+
+    this._visualizer._heatmap.addData({
+      x: cx,
+      y: cy,
+      // min: -100,
+      // value: -1
+      value: temperature - value
+    });
+    this._visualizer._heatmap.repaint();
+
+    // this._visualizer.render_threed()
+    this._visualizer.updateHeatmapTexture();
+  }
+
+  onmousemove(e, visualizer) {
+
+    var tooltip = visualizer.tooltip || visualizer._scene2d.getObjectByName("tooltip");
+
+    if (tooltip) {
+      visualizer._scene2d.remove(tooltip);
+      visualizer.tooltip = null;
+      visualizer.render_threed();
     }
-  }]);
 
-  return Sensor;
-}(_thingsScene.Ellipse);
+    if (!this.parent.visible) return;
 
+    if (!this.parent.userData) this.parent.userData = {};
+
+    var tooltipText = '';
+
+    for (let key in this.parent.userData) {
+      if (this.parent.userData[key]) tooltipText += key + ": " + this.parent.userData[key] + "\n";
+    }
+
+    // tooltipText = 'loc : ' + loc
+
+    // currentLabel.lookAt( camera.position );
+
+    if (tooltipText.length > 0) {
+      tooltip = visualizer.tooltip = visualizer.makeTextSprite(tooltipText);
+
+      var vector = new THREE.Vector3();
+      var vector2 = tooltip.getWorldScale().clone();
+
+      var widthMultiplier = vector2.x / visualizer.model.width;
+      var heightMultiplier = vector2.y / visualizer.model.height;
+
+      vector.set(visualizer._mouse.x, visualizer._mouse.y, 0.5);
+      vector2.normalize();
+
+      vector2.x = vector2.x / 2 * widthMultiplier;
+      vector2.y = -vector2.y / 2 * heightMultiplier;
+      vector2.z = 0;
+
+      vector.add(vector2);
+
+      vector.unproject(visualizer._2dCamera);
+      tooltip.position.set(vector.x, vector.y, vector.z);
+      tooltip.name = "tooltip";
+
+      tooltip.scale.x = tooltip.scale.x * widthMultiplier;
+      tooltip.scale.y = tooltip.scale.y * heightMultiplier;
+
+      // tooltip.position.set(this.getWorldPosition().x, this.getWorldPosition().y, this.getWorldPosition().z)
+      // visualizer._scene3d.add(tooltip)
+
+
+      visualizer._scene2d.add(tooltip);
+      visualizer._renderer && visualizer._renderer.render(visualizer._scene2d, visualizer._2dCamera);
+      visualizer.invalidate();
+    }
+  }
+}
+
+exports.default = HumiditySensor;
+class Sensor extends _thingsScene.Ellipse {
+  is3dish() {
+    return true;
+  }
+
+  _draw(context) {
+    var {
+      left,
+      top,
+      width,
+      height
+    } = this.bounds;
+
+    context.beginPath();
+    context.rect(left, top, width, height);
+
+    this.model.fillStyle = {
+      type: 'pattern',
+      fitPattern: true,
+      image: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAABBCAYAAACTiffeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyppVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTMyIDc5LjE1OTI4NCwgMjAxNi8wNC8xOS0xMzoxMzo0MCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTUuNSAoTWFjaW50b3NoKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpDQ0E1QkUzRTRDMDcxMUU2QkMyRDk3MzlGN0EzMTI2NSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDpDQ0E1QkUzRjRDMDcxMUU2QkMyRDk3MzlGN0EzMTI2NSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjJFQ0Q4QzE5NEI1MjExRTZCQzJEOTczOUY3QTMxMjY1IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjJFQ0Q4QzFBNEI1MjExRTZCQzJEOTczOUY3QTMxMjY1Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+tgU1kQAAB4pJREFU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"
+    };
+    this.drawFill(context);
+  }
+
+  get nature() {
+    return NATURE;
+  }
+}
+
+exports.Sensor = Sensor;
 _thingsScene.Component.register('humidity-sensor', Sensor);
 _component3d2.default.register('humidity-sensor', HumiditySensor);
 
@@ -52829,8 +52074,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 var _object3d = __webpack_require__(3);
 
 var _object3d2 = _interopRequireDefault(_object3d);
@@ -52855,78 +52098,57 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+class ForkLift extends _object3d2.default {
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+  static get threedObjectLoader() {
+    if (!ForkLift._threedObjectLoader) {
+      ForkLift._threedObjectLoader = new Promise((resolve, reject) => {
+        let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
+        let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+        mtlLoader.load(_fork_lift2.default, materials => {
+          materials.preload();
+          objLoader.setMaterials(materials);
 
+          objLoader.load(_fork_lift4.default, obj => {
+            var extObj = obj;
+            if (extObj && extObj.children && extObj.children.length > 0) {
+              extObj = extObj.children[0];
+            }
 
-var ForkLift = function (_Object3D) {
-  _inherits(ForkLift, _Object3D);
-
-  function ForkLift() {
-    _classCallCheck(this, ForkLift);
-
-    return _possibleConstructorReturn(this, (ForkLift.__proto__ || Object.getPrototypeOf(ForkLift)).apply(this, arguments));
-  }
-
-  _createClass(ForkLift, [{
-    key: 'createObject',
-    value: function createObject() {
-      ForkLift.threedObjectLoader.then(this.addObject.bind(this));
-    }
-  }, {
-    key: 'addObject',
-    value: function addObject(extObject) {
-      var _model = this.model,
-          width = _model.width,
-          height = _model.height,
-          depth = _model.depth;
-
-
-      this.type = 'forklift';
-
-      var object = extObject.clone();
-      this.add(object);
-
-      this.scale.set(width, depth, height);
-    }
-  }], [{
-    key: 'threedObjectLoader',
-    get: function get() {
-      if (!ForkLift._threedObjectLoader) {
-        ForkLift._threedObjectLoader = new Promise(function (resolve, reject) {
-          var objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
-          var mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
-
-          mtlLoader.load(_fork_lift2.default, function (materials) {
-            materials.preload();
-            objLoader.setMaterials(materials);
-
-            objLoader.load(_fork_lift4.default, function (obj) {
-              var extObj = obj;
-              if (extObj && extObj.children && extObj.children.length > 0) {
-                extObj = extObj.children[0];
-              }
-
-              extObj.geometry.center();
-              resolve(obj);
-            });
+            extObj.geometry.center();
+            resolve(obj);
           });
         });
-      }
-
-      return ForkLift._threedObjectLoader;
+      });
     }
-  }]);
 
-  return ForkLift;
-}(_object3d2.default);
+    return ForkLift._threedObjectLoader;
+  }
 
-exports.default = ForkLift;
+  createObject() {
+    ForkLift.threedObjectLoader.then(this.addObject.bind(this));
+  }
+
+  addObject(extObject) {
+    var {
+      width,
+      height,
+      depth
+    } = this.model;
+
+    this.type = 'forklift';
+
+    var object = extObject.clone();
+    this.add(object);
+
+    this.scale.set(width, depth, height);
+  }
+
+}
+exports.default = ForkLift; /*
+                             * Copyright © HatioLab Inc. All rights reserved.
+                             */
 
 _component3d2.default.register('forklift', ForkLift);
 
@@ -52942,8 +52164,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Door2d = undefined;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 var _component3d = __webpack_require__(1);
 
 var _component3d2 = _interopRequireDefault(_component3d);
@@ -52954,89 +52174,60 @@ var _three = __webpack_require__(0);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+class Door extends _three.Mesh {
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+  constructor(model, canvasSize) {
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+    super();
 
+    this._model = model;
 
-var Door = function (_Mesh) {
-  _inherits(Door, _Mesh);
-
-  function Door(model, canvasSize) {
-    _classCallCheck(this, Door);
-
-    var _this = _possibleConstructorReturn(this, (Door.__proto__ || Object.getPrototypeOf(Door)).call(this));
-
-    _this._model = model;
-
-    _this.createObject(model, canvasSize);
-
-    return _this;
+    this.createObject(model, canvasSize);
   }
 
-  _createClass(Door, [{
-    key: 'createObject',
-    value: function createObject(model, canvasSize) {
+  createObject(model, canvasSize) {
 
-      var cx = model.left + model.width / 2 - canvasSize.width / 2;
-      var cy = model.top + model.height / 2 - canvasSize.height / 2;
-      var cz = 0.5 * model.depth;
+    let cx = model.left + model.width / 2 - canvasSize.width / 2;
+    let cy = model.top + model.height / 2 - canvasSize.height / 2;
+    let cz = 0.5 * model.depth;
 
-      var rotation = model.rotation;
-      this.type = model.type;
+    let rotation = model.rotation;
+    this.type = model.type;
 
-      this.createDoor(model.width, model.height, model.depth);
+    this.createDoor(model.width, model.height, model.depth);
 
-      this.position.set(cx, cz, cy);
-      this.rotation.y = rotation || 0;
-    }
-  }, {
-    key: 'createDoor',
-    value: function createDoor(w, h, d) {
-      var _model$fillStyle = this.model.fillStyle,
-          fillStyle = _model$fillStyle === undefined ? 'saddlebrown' : _model$fillStyle;
-
-
-      this.geometry = new THREE.BoxBufferGeometry(w, d, h);
-      this.material = new THREE.MeshLambertMaterial({ color: fillStyle, side: THREE.FrontSide });
-
-      // this.castShadow = true
-    }
-  }, {
-    key: 'model',
-    get: function get() {
-      return this._model;
-    }
-  }]);
-
-  return Door;
-}(_three.Mesh);
-
-exports.default = Door;
-
-var Door2d = exports.Door2d = function (_Rect) {
-  _inherits(Door2d, _Rect);
-
-  function Door2d() {
-    _classCallCheck(this, Door2d);
-
-    return _possibleConstructorReturn(this, (Door2d.__proto__ || Object.getPrototypeOf(Door2d)).apply(this, arguments));
+    this.position.set(cx, cz, cy);
+    this.rotation.y = rotation || 0;
   }
 
-  _createClass(Door2d, [{
-    key: 'is3dish',
-    value: function is3dish() {
-      return true;
-    }
-  }]);
+  createDoor(w, h, d) {
 
-  return Door2d;
-}(_thingsScene.Rect);
+    let {
+      fillStyle = 'saddlebrown'
+    } = this.model;
 
+    this.geometry = new THREE.BoxBufferGeometry(w, d, h);
+    this.material = new THREE.MeshLambertMaterial({ color: fillStyle, side: THREE.FrontSide });
+
+    // this.castShadow = true
+  }
+
+  get model() {
+    return this._model;
+  }
+}
+
+exports.default = Door; /*
+                         * Copyright © HatioLab Inc. All rights reserved.
+                         */
+
+class Door2d extends _thingsScene.Rect {
+  is3dish() {
+    return true;
+  }
+}
+
+exports.Door2d = Door2d;
 _thingsScene.Component.register('door', Door2d);
 _component3d2.default.register('door', Door);
 
@@ -53051,22 +52242,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
 var _thingsScene = __webpack_require__(2);
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
-
-
-var NATURE = {
+const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
@@ -53095,9 +52273,12 @@ var NATURE = {
       split: false
     }
   }]
-};
+}; /*
+    * Copyright © HatioLab Inc. All rights reserved.
+    */
 
-var EMPTY_BORDER = {};
+
+const EMPTY_BORDER = {};
 
 function isBottomMost(idx, rows, columns) {
   return idx >= (rows - 1) * columns;
@@ -53107,396 +52288,340 @@ function isRightMost(idx, rows, columns) {
   return (idx + 1) % columns == 0;
 }
 
-function hasAnyProperty(o) {
-  for (var _len = arguments.length, properties = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-    properties[_key - 1] = arguments[_key];
-  }
-
-  for (var p in properties) {
+function hasAnyProperty(o, ...properties) {
+  for (let p in properties) {
     if (o.hasOwnProperty(properties[p])) return true;
   }
 }
 
-var EMPTY_CELL_STROKE_STYLE = '#ccc';
-var EMPTY_CELL_LINE_WIDTH = 1;
-var EMPTY_CELL_FILL_STYLE = '#efefef';
-var HIGHLIGHT_FILL_STYLE = 'rgba(255, 00, 00, 0.7)';
-var HIGHLIGHT_TEXT_STYLE = '#fff';
+const EMPTY_CELL_STROKE_STYLE = '#ccc';
+const EMPTY_CELL_LINE_WIDTH = 1;
+const EMPTY_CELL_FILL_STYLE = '#efefef';
+const HIGHLIGHT_FILL_STYLE = 'rgba(255, 00, 00, 0.7)';
+const HIGHLIGHT_TEXT_STYLE = '#fff';
 
 /**
  * 1. 스타일을 상속 받아야 함. (cascade-style)
  * 2. 스타일을 동적처리할 수 있음. (로직처리)
  * 3. 데이타를 받을 수 있음.
  */
+class RackTableCell extends (0, _thingsScene.RectPath)(_thingsScene.Component) {
 
-var RackTableCell = function (_RectPath) {
-  _inherits(RackTableCell, _RectPath);
-
-  function RackTableCell() {
-    _classCallCheck(this, RackTableCell);
-
-    return _possibleConstructorReturn(this, (RackTableCell.__proto__ || Object.getPrototypeOf(RackTableCell)).apply(this, arguments));
+  get hasTextProperty() {
+    return false;
   }
 
-  _createClass(RackTableCell, [{
-    key: '_drawBorder',
-    value: function _drawBorder(context, x, y, to_x, to_y, style) {
-      if (style && style.strokeStyle && style.lineWidth && style.lineDash) {
-        context.beginPath();
-        context.moveTo(x, y);
-        context.lineTo(to_x, to_y);
-        _thingsScene.Component.drawStroke(context, style, this);
-      }
-    }
-  }, {
-    key: '_draw',
-    value: function _draw(context) {
-      var _model = this.model,
-          left = _model.left,
-          top = _model.top,
-          width = _model.width,
-          height = _model.height;
+  get nature() {
+    return NATURE;
+  }
 
+  set merged(merged) {
+    this.set('merged', !!merged);
+    if (merged) this.set('text', '');
+  }
 
-      var border = this.model.border || {};
+  get merged() {
+    return this.get('merged');
+  }
 
-      if (!this.model.isEmpty) this._draw_rack_cell(context);
+  set rowspan(rowspan) {
+    this.set('rowspan', rowspan);
+  }
 
-      // Cell 채우기.
+  get rowspan() {
+    return this.get('rowspan');
+  }
+
+  set colspan(colspan) {
+    this.set('colspan', colspan);
+  }
+
+  get colspan() {
+    return this.get('colspan');
+  }
+
+  get border() {
+    var border = this.model.border || EMPTY_BORDER;
+  }
+
+  get isEmpty() {
+    return this.get('isEmpty');
+  }
+
+  _drawBorder(context, x, y, to_x, to_y, style) {
+    if (style && style.strokeStyle && style.lineWidth && style.lineDash) {
       context.beginPath();
-      context.lineWidth = 0;
-      context.rect(left, top, width, height);
-
-      // Border 그리기
-      var parent = this.parent;
-      var idx = parent.components.indexOf(this);
-      var columns = parent.columns || 1;
-      var rows = parent.rows || 1;
-
-      this._drawBorder(context, left, top, left + width, top, border.top);
-      this._drawBorder(context, left, top + height, left, top, border.left);
-      if (isRightMost(idx, rows, columns)) this._drawBorder(context, left + width, top, left + width, top + height, border.right);
-      if (isBottomMost(idx, rows, columns)) this._drawBorder(context, left + width, top + height, left, top + height, border.bottom);
+      context.moveTo(x, y);
+      context.lineTo(to_x, to_y);
+      _thingsScene.Component.drawStroke(context, style, this);
     }
-  }, {
-    key: '_post_draw',
-    value: function _post_draw(context) {
-      var _bounds = this.bounds,
-          left = _bounds.left,
-          top = _bounds.top,
-          width = _bounds.width,
-          height = _bounds.height;
+  }
 
+  _draw(context) {
+    var {
+      left,
+      top,
+      width,
+      height
+    } = this.model;
 
-      _get(RackTableCell.prototype.__proto__ || Object.getPrototypeOf(RackTableCell.prototype), '_post_draw', this).call(this, context);
+    var border = this.model.border || {};
 
-      if (this._focused) this._draw_location_info(context);
+    if (!this.model.isEmpty) this._draw_rack_cell(context);
+
+    // Cell 채우기.
+    context.beginPath();
+    context.lineWidth = 0;
+    context.rect(left, top, width, height);
+
+    // Border 그리기
+    var parent = this.parent;
+    var idx = parent.components.indexOf(this);
+    var columns = parent.columns || 1;
+    var rows = parent.rows || 1;
+
+    this._drawBorder(context, left, top, left + width, top, border.top);
+    this._drawBorder(context, left, top + height, left, top, border.left);
+    if (isRightMost(idx, rows, columns)) this._drawBorder(context, left + width, top, left + width, top + height, border.right);
+    if (isBottomMost(idx, rows, columns)) this._drawBorder(context, left + width, top + height, left, top + height, border.bottom);
+  }
+
+  _post_draw(context) {
+    var {
+      left, top, width, height
+    } = this.bounds;
+
+    super._post_draw(context);
+
+    if (this._focused) this._draw_location_info(context);
+  }
+
+  _draw_rack_cell(context) {
+    var {
+      left, top, width, height
+    } = this.model;
+
+    context.save();
+    context.fillStyle = EMPTY_CELL_FILL_STYLE;
+    context.fillRect(left, top, width, height);
+
+    context.beginPath();
+    context.lineWidth = EMPTY_CELL_LINE_WIDTH;
+    context.strokeStyle = EMPTY_CELL_STROKE_STYLE;
+
+    context.moveTo(left, top);
+    context.lineTo(left + width, top + height);
+    context.moveTo(left + width, top);
+    context.lineTo(left, top + height);
+
+    context.stroke();
+    context.closePath();
+    context.restore();
+  }
+
+  _draw_location_info(context) {
+    var rackTable = this.parent;
+    var {
+      locPattern,
+      zone
+    } = rackTable.model;
+
+    locPattern = locPattern.substring(0, locPattern.indexOf('{u}') + 3);
+
+    var locationString = '';
+    if (this.get('section') && this.get('unit')) locationString = locPattern.replace('{z}', zone).replace('{s}', this.get('section')).replace('{u}', this.get('unit'));
+
+    if (!locationString) return;
+
+    let { left, top } = this.bounds;
+
+    left = Math.max(left, 0);
+    top = top - 18;
+
+    context.font = '12px Arial';
+    let metrics = context.measureText(locationString);
+
+    context.fillStyle = "#FF0000";
+    context.fillRect(left, top, metrics.width + 6, 16);
+
+    context.fillStyle = 'white';
+
+    context.fillText(locationString, left + 3, top + 13);
+  }
+
+  get index() {
+    let rackTable = this.parent;
+    var index = rackTable.components.indexOf(this);
+
+    var rowIndex = Math.floor(index / rackTable.columns);
+    var columnIndex = index % rackTable.columns;
+
+    return {
+      row: rowIndex,
+      column: columnIndex
+    };
+  }
+
+  get rowIndex() {
+    return this.index.row;
+  }
+
+  get columnIndex() {
+    return this.index.column;
+  }
+
+  get leftCell() {
+    let rackTable = this.parent;
+    var index = rackTable.components.indexOf(this);
+
+    var rowIndex = this.rowIndex;
+    var columnIndex = this.columnIndex;
+
+    if (columnIndex === 0) return null;
+
+    var leftCell = rackTable.components[rowIndex * rackTable.columns + columnIndex - 1];
+
+    return leftCell;
+  }
+
+  get rightCell() {
+    let rackTable = this.parent;
+    var index = rackTable.components.indexOf(this);
+
+    var rowIndex = this.rowIndex;
+    var columnIndex = this.columnIndex;
+
+    if (columnIndex === rackTable.columns) return null;
+
+    var rightCell = rackTable.components[rowIndex * rackTable.columns + columnIndex + 1];
+
+    return rightCell;
+  }
+
+  get aboveCell() {
+    let rackTable = this.parent;
+    var index = rackTable.components.indexOf(this);
+
+    var rowIndex = this.rowIndex;
+    var columnIndex = this.columnIndex;
+
+    if (rowIndex === 0) return null;
+
+    var aboveCell = rackTable.components[(rowIndex - 1) * rackTable.columns + columnIndex];
+
+    return aboveCell;
+  }
+
+  get belowCell() {
+    var rackTable = this.parent;
+    var index = rackTable.components.indexOf(this);
+
+    var rowIndex = this.rowIndex;
+    var columnIndex = this.columnIndex;
+
+    if (rowIndex === rackTable.rows) return null;
+
+    var belowCell = rackTable.components[(rowIndex + 1) * rackTable.columns + columnIndex];
+
+    return belowCell;
+  }
+
+  get rowCells() {
+    var rackTable = this.parent;
+    return rackTable.getCellsByRow(this.rowIndex);
+  }
+
+  get columnCells() {
+    var rackTable = this.parent;
+    return rackTable.getCellsByColumn(this.columnIndex);
+  }
+
+  get aboveRowCells() {
+    var aboveCell = this.aboveCell;
+    while (1) {
+      var aboveRowCells = aboveCell.notEmptyRowCells;
+
+      if (aboveRowCells.length > 0) return aboveRowCells;
+
+      aboveCell = aboveCell.aboveCell;
     }
-  }, {
-    key: '_draw_rack_cell',
-    value: function _draw_rack_cell(context) {
-      var _model2 = this.model,
-          left = _model2.left,
-          top = _model2.top,
-          width = _model2.width,
-          height = _model2.height;
+  }
 
+  get lastUnit() {
+    var rowCells = this.aboveRowCells;
 
-      context.save();
-      context.fillStyle = EMPTY_CELL_FILL_STYLE;
-      context.fillRect(left, top, width, height);
+    for (let i = rowCells.length - 1; i > 0; i--) {
+      var cell = rowCells[i];
 
-      context.beginPath();
-      context.lineWidth = EMPTY_CELL_LINE_WIDTH;
-      context.strokeStyle = EMPTY_CELL_STROKE_STYLE;
+      var unit = cell.get('unit');
 
-      context.moveTo(left, top);
-      context.lineTo(left + width, top + height);
-      context.moveTo(left + width, top);
-      context.lineTo(left, top + height);
-
-      context.stroke();
-      context.closePath();
-      context.restore();
+      if (unit) return Number(unit);
     }
-  }, {
-    key: '_draw_location_info',
-    value: function _draw_location_info(context) {
-      var rackTable = this.parent;
-      var _rackTable$model = rackTable.model,
-          locPattern = _rackTable$model.locPattern,
-          zone = _rackTable$model.zone;
 
+    return 0;
+  }
 
-      locPattern = locPattern.substring(0, locPattern.indexOf('{u}') + 3);
+  get firstUnit() {
+    var rowCells = this.aboveRowCells;
 
-      var locationString = '';
-      if (this.get('section') && this.get('unit')) locationString = locPattern.replace('{z}', zone).replace('{s}', this.get('section')).replace('{u}', this.get('unit'));
+    for (let i = 0; i < rowCells.length; i++) {
+      var cell = rowCells[i];
 
-      if (!locationString) return;
+      var unit = cell.get('unit');
 
-      var _bounds2 = this.bounds,
-          left = _bounds2.left,
-          top = _bounds2.top;
-
-
-      left = Math.max(left, 0);
-      top = top - 18;
-
-      context.font = '12px Arial';
-      var metrics = context.measureText(locationString);
-
-      context.fillStyle = "#FF0000";
-      context.fillRect(left, top, metrics.width + 6, 16);
-
-      context.fillStyle = 'white';
-
-      context.fillText(locationString, left + 3, top + 13);
+      if (unit) return Number(unit);
     }
-  }, {
-    key: 'onchange',
-    value: function onchange(after, before) {
-      if (hasAnyProperty(after, "isEmpty")) {
-        delete this.model.unit;
-        delete this.model.section;
-      }
+
+    return 0;
+  }
+
+  get notEmptyRowCells() {
+    return this.rowCells.filter(c => {
+      return !c.get('isEmpty');
+    });
+  }
+
+  get emptyRowCells() {
+    return this.rowCells.filter(c => {
+      return c.get('isEmpty');
+    });
+  }
+
+  get isAisle() {
+    return this.notEmptyRowCells.length === 0;
+  }
+
+  onchange(after, before) {
+    if (hasAnyProperty(after, "isEmpty")) {
+      delete this.model.unit;
+      delete this.model.section;
     }
-  }, {
-    key: 'onmouseenter',
-    value: function onmouseenter() {
-      this._focused = true;
-      this.invalidate();
-    }
-  }, {
-    key: 'onmouseleave',
-    value: function onmouseleave() {
+  }
+
+  onmouseenter() {
+    this._focused = true;
+    this.invalidate();
+  }
+
+  onmouseleave() {
+    this._focused = false;
+    this.invalidate();
+  }
+
+  contains(x, y) {
+    var contains = super.contains(x, y);
+    if (!contains) {
       this._focused = false;
       this.invalidate();
     }
-  }, {
-    key: 'contains',
-    value: function contains(x, y) {
-      var contains = _get(RackTableCell.prototype.__proto__ || Object.getPrototypeOf(RackTableCell.prototype), 'contains', this).call(this, x, y);
-      if (!contains) {
-        this._focused = false;
-        this.invalidate();
-      }
 
-      return contains;
-    }
-  }, {
-    key: 'hasTextProperty',
-    get: function get() {
-      return false;
-    }
-  }, {
-    key: 'nature',
-    get: function get() {
-      return NATURE;
-    }
-  }, {
-    key: 'merged',
-    set: function set(merged) {
-      this.set('merged', !!merged);
-      if (merged) this.set('text', '');
-    },
-    get: function get() {
-      return this.get('merged');
-    }
-  }, {
-    key: 'rowspan',
-    set: function set(rowspan) {
-      this.set('rowspan', rowspan);
-    },
-    get: function get() {
-      return this.get('rowspan');
-    }
-  }, {
-    key: 'colspan',
-    set: function set(colspan) {
-      this.set('colspan', colspan);
-    },
-    get: function get() {
-      return this.get('colspan');
-    }
-  }, {
-    key: 'border',
-    get: function get() {
-      var border = this.model.border || EMPTY_BORDER;
-    }
-  }, {
-    key: 'isEmpty',
-    get: function get() {
-      return this.get('isEmpty');
-    }
-  }, {
-    key: 'index',
-    get: function get() {
-      var rackTable = this.parent;
-      var index = rackTable.components.indexOf(this);
+    return contains;
+  }
 
-      var rowIndex = Math.floor(index / rackTable.columns);
-      var columnIndex = index % rackTable.columns;
-
-      return {
-        row: rowIndex,
-        column: columnIndex
-      };
-    }
-  }, {
-    key: 'rowIndex',
-    get: function get() {
-      return this.index.row;
-    }
-  }, {
-    key: 'columnIndex',
-    get: function get() {
-      return this.index.column;
-    }
-  }, {
-    key: 'leftCell',
-    get: function get() {
-      var rackTable = this.parent;
-      var index = rackTable.components.indexOf(this);
-
-      var rowIndex = this.rowIndex;
-      var columnIndex = this.columnIndex;
-
-      if (columnIndex === 0) return null;
-
-      var leftCell = rackTable.components[rowIndex * rackTable.columns + columnIndex - 1];
-
-      return leftCell;
-    }
-  }, {
-    key: 'rightCell',
-    get: function get() {
-      var rackTable = this.parent;
-      var index = rackTable.components.indexOf(this);
-
-      var rowIndex = this.rowIndex;
-      var columnIndex = this.columnIndex;
-
-      if (columnIndex === rackTable.columns) return null;
-
-      var rightCell = rackTable.components[rowIndex * rackTable.columns + columnIndex + 1];
-
-      return rightCell;
-    }
-  }, {
-    key: 'aboveCell',
-    get: function get() {
-      var rackTable = this.parent;
-      var index = rackTable.components.indexOf(this);
-
-      var rowIndex = this.rowIndex;
-      var columnIndex = this.columnIndex;
-
-      if (rowIndex === 0) return null;
-
-      var aboveCell = rackTable.components[(rowIndex - 1) * rackTable.columns + columnIndex];
-
-      return aboveCell;
-    }
-  }, {
-    key: 'belowCell',
-    get: function get() {
-      var rackTable = this.parent;
-      var index = rackTable.components.indexOf(this);
-
-      var rowIndex = this.rowIndex;
-      var columnIndex = this.columnIndex;
-
-      if (rowIndex === rackTable.rows) return null;
-
-      var belowCell = rackTable.components[(rowIndex + 1) * rackTable.columns + columnIndex];
-
-      return belowCell;
-    }
-  }, {
-    key: 'rowCells',
-    get: function get() {
-      var rackTable = this.parent;
-      return rackTable.getCellsByRow(this.rowIndex);
-    }
-  }, {
-    key: 'columnCells',
-    get: function get() {
-      var rackTable = this.parent;
-      return rackTable.getCellsByColumn(this.columnIndex);
-    }
-  }, {
-    key: 'aboveRowCells',
-    get: function get() {
-      var aboveCell = this.aboveCell;
-      while (1) {
-        var aboveRowCells = aboveCell.notEmptyRowCells;
-
-        if (aboveRowCells.length > 0) return aboveRowCells;
-
-        aboveCell = aboveCell.aboveCell;
-      }
-    }
-  }, {
-    key: 'lastUnit',
-    get: function get() {
-      var rowCells = this.aboveRowCells;
-
-      for (var i = rowCells.length - 1; i > 0; i--) {
-        var cell = rowCells[i];
-
-        var unit = cell.get('unit');
-
-        if (unit) return Number(unit);
-      }
-
-      return 0;
-    }
-  }, {
-    key: 'firstUnit',
-    get: function get() {
-      var rowCells = this.aboveRowCells;
-
-      for (var i = 0; i < rowCells.length; i++) {
-        var cell = rowCells[i];
-
-        var unit = cell.get('unit');
-
-        if (unit) return Number(unit);
-      }
-
-      return 0;
-    }
-  }, {
-    key: 'notEmptyRowCells',
-    get: function get() {
-      return this.rowCells.filter(function (c) {
-        return !c.get('isEmpty');
-      });
-    }
-  }, {
-    key: 'emptyRowCells',
-    get: function get() {
-      return this.rowCells.filter(function (c) {
-        return c.get('isEmpty');
-      });
-    }
-  }, {
-    key: 'isAisle',
-    get: function get() {
-      return this.notEmptyRowCells.length === 0;
-    }
-  }]);
-
-  return RackTableCell;
-}((0, _thingsScene.RectPath)(_thingsScene.Component));
+}
 
 exports.default = RackTableCell;
-
-
-["border"].forEach(function (getter) {
-  return _thingsScene.Component.memoize(RackTableCell.prototype, getter, false);
-});
+["border"].forEach(getter => _thingsScene.Component.memoize(RackTableCell.prototype, getter, false));
 
 _thingsScene.Component.register('rack-table-cell', RackTableCell);
 
@@ -53511,8 +52636,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 var _component3d = __webpack_require__(1);
 
 var _component3d2 = _interopRequireDefault(_component3d);
@@ -53521,101 +52644,73 @@ var _three = __webpack_require__(0);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+/*
+ * Copyright © HatioLab Inc. All rights reserved.
+ */
+class Group3D extends _three.Group {
+  constructor(model, canvasSize, visualizer) {
+    super();
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
-
-
-var Group3D = function (_Group) {
-  _inherits(Group3D, _Group);
-
-  function Group3D(model, canvasSize, visualizer) {
-    _classCallCheck(this, Group3D);
-
-    var _this = _possibleConstructorReturn(this, (Group3D.__proto__ || Object.getPrototypeOf(Group3D)).call(this));
-
-    _this._model = model;
-    _this._visualizer = visualizer;
+    this._model = model;
+    this._visualizer = visualizer;
     // this.createObject(canvasSize);
     // this.createChildrenObject(canvasSize);
     // this.createObject(canvasSize);
-    return _this;
   }
 
-  _createClass(Group3D, [{
-    key: 'dispose',
-    value: function dispose() {
-      var _this2 = this;
+  dispose() {
 
-      this.children.slice().forEach(function (child) {
-        if (child.dispose) child.dispose();
-        if (child.geometry && child.geometry.dispose) child.geometry.dispose();
-        if (child.material && child.material.dispose) child.material.dispose();
-        if (child.texture && child.texture.dispose) child.texture.dispose();
-        _this2.remove(child);
-      });
-    }
-  }, {
-    key: 'createObject',
-    value: function createObject(canvasSize) {
-      var _model = this.model,
-          _model$left = _model.left,
-          left = _model$left === undefined ? 0 : _model$left,
-          _model$top = _model.top,
-          top = _model$top === undefined ? 0 : _model$top,
-          _model$width = _model.width,
-          width = _model$width === undefined ? 0 : _model$width,
-          _model$height = _model.height,
-          height = _model$height === undefined ? 0 : _model$height;
+    this.children.slice().forEach(child => {
+      if (child.dispose) child.dispose();
+      if (child.geometry && child.geometry.dispose) child.geometry.dispose();
+      if (child.material && child.material.dispose) child.material.dispose();
+      if (child.texture && child.texture.dispose) child.texture.dispose();
+      this.remove(child);
+    });
+  }
 
+  createObject(canvasSize) {
 
-      var cx = left + width / 2 - canvasSize.width / 2;
-      var cy = top + height / 2 - canvasSize.height / 2;
-      // let cz = this.model.rx
+    var {
+      left = 0,
+      top = 0,
+      width = 0,
+      height = 0
+    } = this.model;
 
-      this.position.x = cx;
-      this.position.z = cy;
-    }
-  }, {
-    key: 'createChildrenObject',
-    value: function createChildrenObject(canvasSize) {
-      var _this3 = this;
+    let cx = left + width / 2 - canvasSize.width / 2;
+    let cy = top + height / 2 - canvasSize.height / 2;
+    // let cz = this.model.rx
 
-      var components = this._model.components;
+    this.position.x = cx;
+    this.position.z = cy;
+  }
 
+  createChildrenObject(canvasSize) {
+    var { components } = this._model;
 
-      components.forEach(function (component) {
-        var clazz = _component3d2.default.register(component.type);
-        if (!clazz) {
-          console.warn("Class not found : 3d class is not exist");
-          return;
-        }
+    components.forEach(component => {
+      var clazz = _component3d2.default.register(component.type);
+      if (!clazz) {
+        console.warn("Class not found : 3d class is not exist");
+        return;
+      }
 
-        var item = new clazz(component, canvasSize, _this3._visualizer);
-        if (item) {
-          item.name = component.id;
-          _this3.add(item);
-          // this.putObject(component.model.id, item);
-        }
-      });
-    }
-  }, {
-    key: 'model',
-    get: function get() {
-      return this._model;
-    }
-  }]);
+      var item = new clazz(component, canvasSize, this._visualizer);
+      if (item) {
+        item.name = component.id;
+        this.add(item);
+        // this.putObject(component.model.id, item);
+      }
+    });
+  }
 
-  return Group3D;
-}(_three.Group);
+  get model() {
+    return this._model;
+  }
+}
 
 exports.default = Group3D;
-
-
 _component3d2.default.register('group', Group3D);
 
 /***/ }),
@@ -53629,10 +52724,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.RackTable = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _component3d = __webpack_require__(1);
 
@@ -53650,23 +52741,17 @@ var _thingsScene = __webpack_require__(2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
-
-
-var LABEL_WIDTH = 25;
-var LABEL_HEIGHT = 25;
+/*
+ * Copyright © HatioLab Inc. All rights reserved.
+ */
+const LABEL_WIDTH = 25;
+const LABEL_HEIGHT = 25;
 
 function rgba(r, g, b, a) {
-  return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + a + ')';
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
-var NATURE = {
+const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
@@ -53734,7 +52819,7 @@ var NATURE = {
   }]
 };
 
-var SIDES = {
+const SIDES = {
   all: ['top', 'left', 'bottom', 'right'],
   out: ['top', 'left', 'bottom', 'right'],
   left: ['left'],
@@ -53745,26 +52830,22 @@ var SIDES = {
   topbottom: ['top', 'bottom']
 };
 
-var CLEAR_STYLE = {
+const CLEAR_STYLE = {
   strokeStyle: '',
   lineDash: 'solid',
   lineWidth: 0
 };
 
-var DEFAULT_STYLE = {
+const DEFAULT_STYLE = {
   strokeStyle: '#999',
   lineDash: 'solid',
   lineWidth: 1
 };
 
-var TABLE_LAYOUT = _thingsScene.Layout.get('table');
+const TABLE_LAYOUT = _thingsScene.Layout.get('table');
 
-function hasAnyProperty(o) {
-  for (var _len = arguments.length, properties = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-    properties[_key - 1] = arguments[_key];
-  }
-
-  for (var p in properties) {
+function hasAnyProperty(o, ...properties) {
+  for (let p in properties) {
     if (o.hasOwnProperty(properties[p])) return true;
   }
 }
@@ -53791,7 +52872,7 @@ function buildCopiedCell(copy, app) {
 }
 
 function buildBorderStyle(style, where) {
-  return (SIDES[where] || []).reduce(function (border, side) {
+  return (SIDES[where] || []).reduce((border, side) => {
     border[side] = style;
     return border;
   }, {});
@@ -53836,27 +52917,19 @@ function after(columns, i) {
 
 function array(value, size) {
   var arr = [];
-  for (var i = 0; i < size; i++) {
-    arr.push(1);
-  }return arr;
+  for (let i = 0; i < size; i++) arr.push(1);
+  return arr;
 }
 
 var columnControlHandler = {
-  ondragmove: function ondragmove(point, index, component) {
-    var _component$textBounds = component.textBounds,
-        left = _component$textBounds.left,
-        top = _component$textBounds.top,
-        width = _component$textBounds.width,
-        height = _component$textBounds.height;
-
+  ondragmove: function (point, index, component) {
+    var { left, top, width, height } = component.textBounds;
     var widths_sum = component.widths_sum;
 
     var widths = component.widths.slice();
 
     /* 컨트롤의 원래 위치를 구한다. */
-    var origin_pos_unit = widths.slice(0, index + 1).reduce(function (sum, width) {
-      return sum + width;
-    }, 0);
+    var origin_pos_unit = widths.slice(0, index + 1).reduce((sum, width) => sum + width, 0);
     var origin_offset = left + origin_pos_unit / widths_sum * width;
 
     /*
@@ -53882,22 +52955,15 @@ var columnControlHandler = {
 };
 
 var rowControlHandler = {
-  ondragmove: function ondragmove(point, index, component) {
-    var _component$textBounds2 = component.textBounds,
-        left = _component$textBounds2.left,
-        top = _component$textBounds2.top,
-        width = _component$textBounds2.width,
-        height = _component$textBounds2.height;
-
+  ondragmove: function (point, index, component) {
+    var { left, top, width, height } = component.textBounds;
     var heights_sum = component.heights_sum;
 
     var heights = component.heights.slice();
 
     /* 컨트롤의 원래 위치를 구한다. */
     index -= component.columns - 1;
-    var origin_pos_unit = heights.slice(0, index + 1).reduce(function (sum, height) {
-      return sum + height;
-    }, 0);
+    var origin_pos_unit = heights.slice(0, index + 1).reduce((sum, height) => sum + height, 0);
     var origin_offset = top + origin_pos_unit / heights_sum * height;
 
     /*
@@ -53922,1116 +52988,985 @@ var rowControlHandler = {
   }
 };
 
-var LOCATION_HEADER_SIZE = 50;
-var LOCATION_HEADER_LINE_WIDTH = 1;
-var LOCATION_HEADER_STROKE_STYLE = '#ccc';
-var LOCATION_HEADER_FILL_STYLE = 'rgba(230, 230, 230, 0.5)';
-var LOCATION_HEADER_HIGHLIGHT_STROKE_STYLE = 'rgba(0, 0, 99, 0.9)';
-var LOCATION_HEADER_HIGHLIGHT_FILL_STYLE = 'rgba(0, 0, 255, 0.5)';
+const LOCATION_HEADER_SIZE = 50;
+const LOCATION_HEADER_LINE_WIDTH = 1;
+const LOCATION_HEADER_STROKE_STYLE = '#ccc';
+const LOCATION_HEADER_FILL_STYLE = 'rgba(230, 230, 230, 0.5)';
+const LOCATION_HEADER_HIGHLIGHT_STROKE_STYLE = 'rgba(0, 0, 99, 0.9)';
+const LOCATION_HEADER_HIGHLIGHT_FILL_STYLE = 'rgba(0, 0, 255, 0.5)';
 
-var RackTable3d = function (_Group3D) {
-  _inherits(RackTable3d, _Group3D);
+class RackTable3d extends _group3d2.default {
 
-  function RackTable3d(model, canvasSize, visualizer, sceneComponent) {
-    _classCallCheck(this, RackTable3d);
+  constructor(model, canvasSize, visualizer, sceneComponent) {
 
-    var _this = _possibleConstructorReturn(this, (RackTable3d.__proto__ || Object.getPrototypeOf(RackTable3d)).call(this, model));
+    super(model);
 
-    _this._visualizer = visualizer;
-    _this._sceneComponent = sceneComponent;
+    this._visualizer = visualizer;
+    this._sceneComponent = sceneComponent;
 
-    _this.createRacks(canvasSize);
+    this.createRacks(canvasSize);
     // this.mergeObjects()
-
-    return _this;
   }
 
-  _createClass(RackTable3d, [{
-    key: 'dispose',
-    value: function dispose() {
-      _get(RackTable3d.prototype.__proto__ || Object.getPrototypeOf(RackTable3d.prototype), 'dispose', this).call(this);
+  dispose() {
+    super.dispose();
 
-      delete this._visualizer;
-    }
-  }, {
-    key: 'createRacks',
-    value: function createRacks(canvasSize) {
-      var _this2 = this;
+    delete this._visualizer;
+  }
 
-      var _model = this.model,
-          _model$components = _model.components,
-          components = _model$components === undefined ? [] : _model$components,
-          left = _model.left,
-          top = _model.top,
-          width = _model.width,
-          height = _model.height,
-          _model$rotation = _model.rotation,
-          rotation = _model$rotation === undefined ? 0 : _model$rotation,
-          zone = _model.zone,
-          _model$locPattern = _model.locPattern,
-          locPattern = _model$locPattern === undefined ? '{z}{s}-{u}{sh}' : _model$locPattern,
-          _model$shelfPattern = _model.shelfPattern,
-          shelfPattern = _model$shelfPattern === undefined ? '00' : _model$shelfPattern,
-          _model$shelves = _model.shelves,
-          shelves = _model$shelves === undefined ? 1 : _model$shelves,
-          _model$depth = _model.depth,
-          depth = _model$depth === undefined ? 1 : _model$depth,
-          columns = _model.columns,
-          rows = _model.rows,
-          _model$minUnit = _model.minUnit,
-          minUnit = _model$minUnit === undefined ? 1 : _model$minUnit,
-          _model$minSection = _model.minSection,
-          minSection = _model$minSection === undefined ? 1 : _model$minSection,
-          _model$stockScale = _model.stockScale,
-          stockScale = _model$stockScale === undefined ? 0.7 : _model$stockScale,
-          hideRackFrame = _model.hideRackFrame;
+  createRacks(canvasSize) {
 
+    var {
+      components = [],
+      left,
+      top,
+      width,
+      height,
+      rotation = 0,
+      zone,
+      locPattern = '{z}{s}-{u}{sh}',
+      shelfPattern = '00',
+      shelves = 1,
+      depth = 1,
+      columns,
+      rows,
+      minUnit = 1,
+      minSection = 1,
+      stockScale = 0.7,
+      hideRackFrame
+    } = this.model;
 
-      var cx = left + width / 2 - canvasSize.width / 2;
-      var cy = top + height / 2 - canvasSize.height / 2;
-      var cz = 0;
+    let cx = left + width / 2 - canvasSize.width / 2;
+    let cy = top + height / 2 - canvasSize.height / 2;
+    let cz = 0;
 
-      this.position.set(cx, cz, cy);
-      this.rotation.y = -rotation;
+    this.position.set(cx, cz, cy);
+    this.rotation.y = -rotation;
 
-      components.forEach(function (rack) {
+    components.forEach(rack => {
 
-        var rackModel = {
-          left: rack.left,
-          top: rack.top,
-          width: rack.width,
-          height: rack.height,
-          depth: depth,
-          shelves: shelves,
-          unit: rack.unit,
-          section: rack.section,
-          zone: zone,
-          locPattern: locPattern,
-          shelfPattern: shelfPattern,
-          isEmpty: rack.isEmpty,
-          hideRackFrame: hideRackFrame,
-          stockScale: stockScale
-        };
+      var rackModel = {
+        left: rack.left,
+        top: rack.top,
+        width: rack.width,
+        height: rack.height,
+        depth,
+        shelves,
+        unit: rack.unit,
+        section: rack.section,
+        zone,
+        locPattern,
+        shelfPattern,
+        isEmpty: rack.isEmpty,
+        hideRackFrame,
+        stockScale
+      };
 
-        if (!rackModel.isEmpty) {
-          var rack = new _rack2.default(rackModel, _this2.model, _this2._visualizer);
-          _this2.add(rack);
-        }
-      });
-    }
-  }, {
-    key: 'mergeObjects',
-    value: function mergeObjects() {
-      var frames = [];
-      var boards = [];
-      this.children.forEach(function (rack) {
-        frames = frames.concat(rack.frames);
-        boards = boards.concat(rack.boards);
-      });
+      if (!rackModel.isEmpty) {
+        var rack = new _rack2.default(rackModel, this.model, this._visualizer);
+        this.add(rack);
+      }
+    });
+  }
 
-      var targetFrame;
-      frames.forEach(function (frameGroup) {
-        frameGroup.children.forEach(function (f) {
-          if (!targetFrame) {
-            targetFrame = f;
-            return;
-          }
+  mergeObjects() {
+    var frames = [];
+    var boards = [];
+    this.children.forEach(rack => {
+      frames = frames.concat(rack.frames);
+      boards = boards.concat(rack.boards);
+    });
 
-          targetFrame.geometry.merge(f.geometry);
-        });
-      });
-      var targetBoard;
-      boards.forEach(function (b) {
-        if (!targetBoard) {
-          targetBoard = b;
+    var targetFrame;
+    frames.forEach(frameGroup => {
+      frameGroup.children.forEach(f => {
+        if (!targetFrame) {
+          targetFrame = f;
           return;
         }
 
-        targetBoard.geometry.merge(b.geometry);
+        targetFrame.geometry.merge(f.geometry);
       });
-    }
-  }, {
-    key: 'raycast',
-    value: function raycast(raycaster, intersects) {}
-  }, {
-    key: 'onchange',
-    value: function onchange(after, before) {
-      if (after.hasOwnProperty("data")) {
-        this.data = after.data;
+    });
+    var targetBoard;
+    boards.forEach(b => {
+      if (!targetBoard) {
+        targetBoard = b;
+        return;
       }
-    }
-  }]);
 
-  return RackTable3d;
-}(_group3d2.default);
-
-exports.default = RackTable3d;
-
-var RackTable = exports.RackTable = function (_Container) {
-  _inherits(RackTable, _Container);
-
-  function RackTable() {
-    _classCallCheck(this, RackTable);
-
-    return _possibleConstructorReturn(this, (RackTable.__proto__ || Object.getPrototypeOf(RackTable)).apply(this, arguments));
+      targetBoard.geometry.merge(b.geometry);
+    });
   }
 
-  _createClass(RackTable, [{
-    key: 'is3dish',
-    value: function is3dish() {
-      return true;
-    }
-  }, {
-    key: 'dispose',
-    value: function dispose() {
-      _get(RackTable.prototype.__proto__ || Object.getPrototypeOf(RackTable.prototype), 'dispose', this).call(this);
-      delete this._focused_cell;
-    }
-  }, {
-    key: 'created',
-    value: function created() {
-      var tobeSize = this.rows * this.columns;
-      var gap = this.size() - tobeSize;
+  raycast(raycaster, intersects) {}
 
-      if (gap == 0) {
-        return;
-      } else if (gap > 0) {
-        var removals = this._components.slice(gap);
-        this.remove(removals);
-      } else {
-        var newbies = [];
+  onchange(after, before) {
+    if (after.hasOwnProperty("data")) {
+      this.data = after.data;
+    }
+  }
 
-        for (var i = 0; i < -gap; i++) {
+}
+
+exports.default = RackTable3d;
+class RackTable extends _thingsScene.Container {
+
+  is3dish() {
+    return true;
+  }
+
+  dispose() {
+    super.dispose();
+    delete this._focused_cell;
+  }
+
+  created() {
+    var tobeSize = this.rows * this.columns;
+    var gap = this.size() - tobeSize;
+
+    if (gap == 0) {
+      return;
+    } else if (gap > 0) {
+      let removals = this._components.slice(gap);
+      this.remove(removals);
+    } else {
+      let newbies = [];
+
+      for (let i = 0; i < -gap; i++) newbies.push(buildNewCell(this.app));
+
+      this.add(newbies);
+    }
+
+    var widths = this.get('widths');
+    var heights = this.get('heights');
+
+    if (!widths || widths.length < this.columns) this.set('widths', this.widths);
+    if (!heights || heights.length < this.rows) this.set('heights', this.heights);
+  }
+
+  // 컴포넌트를 임의로 추가 및 삭제할 수 있는 지를 지정하는 속성임.
+  get focusible() {
+    return false;
+  }
+
+  get widths() {
+    var widths = this.get('widths');
+
+    if (!widths) return array(1, this.columns);
+
+    if (widths.length < this.columns) return widths.concat(array(1, this.columns - widths.length));else if (widths.length > this.columns) return widths.slice(0, this.columns);
+
+    return widths;
+  }
+
+  get heights() {
+    var heights = this.get('heights');
+
+    if (!heights) return array(1, this.rows);
+
+    if (heights.length < this.rows) return heights.concat(array(1, this.rows - heights.length));else if (heights.length > this.rows) return heights.slice(0, this.rows);
+
+    return heights;
+  }
+
+  buildCells(newrows, newcolumns, oldrows, oldcolumns) {
+    if (newrows < oldrows) {
+      let removals = this._components.slice(oldcolumns * newrows);
+      this.remove(removals);
+    }
+
+    var minrows = Math.min(newrows, oldrows);
+
+    if (newcolumns > oldcolumns) {
+      for (let r = 0; r < minrows; r++) {
+        for (let c = oldcolumns; c < newcolumns; c++) {
+          this.insertComponentAt(buildNewCell(this.app), r * newcolumns + c);
+        }
+      }
+    } else if (newcolumns < oldcolumns) {
+      let removals = [];
+
+      for (let r = 0; r < minrows; r++) {
+        for (let c = newcolumns; c < oldcolumns; c++) {
+          removals.push(this.components[r * oldcolumns + c]);
+        }
+      }
+      this.remove(removals);
+    }
+
+    if (newrows > oldrows) {
+      let newbies = [];
+
+      for (let r = oldrows; r < newrows; r++) {
+        for (let i = 0; i < newcolumns; i++) {
           newbies.push(buildNewCell(this.app));
-        }this.add(newbies);
+        }
       }
-
-      var widths = this.get('widths');
-      var heights = this.get('heights');
-
-      if (!widths || widths.length < this.columns) this.set('widths', this.widths);
-      if (!heights || heights.length < this.rows) this.set('heights', this.heights);
+      this.add(newbies);
     }
 
-    // 컴포넌트를 임의로 추가 및 삭제할 수 있는 지를 지정하는 속성임.
+    this.set({
+      widths: this.widths,
+      heights: this.heights
+    });
+  }
 
-  }, {
-    key: 'buildCells',
-    value: function buildCells(newrows, newcolumns, oldrows, oldcolumns) {
-      if (newrows < oldrows) {
-        var removals = this._components.slice(oldcolumns * newrows);
-        this.remove(removals);
+  get layout() {
+    return TABLE_LAYOUT;
+  }
+
+  get rows() {
+    return this.get('rows');
+  }
+
+  setCellsStyle(cells, style, where) {
+    var components = this.components;
+    var total = components.length;
+    var columns = this.get('columns');
+
+    // 병합된 셀도 포함시킨다.
+    var _cells = [];
+    cells.forEach(c => {
+      _cells.push(c);
+      if (c.colspan || c.rowspan) {
+        let col = this.getRowColumn(c).column;
+        let row = this.getRowColumn(c).row;
+        for (let i = row; i < row + c.rowspan; i++) for (let j = col; j < col + c.colspan; j++) if (i != row || j != col) _cells.push(this.components[i * this.columns + j]);
       }
+    });
+    var indices = _cells.map(cell => components.indexOf(cell));
+    indices.forEach(i => {
+      var cell = components[i];
 
-      var minrows = Math.min(newrows, oldrows);
+      switch (where) {
+        case 'all':
+          setCellBorder(cell, style, where);
 
-      if (newcolumns > oldcolumns) {
-        for (var r = 0; r < minrows; r++) {
-          for (var c = oldcolumns; c < newcolumns; c++) {
-            this.insertComponentAt(buildNewCell(this.app), r * newcolumns + c);
+          if (isLeftMost(total, columns, indices, i)) setCellBorder(components[before(columns, i)], style, 'right');
+          if (isRightMost(total, columns, indices, i)) setCellBorder(components[after(columns, i)], style, 'left');
+          if (isTopMost(total, columns, indices, i)) setCellBorder(components[above(columns, i)], style, 'bottom');
+          if (isBottomMost(total, columns, indices, i)) setCellBorder(components[below(columns, i)], style, 'top');
+          break;
+        case 'in':
+          if (!isLeftMost(total, columns, indices, i)) {
+            setCellBorder(cell, style, 'left');
           }
-        }
-      } else if (newcolumns < oldcolumns) {
-        var _removals = [];
-
-        for (var _r = 0; _r < minrows; _r++) {
-          for (var _c = newcolumns; _c < oldcolumns; _c++) {
-            _removals.push(this.components[_r * oldcolumns + _c]);
+          if (!isRightMost(total, columns, indices, i)) {
+            setCellBorder(cell, style, 'right');
           }
-        }
-        this.remove(_removals);
+          if (!isTopMost(total, columns, indices, i)) {
+            setCellBorder(cell, style, 'top');
+          }
+          if (!isBottomMost(total, columns, indices, i)) {
+            setCellBorder(cell, style, 'bottom');
+          }
+          break;
+        case 'out':
+          if (isLeftMost(total, columns, indices, i)) {
+            setCellBorder(cell, style, 'left');
+            setCellBorder(components[before(columns, i)], style, 'right');
+          }
+          if (isRightMost(total, columns, indices, i)) {
+            setCellBorder(cell, style, 'right');
+            setCellBorder(components[after(columns, i)], style, 'left');
+          }
+          if (isTopMost(total, columns, indices, i)) {
+            setCellBorder(cell, style, 'top');
+            setCellBorder(components[above(columns, i)], style, 'bottom');
+          }
+          if (isBottomMost(total, columns, indices, i)) {
+            setCellBorder(cell, style, 'bottom');
+            setCellBorder(components[below(columns, i)], style, 'top');
+          }
+          break;
+        case 'left':
+          if (isLeftMost(total, columns, indices, i)) {
+            setCellBorder(cell, style, 'left');
+            setCellBorder(components[before(columns, i)], style, 'right');
+          }
+          break;
+        case 'right':
+          if (isRightMost(total, columns, indices, i)) {
+            setCellBorder(cell, style, 'right');
+            setCellBorder(components[after(columns, i)], style, 'left');
+          }
+          break;
+        case 'center':
+          if (!isLeftMost(total, columns, indices, i)) {
+            setCellBorder(cell, style, 'left');
+          }
+          if (!isRightMost(total, columns, indices, i)) {
+            setCellBorder(cell, style, 'right');
+          }
+          break;
+        case 'middle':
+          if (!isTopMost(total, columns, indices, i)) {
+            setCellBorder(cell, style, 'top');
+          }
+          if (!isBottomMost(total, columns, indices, i)) {
+            setCellBorder(cell, style, 'bottom');
+          }
+          break;
+        case 'top':
+          if (isTopMost(total, columns, indices, i)) {
+            setCellBorder(cell, style, 'top');
+            setCellBorder(components[above(columns, i)], style, 'bottom');
+          }
+          break;
+        case 'bottom':
+          if (isBottomMost(total, columns, indices, i)) {
+            setCellBorder(cell, style, 'bottom');
+            setCellBorder(components[below(columns, i)], style, 'top');
+          }
+          break;
+        case 'clear':
+          setCellBorder(cell, CLEAR_STYLE, 'all');
+
+          if (isLeftMost(total, columns, indices, i)) setCellBorder(components[before(columns, i)], CLEAR_STYLE, 'right');
+          if (isRightMost(total, columns, indices, i)) setCellBorder(components[after(columns, i)], CLEAR_STYLE, 'left');
+          if (isTopMost(total, columns, indices, i)) setCellBorder(components[above(columns, i)], CLEAR_STYLE, 'bottom');
+          if (isBottomMost(total, columns, indices, i)) setCellBorder(components[below(columns, i)], CLEAR_STYLE, 'top');
       }
+    });
+  }
 
-      if (newrows > oldrows) {
-        var newbies = [];
+  getRowColumn(cell) {
+    var idx = this.components.indexOf(cell);
+    var length = this.components.length;
 
-        for (var _r2 = oldrows; _r2 < newrows; _r2++) {
-          for (var i = 0; i < newcolumns; i++) {
-            newbies.push(buildNewCell(this.app));
-          }
-        }
-        this.add(newbies);
-      }
+    return {
+      column: idx % this.columns,
+      row: Math.floor(idx / this.columns)
+    };
+  }
 
-      this.set({
-        widths: this.widths,
-        heights: this.heights
-      });
-    }
-  }, {
-    key: 'setCellsStyle',
-    value: function setCellsStyle(cells, style, where) {
-      var _this4 = this;
+  getCellsByRow(row) {
+    return this.components.slice(row * this.columns, (row + 1) * this.columns);
+  }
 
-      var components = this.components;
-      var total = components.length;
-      var columns = this.get('columns');
+  getCellsByColumn(column) {
+    var cells = [];
+    for (var i = 0; i < this.rows; i++) cells.push(this.components[this.columns * i + column]);
 
-      // 병합된 셀도 포함시킨다.
-      var _cells = [];
-      cells.forEach(function (c) {
-        _cells.push(c);
-        if (c.colspan || c.rowspan) {
-          var col = _this4.getRowColumn(c).column;
-          var row = _this4.getRowColumn(c).row;
-          for (var i = row; i < row + c.rowspan; i++) {
-            for (var j = col; j < col + c.colspan; j++) {
-              if (i != row || j != col) _cells.push(_this4.components[i * _this4.columns + j]);
-            }
-          }
-        }
-      });
-      var indices = _cells.map(function (cell) {
-        return components.indexOf(cell);
-      });
-      indices.forEach(function (i) {
-        var cell = components[i];
+    return cells;
+  }
 
-        switch (where) {
-          case 'all':
-            setCellBorder(cell, style, where);
+  deleteRows(cells) {
+    // 먼저 cells 위치의 행을 구한다.
+    let rows = [];
+    cells.forEach(cell => {
+      let row = this.getRowColumn(cell).row;
+      if (-1 == rows.indexOf(row)) rows.push(row);
+    });
+    rows.sort((a, b) => {
+      return a - b;
+    });
+    rows.reverse();
+    var heights = this.heights.slice();
+    rows.forEach(row => {
+      this.remove(this.getCellsByRow(row));
+    });
+    heights.splice(rows, 1);
+    this.model.rows -= rows.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+    this.set('heights', heights);
+  }
 
-            if (isLeftMost(total, columns, indices, i)) setCellBorder(components[before(columns, i)], style, 'right');
-            if (isRightMost(total, columns, indices, i)) setCellBorder(components[after(columns, i)], style, 'left');
-            if (isTopMost(total, columns, indices, i)) setCellBorder(components[above(columns, i)], style, 'bottom');
-            if (isBottomMost(total, columns, indices, i)) setCellBorder(components[below(columns, i)], style, 'top');
-            break;
-          case 'in':
-            if (!isLeftMost(total, columns, indices, i)) {
-              setCellBorder(cell, style, 'left');
-            }
-            if (!isRightMost(total, columns, indices, i)) {
-              setCellBorder(cell, style, 'right');
-            }
-            if (!isTopMost(total, columns, indices, i)) {
-              setCellBorder(cell, style, 'top');
-            }
-            if (!isBottomMost(total, columns, indices, i)) {
-              setCellBorder(cell, style, 'bottom');
-            }
-            break;
-          case 'out':
-            if (isLeftMost(total, columns, indices, i)) {
-              setCellBorder(cell, style, 'left');
-              setCellBorder(components[before(columns, i)], style, 'right');
-            }
-            if (isRightMost(total, columns, indices, i)) {
-              setCellBorder(cell, style, 'right');
-              setCellBorder(components[after(columns, i)], style, 'left');
-            }
-            if (isTopMost(total, columns, indices, i)) {
-              setCellBorder(cell, style, 'top');
-              setCellBorder(components[above(columns, i)], style, 'bottom');
-            }
-            if (isBottomMost(total, columns, indices, i)) {
-              setCellBorder(cell, style, 'bottom');
-              setCellBorder(components[below(columns, i)], style, 'top');
-            }
-            break;
-          case 'left':
-            if (isLeftMost(total, columns, indices, i)) {
-              setCellBorder(cell, style, 'left');
-              setCellBorder(components[before(columns, i)], style, 'right');
-            }
-            break;
-          case 'right':
-            if (isRightMost(total, columns, indices, i)) {
-              setCellBorder(cell, style, 'right');
-              setCellBorder(components[after(columns, i)], style, 'left');
-            }
-            break;
-          case 'center':
-            if (!isLeftMost(total, columns, indices, i)) {
-              setCellBorder(cell, style, 'left');
-            }
-            if (!isRightMost(total, columns, indices, i)) {
-              setCellBorder(cell, style, 'right');
-            }
-            break;
-          case 'middle':
-            if (!isTopMost(total, columns, indices, i)) {
-              setCellBorder(cell, style, 'top');
-            }
-            if (!isBottomMost(total, columns, indices, i)) {
-              setCellBorder(cell, style, 'bottom');
-            }
-            break;
-          case 'top':
-            if (isTopMost(total, columns, indices, i)) {
-              setCellBorder(cell, style, 'top');
-              setCellBorder(components[above(columns, i)], style, 'bottom');
-            }
-            break;
-          case 'bottom':
-            if (isBottomMost(total, columns, indices, i)) {
-              setCellBorder(cell, style, 'bottom');
-              setCellBorder(components[below(columns, i)], style, 'top');
-            }
-            break;
-          case 'clear':
-            setCellBorder(cell, CLEAR_STYLE, 'all');
+  deleteColumns(cells) {
+    // 먼저 cells 위치의 열을 구한다.
+    let columns = [];
+    cells.forEach(cell => {
+      let column = this.getRowColumn(cell).column;
+      if (-1 == columns.indexOf(column)) columns.push(column);
+    });
+    columns.sort((a, b) => {
+      return a - b;
+    });
+    columns.reverse();
 
-            if (isLeftMost(total, columns, indices, i)) setCellBorder(components[before(columns, i)], CLEAR_STYLE, 'right');
-            if (isRightMost(total, columns, indices, i)) setCellBorder(components[after(columns, i)], CLEAR_STYLE, 'left');
-            if (isTopMost(total, columns, indices, i)) setCellBorder(components[above(columns, i)], CLEAR_STYLE, 'bottom');
-            if (isBottomMost(total, columns, indices, i)) setCellBorder(components[below(columns, i)], CLEAR_STYLE, 'top');
-        }
-      });
-    }
-  }, {
-    key: 'getRowColumn',
-    value: function getRowColumn(cell) {
-      var idx = this.components.indexOf(cell);
-      var length = this.components.length;
-
-      return {
-        column: idx % this.columns,
-        row: Math.floor(idx / this.columns)
-      };
-    }
-  }, {
-    key: 'getCellsByRow',
-    value: function getCellsByRow(row) {
-      return this.components.slice(row * this.columns, (row + 1) * this.columns);
-    }
-  }, {
-    key: 'getCellsByColumn',
-    value: function getCellsByColumn(column) {
-      var cells = [];
-      for (var i = 0; i < this.rows; i++) {
-        cells.push(this.components[this.columns * i + column]);
-      }return cells;
-    }
-  }, {
-    key: 'deleteRows',
-    value: function deleteRows(cells) {
-      var _this5 = this;
-
-      // 먼저 cells 위치의 행을 구한다.
-      var rows = [];
-      cells.forEach(function (cell) {
-        var row = _this5.getRowColumn(cell).row;
-        if (-1 == rows.indexOf(row)) rows.push(row);
-      });
-      rows.sort(function (a, b) {
-        return a - b;
-      });
-      rows.reverse();
-      var heights = this.heights.slice();
-      rows.forEach(function (row) {
-        _this5.remove(_this5.getCellsByRow(row));
-      });
-      heights.splice(rows, 1);
-      this.model.rows -= rows.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
-      this.set('heights', heights);
-    }
-  }, {
-    key: 'deleteColumns',
-    value: function deleteColumns(cells) {
-      var _this6 = this;
-
-      // 먼저 cells 위치의 열을 구한다.
-      var columns = [];
-      cells.forEach(function (cell) {
-        var column = _this6.getRowColumn(cell).column;
-        if (-1 == columns.indexOf(column)) columns.push(column);
-      });
-      columns.sort(function (a, b) {
-        return a - b;
-      });
-      columns.reverse();
-
-      columns.forEach(function (column) {
-        var widths = _this6.widths.slice();
-        _this6.remove(_this6.getCellsByColumn(column));
-        widths.splice(column, 1);
-        _this6.model.columns -= 1; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
-        _this6.set('widths', widths);
-      });
-    }
-  }, {
-    key: 'insertCellsAbove',
-    value: function insertCellsAbove(cells) {
-      var _this7 = this;
-
-      // 먼저 cells 위치의 행을 구한다.
-      var rows = [];
-      cells.forEach(function (cell) {
-        var row = _this7.getRowColumn(cell).row;
-        if (-1 == rows.indexOf(row)) rows.push(row);
-      });
-      rows.sort(function (a, b) {
-        return a - b;
-      });
-      rows.reverse();
-      // 행 2개 이상은 추가 안함. 임시로 막아놓음
-      if (rows.length >= 2) return false;
-      var insertionRowPosition = rows[0];
-      var newbieRowHeights = [];
-      var newbieCells = [];
-      rows.forEach(function (row) {
-        for (var i = 0; i < _this7.columns; i++) {
-          newbieCells.push(buildCopiedCell(_this7.components[row * _this7.columns + i].model, _this7.app));
-        }newbieRowHeights.push(_this7.heights[row]);
-
-        newbieCells.reverse().forEach(function (cell) {
-          _this7.insertComponentAt(cell, insertionRowPosition * _this7.columns);
-        });
-
-        var heights = _this7.heights.slice();
-        heights.splice.apply(heights, [insertionRowPosition, 0].concat(newbieRowHeights));
-        _this7.set('heights', heights);
-
-        _this7.model.rows += rows.length;
-
-        _this7.clearCache();
-      });
-    }
-  }, {
-    key: 'insertCellsBelow',
-    value: function insertCellsBelow(cells) {
-      var _this8 = this;
-
-      // 먼저 cells 위치의 행을 구한다.
-      var rows = [];
-      cells.forEach(function (cell) {
-        var row = _this8.getRowColumn(cell).row;
-        if (-1 == rows.indexOf(row)) rows.push(row);
-      });
-      rows.sort(function (a, b) {
-        return a - b;
-      });
-      rows.reverse();
-      // 행 2개 이상은 추가 안함. 임시로 막아놓음
-      if (rows.length >= 2) return false;
-      var insertionRowPosition = rows[rows.length - 1] + 1;
-      var newbieRowHeights = [];
-      var newbieCells = [];
-      rows.forEach(function (row) {
-        for (var i = 0; i < _this8.columns; i++) {
-          newbieCells.push(buildCopiedCell(_this8.components[row * _this8.columns + i].model, _this8.app));
-        }newbieRowHeights.push(_this8.heights[row]);
-
-        newbieCells.reverse().forEach(function (cell) {
-          _this8.insertComponentAt(cell, insertionRowPosition * _this8.columns);
-        });
-
-        var heights = _this8.heights.slice();
-        heights.splice.apply(heights, [insertionRowPosition, 0].concat(newbieRowHeights));
-        _this8.set('heights', heights);
-
-        _this8.model.rows += 1;
-
-        _this8.clearCache();
-      });
-    }
-  }, {
-    key: 'insertCellsLeft',
-    value: function insertCellsLeft(cells) {
-      var _this9 = this;
-
-      // 먼저 cells 위치의 열을 구한다.
-      var columns = [];
-      cells.forEach(function (cell) {
-        var column = _this9.getRowColumn(cell).column;
-        if (-1 == columns.indexOf(column)) columns.push(column);
-      });
-      columns.sort(function (a, b) {
-        return a - b;
-      });
-      columns.reverse();
-      // 열 2개 이상은 추가 안함. 임시로 막아놓음
-      if (columns.length >= 2) return false;
-      var insertionColumnPosition = columns[0];
-      var newbieColumnWidths = [];
-      var newbieCells = [];
-      columns.forEach(function (column) {
-        for (var i = 0; i < _this9.rows; i++) {
-          newbieCells.push(buildCopiedCell(_this9.components[column + _this9.columns * i].model, _this9.app));
-        }newbieColumnWidths.push(_this9.widths[column]);
-
-        var increasedColumns = _this9.columns;
-        var index = _this9.rows;
-        newbieCells.reverse().forEach(function (cell) {
-          if (index == 0) {
-            index = _this9.rows;
-            increasedColumns++;
-          }
-
-          index--;
-          _this9.insertComponentAt(cell, insertionColumnPosition + index * increasedColumns);
-        });
-
-        var widths = _this9.widths.slice();
-        _this9.model.columns += columns.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
-
-        widths.splice.apply(widths, [insertionColumnPosition, 0].concat(newbieColumnWidths));
-
-        _this9.set('widths', widths);
-      });
-    }
-  }, {
-    key: 'insertCellsRight',
-    value: function insertCellsRight(cells) {
-      var _this10 = this;
-
-      // 먼저 cells 위치의 열을 구한다.
-      var columns = [];
-      cells.forEach(function (cell) {
-        var column = _this10.getRowColumn(cell).column;
-        if (-1 == columns.indexOf(column)) columns.push(column);
-      });
-      columns.sort(function (a, b) {
-        return a - b;
-      });
-      columns.reverse();
-      // 열 2개 이상은 추가 안함. 임시로 막아놓음
-      if (columns.length >= 2) return false;
-      var insertionColumnPosition = columns[columns.length - 1] + 1;
-      var newbieColumnWidths = [];
-      var newbieCells = [];
-      columns.forEach(function (column) {
-        for (var i = 0; i < _this10.rows; i++) {
-          newbieCells.push(buildCopiedCell(_this10.components[column + _this10.columns * i].model, _this10.app));
-        }newbieColumnWidths.push(_this10.widths[column]);
-
-        var increasedColumns = _this10.columns;
-        var index = _this10.rows;
-        newbieCells.reverse().forEach(function (cell) {
-          if (index == 0) {
-            index = _this10.rows;
-            increasedColumns++;
-          }
-
-          index--;
-          _this10.insertComponentAt(cell, insertionColumnPosition + index * increasedColumns);
-        });
-
-        var widths = _this10.widths.slice();
-        _this10.model.columns += columns.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
-
-        widths.splice.apply(widths, [insertionColumnPosition, 0].concat(newbieColumnWidths));
-
-        _this10.set('widths', widths);
-      });
-    }
-  }, {
-    key: 'distributeHorizontal',
-    value: function distributeHorizontal(cells) {
-      var _this11 = this;
-
-      var columns = [];
-
-      cells.forEach(function (cell) {
-        var rowcolumn = _this11.getRowColumn(cell);
-
-        if (-1 == columns.indexOf(rowcolumn.column)) columns.push(rowcolumn.column);
-      });
-
-      var sum = columns.reduce(function (sum, column) {
-        return sum + _this11.widths[column];
-      }, 0);
-
-      var newval = Math.round(sum / columns.length * 100) / 100;
+    columns.forEach(column => {
       var widths = this.widths.slice();
-      columns.forEach(function (column) {
-        widths[column] = newval;
+      this.remove(this.getCellsByColumn(column));
+      widths.splice(column, 1);
+      this.model.columns -= 1; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+      this.set('widths', widths);
+    });
+  }
+
+  insertCellsAbove(cells) {
+    // 먼저 cells 위치의 행을 구한다.
+    let rows = [];
+    cells.forEach(cell => {
+      let row = this.getRowColumn(cell).row;
+      if (-1 == rows.indexOf(row)) rows.push(row);
+    });
+    rows.sort((a, b) => {
+      return a - b;
+    });
+    rows.reverse();
+    // 행 2개 이상은 추가 안함. 임시로 막아놓음
+    if (rows.length >= 2) return false;
+    let insertionRowPosition = rows[0];
+    let newbieRowHeights = [];
+    let newbieCells = [];
+    rows.forEach(row => {
+      for (let i = 0; i < this.columns; i++) newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app));
+
+      newbieRowHeights.push(this.heights[row]);
+
+      newbieCells.reverse().forEach(cell => {
+        this.insertComponentAt(cell, insertionRowPosition * this.columns);
       });
+
+      let heights = this.heights.slice();
+      heights.splice(insertionRowPosition, 0, ...newbieRowHeights);
+      this.set('heights', heights);
+
+      this.model.rows += rows.length;
+
+      this.clearCache();
+    });
+  }
+
+  insertCellsBelow(cells) {
+    // 먼저 cells 위치의 행을 구한다.
+    let rows = [];
+    cells.forEach(cell => {
+      let row = this.getRowColumn(cell).row;
+      if (-1 == rows.indexOf(row)) rows.push(row);
+    });
+    rows.sort((a, b) => {
+      return a - b;
+    });
+    rows.reverse();
+    // 행 2개 이상은 추가 안함. 임시로 막아놓음
+    if (rows.length >= 2) return false;
+    let insertionRowPosition = rows[rows.length - 1] + 1;
+    let newbieRowHeights = [];
+    let newbieCells = [];
+    rows.forEach(row => {
+      for (let i = 0; i < this.columns; i++) newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app));
+      newbieRowHeights.push(this.heights[row]);
+
+      newbieCells.reverse().forEach(cell => {
+        this.insertComponentAt(cell, insertionRowPosition * this.columns);
+      });
+
+      let heights = this.heights.slice();
+      heights.splice(insertionRowPosition, 0, ...newbieRowHeights);
+      this.set('heights', heights);
+
+      this.model.rows += 1;
+
+      this.clearCache();
+    });
+  }
+
+  insertCellsLeft(cells) {
+    // 먼저 cells 위치의 열을 구한다.
+    let columns = [];
+    cells.forEach(cell => {
+      let column = this.getRowColumn(cell).column;
+      if (-1 == columns.indexOf(column)) columns.push(column);
+    });
+    columns.sort((a, b) => {
+      return a - b;
+    });
+    columns.reverse();
+    // 열 2개 이상은 추가 안함. 임시로 막아놓음
+    if (columns.length >= 2) return false;
+    let insertionColumnPosition = columns[0];
+    let newbieColumnWidths = [];
+    let newbieCells = [];
+    columns.forEach(column => {
+      for (let i = 0; i < this.rows; i++) newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app));
+      newbieColumnWidths.push(this.widths[column]);
+
+      let increasedColumns = this.columns;
+      let index = this.rows;
+      newbieCells.reverse().forEach(cell => {
+        if (index == 0) {
+          index = this.rows;
+          increasedColumns++;
+        }
+
+        index--;
+        this.insertComponentAt(cell, insertionColumnPosition + index * increasedColumns);
+      });
+
+      let widths = this.widths.slice();
+      this.model.columns += columns.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+
+      widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths);
 
       this.set('widths', widths);
-    }
-  }, {
-    key: 'distributeVertical',
-    value: function distributeVertical(cells) {
-      var _this12 = this;
+    });
+  }
 
-      var rows = [];
+  insertCellsRight(cells) {
+    // 먼저 cells 위치의 열을 구한다.
+    let columns = [];
+    cells.forEach(cell => {
+      let column = this.getRowColumn(cell).column;
+      if (-1 == columns.indexOf(column)) columns.push(column);
+    });
+    columns.sort((a, b) => {
+      return a - b;
+    });
+    columns.reverse();
+    // 열 2개 이상은 추가 안함. 임시로 막아놓음
+    if (columns.length >= 2) return false;
+    let insertionColumnPosition = columns[columns.length - 1] + 1;
+    let newbieColumnWidths = [];
+    let newbieCells = [];
+    columns.forEach(column => {
+      for (let i = 0; i < this.rows; i++) newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app));
+      newbieColumnWidths.push(this.widths[column]);
 
-      cells.forEach(function (cell) {
-        var rowcolumn = _this12.getRowColumn(cell);
+      let increasedColumns = this.columns;
+      let index = this.rows;
+      newbieCells.reverse().forEach(cell => {
+        if (index == 0) {
+          index = this.rows;
+          increasedColumns++;
+        }
 
-        if (-1 == rows.indexOf(rowcolumn.row)) rows.push(rowcolumn.row);
+        index--;
+        this.insertComponentAt(cell, insertionColumnPosition + index * increasedColumns);
       });
 
-      var sum = rows.reduce(function (sum, row) {
-        return sum + _this12.heights[row];
-      }, 0);
+      let widths = this.widths.slice();
+      this.model.columns += columns.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
 
-      var newval = Math.round(sum / rows.length * 100) / 100;
-      var heights = this.heights.slice();
-      rows.forEach(function (row) {
-        heights[row] = newval;
-      });
+      widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths);
 
-      this.set('heights', heights);
-    }
+      this.set('widths', widths);
+    });
+  }
+
+  distributeHorizontal(cells) {
+    var columns = [];
+
+    cells.forEach(cell => {
+      let rowcolumn = this.getRowColumn(cell);
+
+      if (-1 == columns.indexOf(rowcolumn.column)) columns.push(rowcolumn.column);
+    });
+
+    var sum = columns.reduce((sum, column) => {
+      return sum + this.widths[column];
+    }, 0);
+
+    var newval = Math.round(sum / columns.length * 100) / 100;
+    var widths = this.widths.slice();
+    columns.forEach(column => {
+      widths[column] = newval;
+    });
+
+    this.set('widths', widths);
+  }
+
+  distributeVertical(cells) {
+    var rows = [];
+
+    cells.forEach(cell => {
+      let rowcolumn = this.getRowColumn(cell);
+
+      if (-1 == rows.indexOf(rowcolumn.row)) rows.push(rowcolumn.row);
+    });
+
+    var sum = rows.reduce((sum, row) => {
+      return sum + this.heights[row];
+    }, 0);
+
+    var newval = Math.round(sum / rows.length * 100) / 100;
+    var heights = this.heights.slice();
+    rows.forEach(row => {
+      heights[row] = newval;
+    });
+
+    this.set('heights', heights);
+  }
+
+  /**
+   * visualizer location setting functions
+   */
+  increaseLocation(type, skipNumbering, startSection, startUnit) {
+    /**
+     * step 1
+     *
+     * selected collect rack-cell
+     */
+    var selectedCells = this.root.selected;
 
     /**
-     * visualizer location setting functions
+     * step 2
+     *
+     * classify cells by row
      */
+    var classified = this.classifyByRow(selectedCells);
 
-  }, {
-    key: 'increaseLocation',
-    value: function increaseLocation(type, skipNumbering, startSection, startUnit) {
-      /**
-       * step 1
-       *
-       * selected collect rack-cell
-       */
-      var selectedCells = this.root.selected;
+    /**
+     * step 3
+     *
+     * find aisle
+     */
+    var aisleRowIndices = this.getAisleRowIndices(classified);
 
-      /**
-       * step 2
-       *
-       * classify cells by row
-       */
-      var classified = this.classifyByRow(selectedCells);
+    /**
+     * step 4
+     *
+     * classify cells by section
+     */
+    var sections = this.classifyCellsBySection(classified, aisleRowIndices);
 
-      /**
-       * step 3
-       *
-       * find aisle
-       */
-      var aisleRowIndices = this.getAisleRowIndices(classified);
+    /**
+     * step 5
+     *
+     * rearrange by aisle
+     */
+    var rearranged = this.rearrangeByAisle(type, sections, aisleRowIndices);
 
-      /**
-       * step 4
-       *
-       * classify cells by section
-       */
-      var sections = this.classifyCellsBySection(classified, aisleRowIndices);
+    /**
+     * step 6
+     *
+     * if skip numbering, remove empty cells
+     */
+    if (skipNumbering) rearranged = this.removeEmptyCells(rearranged);
 
-      /**
-       * step 5
-       *
-       * rearrange by aisle
-       */
-      var rearranged = this.rearrangeByAisle(type, sections, aisleRowIndices);
+    /**
+     * step 7
+     *
+     * merge rows
+     */
+    var merged = this.mergeRows(rearranged);
 
-      /**
-       * step 6
-       *
-       * if skip numbering, remove empty cells
-       */
-      if (skipNumbering) rearranged = this.removeEmptyCells(rearranged);
+    /**
+     * step 8
+     *
+     * set location
+     */
+    this.setLocations(merged, startSection, startUnit);
+  }
 
-      /**
-       * step 7
-       *
-       * merge rows
-       */
-      var merged = this.mergeRows(rearranged);
+  classifyByRow(cells) {
+    var classified = [];
+    cells.forEach(c => {
+      var index = c.index;
+      var {
+        row, column
+      } = index;
 
-      /**
-       * step 8
-       *
-       * set location
-       */
-      this.setLocations(merged, startSection, startUnit);
-    }
-  }, {
-    key: 'classifyByRow',
-    value: function classifyByRow(cells) {
-      var classified = [];
-      cells.forEach(function (c) {
-        var index = c.index;
-        var row = index.row,
-            column = index.column;
+      if (!classified[row]) classified[row] = [];
 
+      classified[row][column] = c;
+    });
 
-        if (!classified[row]) classified[row] = [];
+    return classified;
+  }
 
-        classified[row][column] = c;
-      });
+  findAisle(rows) {
+    if (!rows) return [];
 
-      return classified;
-    }
-  }, {
-    key: 'findAisle',
-    value: function findAisle(rows) {
-      if (!rows) return [];
+    return rows.filter(r => {
+      return r[0].isAisle;
+    });
+  }
 
-      return rows.filter(function (r) {
-        return r[0].isAisle;
-      });
-    }
-  }, {
-    key: 'getAisleRowIndices',
-    value: function getAisleRowIndices(rows) {
-      var aisles = this.findAisle(rows);
-      var aisleRowIndices = [];
-      aisles.forEach(function (aisle) {
-        aisleRowIndices.push(rows.indexOf(aisle));
-      });
+  getAisleRowIndices(rows) {
+    var aisles = this.findAisle(rows);
+    var aisleRowIndices = [];
+    aisles.forEach(aisle => {
+      aisleRowIndices.push(rows.indexOf(aisle));
+    });
 
-      return aisleRowIndices;
-    }
-  }, {
-    key: 'classifyCellsBySection',
-    value: function classifyCellsBySection(rows, aisleRowIndices) {
-      var sections = [];
-      var wasAisle = false;
-      var section;
-      rows.forEach(function (row, i) {
-        var isAisle = aisleRowIndices.indexOf(i) > -1;
-        if (!(wasAisle || isAisle)) {
-          section = [];
-          sections.push(section);
-        }
+    return aisleRowIndices;
+  }
 
-        wasAisle = isAisle;
-
-        section.push(row);
-      });
-
-      return sections;
-    }
-  }, {
-    key: 'rearrangeByAisle',
-    value: function rearrangeByAisle(type, sections) {
-      var rearranged = [];
-      switch (type.toLowerCase()) {
-        case 'cw':
-          var reverse = false;
-          sections.forEach(function (rows, i) {
-            var section = [];
-            rearranged.push(section);
-            rows.forEach(function (r, i) {
-              if (reverse) r.reverse();
-
-              if (i % 2 === 0) {
-                section.push(r);
-                reverse = !reverse;
-              }
-            });
-          });
-          break;
-        case 'ccw':
-          var reverse = true;
-          sections.forEach(function (rows, i) {
-            var section = [];
-            rearranged.push(section);
-            rows.forEach(function (r, i) {
-              if (reverse) r.reverse();
-
-              if (i % 2 === 0) {
-                section.push(r);
-                reverse = !reverse;
-              }
-            });
-          });
-          break;
-        case 'zigzag':
-          sections.forEach(function (rows, i) {
-            var section = [];
-
-            rows.forEach(function (r, i) {
-
-              if (i % 2 === 0) {
-                section.push(r);
-              }
-            });
-
-            var sectionLength = section.length;
-            var tempRow = [];
-            var tempSection = [];
-
-            section.forEach(function (row, rowIdx) {
-              row.forEach(function (cell, idx) {
-                tempRow[rowIdx + idx * section.length] = cell;
-              });
-            });
-
-            var chunkSize = tempRow.length / sectionLength;
-            for (var idx = 0; idx < sectionLength; idx++) {
-              tempSection.push(tempRow.slice(idx * chunkSize, (idx + 1) * chunkSize));
-            }
-
-            rearranged.push(tempSection);
-          });
-          break;
-        case 'zigzag-reverse':
-          sections.forEach(function (rows, i) {
-            var section = [];
-
-            rows.forEach(function (r, i) {
-
-              if (i % 2 === 0) {
-                r.reverse();
-                section.push(r);
-              }
-            });
-
-            var sectionLength = section.length;
-            var tempRow = [];
-            var tempSection = [];
-
-            section.forEach(function (row, rowIdx) {
-              row.forEach(function (cell, idx) {
-                tempRow[rowIdx + idx * section.length] = cell;
-              });
-            });
-
-            var chunkSize = tempRow.length / sectionLength;
-            for (var idx = 0; idx < sectionLength; idx++) {
-              tempSection.push(tempRow.slice(idx * chunkSize, (idx + 1) * chunkSize));
-            }
-
-            rearranged.push(tempSection);
-          });
-          break;
+  classifyCellsBySection(rows, aisleRowIndices) {
+    var sections = [];
+    var wasAisle = false;
+    var section;
+    rows.forEach((row, i) => {
+      var isAisle = aisleRowIndices.indexOf(i) > -1;
+      if (!(wasAisle || isAisle)) {
+        section = [];
+        sections.push(section);
       }
 
-      return rearranged;
-    }
-  }, {
-    key: 'removeEmptyCells',
-    value: function removeEmptyCells(sections) {
-      var newSections = [];
-      sections.forEach(function (rows) {
-        var newRows = [];
-        newSections.push(newRows);
-        rows.forEach(function (row) {
-          var newRow = [];
-          newRows.push(newRow);
-          row.forEach(function (c, i) {
-            if (!c.isEmpty) newRow.push(c);
+      wasAisle = isAisle;
+
+      section.push(row);
+    });
+
+    return sections;
+  }
+
+  rearrangeByAisle(type, sections) {
+    var rearranged = [];
+    switch (type.toLowerCase()) {
+      case 'cw':
+        var reverse = false;
+        sections.forEach((rows, i) => {
+          var section = [];
+          rearranged.push(section);
+          rows.forEach((r, i) => {
+            if (reverse) r.reverse();
+
+            if (i % 2 === 0) {
+              section.push(r);
+              reverse = !reverse;
+            }
           });
         });
-      });
+        break;
+      case 'ccw':
+        var reverse = true;
+        sections.forEach((rows, i) => {
+          var section = [];
+          rearranged.push(section);
+          rows.forEach((r, i) => {
+            if (reverse) r.reverse();
 
-      return newSections;
-    }
-  }, {
-    key: 'mergeRows',
-    value: function mergeRows(sections) {
-      var merged = [];
-      sections.forEach(function (section) {
-        var newSection = [];
-        section.forEach(function (rows) {
-          var mergedRow = [];
-          rows.forEach(function (row) {
-            mergedRow = mergedRow.concat(row);
+            if (i % 2 === 0) {
+              section.push(r);
+              reverse = !reverse;
+            }
           });
-          newSection = newSection.concat(mergedRow);
         });
-        merged.push(newSection);
-      });
-      return merged;
-    }
-  }, {
-    key: 'setLocations',
-    value: function setLocations(sections, startSection, startUnit) {
-      var _model2 = this.model,
-          _model2$sectionDigits = _model2.sectionDigits,
-          sectionDigits = _model2$sectionDigits === undefined ? 2 : _model2$sectionDigits,
-          _model2$unitDigits = _model2.unitDigits,
-          unitDigits = _model2$unitDigits === undefined ? 2 : _model2$unitDigits;
+        break;
+      case 'zigzag':
+        sections.forEach((rows, i) => {
+          var section = [];
 
+          rows.forEach((r, i) => {
 
-      var sectionNumber = Number(startSection) || 1;
+            if (i % 2 === 0) {
+              section.push(r);
+            }
+          });
 
-      sections.forEach(function (section) {
-        var unitNumber = Number(startUnit) || 1;
-        section.forEach(function (c) {
-          if (!c.isEmpty) {
-            c.set('section', String(sectionNumber).padStart(sectionDigits, 0));
-            c.set('unit', String(unitNumber).padStart(unitDigits, 0));
-          } else {
-            c.set('section', null);
-            c.set('unit', null);
+          var sectionLength = section.length;
+          var tempRow = [];
+          var tempSection = [];
+
+          section.forEach((row, rowIdx) => {
+            row.forEach((cell, idx) => {
+              tempRow[rowIdx + idx * section.length] = cell;
+            });
+          });
+
+          var chunkSize = tempRow.length / sectionLength;
+          for (var idx = 0; idx < sectionLength; idx++) {
+            tempSection.push(tempRow.slice(idx * chunkSize, (idx + 1) * chunkSize));
           }
-          unitNumber++;
+
+          rearranged.push(tempSection);
         });
-        sectionNumber++;
-      });
-    }
-  }, {
-    key: 'onchange',
-    value: function onchange(after, before) {
-      if (hasAnyProperty(after, "rows", "columns")) {
-        this.buildCells(this.get('rows'), this.get('columns'), before.hasOwnProperty('rows') ? before.rows : this.get('rows'), before.hasOwnProperty('columns') ? before.columns : this.get('columns'));
-      }
+        break;
+      case 'zigzag-reverse':
+        sections.forEach((rows, i) => {
+          var section = [];
 
-      this.invalidate();
-    }
-  }, {
-    key: 'oncellchanged',
-    value: function oncellchanged(after, before) {
-      this.invalidate();
-    }
-  }, {
-    key: 'focusible',
-    get: function get() {
-      return false;
-    }
-  }, {
-    key: 'widths',
-    get: function get() {
-      var widths = this.get('widths');
+          rows.forEach((r, i) => {
 
-      if (!widths) return array(1, this.columns);
+            if (i % 2 === 0) {
+              r.reverse();
+              section.push(r);
+            }
+          });
 
-      if (widths.length < this.columns) return widths.concat(array(1, this.columns - widths.length));else if (widths.length > this.columns) return widths.slice(0, this.columns);
+          var sectionLength = section.length;
+          var tempRow = [];
+          var tempSection = [];
 
-      return widths;
-    }
-  }, {
-    key: 'heights',
-    get: function get() {
-      var heights = this.get('heights');
+          section.forEach((row, rowIdx) => {
+            row.forEach((cell, idx) => {
+              tempRow[rowIdx + idx * section.length] = cell;
+            });
+          });
 
-      if (!heights) return array(1, this.rows);
-
-      if (heights.length < this.rows) return heights.concat(array(1, this.rows - heights.length));else if (heights.length > this.rows) return heights.slice(0, this.rows);
-
-      return heights;
-    }
-  }, {
-    key: 'layout',
-    get: function get() {
-      return TABLE_LAYOUT;
-    }
-  }, {
-    key: 'rows',
-    get: function get() {
-      return this.get('rows');
-    }
-  }, {
-    key: 'columns',
-    get: function get() {
-      return this.get('columns');
-    }
-  }, {
-    key: 'lefts',
-    get: function get() {
-      var _this13 = this;
-
-      return this.components.filter(function (c, i) {
-        return !(i % _this13.columns);
-      });
-    }
-  }, {
-    key: 'centers',
-    get: function get() {
-      var _this14 = this;
-
-      return this.components.filter(function (c, i) {
-        return i % _this14.columns && (i + 1) % _this14.columns;
-      });
-    }
-  }, {
-    key: 'rights',
-    get: function get() {
-      var _this15 = this;
-
-      return this.components.filter(function (c, i) {
-        return !((i + 1) % _this15.columns);
-      });
-    }
-  }, {
-    key: 'tops',
-    get: function get() {
-      return this.components.slice(0, this.columns);
-    }
-  }, {
-    key: 'middles',
-    get: function get() {
-      return this.components.slice(this.columns, this.columns * (this.rows - 1));
-    }
-  }, {
-    key: 'bottoms',
-    get: function get() {
-      return this.components.slice(this.columns * (this.rows - 1));
-    }
-  }, {
-    key: 'all',
-    get: function get() {
-      return this.components;
-    }
-  }, {
-    key: 'widths_sum',
-    get: function get() {
-      var _this16 = this;
-
-      var widths = this.widths;
-      return widths ? widths.filter(function (width, i) {
-        return i < _this16.columns;
-      }).reduce(function (sum, width) {
-        return sum + width;
-      }, 0) : this.columns;
-    }
-  }, {
-    key: 'heights_sum',
-    get: function get() {
-      var _this17 = this;
-
-      var heights = this.heights;
-      return heights ? heights.filter(function (height, i) {
-        return i < _this17.rows;
-      }).reduce(function (sum, height) {
-        return sum + height;
-      }, 0) : this.rows;
-    }
-  }, {
-    key: 'nature',
-    get: function get() {
-      return NATURE;
-    }
-  }, {
-    key: 'controls',
-    get: function get() {
-      var widths = this.widths;
-      var heights = this.heights;
-      var inside = this.textBounds;
-
-      var width_unit = inside.width / this.widths_sum;
-      var height_unit = inside.height / this.heights_sum;
-
-      var x = inside.left;
-      var y = inside.top;
-
-      var controls = [];
-
-      widths.slice(0, this.columns - 1).forEach(function (width) {
-        x += width * width_unit;
-        controls.push({
-          x: x,
-          y: inside.top,
-          handler: columnControlHandler
-        });
-      });
-
-      heights.slice(0, this.rows - 1).forEach(function (height) {
-        y += height * height_unit;
-        controls.push({
-          x: inside.left,
-          y: y,
-          handler: rowControlHandler
-        });
-      });
-
-      return controls;
-    }
-  }, {
-    key: 'eventMap',
-    get: function get() {
-      return {
-        '(self)': {
-          '(descendant)': {
-            change: this.oncellchanged
+          var chunkSize = tempRow.length / sectionLength;
+          for (var idx = 0; idx < sectionLength; idx++) {
+            tempSection.push(tempRow.slice(idx * chunkSize, (idx + 1) * chunkSize));
           }
+
+          rearranged.push(tempSection);
+        });
+        break;
+    }
+
+    return rearranged;
+  }
+
+  removeEmptyCells(sections) {
+    var newSections = [];
+    sections.forEach(rows => {
+      var newRows = [];
+      newSections.push(newRows);
+      rows.forEach(row => {
+        var newRow = [];
+        newRows.push(newRow);
+        row.forEach((c, i) => {
+          if (!c.isEmpty) newRow.push(c);
+        });
+      });
+    });
+
+    return newSections;
+  }
+
+  mergeRows(sections) {
+    var merged = [];
+    sections.forEach(section => {
+      var newSection = [];
+      section.forEach(rows => {
+        var mergedRow = [];
+        rows.forEach(row => {
+          mergedRow = mergedRow.concat(row);
+        });
+        newSection = newSection.concat(mergedRow);
+      });
+      merged.push(newSection);
+    });
+    return merged;
+  }
+
+  setLocations(sections, startSection, startUnit) {
+    var {
+      sectionDigits = 2,
+      unitDigits = 2
+    } = this.model;
+
+    var sectionNumber = Number(startSection) || 1;
+
+    sections.forEach(section => {
+      var unitNumber = Number(startUnit) || 1;
+      section.forEach(c => {
+        if (!c.isEmpty) {
+          c.set('section', String(sectionNumber).padStart(sectionDigits, 0));
+          c.set('unit', String(unitNumber).padStart(unitDigits, 0));
+        } else {
+          c.set('section', null);
+          c.set('unit', null);
         }
-      };
+        unitNumber++;
+      });
+      sectionNumber++;
+    });
+  }
+
+  get columns() {
+    return this.get('columns');
+  }
+
+  get lefts() {
+    return this.components.filter((c, i) => {
+      return !(i % this.columns);
+    });
+  }
+
+  get centers() {
+    return this.components.filter((c, i) => {
+      return i % this.columns && (i + 1) % this.columns;
+    });
+  }
+
+  get rights() {
+    return this.components.filter((c, i) => {
+      return !((i + 1) % this.columns);
+    });
+  }
+
+  get tops() {
+    return this.components.slice(0, this.columns);
+  }
+
+  get middles() {
+    return this.components.slice(this.columns, this.columns * (this.rows - 1));
+  }
+
+  get bottoms() {
+    return this.components.slice(this.columns * (this.rows - 1));
+  }
+
+  get all() {
+    return this.components;
+  }
+
+  get widths_sum() {
+    var widths = this.widths;
+    return widths ? widths.filter((width, i) => i < this.columns).reduce((sum, width) => sum + width, 0) : this.columns;
+  }
+
+  get heights_sum() {
+    var heights = this.heights;
+    return heights ? heights.filter((height, i) => i < this.rows).reduce((sum, height) => sum + height, 0) : this.rows;
+  }
+
+  get nature() {
+    return NATURE;
+  }
+
+  get controls() {
+    var widths = this.widths;
+    var heights = this.heights;
+    var inside = this.textBounds;
+
+    var width_unit = inside.width / this.widths_sum;
+    var height_unit = inside.height / this.heights_sum;
+
+    var x = inside.left;
+    var y = inside.top;
+
+    var controls = [];
+
+    widths.slice(0, this.columns - 1).forEach(width => {
+      x += width * width_unit;
+      controls.push({
+        x: x,
+        y: inside.top,
+        handler: columnControlHandler
+      });
+    });
+
+    heights.slice(0, this.rows - 1).forEach(height => {
+      y += height * height_unit;
+      controls.push({
+        x: inside.left,
+        y: y,
+        handler: rowControlHandler
+      });
+    });
+
+    return controls;
+  }
+
+  onchange(after, before) {
+    if (hasAnyProperty(after, "rows", "columns")) {
+      this.buildCells(this.get('rows'), this.get('columns'), before.hasOwnProperty('rows') ? before.rows : this.get('rows'), before.hasOwnProperty('columns') ? before.columns : this.get('columns'));
     }
-  }]);
 
-  return RackTable;
-}(_thingsScene.Container);
+    this.invalidate();
+  }
 
-["rows", "columns", "widths", "heights", "widths_sum", "heights_sum", "controls"].forEach(function (getter) {
-  return _thingsScene.Component.memoize(RackTable.prototype, getter, false);
-});
+  get eventMap() {
+    return {
+      '(self)': {
+        '(descendant)': {
+          change: this.oncellchanged
+        }
+      }
+    };
+  }
+
+  oncellchanged(after, before) {
+    this.invalidate();
+  }
+}
+
+exports.RackTable = RackTable;
+["rows", "columns", "widths", "heights", "widths_sum", "heights_sum", "controls"].forEach(getter => _thingsScene.Component.memoize(RackTable.prototype, getter, false));
 
 _thingsScene.Component.register('rack-table', RackTable);
 _component3d2.default.register('rack-table', RackTable3d);
@@ -55047,8 +53982,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 var _thingsScene = __webpack_require__(2);
 
 var _three = __webpack_require__(0);
@@ -55057,16 +53990,10 @@ var THREE = _interopRequireWildcard(_three);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
-
-
-var NATURE = {
+/*
+ * Copyright © HatioLab Inc. All rights reserved.
+ */
+const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
@@ -55083,229 +54010,205 @@ var NATURE = {
   }]
 };
 
-var VideoPlayer360 = function (_RectPath) {
-  _inherits(VideoPlayer360, _RectPath);
+class VideoPlayer360 extends (0, _thingsScene.RectPath)(_thingsScene.Component) {
 
-  function VideoPlayer360() {
-    _classCallCheck(this, VideoPlayer360);
-
-    return _possibleConstructorReturn(this, (VideoPlayer360.__proto__ || Object.getPrototypeOf(VideoPlayer360)).apply(this, arguments));
+  get nature() {
+    return NATURE;
   }
 
-  _createClass(VideoPlayer360, [{
-    key: 'init_scene',
-    value: function init_scene(width, height) {
-      var _model = this.model,
-          mute = _model.mute,
-          loop = _model.loop,
-          autoplay = _model.autoplay,
-          src = _model.src,
-          fov = _model.fov,
-          clickAndDrag = _model.clickAndDrag,
-          wheelEnabled = _model.wheelEnabled;
+  init_scene(width, height) {
+    var { mute, loop, autoplay, src, fov, clickAndDrag, wheelEnabled } = this.model;
 
+    this._dragStart = {};
+    this._lon = 0;
+    this._lat = 0;
+    this._clickAndDrag = clickAndDrag;
+    this._isPlaying = false;
+    this._wheelEnabled = wheelEnabled;
 
-      this._dragStart = {};
-      this._lon = 0;
-      this._lat = 0;
-      this._clickAndDrag = clickAndDrag;
+    this._fov = fov || 35;
+    this._fovMin = 3;
+    this._fovMax = 100;
+
+    this._time = new Date().getTime();
+
+    // create a local THREE.js scene
+    this._scene = new THREE.Scene();
+
+    // create ThreeJS camera
+    this._camera = new THREE.PerspectiveCamera(fov, width / height, 0.1, 1000);
+    this._camera.setFocalLength(fov);
+
+    // create ThreeJS renderer and append it to our object
+    this._renderer = new THREE.WebGLRenderer();
+    this._renderer.setSize(width, height);
+    this._renderer.autoClear = false;
+    this._renderer.setClearColor(0x333333, 1);
+
+    // create off-dom video player
+    this._video = document.createElement('video');
+    this._video.setAttribute('crossorigin', 'anonymous');
+    this._video.loop = loop;
+    this._video.muted = mute;
+    this._texture = new THREE.Texture(this._video);
+
+    // make a self reference we can pass to our callbacks
+    var self = this;
+
+    // attach video player event listeners
+    this._video.addEventListener("ended", function () {
       this._isPlaying = false;
-      this._wheelEnabled = wheelEnabled;
+    });
 
-      this._fov = fov || 35;
-      this._fovMin = 3;
-      this._fovMax = 100;
+    // Progress Meter
+    this._video.addEventListener("progress", function () {
 
-      this._time = new Date().getTime();
-
-      // create a local THREE.js scene
-      this._scene = new THREE.Scene();
-
-      // create ThreeJS camera
-      this._camera = new THREE.PerspectiveCamera(fov, width / height, 0.1, 1000);
-      this._camera.setFocalLength(fov);
-
-      // create ThreeJS renderer and append it to our object
-      this._renderer = new THREE.WebGLRenderer();
-      this._renderer.setSize(width, height);
-      this._renderer.autoClear = false;
-      this._renderer.setClearColor(0x333333, 1);
-
-      // create off-dom video player
-      this._video = document.createElement('video');
-      this._video.setAttribute('crossorigin', 'anonymous');
-      this._video.loop = loop;
-      this._video.muted = mute;
-      this._texture = new THREE.Texture(this._video);
-
-      // make a self reference we can pass to our callbacks
-      var self = this;
-
-      // attach video player event listeners
-      this._video.addEventListener("ended", function () {
-        this._isPlaying = false;
-      });
-
-      // Progress Meter
-      this._video.addEventListener("progress", function () {
-
-        var percent = null;
-        if (self._video && self._video.buffered && self._video.buffered.length > 0 && self._video.buffered.end && self._video.duration) {
-          percent = self._video.buffered.end(0) / self._video.duration;
-        }
-        // Some browsers (e.g., FF3.6 and Safari 5) cannot calculate target.bufferered.end()
-        // to be anything other than 0. If the byte count is available we use this instead.
-        // Browsers that support the else if do not seem to have the bufferedBytes value and
-        // should skip to there. Tested in Safari 5, Webkit head, FF3.6, Chrome 6, IE 7/8.
-        else if (self._video && self._video.bytesTotal !== undefined && self._video.bytesTotal > 0 && self._video.bufferedBytes !== undefined) {
-            percent = self._video.bufferedBytes / self._video.bytesTotal;
-          }
-
-        // Someday we can have a loading animation for videos
-        var cpct = Math.round(percent * 100);
-        if (cpct === 100) {
-          // do something now that we are done
-        } else {
-            // do something with this percentage info (cpct)
-          }
-      });
-
-      // Video Play Listener, fires after video loads
-      // this._video.addEventListener("canplaythrough", function() {
-      this._video.addEventListener("canplay", function () {
-
-        if (autoplay === true) {
-          self.play();
-          self._videoReady = true;
-        }
-      });
-
-      // set the video src and begin loading
-      this._video.src = this.app.url(src);
-
-      this._texture.generateMipmaps = false;
-      this._texture.minFilter = THREE.LinearFilter;
-      this._texture.magFilter = THREE.LinearFilter;
-      this._texture.format = THREE.RGBFormat;
-
-      // create ThreeJS mesh sphere onto which our texture will be drawn
-      this._mesh = new THREE.Mesh(new THREE.SphereBufferGeometry(500, 80, 50), new THREE.MeshBasicMaterial({ map: this._texture }));
-      this._mesh.scale.x = -1; // mirror the texture, since we're looking from the inside out
-      this._scene.add(this._mesh);
-
-      // this.createControls()
-
-      this.animate();
-    }
-  }, {
-    key: 'destroy_scene',
-    value: function destroy_scene() {
-      cancelAnimationFrame(this._requestAnimationId);
-      this._requestAnimationId = undefined;
-      this._texture.dispose();
-      this._scene.remove(this._mesh);
-      this.unloadVideo();
-
-      this._renderer = undefined;
-      this._camera = undefined;
-      this._keyboard = undefined;
-      this._controls = undefined;
-      this._projector = undefined;
-      this._load_manager = undefined;
-
-      this._scene = undefined;
-      this._video = undefined;
-    }
-  }, {
-    key: 'loadVideo',
-    value: function loadVideo(videoFile) {
-      this._video.src = videoFile;
-    }
-  }, {
-    key: 'unloadVideo',
-    value: function unloadVideo() {
-      // overkill unloading to avoid dreaded video 'pending' bug in Chrome. See https://code.google.com/p/chromium/issues/detail?id=234779
-      this.pause();
-      this._video.src = '';
-      this._video.removeAttribute('src');
-    }
-  }, {
-    key: 'play',
-    value: function play() {
-      this._isPlaying = true;
-      this._video.play();
-    }
-  }, {
-    key: 'pause',
-    value: function pause() {
-      this._isPlaying = false;
-      this._video.pause();
-    }
-  }, {
-    key: 'resize',
-    value: function resize(w, h) {
-      if (!this._renderer) return;
-      this._renderer.setSize(w, h);
-      this._camera.aspect = w / h;
-      this._camera.updateProjectionMatrix();
-    }
-  }, {
-    key: 'animate',
-    value: function animate() {
-
-      this._requestAnimationId = requestAnimationFrame(this.animate.bind(this));
-
-      if (this._video.readyState === this._video.HAVE_ENOUGH_DATA) {
-        if (typeof this._texture !== "undefined") {
-          var ct = new Date().getTime();
-          if (ct - this._time >= 30) {
-            this._texture.needsUpdate = true;
-            this._time = ct;
-          }
-        }
+      var percent = null;
+      if (self._video && self._video.buffered && self._video.buffered.length > 0 && self._video.buffered.end && self._video.duration) {
+        percent = self._video.buffered.end(0) / self._video.duration;
       }
+      // Some browsers (e.g., FF3.6 and Safari 5) cannot calculate target.bufferered.end()
+      // to be anything other than 0. If the byte count is available we use this instead.
+      // Browsers that support the else if do not seem to have the bufferedBytes value and
+      // should skip to there. Tested in Safari 5, Webkit head, FF3.6, Chrome 6, IE 7/8.
+      else if (self._video && self._video.bytesTotal !== undefined && self._video.bytesTotal > 0 && self._video.bufferedBytes !== undefined) {
+          percent = self._video.bufferedBytes / self._video.bytesTotal;
+        }
 
-      this.render();
-      this.invalidate();
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      this._lat = Math.max(-85, Math.min(85, this._lat || 0));
-      this._phi = (90 - this._lat) * Math.PI / 180;
-      this._theta = (this._lon || 0) * Math.PI / 180;
-
-      var cx = 500 * Math.sin(this._phi) * Math.cos(this._theta);
-      var cy = 500 * Math.cos(this._phi);
-      var cz = 500 * Math.sin(this._phi) * Math.sin(this._theta);
-
-      this._camera.lookAt(new THREE.Vector3(cx, cy, cz));
-
-      // distortion
-      if (this.model.flatProjection) {
-        this._camera.position.x = 0;
-        this._camera.position.y = 0;
-        this._camera.position.z = 0;
+      // Someday we can have a loading animation for videos
+      var cpct = Math.round(percent * 100);
+      if (cpct === 100) {
+        // do something now that we are done
       } else {
-        this._camera.position.x = -cx;
-        this._camera.position.y = -cy;
-        this._camera.position.z = -cz;
-      }
+          // do something with this percentage info (cpct)
+        }
+    });
 
-      this._renderer.clear();
-      this._renderer.render(this._scene, this._camera);
+    // Video Play Listener, fires after video loads
+    // this._video.addEventListener("canplaythrough", function() {
+    this._video.addEventListener("canplay", function () {
+
+      if (autoplay === true) {
+        self.play();
+        self._videoReady = true;
+      }
+    });
+
+    // set the video src and begin loading
+    this._video.src = this.app.url(src);
+
+    this._texture.generateMipmaps = false;
+    this._texture.minFilter = THREE.LinearFilter;
+    this._texture.magFilter = THREE.LinearFilter;
+    this._texture.format = THREE.RGBFormat;
+
+    // create ThreeJS mesh sphere onto which our texture will be drawn
+    this._mesh = new THREE.Mesh(new THREE.SphereBufferGeometry(500, 80, 50), new THREE.MeshBasicMaterial({ map: this._texture }));
+    this._mesh.scale.x = -1; // mirror the texture, since we're looking from the inside out
+    this._scene.add(this._mesh);
+
+    // this.createControls()
+
+    this.animate();
+  }
+
+  destroy_scene() {
+    cancelAnimationFrame(this._requestAnimationId);
+    this._requestAnimationId = undefined;
+    this._texture.dispose();
+    this._scene.remove(this._mesh);
+    this.unloadVideo();
+
+    this._renderer = undefined;
+    this._camera = undefined;
+    this._keyboard = undefined;
+    this._controls = undefined;
+    this._projector = undefined;
+    this._load_manager = undefined;
+
+    this._scene = undefined;
+    this._video = undefined;
+  }
+
+  loadVideo(videoFile) {
+    this._video.src = videoFile;
+  }
+
+  unloadVideo() {
+    // overkill unloading to avoid dreaded video 'pending' bug in Chrome. See https://code.google.com/p/chromium/issues/detail?id=234779
+    this.pause();
+    this._video.src = '';
+    this._video.removeAttribute('src');
+  }
+
+  play() {
+    this._isPlaying = true;
+    this._video.play();
+  }
+
+  pause() {
+    this._isPlaying = false;
+    this._video.pause();
+  }
+
+  resize(w, h) {
+    if (!this._renderer) return;
+    this._renderer.setSize(w, h);
+    this._camera.aspect = w / h;
+    this._camera.updateProjectionMatrix();
+  }
+
+  animate() {
+
+    this._requestAnimationId = requestAnimationFrame(this.animate.bind(this));
+
+    if (this._video.readyState === this._video.HAVE_ENOUGH_DATA) {
+      if (typeof this._texture !== "undefined") {
+        var ct = new Date().getTime();
+        if (ct - this._time >= 30) {
+          this._texture.needsUpdate = true;
+          this._time = ct;
+        }
+      }
     }
 
-    // creates div and buttons for onscreen video controls
+    this.render();
+    this.invalidate();
+  }
 
-  }, {
-    key: 'createControls',
-    value: function createControls() {
+  render() {
+    this._lat = Math.max(-85, Math.min(85, this._lat || 0));
+    this._phi = (90 - this._lat) * Math.PI / 180;
+    this._theta = (this._lon || 0) * Math.PI / 180;
 
-      var muteControl = this.options.muted ? 'fa-volume-off' : 'fa-volume-up';
-      var playPauseControl = this.options.autoplay ? 'fa-pause' : 'fa-play';
+    var cx = 500 * Math.sin(this._phi) * Math.cos(this._theta);
+    var cy = 500 * Math.cos(this._phi);
+    var cz = 500 * Math.sin(this._phi) * Math.sin(this._theta);
 
-      var controlsHTML = ' \
+    this._camera.lookAt(new THREE.Vector3(cx, cy, cz));
+
+    // distortion
+    if (this.model.flatProjection) {
+      this._camera.position.x = 0;
+      this._camera.position.y = 0;
+      this._camera.position.z = 0;
+    } else {
+      this._camera.position.x = -cx;
+      this._camera.position.y = -cy;
+      this._camera.position.z = -cz;
+    }
+
+    this._renderer.clear();
+    this._renderer.render(this._scene, this._camera);
+  }
+
+  // creates div and buttons for onscreen video controls
+  createControls() {
+
+    var muteControl = this.options.muted ? 'fa-volume-off' : 'fa-volume-up';
+    var playPauseControl = this.options.autoplay ? 'fa-pause' : 'fa-play';
+
+    var controlsHTML = ' \
           <div class="controls"> \
               <a href="#" class="playButton button fa ' + playPauseControl + '"></a> \
               <a href="#" class="muteButton button fa ' + muteControl + '"></a> \
@@ -55313,258 +54216,234 @@ var VideoPlayer360 = function (_RectPath) {
           </div> \
       ';
 
-      $(this.element).append(controlsHTML, true);
+    $(this.element).append(controlsHTML, true);
 
-      // hide controls if option is set
-      if (this.options.hideControls) {
-        $(this.element).find('.controls').hide();
-      }
-
-      // wire up controller events to dom elements
-      // this.attachControlEvents();
-    }
-  }, {
-    key: 'attachControlEvents',
-    value: function attachControlEvents() {
-
-      // create a self var to pass to our controller functions
-      var self = this;
-
-      this.element.addEventListener('mousemove', this.onMouseMove.bind(this), false);
-      this.element.addEventListener('touchmove', this.onMouseMove.bind(this), false);
-      this.element.addEventListener('mousewheel', this.onMouseWheel.bind(this), false);
-      this.element.addEventListener('DOMMouseScroll', this.onMouseWheel.bind(this), false);
-      this.element.addEventListener('mousedown', this.onMouseDown.bind(this), false);
-      this.element.addEventListener('touchstart', this.onMouseDown.bind(this), false);
-      this.element.addEventListener('mouseup', this.onMouseUp.bind(this), false);
-      this.element.addEventListener('touchend', this.onMouseUp.bind(this), false);
-
-      $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange', this.fullscreen.bind(this));
-
-      $(window).resize(function () {
-        self.resizeGL($(self.element).width(), $(self.element).height());
-      });
-
-      // Player Controls
-      $(this.element).find('.playButton').click(function (e) {
-        e.preventDefault();
-        if ($(this).hasClass('fa-pause')) {
-          $(this).removeClass('fa-pause').addClass('fa-play');
-          self.pause();
-        } else {
-          $(this).removeClass('fa-play').addClass('fa-pause');
-          self.play();
-        }
-      });
-
-      $(this.element).find(".fullscreenButton").click(function (e) {
-        e.preventDefault();
-        var elem = $(self.element)[0];
-        if ($(this).hasClass('fa-expand')) {
-          if (elem.requestFullscreen) {
-            elem.requestFullscreen();
-          } else if (elem.msRequestFullscreen) {
-            elem.msRequestFullscreen();
-          } else if (elem.mozRequestFullScreen) {
-            elem.mozRequestFullScreen();
-          } else if (elem.webkitRequestFullscreen) {
-            elem.webkitRequestFullscreen();
-          }
-        } else {
-          if (elem.requestFullscreen) {
-            document.exitFullscreen();
-          } else if (elem.msRequestFullscreen) {
-            document.msExitFullscreen();
-          } else if (elem.mozRequestFullScreen) {
-            document.mozCancelFullScreen();
-          } else if (elem.webkitRequestFullscreen) {
-            document.webkitExitFullscreen();
-          }
-        }
-      });
-
-      $(this.element).find(".muteButton").click(function (e) {
-        e.preventDefault();
-        if ($(this).hasClass('fa-volume-off')) {
-          $(this).removeClass('fa-volume-off').addClass('fa-volume-up');
-          self._video.muted = false;
-        } else {
-          $(this).removeClass('fa-volume-up').addClass('fa-volume-off');
-          self._video.muted = true;
-        }
-      });
+    // hide controls if option is set
+    if (this.options.hideControls) {
+      $(this.element).find('.controls').hide();
     }
 
-    /* Component Overides .. */
+    // wire up controller events to dom elements
+    // this.attachControlEvents();
+  }
 
-  }, {
-    key: '_draw',
-    value: function _draw(ctx) {
-      var _model2 = this.model,
-          left = _model2.left,
-          top = _model2.top,
-          width = _model2.width,
-          height = _model2.height,
-          src = _model2.src;
+  attachControlEvents() {
 
+    // create a self var to pass to our controller functions
+    var self = this;
 
-      ctx.beginPath();
-      ctx.rect(left, top, width, height);
-    }
-  }, {
-    key: '_post_draw',
-    value: function _post_draw(ctx) {
-      var _model3 = this.model,
-          left = _model3.left,
-          top = _model3.top,
-          width = _model3.width,
-          height = _model3.height,
-          src = _model3.src;
+    this.element.addEventListener('mousemove', this.onMouseMove.bind(this), false);
+    this.element.addEventListener('touchmove', this.onMouseMove.bind(this), false);
+    this.element.addEventListener('mousewheel', this.onMouseWheel.bind(this), false);
+    this.element.addEventListener('DOMMouseScroll', this.onMouseWheel.bind(this), false);
+    this.element.addEventListener('mousedown', this.onMouseDown.bind(this), false);
+    this.element.addEventListener('touchstart', this.onMouseDown.bind(this), false);
+    this.element.addEventListener('mouseup', this.onMouseUp.bind(this), false);
+    this.element.addEventListener('touchend', this.onMouseUp.bind(this), false);
 
+    $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange', this.fullscreen.bind(this));
 
-      if (src) {
+    $(window).resize(function () {
+      self.resizeGL($(self.element).width(), $(self.element).height());
+    });
 
-        if (!this._scene) {
-          this.init_scene(width, height);
-          this.render();
-        }
-
-        ctx.drawImage(this._renderer.domElement, 0, 0, width, height, left, top, width, height);
+    // Player Controls
+    $(this.element).find('.playButton').click(function (e) {
+      e.preventDefault();
+      if ($(this).hasClass('fa-pause')) {
+        $(this).removeClass('fa-pause').addClass('fa-play');
+        self.pause();
       } else {
-        this.drawFill(ctx);
+        $(this).removeClass('fa-play').addClass('fa-pause');
+        self.play();
+      }
+    });
+
+    $(this.element).find(".fullscreenButton").click(function (e) {
+      e.preventDefault();
+      var elem = $(self.element)[0];
+      if ($(this).hasClass('fa-expand')) {
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen();
+        } else if (elem.msRequestFullscreen) {
+          elem.msRequestFullscreen();
+        } else if (elem.mozRequestFullScreen) {
+          elem.mozRequestFullScreen();
+        } else if (elem.webkitRequestFullscreen) {
+          elem.webkitRequestFullscreen();
+        }
+      } else {
+        if (elem.requestFullscreen) {
+          document.exitFullscreen();
+        } else if (elem.msRequestFullscreen) {
+          document.msExitFullscreen();
+        } else if (elem.mozRequestFullScreen) {
+          document.mozCancelFullScreen();
+        } else if (elem.webkitRequestFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      }
+    });
+
+    $(this.element).find(".muteButton").click(function (e) {
+      e.preventDefault();
+      if ($(this).hasClass('fa-volume-off')) {
+        $(this).removeClass('fa-volume-off').addClass('fa-volume-up');
+        self._video.muted = false;
+      } else {
+        $(this).removeClass('fa-volume-up').addClass('fa-volume-off');
+        self._video.muted = true;
+      }
+    });
+  }
+
+  /* Component Overides .. */
+
+  _draw(ctx) {
+    var {
+      left,
+      top,
+      width,
+      height,
+      src
+    } = this.model;
+
+    ctx.beginPath();
+    ctx.rect(left, top, width, height);
+  }
+
+  _post_draw(ctx) {
+
+    var {
+      left,
+      top,
+      width,
+      height,
+      src
+    } = this.model;
+
+    if (src) {
+
+      if (!this._scene) {
+        this.init_scene(width, height);
+        this.render();
       }
 
-      this.drawStroke(ctx);
+      ctx.drawImage(this._renderer.domElement, 0, 0, width, height, left, top, width, height);
+    } else {
+      this.drawFill(ctx);
     }
-  }, {
-    key: 'onchange',
-    value: function onchange(after, before) {
 
-      if (after.hasOwnProperty('width') || after.hasOwnProperty('height')) {
-        this.resize(this.model.width, this.model.height);
-      }
+    this.drawStroke(ctx);
+  }
 
-      if (after.hasOwnProperty('src') || after.hasOwnProperty('autoplay')) {
+  onchange(after, before) {
 
-        this.destroy_scene();
-      }
-
-      this.invalidate();
+    if (after.hasOwnProperty('width') || after.hasOwnProperty('height')) {
+      this.resize(this.model.width, this.model.height);
     }
-  }, {
-    key: 'ondblclick',
-    value: function ondblclick(e) {
-      if (this._isPlaying) this.pause();else this.play();
 
-      e.stopPropagation();
+    if (after.hasOwnProperty('src') || after.hasOwnProperty('autoplay')) {
+
+      this.destroy_scene();
     }
-  }, {
-    key: 'onmousedown',
-    value: function onmousedown(e) {}
-  }, {
-    key: 'onmousemove',
-    value: function onmousemove(e) {
 
-      if (this._clickAndDrag === false) {
+    this.invalidate();
+  }
 
-        var x, y;
+  ondblclick(e) {
+    if (this._isPlaying) this.pause();else this.play();
 
-        this._onPointerDownPointerX = e.offsetX;
-        this._onPointerDownPointerY = -e.offsetY;
+    e.stopPropagation();
+  }
 
-        this._onPointerDownLon = this._lon;
-        this._onPointerDownLat = this._lat;
+  onmousedown(e) {}
 
-        x = e.offsetX - this._renderer.getContext().canvas.offsetLeft;
-        y = e.offsetY - this._renderer.getContext().canvas.offsetTop;
-        this._lon = x / this._renderer.getContext().canvas.width * 430 - 225;
-        this._lat = y / this._renderer.getContext().canvas.height * -180 + 90;
-      }
+  onmousemove(e) {
+
+    if (this._clickAndDrag === false) {
+
+      var x, y;
+
+      this._onPointerDownPointerX = e.offsetX;
+      this._onPointerDownPointerY = -e.offsetY;
+
+      this._onPointerDownLon = this._lon;
+      this._onPointerDownLat = this._lat;
+
+      x = e.offsetX - this._renderer.getContext().canvas.offsetLeft;
+      y = e.offsetY - this._renderer.getContext().canvas.offsetTop;
+      this._lon = x / this._renderer.getContext().canvas.width * 430 - 225;
+      this._lat = y / this._renderer.getContext().canvas.height * -180 + 90;
     }
-  }, {
-    key: 'onwheel',
-    value: function onwheel(e) {
-      if (this._wheelEnabled === false) return;
+  }
 
-      var wheelSpeed = 0.01;
+  onwheel(e) {
+    if (this._wheelEnabled === false) return;
 
-      this._fov -= e.deltaY * wheelSpeed;
+    var wheelSpeed = 0.01;
 
-      if (this._fov < this._fovMin) {
-        this._fov = this._fovMin;
-      } else if (this._fov > this._fovMax) {
-        this._fov = this._fovMax;
-      }
+    this._fov -= e.deltaY * wheelSpeed;
 
-      this._camera.setFocalLength(this._fov);
-      this._camera.updateProjectionMatrix();
-      e.stopPropagation();
+    if (this._fov < this._fovMin) {
+      this._fov = this._fovMin;
+    } else if (this._fov > this._fovMax) {
+      this._fov = this._fovMax;
     }
-  }, {
-    key: 'ondragstart',
-    value: function ondragstart(e) {
-      // this._dragStart.x = e.pageX;
-      // this._dragStart.y = e.pageY;
+
+    this._camera.setFocalLength(this._fov);
+    this._camera.updateProjectionMatrix();
+    e.stopPropagation();
+  }
+
+  ondragstart(e) {
+    // this._dragStart.x = e.pageX;
+    // this._dragStart.y = e.pageY;
+    this._dragStart.x = e.offsetX;
+    this._dragStart.y = e.offsetY;
+  }
+
+  ondragmove(e) {
+
+    if (this._isPlaying === false) {
+      return;
+    }
+
+    if (this._clickAndDrag !== false) {
+      // this._onPointerDownPointerX = e.clientX;
+      // this._onPointerDownPointerY = -e.clientY;
+      this._onPointerDownPointerX = e.offsetX;
+      this._onPointerDownPointerY = -e.offsetY;
+
+      this._onPointerDownLon = this._lon;
+      this._onPointerDownLat = this._lat;
+
+      var x, y;
+
+      x = e.offsetX - this._dragStart.x;
+      y = e.offsetY - this._dragStart.y;
       this._dragStart.x = e.offsetX;
       this._dragStart.y = e.offsetY;
+      this._lon += x;
+      this._lat -= y;
     }
-  }, {
-    key: 'ondragmove',
-    value: function ondragmove(e) {
 
-      if (this._isPlaying === false) {
-        return;
-      }
+    e.stopPropagation();
+  }
 
-      if (this._clickAndDrag !== false) {
-        // this._onPointerDownPointerX = e.clientX;
-        // this._onPointerDownPointerY = -e.clientY;
-        this._onPointerDownPointerX = e.offsetX;
-        this._onPointerDownPointerY = -e.offsetY;
+  ondragend(e) {}
 
-        this._onPointerDownLon = this._lon;
-        this._onPointerDownLat = this._lat;
+  ontouchstart(e) {}
 
-        var x, y;
+  ontouchmove(e) {}
 
-        x = e.offsetX - this._dragStart.x;
-        y = e.offsetY - this._dragStart.y;
-        this._dragStart.x = e.offsetX;
-        this._dragStart.y = e.offsetY;
-        this._lon += x;
-        this._lat -= y;
-      }
+  ontouchend(e) {}
 
-      e.stopPropagation();
-    }
-  }, {
-    key: 'ondragend',
-    value: function ondragend(e) {}
-  }, {
-    key: 'ontouchstart',
-    value: function ontouchstart(e) {}
-  }, {
-    key: 'ontouchmove',
-    value: function ontouchmove(e) {}
-  }, {
-    key: 'ontouchend',
-    value: function ontouchend(e) {}
-  }, {
-    key: 'onkeydown',
-    value: function onkeydown(e) {}
-  }, {
-    key: 'nature',
-    get: function get() {
-      return NATURE;
-    }
-  }]);
+  onkeydown(e) {}
 
-  return VideoPlayer360;
-}((0, _thingsScene.RectPath)(_thingsScene.Component));
+}
 
 exports.default = VideoPlayer360;
-
-
 _thingsScene.Component.register('video-player-360', VideoPlayer360);
 
 /***/ }),
@@ -55577,10 +54456,6 @@ _thingsScene.Component.register('video-player-360', VideoPlayer360);
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _threeLayout = __webpack_require__(9);
 
@@ -55604,16 +54479,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
-
-
-var NATURE = {
+const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
@@ -55674,9 +54540,12 @@ var NATURE = {
     name: 'threed',
     property: 'threed'
   }]
-};
+}; /*
+    * Copyright © HatioLab Inc. All rights reserved.
+    */
 
-var WEBGL_NO_SUPPORT_TEXT = 'WebGL no support';
+
+const WEBGL_NO_SUPPORT_TEXT = 'WebGL no support';
 
 function registerLoaders() {
   if (!registerLoaders.done) {
@@ -55685,1329 +54554,1248 @@ function registerLoaders() {
   }
 }
 
-var ThreeContainer = function (_Container) {
-  _inherits(ThreeContainer, _Container);
+class ThreeContainer extends _thingsScene.Container {
 
-  function ThreeContainer() {
-    _classCallCheck(this, ThreeContainer);
-
-    return _possibleConstructorReturn(this, (ThreeContainer.__proto__ || Object.getPrototypeOf(ThreeContainer)).apply(this, arguments));
+  containable(component) {
+    return component.is3dish();
   }
 
-  _createClass(ThreeContainer, [{
-    key: 'containable',
-    value: function containable(component) {
-      return component.is3dish();
-    }
-  }, {
-    key: 'putObject',
-    value: function putObject(id, object) {
-      if (!this._objects) this._objects = {};
+  putObject(id, object) {
+    if (!this._objects) this._objects = {};
 
-      this._objects[id] = object;
-    }
-  }, {
-    key: 'getObject',
-    value: function getObject(id) {
-      if (!this._objects) this._objects = {};
+    this._objects[id] = object;
+  }
 
-      return this._objects[id];
-    }
-  }, {
-    key: 'added',
-    value: function added() {
-      if (!this.app.isViewMode) return;
+  getObject(id) {
+    if (!this._objects) this._objects = {};
 
-      _thingsScene.ScriptLoader.load('/node_modules/three/build/three.min.js').then(function () {
-        THREE.Cache.enabled = true;
-        // ScriptLoader.load
-      }, error);
-    }
+    return this._objects[id];
+  }
 
-    /* THREE Object related .. */
+  added() {
+    if (!this.app.isViewMode) return;
 
-  }, {
-    key: 'createFloor',
-    value: function createFloor(color, width, height) {
-      var _this2 = this;
+    _thingsScene.ScriptLoader.load('/node_modules/three/build/three.min.js').then(() => {
+      THREE.Cache.enabled = true;
+      // ScriptLoader.load
+    }, error);
+  }
 
-      var fillStyle = this.model.fillStyle;
+  /* THREE Object related .. */
 
-      var floorMaterial;
+  createFloor(color, width, height) {
 
-      if (fillStyle.type == 'pattern' && fillStyle.image) {
+    let fillStyle = this.model.fillStyle;
 
-        var floorTexture = this._textureLoader.load(this.app.url(fillStyle.image), function (texture) {
-          texture.minFilter = THREE.LinearFilter;
-          _this2.render_threed();
-        });
+    var floorMaterial;
 
-        floorMaterial = new THREE.MeshBasicMaterial({
-          map: floorTexture,
-          side: THREE.DoubleSide
-        });
-      } else {
-        floorMaterial = new THREE.MeshBasicMaterial({
-          color: color,
-          side: THREE.FrontSide
-        });
-      }
+    if (fillStyle.type == 'pattern' && fillStyle.image) {
 
-      var floorGeometry = new THREE.PlaneGeometry(width, height);
-
-      var floor = new THREE.Mesh(floorGeometry, floorMaterial);
-
-      // floor.receiveShadow = true
-
-      floor.rotation.x = -Math.PI / 2;
-      floor.position.y = -2;
-
-      floor.name = 'floor';
-
-      this._scene3d.add(floor);
-    }
-  }, {
-    key: 'createObjects',
-    value: function createObjects(components, canvasSize) {
-      var _this3 = this;
-
-      components.forEach(function (component) {
-
-        var clazz = _component3d2.default.register(component.model.type);
-
-        if (!clazz) {
-          console.warn("Class not found : 3d class is not exist");
-          return;
-        }
-
-        var item = new clazz(component.model, canvasSize, _this3, component);
-
-        if (item) {
-          // items.push(item)
-          setTimeout(function () {
-            item.name = component.model.id;
-            this._scene3d.add(item);
-            this.putObject(component.model.id, item);
-          }.bind(_this3));
-        }
-      });
-    }
-  }, {
-    key: 'createHeatmap',
-    value: function createHeatmap(width, height) {
-      var _this4 = this;
-
-      if (this._model.useHeatmap === false) return;
-
-      _thingsScene.ScriptLoader.load('/node_modules/heatmap.js/build/heatmap.min.js').then(function () {
-        var div = document.createElement('div');
-
-        _this4._heatmap = h337.create({
-          container: div,
-          width: width,
-          height: height,
-          radius: Math.sqrt(width * width + height * height) / 4
-        });
-
-        var heatmapMaterial = new THREE.MeshBasicMaterial({
-          side: THREE.FrontSide,
-          transparent: true,
-          visible: false
-        });
-
-        var heatmapGeometry = new THREE.PlaneGeometry(width, height);
-
-        var heatmap = new THREE.Mesh(heatmapGeometry, heatmapMaterial);
-
-        heatmap.rotation.x = -Math.PI / 2;
-        heatmap.position.y = -1;
-
-        heatmap.name = 'heatmap';
-
-        _this4._scene3d.add(heatmap);
-      }, error);
-    }
-  }, {
-    key: 'navigatePath',
-    value: function navigatePath(targetNames) {
-
-      var currentPosition = {
-        x: 0,
-        y: 0,
-        z: 0
-      };
-
-      for (var i in targetNames) {
-        var targetName = targetNames[i];
-        var targetObject = this.findTarget(targetName);
-
-        this.emphasizeTarget(targetObject);
-
-        var targetRack = targetObject.parent;
-        targetRack.geometry.computeBoundingBox();
-        var targetRackBoundBox = targetRack.geometry.boundingBox;
-
-        // let targetPath = this.findPath(targetName)
-        var sprite = this.createMarker(Number(i) + 1);
-        sprite.position.set(0, 100, 0);
-
-        sprite.position.set(0, targetRackBoundBox.max.y + 25, 0);
-
-        sprite.name = targetName + "-marker";
-
-        targetRack.add(sprite);
-        // this._scene3d.add(sprite)
-
-        //
-        // this._scene3d.add(sprite)
-
-        // if(targetPath)
-        //   currentPosition = this.drawPath(currentPosition, targetPath)
-      }
-
-      this.render_threed();
-    }
-  }, {
-    key: 'findTarget',
-    value: function findTarget(name) {
-      var targetObject = this._scene3d.getObjectByName(name, true);
-      if (!targetObject) return;
-
-      return targetObject;
-    }
-  }, {
-    key: 'emphasizeTarget',
-    value: function emphasizeTarget(object) {
-
-      this._scene3d.updateMatrixWorld();
-
-      var box = new THREE.Mesh(object.geometry.clone(), object.material.clone());
-
-      box.name = object.name + '-emp';
-      box.material.color.set(0x44a6f6);
-      box.raycast = function () {};
-
-      box.position.copy(object.getWorldPosition());
-
-      this._scene3d.add(box);
-    }
-  }, {
-    key: 'findPath',
-    value: function findPath(target) {
-      var targetObject = this._scene3d.getObjectByName(target, true);
-      if (!targetObject) return;
-
-      targetObject = targetObject.parent; // 찾은 stock에 강조표시를 하면 눈이 띄지 않는다.
-      // 부모(Rack)에 강조표시.
-
-      // targetObject.updateMatrix()
-      this._scene3d.updateMatrixWorld();
-
-      var position = targetObject.getWorldPosition();
-
-      var scale = targetObject.getWorldScale();
-
-      var box = new THREE.BoxHelper(targetObject, 0xff3333);
-
-      box.material.linewidth = this.model.zoom * 0.1;
-
-      this._scene3d.add(box);
-
-      // this.makeTextSprite()
-
-      // var box = new THREE.BoxHelper(targetObject, 0xff3333)
-      // box.material.linewidth = 10
-      //
-      // this._scene3d.add(box)
-
-
-      // position =
-
-      return {
-        x: position.x,
-        y: position.y,
-        z: position.z
-      };
-    }
-  }, {
-    key: 'drawPath',
-    value: function drawPath(current, target) {
-
-      var tX = target.x;
-      var tY = target.y;
-      var tZ = target.z;
-
-      var cX = current.x;
-      var cY = current.y;
-      var cZ = current.z;
-
-      var lineWidth = 5;
-
-      var material = new THREE.LineBasicMaterial({
-        color: 0xff3333,
-        linewidth: lineWidth
+      var floorTexture = this._textureLoader.load(this.app.url(fillStyle.image), texture => {
+        texture.minFilter = THREE.LinearFilter;
+        this.render_threed();
       });
 
-      var geometry = new THREE.Geometry();
-
-      geometry.vertices.push(new THREE.Vector3(cX, 0, cZ));
-      geometry.vertices.push(new THREE.Vector3(tX, 0, tZ));
-
-      var line = new THREE.Line(geometry, material);
-
-      this._scene3d.add(line);
-
-      return target;
-    }
-  }, {
-    key: 'updateHeatmapTexture',
-    value: function updateHeatmapTexture() {
-      var heatmap = this._scene3d.getObjectByName('heatmap', true);
-
-      var texture = new THREE.Texture(this._heatmap._renderer.canvas);
-      texture.needsUpdate = true;
-
-      heatmap.material.map = texture;
-
-      heatmap.material.visible = true;
-    }
-  }, {
-    key: 'createMarker',
-    value: function createMarker(message) {
-
-      var fontFace = "Arial";
-      var fontSize = 32;
-      var textColor = 'rgba(255,255,255,1)';
-      var vAlign = 'middle';
-      var hAlign = 'center';
-      var padding = 10;
-
-      var image = new Image();
-      image.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAH0AAABuCAYAAAAKwhwQAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyppVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTMyIDc5LjE1OTI4NCwgMjAxNi8wNC8xOS0xMzoxMzo0MCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTUuNSAoTWFjaW50b3NoKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo3MkZDRjQ0RjVDOTYxMUU2QjMxRjhENEQwQjZBMjk5OSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo3MkZDRjQ1MDVDOTYxMUU2QjMxRjhENEQwQjZBMjk5OSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjcyRkNGNDRENUM5NjExRTZCMzFGOEQ0RDBCNkEyOTk5IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjcyRkNGNDRFNUM5NjExRTZCMzFGOEQ0RDBCNkEyOTk5Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+nKWOowAAIaRJREFU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';
-
-      var canvas = document.createElement('canvas');
-      var context = canvas.getContext('2d');
-
-      // document.body.appendChild(canvas)
-
-      canvas.width = image.width;
-      canvas.height = image.height;
-
-      context.font = fontSize + "px " + fontFace;
-      context.textBaseline = "alphabetic";
-      context.textAlign = "left";
-
-      var cx = canvas.width / 2;
-      var cy = canvas.height / 2;
-
-      var metrics = context.measureText(String(message));
-      var textWidth = metrics.width;
-
-      var tx = textWidth / 2.0;
-      var ty = fontSize / 2.0;
-
-      // then adjust for the justification
-      if (vAlign == "bottom") ty = fontSize;else if (vAlign == "top") ty = 0;
-
-      if (hAlign == "left") tx = textWidth;else if (hAlign == "right") tx = 0;
-
-      context.drawImage(image, cx - image.width * 0.5, cy - image.height * 0.5, image.width, image.height);
-
-      // text color
-      context.fillStyle = textColor;
-
-      var offsetY = cy - fontSize * 0.5 + padding;
-
-      context.fillText(message, cx - tx, offsetY);
-
-      // canvas contents will be used for a texture
-      var texture = new THREE.Texture(canvas);
-      texture.needsUpdate = true;
-
-      var spriteMaterial = new THREE.SpriteMaterial({
-        map: texture
+      floorMaterial = new THREE.MeshBasicMaterial({
+        map: floorTexture,
+        side: THREE.DoubleSide
       });
-      var sprite = new THREE.Sprite(spriteMaterial);
-      sprite.scale.set(Math.floor(image.width * 0.5), Math.floor(image.height * 0.5), 1);
-      // sprite.scale.set(canvas.width, canvas.height,1.0);
-
-      sprite.raycast = function () {};
-
-      return sprite;
-    }
-  }, {
-    key: 'makeTextSprite',
-    value: function makeTextSprite(message, parameters) {
-
-      if (!message) return;
-
-      if (parameters === undefined) parameters = {};
-
-      var fontFace = parameters.hasOwnProperty("fontFace") ? parameters["fontFace"] : "Arial";
-
-      var fontSize = parameters.hasOwnProperty("fontSize") ? parameters["fontSize"] : 32;
-
-      var textColor = parameters.hasOwnProperty("textColor") ? parameters["textColor"] : 'rgba(255,255,255,1)';
-
-      var borderWidth = parameters.hasOwnProperty("borderWidth") ? parameters["borderWidth"] : 2;
-
-      var borderColor = parameters.hasOwnProperty("borderColor") ? parameters["borderColor"] : 'rgba(0, 0, 0, 1.0)';
-
-      var backgroundColor = parameters.hasOwnProperty("backgroundColor") ?
-      // parameters["backgroundColor"] : 'rgba(51, 51, 51, 1.0)';
-      parameters["backgroundColor"] : 'rgba(0, 0, 0, 0.7)';
-
-      var radius = parameters.hasOwnProperty("radius") ? parameters["radius"] : 30;
-
-      var vAlign = parameters.hasOwnProperty("vAlign") ? parameters["vAlign"] : 'middle';
-
-      var hAlign = parameters.hasOwnProperty("hAlign") ? parameters["hAlign"] : 'center';
-
-      var canvas = document.createElement('canvas');
-      var context = canvas.getContext('2d');
-
-      // document.body.appendChild(canvas)
-
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-
-      context.font = fontSize + "px " + fontFace;
-      context.textBaseline = "alphabetic";
-      context.textAlign = "left";
-
-      var textWidth = 0;
-
-      var msgArr = String(message).trim().split('\n');
-
-      var cx = canvas.width / 2;
-      var cy = canvas.height / 2;
-
-      for (var _i in msgArr) {
-        // get size data (height depends only on font size)
-        var metrics = context.measureText(msgArr[_i]);
-
-        if (textWidth < metrics.width) textWidth = metrics.width;
-      }
-
-      var tx = textWidth / 2.0;
-      var ty = fontSize / 2.0;
-
-      // then adjust for the justification
-      if (vAlign == "bottom") ty = fontSize;else if (vAlign == "top") ty = 0;
-
-      if (hAlign == "left") tx = textWidth;else if (hAlign == "right") tx = 0;
-
-      this.roundRect(context, cx - tx, cy - fontSize * msgArr.length * 0.5,
-      // cy - fontSize * msgArr.length * 0.5 + ty - 0.28 * fontSize,
-      textWidth, fontSize * msgArr.length,
-      // fontSize * msgArr.length * 1.28,
-      radius, borderWidth, borderColor, backgroundColor, 5);
-
-      // text color
-      context.fillStyle = textColor;
-      context.lineWidth = 3;
-
-      var offsetY = cy - fontSize * msgArr.length * 0.5 - 5 - borderWidth;
-
-      for (var i in msgArr) {
-        i = Number(i);
-        offsetY += fontSize;
-
-        context.fillText(msgArr[i], cx - tx,
-        // cy - fontSize * (i - msgArr.length/2) + ty
-        offsetY);
-      }
-
-      // canvas contents will be used for a texture
-      var texture = new THREE.Texture(canvas);
-      texture.needsUpdate = true;
-
-      var spriteMaterial = new THREE.SpriteMaterial({
-        map: texture
+    } else {
+      floorMaterial = new THREE.MeshBasicMaterial({
+        color: color,
+        side: THREE.FrontSide
       });
-      var sprite = new THREE.Sprite(spriteMaterial);
-      sprite.scale.set(600, 300, 1);
-      // sprite.scale.set(canvas.width, canvas.height, 1.0);
-
-      sprite.raycast = function () {};
-
-      return sprite;
-    }
-  }, {
-    key: 'destroy_scene3d',
-    value: function destroy_scene3d() {
-      this.stop();
-      if (this._renderer) this._renderer.clear();
-      this._renderer = undefined;
-      this._camera = undefined;
-      this._2dCamera = undefined;
-      this._keyboard = undefined;
-      this._controls = undefined;
-      this._projector = undefined;
-      this._load_manager = undefined;
-
-      if (this._scene3d) {
-        for (var i in this._scene3d.children) {
-          var child = this._scene3d.children[i];
-          if (child.dispose) child.dispose();
-          if (child.geometry) child.geometry.dispose();
-          if (child.material) child.material.dispose();
-          if (child.texture) child.texture.dispose();
-          this._scene3d.remove(child);
-        }
-      }
-
-      if (this._scene2d) {
-        for (var _i2 in this._scene2d.children) {
-          var _child = this._scene2d.children[_i2];
-          if (_child.dispose) _child.dispose();
-          if (_child.geometry) _child.geometry.dispose();
-          if (_child.material) _child.material.dispose();
-          if (_child.texture) _child.texture.dispose();
-          this._scene2d.remove(_child);
-        }
-      }
-
-      this._scene3d = undefined;
-      this._scene2d = undefined;
-    }
-  }, {
-    key: 'init_scene3d',
-    value: function init_scene3d() {
-
-      if (this._scene3d) this.destroy_scene3d();
-
-      registerLoaders();
-      this._textureLoader = new THREE.TextureLoader();
-      this._textureLoader.withCredential = true;
-      this._textureLoader.crossOrigin = 'use-credentials';
-
-      // this._exporter = new THREE.OBJExporter();
-
-      var _model = this.model,
-          width = _model.width,
-          height = _model.height,
-          _model$fov = _model.fov,
-          fov = _model$fov === undefined ? 45 : _model$fov,
-          _model$near = _model.near,
-          near = _model$near === undefined ? 0.1 : _model$near,
-          _model$far = _model.far,
-          far = _model$far === undefined ? 20000 : _model$far,
-          _model$fillStyle = _model.fillStyle,
-          fillStyle = _model$fillStyle === undefined ? '#424b57' : _model$fillStyle,
-          _model$light = _model.light,
-          light = _model$light === undefined ? 0xffffff : _model$light,
-          _model$antialias = _model.antialias,
-          antialias = _model$antialias === undefined ? true : _model$antialias,
-          _model$precision = _model.precision,
-          precision = _model$precision === undefined ? 'highp' : _model$precision;
-
-      var components = this.components || [];
-
-      // SCENE
-      this._scene3d = new THREE.Scene();
-      this._scene2d = new THREE.Scene();
-
-      // CAMERA
-      var aspect = width / height;
-
-      this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-      this._2dCamera = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 1, 1000);
-
-      this._scene3d.add(this._camera);
-      this._scene2d.add(this._2dCamera);
-      this._camera.position.set(height * 0.8, Math.max(width, height) * 0.8, width * 0.8);
-      this._2dCamera.position.set(height * 0.8, Math.max(width, height) * 0.8, width * 0.8);
-      this._camera.lookAt(this._scene3d.position);
-      this._2dCamera.lookAt(this._scene2d.position);
-      this._camera.zoom = this.model.zoom * 0.01;
-
-      if (this.model.showAxis) {
-        var axisHelper = new THREE.AxesHelper(width);
-        this._scene3d.add(axisHelper);
-      }
-
-      try {
-        // RENDERER
-        this._renderer = new THREE.WebGLRenderer({
-          precision: precision,
-          alpha: true,
-          antialias: antialias
-        });
-      } catch (e) {
-        this._noSupportWebgl = true;
-      }
-
-      if (this._noSupportWebgl) return;
-
-      this._renderer.autoClear = false;
-
-      this._renderer.setClearColor(0xffffff, 0); // transparent
-      this._renderer.setSize(width, height);
-      // this._renderer.setSize(1600, 900)
-      // this._renderer.shadowMap.enabled = true
-
-      // CONTROLS
-      this._controls = new _threeControls2.default(this._camera, this);
-
-      // LIGHT
-      var _light = new THREE.PointLight(light, 1);
-      this._camera.add(_light);
-      // this._camera.castShadow = true
-
-      this._raycaster = new THREE.Raycaster();
-      // this._mouse = { x: 0, y: 0, originX: 0, originY : 0 }
-      this._mouse = new THREE.Vector2();
-
-      this._tick = 0;
-      this._clock = new THREE.Clock(true);
-      this.mixers = new Array();
-
-      this.createHeatmap(width, height);
-      this.createFloor(fillStyle, width, height);
-      this.createObjects(components, {
-        width: width,
-        height: height
-      });
-
-      this._load_manager = new THREE.LoadingManager();
-      this._load_manager.onProgress = function (item, loaded, total) {};
-
-      this.threed_animate();
-    }
-  }, {
-    key: 'threed_animate',
-    value: function threed_animate() {
-      this._animationFrame = requestAnimationFrame(this.threed_animate.bind(this));
-
-      // if (this.model.autoRotate)
-      this.update();
-    }
-  }, {
-    key: 'stop',
-    value: function stop() {
-      cancelAnimationFrame(this._animationFrame);
-    }
-  }, {
-    key: 'update',
-    value: function update() {
-      this._controls.update();
-      this.render_threed();
-    }
-  }, {
-    key: 'render_threed',
-    value: function render_threed() {
-      var delta;
-      if (this._clock) delta = this._clock.getDelta();
-
-      var mixers = this.mixers;
-      for (var i in mixers) {
-        if (mixers.hasOwnProperty(i)) {
-          var mixer = mixers[i];
-          if (mixer) {
-            mixer.update(delta);
-          }
-        }
-      }
-
-      if (this._renderer) {
-        this._renderer.clear();
-        this._renderer.render(this._scene3d, this._camera);
-      }
-
-      if (this._renderer && this._scene2d) {
-        this._renderer.render(this._scene2d, this._2dCamera);
-      }
-
-      this.invalidate();
     }
 
-    /* Container Overides .. */
+    var floorGeometry = new THREE.PlaneGeometry(width, height);
 
-  }, {
-    key: '_draw',
-    value: function _draw(ctx) {
-      if (this.app.isViewMode) {
-        if (!this.model.threed) this.model.threed = true;
-      }
+    var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 
-      if (this.model.threed && !this._noSupportWebgl) {
+    // floor.receiveShadow = true
+
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -2;
+
+    floor.name = 'floor';
+
+    this._scene3d.add(floor);
+  }
+
+  createObjects(components, canvasSize) {
+
+    components.forEach(component => {
+
+      var clazz = _component3d2.default.register(component.model.type);
+
+      if (!clazz) {
+        console.warn("Class not found : 3d class is not exist");
         return;
       }
 
-      _get(ThreeContainer.prototype.__proto__ || Object.getPrototypeOf(ThreeContainer.prototype), '_draw', this).call(this, ctx);
-    }
-  }, {
-    key: '_post_draw',
-    value: function _post_draw(ctx) {
-      var _model2 = this.model,
-          left = _model2.left,
-          top = _model2.top,
-          width = _model2.width,
-          height = _model2.height,
-          threed = _model2.threed;
+      var item = new clazz(component.model, canvasSize, this, component);
 
-
-      if (threed) {
-
-        if (!this._scene3d) {
-          this.init_scene3d();
-          this.render_threed();
-        }
-
-        if (this._noSupportWebgl) {
-          this._showWebglNoSupportText(ctx);
-          return;
-        }
-
-        if (this._dataChanged) {
-          this._onDataChanged();
-        }
-
-        this.showTooltip(this._selectedPickingLocation);
-
-        ctx.drawImage(this._renderer.domElement, 0, 0, width, height, left, top, width, height);
-
-        // this.showTooltip('LOC-2-1-1-A-1')
-      } else {
-        _get(ThreeContainer.prototype.__proto__ || Object.getPrototypeOf(ThreeContainer.prototype), '_post_draw', this).call(this, ctx);
+      if (item) {
+        // items.push(item)
+        setTimeout(function () {
+          item.name = component.model.id;
+          this._scene3d.add(item);
+          this.putObject(component.model.id, item);
+        }.bind(this));
       }
-    }
-  }, {
-    key: 'dispose',
-    value: function dispose() {
-      _get(ThreeContainer.prototype.__proto__ || Object.getPrototypeOf(ThreeContainer.prototype), 'dispose', this).call(this);
-      this.destroy_scene3d();
-    }
-  }, {
-    key: 'roundRect',
-    value: function roundRect(ctx, x, y, w, h, r, borderWidth, borderColor, fillColor, padding, image) {
-      // no point in drawing it if it isn't going to be rendered
-      if (fillColor == undefined && borderColor == undefined) return;
+    });
+  }
 
-      var left = x - borderWidth - r - padding;
-      var right = left + w + borderWidth * 2 + r * 2 + padding * 2;
-      var top = y - borderWidth - r - padding;
-      var bottom = top + h + borderWidth * 2 + r * 2 + padding * 2;
+  createHeatmap(width, height) {
 
-      ctx.beginPath();
-      ctx.moveTo(left + r, top);
-      ctx.lineTo(right - r, top);
-      ctx.quadraticCurveTo(right, top, right, top + r);
-      ctx.lineTo(right, bottom - r);
-      ctx.quadraticCurveTo(right, bottom, right - r, bottom);
-      ctx.lineTo(left + r, bottom);
-      ctx.quadraticCurveTo(left, bottom, left, bottom - r);
-      ctx.lineTo(left, top + r);
-      ctx.quadraticCurveTo(left, top, left + r, top);
-      ctx.closePath();
+    if (this._model.useHeatmap === false) return;
 
-      ctx.lineWidth = borderWidth;
+    _thingsScene.ScriptLoader.load('/node_modules/heatmap.js/build/heatmap.min.js').then(() => {
+      var div = document.createElement('div');
 
-      // background color
-      // border color
-
-      // if the fill color is defined, then fill it
-      if (fillColor != undefined) {
-        ctx.fillStyle = fillColor;
-        ctx.fill();
-      }
-
-      if (borderWidth > 0 && borderColor != undefined) {
-        ctx.strokeStyle = borderColor;
-        ctx.stroke();
-      }
-    }
-  }, {
-    key: 'getObjectByRaycast',
-    value: function getObjectByRaycast() {
-
-      var intersects = this.getObjectsByRaycast();
-      var intersected;
-
-      if (intersects.length > 0) {
-        intersected = intersects[0].object;
-      }
-
-      return intersected;
-    }
-  }, {
-    key: 'getObjectsByRaycast',
-    value: function getObjectsByRaycast() {
-      // find intersections
-
-      // create a Ray with origin at the mouse position
-      //   and direction into the scene (camera direction)
-
-      var vector = this._mouse;
-      if (!this._camera) return;
-
-      this._raycaster.setFromCamera(vector, this._camera);
-
-      // create an array containing all objects in the scene with which the ray intersects
-      var intersects = this._raycaster.intersectObjects(this._scene3d.children, true);
-
-      return intersects;
-    }
-  }, {
-    key: 'moveCameraTo',
-    value: function moveCameraTo(targetName) {
-
-      if (!targetName) return;
-
-      var object = this._scene3d.getObjectByName(targetName, true);
-      if (!object) return;
-
-      var self = this;
-      // this._controls.rotateLeft(5)
-      // setTimeout(function() {
-      //   self.moveCameraTo(5)
-      // }, 100)
-
-      var objectPositionVector = object.getWorldPosition();
-      objectPositionVector.y = 0;
-      var distance = objectPositionVector.distanceTo(new THREE.Vector3(0, 0, 0));
-
-      objectPositionVector.multiplyScalar(1000 / (distance || 1));
-
-      var self = this;
-      var diffX = this._camera.position.x - objectPositionVector.x;
-      var diffY = this._camera.position.y - 300;
-      var diffZ = this._camera.position.z - objectPositionVector.z;
-
-      this.animate({
-        step: function step(delta) {
-
-          var vector = new THREE.Vector3();
-
-          vector.x = objectPositionVector.x - diffX * (delta - 1);
-          vector.y = 0;
-          vector.z = objectPositionVector.z - diffZ * (delta - 1);
-
-          var distance = vector.distanceTo(new THREE.Vector3(0, 0, 0));
-
-          vector.multiplyScalar(1000 / (distance || 1));
-
-          self._camera.position.x = vector.x;
-          self._camera.position.y = 300 - diffY * (delta - 1);
-          self._camera.position.z = vector.z;
-
-          self._camera.lookAt(self._scene3d.position);
-        },
-        duration: 2000,
-        delta: 'linear'
-      }).start();
-
-      // this._camera.position.x = objectPositionVector.x
-      // this._camera.position.y = 300
-      // this._camera.position.z = objectPositionVector.z
-    }
-  }, {
-    key: 'exportModel',
-    value: function exportModel() {
-      // var exported = this._exporter.parse(this._scene3d);
-      // var blob = new Blob([exported], { type: "text/plain;charset=utf-8" });
-      // console.log(exported)
-      // saveAs(blob, "exported.txt");
-    }
-  }, {
-    key: 'createTooltipForNavigator',
-    value: function createTooltipForNavigator(messageObject) {
-
-      if (!messageObject) return;
-
-      var isMarker = true;
-      var fontFace = "Arial";
-      var fontSize = 40;
-      var textColor = 'rgba(255,255,255,1)';
-      var borderWidth = 2;
-      var borderColor = 'rgba(0, 0, 0, 1.0)';
-      var backgroundColor = 'rgba(0, 0, 0, 0.7)';
-      var radius = 30;
-      var vAlign = 'middle';
-      var hAlign = 'center';
-
-      var canvas = document.createElement('canvas');
-      var context = canvas.getContext('2d');
-
-      // document.body.appendChild(canvas)
-
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-
-      context.font = fontSize + "px " + fontFace;
-      context.textBaseline = "alphabetic";
-      context.textAlign = "left";
-
-      var textWidth = 0;
-
-      var cx = canvas.width / 2;
-      var cy = canvas.height / 2;
-
-      // for location label
-      context.font = Math.floor(fontSize) + "px " + fontFace;
-      var metrics = context.measureText("Location");
-      if (textWidth < metrics.width) textWidth = metrics.width;
-
-      // for location value
-      context.font = "bold " + fontSize * 2 + "px " + fontFace;
-      metrics = context.measureText(messageObject.location);
-      if (textWidth < metrics.width) textWidth = metrics.width;
-
-      // for values (material, qty)
-      context.font = fontSize + "px " + fontFace;
-      metrics = context.measureText("- Material : " + messageObject.material);
-      if (textWidth < metrics.width) textWidth = metrics.width;
-
-      metrics = context.measureText("- QTY : " + messageObject.qty);
-      if (textWidth < metrics.width) textWidth = metrics.width;
-
-      var tx = textWidth / 2.0;
-      var ty = fontSize / 2.0;
-
-      // then adjust for the justification
-      if (vAlign == "bottom") ty = fontSize;else if (vAlign == "top") ty = 0;
-
-      if (hAlign == "left") tx = textWidth;else if (hAlign == "right") tx = 0;
-
-      var offsetY = cy;
-
-      this.roundRect(context, cx - tx, cy - fontSize * 6 * 0.5,
-      // cy - fontSize * 6 * 0.5 + ty - 0.28 * fontSize,
-      textWidth,
-      // fontSize * 6 * 1.28,
-      fontSize * 8, radius, borderWidth, borderColor, backgroundColor, 0);
-
-      // text color
-      context.fillStyle = textColor;
-      context.lineWidth = 3;
-
-      // for location label
-      offsetY += -fontSize * 6 * 0.5 + Math.floor(fontSize);
-      context.font = Math.floor(fontSize) + "px " + fontFace;
-      context.fillStyle = 'rgba(134,199,252,1)';
-      context.fillText("Location", cx - tx, offsetY);
-
-      // for location value
-      offsetY += fontSize * 2.5;
-      context.font = "bold " + fontSize * 2 + "px " + fontFace;
-      context.fillStyle = textColor;
-      context.fillText(messageObject.location, cx - tx, offsetY);
-
-      // for values (material, qty)
-      offsetY += fontSize * 2;
-      context.font = fontSize + "px " + fontFace;
-      context.fillStyle = 'rgba(204,204,204,1)';
-      context.fillText("- Material : " + messageObject.material, cx - tx, offsetY);
-
-      offsetY += fontSize + ty;
-      context.fillText("- QTY : " + messageObject.qty, cx - tx, offsetY);
-
-      // canvas contents will be used for a texture
-      var texture = new THREE.Texture(canvas);
-      texture.needsUpdate = true;
-
-      var spriteMaterial = new THREE.SpriteMaterial({
-        map: texture
+      this._heatmap = h337.create({
+        container: div,
+        width: width,
+        height: height,
+        radius: Math.sqrt(width * width + height * height) / 4
       });
-      var sprite = new THREE.Sprite(spriteMaterial);
-      sprite.scale.set(window.innerWidth / 4 * 3, window.innerWidth / 8 * 3, 1);
-      // sprite.scale.set(canvas.width, canvas.height,1.0);
 
-      sprite.raycast = function () {};
+      var heatmapMaterial = new THREE.MeshBasicMaterial({
+        side: THREE.FrontSide,
+        transparent: true,
+        visible: false
+      });
 
-      return sprite;
+      var heatmapGeometry = new THREE.PlaneGeometry(width, height);
+
+      var heatmap = new THREE.Mesh(heatmapGeometry, heatmapMaterial);
+
+      heatmap.rotation.x = -Math.PI / 2;
+      heatmap.position.y = -1;
+
+      heatmap.name = 'heatmap';
+
+      this._scene3d.add(heatmap);
+    }, error);
+  }
+
+  navigatePath(targetNames) {
+
+    var currentPosition = {
+      x: 0,
+      y: 0,
+      z: 0
+    };
+
+    for (let i in targetNames) {
+      let targetName = targetNames[i];
+      let targetObject = this.findTarget(targetName);
+
+      this.emphasizeTarget(targetObject);
+
+      let targetRack = targetObject.parent;
+      targetRack.geometry.computeBoundingBox();
+      let targetRackBoundBox = targetRack.geometry.boundingBox;
+
+      // let targetPath = this.findPath(targetName)
+      let sprite = this.createMarker(Number(i) + 1);
+      sprite.position.set(0, 100, 0);
+
+      sprite.position.set(0, targetRackBoundBox.max.y + 25, 0);
+
+      sprite.name = targetName + "-marker";
+
+      targetRack.add(sprite);
+      // this._scene3d.add(sprite)
+
+      //
+      // this._scene3d.add(sprite)
+
+      // if(targetPath)
+      //   currentPosition = this.drawPath(currentPosition, targetPath)
     }
-  }, {
-    key: 'showTooltip',
-    value: function showTooltip(targetName) {
-      if (!targetName) return;
 
-      var tooltip = this._scene2d.getObjectByName('navigator-tooltip');
-      if (tooltip) this._scene2d.remove(tooltip);
+    this.render_threed();
+  }
 
-      var object = this._scene3d.getObjectByName(targetName, true);
-      var nav = this._scene3d.getObjectByName(targetName + '-marker', true);
+  findTarget(name) {
+    var targetObject = this._scene3d.getObjectByName(name, true);
+    if (!targetObject) return;
 
-      if (object && nav) {
-        var vector = nav.getWorldPosition().clone();
-        vector.project(this._camera);
-        vector.z = 0.5;
+    return targetObject;
+  }
 
-        var tooltipTextObject = {
-          location: object.userData.location,
-          material: object.userData.material,
-          qty: object.userData.qty
-        };
+  emphasizeTarget(object) {
 
-        tooltip = this.createTooltipForNavigator(tooltipTextObject);
+    this._scene3d.updateMatrixWorld();
 
-        var vector2 = tooltip.getWorldScale().clone();
+    var box = new THREE.Mesh(object.geometry.clone(), object.material.clone());
 
-        var widthMultiplier = vector2.x / this.model.width;
-        var heightMultiplier = vector2.y / this.model.height;
+    box.name = object.name + '-emp';
+    box.material.color.set(0x44a6f6);
+    box.raycast = function () {};
 
-        vector2.normalize();
+    box.position.copy(object.getWorldPosition());
 
-        vector2.x = 0;
-        vector2.y = vector2.y * 1.5 * heightMultiplier;
-        vector2.z = 0;
+    this._scene3d.add(box);
+  }
 
-        vector.add(vector2);
+  findPath(target) {
+    var targetObject = this._scene3d.getObjectByName(target, true);
+    if (!targetObject) return;
 
-        vector.unproject(this._2dCamera);
-        tooltip.position.set(vector.x, vector.y, vector.z);
-        tooltip.name = 'navigator-tooltip';
+    targetObject = targetObject.parent; // 찾은 stock에 강조표시를 하면 눈이 띄지 않는다.
+    // 부모(Rack)에 강조표시.
 
-        tooltip.scale.x = tooltip.scale.x * widthMultiplier;
-        tooltip.scale.y = tooltip.scale.y * heightMultiplier;
+    // targetObject.updateMatrix()
+    this._scene3d.updateMatrixWorld();
 
-        this._scene2d.add(tooltip);
+    var position = targetObject.getWorldPosition();
+
+    var scale = targetObject.getWorldScale();
+
+    var box = new THREE.BoxHelper(targetObject, 0xff3333);
+
+    box.material.linewidth = this.model.zoom * 0.1;
+
+    this._scene3d.add(box);
+
+    // this.makeTextSprite()
+
+    // var box = new THREE.BoxHelper(targetObject, 0xff3333)
+    // box.material.linewidth = 10
+    //
+    // this._scene3d.add(box)
+
+
+    // position =
+
+    return {
+      x: position.x,
+      y: position.y,
+      z: position.z
+    };
+  }
+
+  drawPath(current, target) {
+
+    let tX = target.x;
+    let tY = target.y;
+    let tZ = target.z;
+
+    let cX = current.x;
+    let cY = current.y;
+    let cZ = current.z;
+
+    let lineWidth = 5;
+
+    let material = new THREE.LineBasicMaterial({
+      color: 0xff3333,
+      linewidth: lineWidth
+    });
+
+    let geometry = new THREE.Geometry();
+
+    geometry.vertices.push(new THREE.Vector3(cX, 0, cZ));
+    geometry.vertices.push(new THREE.Vector3(tX, 0, tZ));
+
+    let line = new THREE.Line(geometry, material);
+
+    this._scene3d.add(line);
+
+    return target;
+  }
+
+  updateHeatmapTexture() {
+    var heatmap = this._scene3d.getObjectByName('heatmap', true);
+
+    var texture = new THREE.Texture(this._heatmap._renderer.canvas);
+    texture.needsUpdate = true;
+
+    heatmap.material.map = texture;
+
+    heatmap.material.visible = true;
+  }
+
+  createMarker(message) {
+
+    var fontFace = "Arial";
+    var fontSize = 32;
+    var textColor = 'rgba(255,255,255,1)';
+    var vAlign = 'middle';
+    var hAlign = 'center';
+    var padding = 10;
+
+    var image = new Image();
+    image.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAH0AAABuCAYAAAAKwhwQAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyppVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTMyIDc5LjE1OTI4NCwgMjAxNi8wNC8xOS0xMzoxMzo0MCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTUuNSAoTWFjaW50b3NoKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo3MkZDRjQ0RjVDOTYxMUU2QjMxRjhENEQwQjZBMjk5OSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo3MkZDRjQ1MDVDOTYxMUU2QjMxRjhENEQwQjZBMjk5OSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjcyRkNGNDRENUM5NjExRTZCMzFGOEQ0RDBCNkEyOTk5IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjcyRkNGNDRFNUM5NjExRTZCMzFGOEQ0RDBCNkEyOTk5Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+nKWOowAAIaRJREFU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';
+
+    var canvas = document.createElement('canvas');
+    var context = canvas.getContext('2d');
+
+    // document.body.appendChild(canvas)
+
+    canvas.width = image.width;
+    canvas.height = image.height;
+
+    context.font = fontSize + "px " + fontFace;
+    context.textBaseline = "alphabetic";
+    context.textAlign = "left";
+
+    var cx = canvas.width / 2;
+    var cy = canvas.height / 2;
+
+    var metrics = context.measureText(String(message));
+    var textWidth = metrics.width;
+
+    var tx = textWidth / 2.0;
+    var ty = fontSize / 2.0;
+
+    // then adjust for the justification
+    if (vAlign == "bottom") ty = fontSize;else if (vAlign == "top") ty = 0;
+
+    if (hAlign == "left") tx = textWidth;else if (hAlign == "right") tx = 0;
+
+    context.drawImage(image, cx - image.width * 0.5, cy - image.height * 0.5, image.width, image.height);
+
+    // text color
+    context.fillStyle = textColor;
+
+    var offsetY = cy - fontSize * 0.5 + padding;
+
+    context.fillText(message, cx - tx, offsetY);
+
+    // canvas contents will be used for a texture
+    var texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+
+    var spriteMaterial = new THREE.SpriteMaterial({
+      map: texture
+    });
+    var sprite = new THREE.Sprite(spriteMaterial);
+    sprite.scale.set(Math.floor(image.width * 0.5), Math.floor(image.height * 0.5), 1);
+    // sprite.scale.set(canvas.width, canvas.height,1.0);
+
+    sprite.raycast = function () {};
+
+    return sprite;
+  }
+
+  makeTextSprite(message, parameters) {
+
+    if (!message) return;
+
+    if (parameters === undefined) parameters = {};
+
+    var fontFace = parameters.hasOwnProperty("fontFace") ? parameters["fontFace"] : "Arial";
+
+    var fontSize = parameters.hasOwnProperty("fontSize") ? parameters["fontSize"] : 32;
+
+    var textColor = parameters.hasOwnProperty("textColor") ? parameters["textColor"] : 'rgba(255,255,255,1)';
+
+    var borderWidth = parameters.hasOwnProperty("borderWidth") ? parameters["borderWidth"] : 2;
+
+    var borderColor = parameters.hasOwnProperty("borderColor") ? parameters["borderColor"] : 'rgba(0, 0, 0, 1.0)';
+
+    var backgroundColor = parameters.hasOwnProperty("backgroundColor") ?
+    // parameters["backgroundColor"] : 'rgba(51, 51, 51, 1.0)';
+    parameters["backgroundColor"] : 'rgba(0, 0, 0, 0.7)';
+
+    var radius = parameters.hasOwnProperty("radius") ? parameters["radius"] : 30;
+
+    var vAlign = parameters.hasOwnProperty("vAlign") ? parameters["vAlign"] : 'middle';
+
+    var hAlign = parameters.hasOwnProperty("hAlign") ? parameters["hAlign"] : 'center';
+
+    var canvas = document.createElement('canvas');
+    var context = canvas.getContext('2d');
+
+    // document.body.appendChild(canvas)
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    context.font = fontSize + "px " + fontFace;
+    context.textBaseline = "alphabetic";
+    context.textAlign = "left";
+
+    var textWidth = 0;
+
+    var msgArr = String(message).trim().split('\n');
+
+    var cx = canvas.width / 2;
+    var cy = canvas.height / 2;
+
+    for (let i in msgArr) {
+      // get size data (height depends only on font size)
+      var metrics = context.measureText(msgArr[i]);
+
+      if (textWidth < metrics.width) textWidth = metrics.width;
+    }
+
+    var tx = textWidth / 2.0;
+    var ty = fontSize / 2.0;
+
+    // then adjust for the justification
+    if (vAlign == "bottom") ty = fontSize;else if (vAlign == "top") ty = 0;
+
+    if (hAlign == "left") tx = textWidth;else if (hAlign == "right") tx = 0;
+
+    this.roundRect(context, cx - tx, cy - fontSize * msgArr.length * 0.5,
+    // cy - fontSize * msgArr.length * 0.5 + ty - 0.28 * fontSize,
+    textWidth, fontSize * msgArr.length,
+    // fontSize * msgArr.length * 1.28,
+    radius, borderWidth, borderColor, backgroundColor, 5);
+
+    // text color
+    context.fillStyle = textColor;
+    context.lineWidth = 3;
+
+    var offsetY = cy - fontSize * msgArr.length * 0.5 - 5 - borderWidth;
+
+    for (var i in msgArr) {
+      i = Number(i);
+      offsetY += fontSize;
+
+      context.fillText(msgArr[i], cx - tx,
+      // cy - fontSize * (i - msgArr.length/2) + ty
+      offsetY);
+    }
+
+    // canvas contents will be used for a texture
+    var texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+
+    var spriteMaterial = new THREE.SpriteMaterial({
+      map: texture
+    });
+    var sprite = new THREE.Sprite(spriteMaterial);
+    sprite.scale.set(600, 300, 1);
+    // sprite.scale.set(canvas.width, canvas.height, 1.0);
+
+    sprite.raycast = function () {};
+
+    return sprite;
+  }
+
+  destroy_scene3d() {
+    this.stop();
+    if (this._renderer) this._renderer.clear();
+    this._renderer = undefined;
+    this._camera = undefined;
+    this._2dCamera = undefined;
+    this._keyboard = undefined;
+    this._controls = undefined;
+    this._projector = undefined;
+    this._load_manager = undefined;
+
+    if (this._scene3d) {
+      for (let i in this._scene3d.children) {
+        let child = this._scene3d.children[i];
+        if (child.dispose) child.dispose();
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) child.material.dispose();
+        if (child.texture) child.texture.dispose();
+        this._scene3d.remove(child);
+      }
+    }
+
+    if (this._scene2d) {
+      for (let i in this._scene2d.children) {
+        let child = this._scene2d.children[i];
+        if (child.dispose) child.dispose();
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) child.material.dispose();
+        if (child.texture) child.texture.dispose();
+        this._scene2d.remove(child);
+      }
+    }
+
+    this._scene3d = undefined;
+    this._scene2d = undefined;
+  }
+
+  init_scene3d() {
+
+    if (this._scene3d) this.destroy_scene3d();
+
+    registerLoaders();
+    this._textureLoader = new THREE.TextureLoader();
+    this._textureLoader.withCredential = true;
+    this._textureLoader.crossOrigin = 'use-credentials';
+
+    // this._exporter = new THREE.OBJExporter();
+
+    var {
+      width,
+      height,
+      fov = 45,
+      near = 0.1,
+      far = 20000,
+      fillStyle = '#424b57',
+      light = 0xffffff,
+      antialias = true,
+      precision = 'highp'
+    } = this.model;
+    var components = this.components || [];
+
+    // SCENE
+    this._scene3d = new THREE.Scene();
+    this._scene2d = new THREE.Scene();
+
+    // CAMERA
+    var aspect = width / height;
+
+    this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+    this._2dCamera = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 1, 1000);
+
+    this._scene3d.add(this._camera);
+    this._scene2d.add(this._2dCamera);
+    this._camera.position.set(height * 0.8, Math.max(width, height) * 0.8, width * 0.8);
+    this._2dCamera.position.set(height * 0.8, Math.max(width, height) * 0.8, width * 0.8);
+    this._camera.lookAt(this._scene3d.position);
+    this._2dCamera.lookAt(this._scene2d.position);
+    this._camera.zoom = this.model.zoom * 0.01;
+
+    if (this.model.showAxis) {
+      var axisHelper = new THREE.AxesHelper(width);
+      this._scene3d.add(axisHelper);
+    }
+
+    try {
+      // RENDERER
+      this._renderer = new THREE.WebGLRenderer({
+        precision: precision,
+        alpha: true,
+        antialias: antialias
+      });
+    } catch (e) {
+      this._noSupportWebgl = true;
+    }
+
+    if (this._noSupportWebgl) return;
+
+    this._renderer.autoClear = false;
+
+    this._renderer.setClearColor(0xffffff, 0); // transparent
+    this._renderer.setSize(width, height);
+    // this._renderer.setSize(1600, 900)
+    // this._renderer.shadowMap.enabled = true
+
+    // CONTROLS
+    this._controls = new _threeControls2.default(this._camera, this);
+
+    // LIGHT
+    var _light = new THREE.PointLight(light, 1);
+    this._camera.add(_light);
+    // this._camera.castShadow = true
+
+    this._raycaster = new THREE.Raycaster();
+    // this._mouse = { x: 0, y: 0, originX: 0, originY : 0 }
+    this._mouse = new THREE.Vector2();
+
+    this._tick = 0;
+    this._clock = new THREE.Clock(true);
+    this.mixers = new Array();
+
+    this.createHeatmap(width, height);
+    this.createFloor(fillStyle, width, height);
+    this.createObjects(components, {
+      width,
+      height
+    });
+
+    this._load_manager = new THREE.LoadingManager();
+    this._load_manager.onProgress = function (item, loaded, total) {};
+
+    this.threed_animate();
+  }
+
+  threed_animate() {
+    this._animationFrame = requestAnimationFrame(this.threed_animate.bind(this));
+
+    // if (this.model.autoRotate)
+    this.update();
+  }
+
+  stop() {
+    cancelAnimationFrame(this._animationFrame);
+  }
+
+  update() {
+    this._controls.update();
+    this.render_threed();
+  }
+
+  get scene3d() {
+    if (!this._scene3d) this.init_scene3d();
+    return this._scene3d;
+  }
+
+  render_threed() {
+    var delta;
+    if (this._clock) delta = this._clock.getDelta();
+
+    var mixers = this.mixers;
+    for (var i in mixers) {
+      if (mixers.hasOwnProperty(i)) {
+        var mixer = mixers[i];
+        if (mixer) {
+          mixer.update(delta);
+        }
+      }
+    }
+
+    if (this._renderer) {
+      this._renderer.clear();
+      this._renderer.render(this._scene3d, this._camera);
+    }
+
+    if (this._renderer && this._scene2d) {
+      this._renderer.render(this._scene2d, this._2dCamera);
+    }
+
+    this.invalidate();
+  }
+
+  /* Container Overides .. */
+  _draw(ctx) {
+    if (this.app.isViewMode) {
+      if (!this.model.threed) this.model.threed = true;
+    }
+
+    if (this.model.threed && !this._noSupportWebgl) {
+      return;
+    }
+
+    super._draw(ctx);
+  }
+
+  _post_draw(ctx) {
+    var {
+      left,
+      top,
+      width,
+      height,
+      threed
+    } = this.model;
+
+    if (threed) {
+
+      if (!this._scene3d) {
+        this.init_scene3d();
         this.render_threed();
       }
+
+      if (this._noSupportWebgl) {
+        this._showWebglNoSupportText(ctx);
+        return;
+      }
+
+      if (this._dataChanged) {
+        this._onDataChanged();
+      }
+
+      this.showTooltip(this._selectedPickingLocation);
+
+      ctx.drawImage(this._renderer.domElement, 0, 0, width, height, left, top, width, height);
+
+      // this.showTooltip('LOC-2-1-1-A-1')
+    } else {
+      super._post_draw(ctx);
     }
-  }, {
-    key: 'transcoord2dTo3d',
-    value: function transcoord2dTo3d(position) {
-      var _model3 = this.model,
-          width = _model3.width,
-          height = _model3.height;
-      var _position$x = position.x,
-          x = _position$x === undefined ? 0 : _position$x,
-          _position$y = position.y,
-          y = _position$y === undefined ? 0 : _position$y,
-          _position$z = position.z,
-          z = _position$z === undefined ? 0 : _position$z;
+  }
 
+  dispose() {
+    super.dispose();
+    this.destroy_scene3d();
+  }
 
-      var cx = width / 2;
-      var cy = height / 2;
+  get layout() {
+    return _thingsScene.Layout.get('three');
+  }
 
-      var coord3d = {};
-      coord3d.x = x - cx;
-      coord3d.y = y - cy;
-      coord3d.z = z;
+  get nature() {
+    return NATURE;
+  }
 
-      return coord3d;
+  roundRect(ctx, x, y, w, h, r, borderWidth, borderColor, fillColor, padding, image) {
+    // no point in drawing it if it isn't going to be rendered
+    if (fillColor == undefined && borderColor == undefined) return;
+
+    let left = x - borderWidth - r - padding;
+    let right = left + w + borderWidth * 2 + r * 2 + padding * 2;
+    let top = y - borderWidth - r - padding;
+    let bottom = top + h + borderWidth * 2 + r * 2 + padding * 2;
+
+    ctx.beginPath();
+    ctx.moveTo(left + r, top);
+    ctx.lineTo(right - r, top);
+    ctx.quadraticCurveTo(right, top, right, top + r);
+    ctx.lineTo(right, bottom - r);
+    ctx.quadraticCurveTo(right, bottom, right - r, bottom);
+    ctx.lineTo(left + r, bottom);
+    ctx.quadraticCurveTo(left, bottom, left, bottom - r);
+    ctx.lineTo(left, top + r);
+    ctx.quadraticCurveTo(left, top, left + r, top);
+    ctx.closePath();
+
+    ctx.lineWidth = borderWidth;
+
+    // background color
+    // border color
+
+    // if the fill color is defined, then fill it
+    if (fillColor != undefined) {
+      ctx.fillStyle = fillColor;
+      ctx.fill();
     }
-  }, {
-    key: '_showWebglNoSupportText',
-    value: function _showWebglNoSupportText(context) {
-      context.save();
 
-      var _model4 = this.model,
-          width = _model4.width,
-          height = _model4.height;
-
-
-      context.font = width / 20 + 'px Arial';
-      context.textAlign = 'center';
-      context.fillText(WEBGL_NO_SUPPORT_TEXT, width / 2 - width / 40, height / 2);
-
-      context.restore();
+    if (borderWidth > 0 && borderColor != undefined) {
+      ctx.strokeStyle = borderColor;
+      ctx.stroke();
     }
-  }, {
-    key: '_onDataChanged',
-    value: function _onDataChanged() {
-      var _this5 = this;
+  }
 
-      /* for picking navigator
-       if (this._pickingLocations) {
-        // set picking locations
-        for (let i in this._pickingLocations) {
-          let loc = this._pickingLocations[i]
-           let obj = this._scene3d.getObjectByName(loc, true)
-          if (obj) {
-            obj.userData = {}
-          }
-           let empObj = this._scene3d.getObjectByName(loc + '-emp', true)
-          if (empObj) {
-            this._scene3d.remove(empObj)
-          }
-          let navObj = this._scene3d.getObjectByName(loc + '-marker', true)
-          if (navObj) {
-            navObj.parent.remove(navObj)
-          }
-           let navTooltipObj = this._scene2d.getObjectByName('navigator-tooltip', true)
-          if (navTooltipObj) {
-            this._scene2d.remove(navTooltipObj)
-          }
+  getObjectByRaycast() {
+
+    var intersects = this.getObjectsByRaycast();
+    var intersected;
+
+    if (intersects.length > 0) {
+      intersected = intersects[0].object;
+    }
+
+    return intersected;
+  }
+
+  getObjectsByRaycast() {
+    // find intersections
+
+    // create a Ray with origin at the mouse position
+    //   and direction into the scene (camera direction)
+
+    var vector = this._mouse;
+    if (!this._camera) return;
+
+    this._raycaster.setFromCamera(vector, this._camera);
+
+    // create an array containing all objects in the scene with which the ray intersects
+    var intersects = this._raycaster.intersectObjects(this._scene3d.children, true);
+
+    return intersects;
+  }
+
+  moveCameraTo(targetName) {
+
+    if (!targetName) return;
+
+    let object = this._scene3d.getObjectByName(targetName, true);
+    if (!object) return;
+
+    var self = this;
+    // this._controls.rotateLeft(5)
+    // setTimeout(function() {
+    //   self.moveCameraTo(5)
+    // }, 100)
+
+    let objectPositionVector = object.getWorldPosition();
+    objectPositionVector.y = 0;
+    let distance = objectPositionVector.distanceTo(new THREE.Vector3(0, 0, 0));
+
+    objectPositionVector.multiplyScalar(1000 / (distance || 1));
+
+    var self = this;
+    var diffX = this._camera.position.x - objectPositionVector.x;
+    var diffY = this._camera.position.y - 300;
+    var diffZ = this._camera.position.z - objectPositionVector.z;
+
+    this.animate({
+      step: function (delta) {
+
+        let vector = new THREE.Vector3();
+
+        vector.x = objectPositionVector.x - diffX * (delta - 1);
+        vector.y = 0;
+        vector.z = objectPositionVector.z - diffZ * (delta - 1);
+
+        let distance = vector.distanceTo(new THREE.Vector3(0, 0, 0));
+
+        vector.multiplyScalar(1000 / (distance || 1));
+
+        self._camera.position.x = vector.x;
+        self._camera.position.y = 300 - diffY * (delta - 1);
+        self._camera.position.z = vector.z;
+
+        self._camera.lookAt(self._scene3d.position);
+      },
+      duration: 2000,
+      delta: 'linear'
+    }).start();
+
+    // this._camera.position.x = objectPositionVector.x
+    // this._camera.position.y = 300
+    // this._camera.position.z = objectPositionVector.z
+  }
+
+  exportModel() {
+    // var exported = this._exporter.parse(this._scene3d);
+    // var blob = new Blob([exported], { type: "text/plain;charset=utf-8" });
+    // console.log(exported)
+    // saveAs(blob, "exported.txt");
+  }
+
+  createTooltipForNavigator(messageObject) {
+
+    if (!messageObject) return;
+
+    let isMarker = true;
+    let fontFace = "Arial";
+    let fontSize = 40;
+    let textColor = 'rgba(255,255,255,1)';
+    let borderWidth = 2;
+    let borderColor = 'rgba(0, 0, 0, 1.0)';
+    let backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    let radius = 30;
+    let vAlign = 'middle';
+    let hAlign = 'center';
+
+    let canvas = document.createElement('canvas');
+    let context = canvas.getContext('2d');
+
+    // document.body.appendChild(canvas)
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    context.font = fontSize + "px " + fontFace;
+    context.textBaseline = "alphabetic";
+    context.textAlign = "left";
+
+    var textWidth = 0;
+
+    let cx = canvas.width / 2;
+    let cy = canvas.height / 2;
+
+    // for location label
+    context.font = Math.floor(fontSize) + "px " + fontFace;
+    var metrics = context.measureText("Location");
+    if (textWidth < metrics.width) textWidth = metrics.width;
+
+    // for location value
+    context.font = "bold " + fontSize * 2 + "px " + fontFace;
+    metrics = context.measureText(messageObject.location);
+    if (textWidth < metrics.width) textWidth = metrics.width;
+
+    // for values (material, qty)
+    context.font = fontSize + "px " + fontFace;
+    metrics = context.measureText("- Material : " + messageObject.material);
+    if (textWidth < metrics.width) textWidth = metrics.width;
+
+    metrics = context.measureText("- QTY : " + messageObject.qty);
+    if (textWidth < metrics.width) textWidth = metrics.width;
+
+    var tx = textWidth / 2.0;
+    var ty = fontSize / 2.0;
+
+    // then adjust for the justification
+    if (vAlign == "bottom") ty = fontSize;else if (vAlign == "top") ty = 0;
+
+    if (hAlign == "left") tx = textWidth;else if (hAlign == "right") tx = 0;
+
+    var offsetY = cy;
+
+    this.roundRect(context, cx - tx, cy - fontSize * 6 * 0.5,
+    // cy - fontSize * 6 * 0.5 + ty - 0.28 * fontSize,
+    textWidth,
+    // fontSize * 6 * 1.28,
+    fontSize * 8, radius, borderWidth, borderColor, backgroundColor, 0);
+
+    // text color
+    context.fillStyle = textColor;
+    context.lineWidth = 3;
+
+    // for location label
+    offsetY += -fontSize * 6 * 0.5 + Math.floor(fontSize);
+    context.font = Math.floor(fontSize) + "px " + fontFace;
+    context.fillStyle = 'rgba(134,199,252,1)';
+    context.fillText("Location", cx - tx, offsetY);
+
+    // for location value
+    offsetY += fontSize * 2.5;
+    context.font = "bold " + fontSize * 2 + "px " + fontFace;
+    context.fillStyle = textColor;
+    context.fillText(messageObject.location, cx - tx, offsetY);
+
+    // for values (material, qty)
+    offsetY += fontSize * 2;
+    context.font = fontSize + "px " + fontFace;
+    context.fillStyle = 'rgba(204,204,204,1)';
+    context.fillText("- Material : " + messageObject.material, cx - tx, offsetY);
+
+    offsetY += fontSize + ty;
+    context.fillText("- QTY : " + messageObject.qty, cx - tx, offsetY);
+
+    // canvas contents will be used for a texture
+    var texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+
+    var spriteMaterial = new THREE.SpriteMaterial({
+      map: texture
+    });
+    var sprite = new THREE.Sprite(spriteMaterial);
+    sprite.scale.set(window.innerWidth / 4 * 3, window.innerWidth / 8 * 3, 1);
+    // sprite.scale.set(canvas.width, canvas.height,1.0);
+
+    sprite.raycast = function () {};
+
+    return sprite;
+  }
+
+  showTooltip(targetName) {
+    if (!targetName) return;
+
+    var tooltip = this._scene2d.getObjectByName('navigator-tooltip');
+    if (tooltip) this._scene2d.remove(tooltip);
+
+    var object = this._scene3d.getObjectByName(targetName, true);
+    var nav = this._scene3d.getObjectByName(targetName + '-marker', true);
+
+    if (object && nav) {
+      let vector = nav.getWorldPosition().clone();
+      vector.project(this._camera);
+      vector.z = 0.5;
+
+      var tooltipTextObject = {
+        location: object.userData.location,
+        material: object.userData.material,
+        qty: object.userData.qty
+      };
+
+      tooltip = this.createTooltipForNavigator(tooltipTextObject);
+
+      var vector2 = tooltip.getWorldScale().clone();
+
+      var widthMultiplier = vector2.x / this.model.width;
+      var heightMultiplier = vector2.y / this.model.height;
+
+      vector2.normalize();
+
+      vector2.x = 0;
+      vector2.y = vector2.y * 1.5 * heightMultiplier;
+      vector2.z = 0;
+
+      vector.add(vector2);
+
+      vector.unproject(this._2dCamera);
+      tooltip.position.set(vector.x, vector.y, vector.z);
+      tooltip.name = 'navigator-tooltip';
+
+      tooltip.scale.x = tooltip.scale.x * widthMultiplier;
+      tooltip.scale.y = tooltip.scale.y * heightMultiplier;
+
+      this._scene2d.add(tooltip);
+      this.render_threed();
+    }
+  }
+
+  transcoord2dTo3d(position) {
+    var {
+      width,
+      height
+    } = this.model;
+
+    var {
+      x = 0,
+      y = 0,
+      z = 0
+    } = position;
+
+    var cx = width / 2;
+    var cy = height / 2;
+
+    var coord3d = {};
+    coord3d.x = x - cx;
+    coord3d.y = y - cy;
+    coord3d.z = z;
+
+    return coord3d;
+  }
+
+  _showWebglNoSupportText(context) {
+    context.save();
+
+    var {
+      width,
+      height
+    } = this.model;
+
+    context.font = width / 20 + 'px Arial';
+    context.textAlign = 'center';
+    context.fillText(WEBGL_NO_SUPPORT_TEXT, width / 2 - width / 40, height / 2);
+
+    context.restore();
+  }
+
+  _onDataChanged() {
+
+    /* for picking navigator
+     if (this._pickingLocations) {
+      // set picking locations
+      for (let i in this._pickingLocations) {
+        let loc = this._pickingLocations[i]
+         let obj = this._scene3d.getObjectByName(loc, true)
+        if (obj) {
+          obj.userData = {}
+        }
+         let empObj = this._scene3d.getObjectByName(loc + '-emp', true)
+        if (empObj) {
+          this._scene3d.remove(empObj)
+        }
+        let navObj = this._scene3d.getObjectByName(loc + '-marker', true)
+        if (navObj) {
+          navObj.parent.remove(navObj)
+        }
+         let navTooltipObj = this._scene2d.getObjectByName('navigator-tooltip', true)
+        if (navTooltipObj) {
+          this._scene2d.remove(navTooltipObj)
         }
       }
-       if (this._selectedPickingLocation) {
-        // set selected picking location
-        let obj = this._scene3d.getObjectByName(this._selectedPickingLocation, true)
-        if (obj && obj.userData) {
-          delete obj.userData.selected
-        }
+    }
+     if (this._selectedPickingLocation) {
+      // set selected picking location
+      let obj = this._scene3d.getObjectByName(this._selectedPickingLocation, true)
+      if (obj && obj.userData) {
+        delete obj.userData.selected
       }
-       this._pickingLocations = []
-      this._selectedPickingLocation = null
-       */
+    }
+     this._pickingLocations = []
+    this._selectedPickingLocation = null
+     */
 
-      if (this._data) {
-        if (this._data instanceof Array) {
-          /**
-           *  Array type data
-           *  (e.g. data: [{
-           *    'loc' : 'location1',
-           *    'description': 'description1'
-           *  },
-           *  ...
-           *  ])
-           */
-          this._data.forEach(function (d) {
-            var data = d;
+    if (this._data) {
+      if (this._data instanceof Array) {
+        /**
+         *  Array type data
+         *  (e.g. data: [{
+         *    'loc' : 'location1',
+         *    'description': 'description1'
+         *  },
+         *  ...
+         *  ])
+         */
+        this._data.forEach(d => {
+          let data = d;
+
+          setTimeout(function () {
+            let loc = data.loc || data.LOC || data.location || data.LOCATION;
+            let object = this.getObject(loc);
+            if (object) {
+              object.userData = data;
+              object.onUserDataChanged();
+
+              // if (d.navigationData) {
+              //   this._pickingLocations.push(loc)
+              // }
+              // if (d.selected) {
+              //   this._selectedPickingLocation = loc
+              // }
+            }
+          }.bind(this));
+        });
+      } else {
+        /**
+         *  Object type data
+         *  (e.g. data: {
+         *    'location1': {description: 'description'},
+         *    ...
+         *  })
+         */
+        for (var loc in this._data) {
+          let location = loc;
+          if (this._data.hasOwnProperty(location)) {
 
             setTimeout(function () {
-              var loc = data.loc || data.LOC || data.location || data.LOCATION;
-              var object = this.getObject(loc);
+              let d = this._data[location];
+              let object = this.getObject(location);
               if (object) {
-                object.userData = data;
+                object.userData = d;
                 object.onUserDataChanged();
 
                 // if (d.navigationData) {
-                //   this._pickingLocations.push(loc)
+                //   this._pickingLocations.push(location)
                 // }
                 // if (d.selected) {
-                //   this._selectedPickingLocation = loc
+                //   this._selectedPickingLocation = location
                 // }
               }
-            }.bind(_this5));
-          });
-        } else {
-          var _loop = function _loop() {
-            var location = loc;
-            if (_this5._data.hasOwnProperty(location)) {
-
-              setTimeout(function () {
-                var d = this._data[location];
-                var object = this.getObject(location);
-                if (object) {
-                  object.userData = d;
-                  object.onUserDataChanged();
-
-                  // if (d.navigationData) {
-                  //   this._pickingLocations.push(location)
-                  // }
-                  // if (d.selected) {
-                  //   this._selectedPickingLocation = location
-                  // }
-                }
-              }.bind(_this5));
-            }
-          };
-
-          /**
-           *  Object type data
-           *  (e.g. data: {
-           *    'location1': {description: 'description'},
-           *    ...
-           *  })
-           */
-          for (var loc in this._data) {
-            _loop();
+            }.bind(this));
           }
         }
       }
-
-      this._dataChanged = false;
-
-      // draw navigatePath
-      if (this._pickingLocations && this._pickingLocations.length > 0) this.navigatePath(this._pickingLocations);
-
-      this.render_threed();
     }
 
-    /* Event Handlers */
+    this._dataChanged = false;
 
-  }, {
-    key: 'onchange',
-    value: function onchange(after, before) {
+    // draw navigatePath
+    if (this._pickingLocations && this._pickingLocations.length > 0) this.navigatePath(this._pickingLocations);
 
-      if (after.hasOwnProperty('width') || after.hasOwnProperty('height') || after.hasOwnProperty('threed')) this.destroy_scene3d();
+    this.render_threed();
+  }
 
-      if (after.hasOwnProperty('autoRotate')) {
-        this._controls.autoRotate = after.autoRotate;
-      }
+  /* Event Handlers */
 
-      if (after.hasOwnProperty('fov') || after.hasOwnProperty('near') || after.hasOwnProperty('far') || after.hasOwnProperty('zoom')) {
+  onchange(after, before) {
 
-        this._camera.near = this.model.near;
-        this._camera.far = this.model.far;
-        this._camera.zoom = this.model.zoom * 0.01;
-        this._camera.fov = this.model.fov;
-        this._camera.updateProjectionMatrix();
+    if (after.hasOwnProperty('width') || after.hasOwnProperty('height') || after.hasOwnProperty('threed')) this.destroy_scene3d();
 
-        this._controls.cameraChanged = true;
-
-        this._controls.update();
-      }
-
-      if (after.hasOwnProperty("data")) {
-        if (this._data !== after.data) {
-          this._data = after.data;
-          this._dataChanged = true;
-        }
-      }
-
-      // if(after.hasOwnProperty('autoRotate')) {
-      //   this.model.autoRotate = after.autoRotate
-      // }
-
-      this.invalidate();
+    if (after.hasOwnProperty('autoRotate')) {
+      this._controls.autoRotate = after.autoRotate;
     }
-  }, {
-    key: 'onmousedown',
-    value: function onmousedown(e) {
-      if (this._controls) {
-        this._controls.onMouseDown(e);
+
+    if (after.hasOwnProperty('fov') || after.hasOwnProperty('near') || after.hasOwnProperty('far') || after.hasOwnProperty('zoom')) {
+
+      this._camera.near = this.model.near;
+      this._camera.far = this.model.far;
+      this._camera.zoom = this.model.zoom * 0.01;
+      this._camera.fov = this.model.fov;
+      this._camera.updateProjectionMatrix();
+
+      this._controls.cameraChanged = true;
+
+      this._controls.update();
+    }
+
+    if (after.hasOwnProperty("data")) {
+      if (this._data !== after.data) {
+        this._data = after.data;
+        this._dataChanged = true;
       }
     }
-  }, {
-    key: 'onmousemove',
-    value: function onmousemove(e) {
-      if (this._controls) {
-        var pointer = this.transcoordC2S(e.offsetX, e.offsetY);
 
-        // this._mouse.originX = this.getContext().canvas.offsetLeft +e.offsetX;
-        // this._mouse.originY = this.getContext().canvas.offsetTop + e.offsetY;
+    // if(after.hasOwnProperty('autoRotate')) {
+    //   this.model.autoRotate = after.autoRotate
+    // }
 
-        this._mouse.x = (pointer.x - this.model.left) / this.model.width * 2 - 1;
-        this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
+    this.invalidate();
+  }
 
-        var object = this.getObjectByRaycast();
+  onmousedown(e) {
+    if (this._controls) {
+      this._controls.onMouseDown(e);
+    }
+  }
 
-        if (object && object.onmousemove) object.onmousemove(e, this);else {
-          if (!this._scene2d) return;
-          this._scene2d.remove(this._scene2d.getObjectByName('tooltip'));
-          this.render_threed();
-        }
+  onmousemove(e) {
+    if (this._controls) {
+      var pointer = this.transcoordC2S(e.offsetX, e.offsetY);
 
-        this._controls.onMouseMove(e);
+      // this._mouse.originX = this.getContext().canvas.offsetLeft +e.offsetX;
+      // this._mouse.originY = this.getContext().canvas.offsetTop + e.offsetY;
 
-        e.stopPropagation();
+      this._mouse.x = (pointer.x - this.model.left) / this.model.width * 2 - 1;
+      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
+
+      var object = this.getObjectByRaycast();
+
+      if (object && object.onmousemove) object.onmousemove(e, this);else {
+        if (!this._scene2d) return;
+        this._scene2d.remove(this._scene2d.getObjectByName('tooltip'));
+        this.render_threed();
       }
-    }
-  }, {
-    key: 'onmouseleave',
-    value: function onmouseleave(e) {
-      if (!this._scene2d) return;
 
-      var tooltip = this._scene2d.getObjectByName('tooltip');
-      if (tooltip) {
-        this._scene2d.remove(tooltip);
-      }
-    }
-  }, {
-    key: 'onwheel',
-    value: function onwheel(e) {
-      if (this._controls) {
-        this.handleMouseWheel(e);
-        e.stopPropagation();
-      }
-    }
-  }, {
-    key: 'ondragstart',
-    value: function ondragstart(e) {
-      if (this._controls) {
-        var pointer = this.transcoordC2S(e.offsetX, e.offsetY);
+      this._controls.onMouseMove(e);
 
-        // this._mouse.originX = this.getContext().canvas.offsetLeft +e.offsetX;
-        // this._mouse.originY = this.getContext().canvas.offsetTop + e.offsetY;
+      e.stopPropagation();
+    }
+  }
 
-        this._mouse.x = (pointer.x - this.model.left) / this.model.width * 2 - 1;
-        this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
+  onmouseleave(e) {
+    if (!this._scene2d) return;
 
-        this._controls.onDragStart(e);
-        e.stopPropagation();
-      }
+    var tooltip = this._scene2d.getObjectByName('tooltip');
+    if (tooltip) {
+      this._scene2d.remove(tooltip);
     }
-  }, {
-    key: 'ondragmove',
-    value: function ondragmove(e) {
-      if (this._controls) {
-        this._controls.onDragMove(e);
-        e.stopPropagation();
-      }
-    }
-  }, {
-    key: 'ondragend',
-    value: function ondragend(e) {
-      if (this._controls) {
-        this._controls.onDragEnd(e);
-        e.stopPropagation();
-      }
-    }
-  }, {
-    key: 'ontouchstart',
-    value: function ontouchstart(e) {
-      if (this._controls) {
-        this._controls.onTouchStart(e);
-        e.stopPropagation();
-      }
-    }
-  }, {
-    key: 'ontouchmove',
-    value: function ontouchmove(e) {
-      if (this._controls) {
-        this._controls.onTouchMove(e);
-        e.stopPropagation();
-      }
-    }
-  }, {
-    key: 'ontouchend',
-    value: function ontouchend(e) {
-      if (this._controls) {
-        this._controls.onTouchEnd(e);
-        e.stopPropagation();
-      }
-    }
-  }, {
-    key: 'onkeydown',
-    value: function onkeydown(e) {
-      if (this._controls) {
-        this._controls.onKeyDown(e);
-        e.stopPropagation();
-      }
-    }
-  }, {
-    key: 'handleMouseWheel',
-    value: function handleMouseWheel(event) {
+  }
 
-      var delta = 0;
-      var zoom = this.model.zoom;
+  onwheel(e) {
+    if (this._controls) {
+      this.handleMouseWheel(e);
+      e.stopPropagation();
+    }
+  }
 
-      delta = -event.deltaY;
-      zoom += delta * 0.01;
-      if (zoom < 0) zoom = 0;
+  ondragstart(e) {
+    if (this._controls) {
+      var pointer = this.transcoordC2S(e.offsetX, e.offsetY);
 
-      this.set('zoom', zoom);
-    }
-  }, {
-    key: 'scene3d',
-    get: function get() {
-      if (!this._scene3d) this.init_scene3d();
-      return this._scene3d;
-    }
-  }, {
-    key: 'layout',
-    get: function get() {
-      return _thingsScene.Layout.get('three');
-    }
-  }, {
-    key: 'nature',
-    get: function get() {
-      return NATURE;
-    }
-  }]);
+      // this._mouse.originX = this.getContext().canvas.offsetLeft +e.offsetX;
+      // this._mouse.originY = this.getContext().canvas.offsetTop + e.offsetY;
 
-  return ThreeContainer;
-}(_thingsScene.Container);
+      this._mouse.x = (pointer.x - this.model.left) / this.model.width * 2 - 1;
+      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
+
+      this._controls.onDragStart(e);
+      e.stopPropagation();
+    }
+  }
+
+  ondragmove(e) {
+    if (this._controls) {
+      this._controls.onDragMove(e);
+      e.stopPropagation();
+    }
+  }
+
+  ondragend(e) {
+    if (this._controls) {
+      this._controls.onDragEnd(e);
+      e.stopPropagation();
+    }
+  }
+
+  ontouchstart(e) {
+    if (this._controls) {
+      this._controls.onTouchStart(e);
+      e.stopPropagation();
+    }
+  }
+
+  ontouchmove(e) {
+    if (this._controls) {
+      this._controls.onTouchMove(e);
+      e.stopPropagation();
+    }
+  }
+
+  ontouchend(e) {
+    if (this._controls) {
+      this._controls.onTouchEnd(e);
+      e.stopPropagation();
+    }
+  }
+
+  onkeydown(e) {
+    if (this._controls) {
+      this._controls.onKeyDown(e);
+      e.stopPropagation();
+    }
+  }
+
+  handleMouseWheel(event) {
+
+    var delta = 0;
+    var zoom = this.model.zoom;
+
+    delta = -event.deltaY;
+    zoom += delta * 0.01;
+    if (zoom < 0) zoom = 0;
+
+    this.set('zoom', zoom);
+  }
+
+}
 
 exports.default = ThreeContainer;
-
-
 _thingsScene.Component.register('three-container', ThreeContainer);
 
 /***/ }),
@@ -58935,10 +57723,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
 var _threeControls = __webpack_require__(10);
 
 var _threeControls2 = _interopRequireDefault(_threeControls);
@@ -58959,22 +57743,18 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Copyright © HatioLab Inc. All rights reserved.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
-
+__webpack_require__(42);
 
 // import OBJExporter from 'three-obj-exporter'
 
-__webpack_require__(42);
+/*
+ * Copyright © HatioLab Inc. All rights reserved.
+ */
+
 __webpack_require__(41);
 __webpack_require__(40);
 
-var NATURE = {
+const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
@@ -59062,7 +57842,7 @@ var NATURE = {
   }]
 };
 
-var WEBGL_NO_SUPPORT_TEXT = 'WebGL no support';
+const WEBGL_NO_SUPPORT_TEXT = 'WebGL no support';
 
 function registerLoaders() {
   if (!registerLoaders.done) {
@@ -59080,8 +57860,8 @@ function createProgressbar(targetEl) {
 
   targetEl = targetEl || document.body;
 
-  progress.style.width = '200px';
-  progress.style.height = '20px';
+  progress.style.width = `200px`;
+  progress.style.height = `20px`;
   progress.style.border = '2px solid #000';
   progress.style.position = 'absolute';
   progress.style.marginLeft = '-100px';
@@ -59094,7 +57874,7 @@ function createProgressbar(targetEl) {
   progress.style.lineHeight = '20px';
   progress.innerText = 'Loading ...';
 
-  progress.style.background = 'linear-gradient(90deg, #000 0%, transparent)';
+  progress.style.background = `linear-gradient(90deg, #000 0%, transparent)`;
 
   targetEl.appendChild(progress);
 
@@ -59104,7 +57884,7 @@ function createProgressbar(targetEl) {
 function showProgressbar(targetEl, loaded, total) {
   if (!progress) createProgressbar(targetEl);
 
-  progress.style.background = 'linear-gradient(90deg, #000 ' + loaded / total * 100 + '%, transparent)';
+  progress.style.background = `linear-gradient(90deg, #000 ${loaded / total * 100}%, transparent)`;
 }
 
 function removeProgressBar(targetEl) {
@@ -59117,802 +57897,737 @@ function removeProgressBar(targetEl) {
   progress = null;
 }
 
-var Visualizer = function (_Container) {
-  _inherits(Visualizer, _Container);
+class Visualizer extends _thingsScene.Container {
 
-  function Visualizer() {
-    _classCallCheck(this, Visualizer);
+  get legendTarget() {
+    var { legendTarget } = this.model;
 
-    return _possibleConstructorReturn(this, (Visualizer.__proto__ || Object.getPrototypeOf(Visualizer)).apply(this, arguments));
+    if (!this._legendTarget && legendTarget) {
+      this._legendTarget = this.root.findById(legendTarget);
+      this._legendTarget && this._legendTarget.on('change', this.onLegendTargetChanged, this);
+    }
+
+    return this._legendTarget;
   }
 
-  _createClass(Visualizer, [{
-    key: 'containable',
-    value: function containable(component) {
-      return component.is3dish();
+  containable(component) {
+    return component.is3dish();
+  }
+
+  putObject(id, object) {
+    if (!this._objects) this._objects = {};
+
+    this._objects[id] = object;
+  }
+
+  getObject(id) {
+    if (!this._objects) this._objects = {};
+
+    return this._objects[id];
+  }
+
+  added() {
+    if (!this.app.isViewMode) return;
+
+    var loadLoaders = () => {
+      if (!THREE) return;
+
+      // ScriptLoader.load(OBJLoader);
+      // ScriptLoader.load(MTLLoader);
+      // ScriptLoader.load(TGALoader);
+    };
+
+    if (!THREE) {
+      _thingsScene.ScriptLoader.load(three).then(() => {
+        THREE.Cache.enabled = true;
+        // require('./object-3d-overload');
+        // ScriptLoader.load
+        // loadLoaders();
+      }, _thingsScene.error);
     }
-  }, {
-    key: 'putObject',
-    value: function putObject(id, object) {
-      if (!this._objects) this._objects = {};
+    //  else
+    //   loadLoaders();
+  }
 
-      this._objects[id] = object;
-    }
-  }, {
-    key: 'getObject',
-    value: function getObject(id) {
-      if (!this._objects) this._objects = {};
+  /* THREE Object related .. */
 
-      return this._objects[id];
-    }
-  }, {
-    key: 'added',
-    value: function added() {
-      if (!this.app.isViewMode) return;
+  createFloor(color, width, height) {
 
-      var loadLoaders = function loadLoaders() {
-        if (!THREE) return;
+    let fillStyle = this.model.fillStyle;
 
-        // ScriptLoader.load(OBJLoader);
-        // ScriptLoader.load(MTLLoader);
-        // ScriptLoader.load(TGALoader);
-      };
+    var floorMaterial;
 
-      if (!THREE) {
-        _thingsScene.ScriptLoader.load(three).then(function () {
-          THREE.Cache.enabled = true;
-          // require('./object-3d-overload');
-          // ScriptLoader.load
-          // loadLoaders();
-        }, _thingsScene.error);
-      }
-      //  else
-      //   loadLoaders();
-    }
+    if (fillStyle.type == 'pattern' && fillStyle.image) {
 
-    /* THREE Object related .. */
+      var floorTexture = this._textureLoader.load(this.app.url(fillStyle.image), texture => {
+        texture.minFilter = THREE.LinearFilter;
 
-  }, {
-    key: 'createFloor',
-    value: function createFloor(color, width, height) {
-      var _this2 = this;
-
-      var fillStyle = this.model.fillStyle;
-
-      var floorMaterial;
-
-      if (fillStyle.type == 'pattern' && fillStyle.image) {
-
-        var floorTexture = this._textureLoader.load(this.app.url(fillStyle.image), function (texture) {
-          texture.minFilter = THREE.LinearFilter;
-
-          texture.repeat.set(1, 1);
-          _this2.render_threed();
-        });
-
-        var floorMaterial = [new THREE.MeshLambertMaterial({
-          color: color
-        }), new THREE.MeshLambertMaterial({
-          color: color
-        }), new THREE.MeshLambertMaterial({
-          color: color
-        }), new THREE.MeshLambertMaterial({
-          color: color
-        }), new THREE.MeshLambertMaterial({
-          map: floorTexture
-        }), new THREE.MeshLambertMaterial({
-          color: color
-        })];
-      } else {
-        floorMaterial = new THREE.MeshLambertMaterial({
-          color: color
-        });
-      }
-
-      var floorGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
-      var floor = new THREE.Mesh(floorGeometry, floorMaterial);
-
-      floor.scale.set(width, height, 5);
-      floor.rotation.x = -Math.PI / 2;
-      floor.position.y = -2;
-
-      floor.name = 'floor';
-
-      this._scene3d.add(floor);
-
-      return floor;
-    }
-  }, {
-    key: 'createObjects',
-    value: function createObjects(components, canvasSize) {
-      var _this3 = this;
-
-      components.forEach(function (component) {
-        var clazz = _component3d2.default.register(component.model.type);
-        if (!clazz) {
-          console.warn('Class not found : 3d ' + component.model.type + ' class is not exist');
-          return;
-        }
-
-        var item = new clazz(component.hierarchy, canvasSize, _this3, component);
-        if (item) {
-          item.name = component.model.id;
-          _this3._scene3d.add(item);
-          _this3.putObject(component.model.id, item);
-        }
-      });
-    }
-  }, {
-    key: 'destroy_scene3d',
-    value: function destroy_scene3d() {
-      this.stop();
-
-      window.removeEventListener('focus', this._onFocus);
-
-      if (this._renderer) this._renderer.clear();
-      delete this._renderer;
-      delete this._camera;
-      delete this._2dCamera;
-      delete this._keyboard;
-      delete this._controls;
-      delete this._projector;
-      delete this._load_manager;
-      delete this._objects;
-
-      if (this._scene3d) {
-        var children = this._scene3d.children.slice();
-        for (var i in children) {
-          var child = children[i];
-          if (child.dispose) child.dispose();
-          if (child.geometry && child.geometry.dispose) child.geometry.dispose();
-          if (child.material && child.material.dispose) child.material.dispose();
-          if (child.texture && child.texture.dispose) child.texture.dispose();
-          this._scene3d.remove(child);
-        }
-      }
-
-      delete this._scene3d;
-    }
-  }, {
-    key: 'init_scene3d',
-    value: function init_scene3d() {
-
-      this.trigger("visualizer-initialized", this);
-
-      this.root.on('redraw', this.onredraw, this);
-
-      if (this._scene3d) this.destroy_scene3d();
-
-      // var self = this;
-
-      // THREE.DefaultLoadingManager.onStart = function (item, loaded, total) {
-      //   createProgressbar(self.root.target_element);
-      //   self._loadComplete = false;
-      // }
-
-      // THREE.DefaultLoadingManager.onProgress = function (item, loaded, total) {
-      //   var a = this;
-      //   showProgressbar(self.root.target_element, loaded, total)
-      // }
-      // THREE.DefaultLoadingManager.onLoad = function (item, loaded, total) {
-      //   removeProgressBar(self.root.target_element)
-      //   self._loadComplete = true;
-      // }
-
-      // THREE.DefaultLoadingManager.onError = function (url) {
-      //   console.warn('There was an error loading ' + url);
-      // }
-
-      registerLoaders();
-      this._textureLoader = new THREE.TextureLoader(THREE.DefaultLoadingManager);
-      this._textureLoader.withCredential = true;
-      this._textureLoader.crossOrigin = 'use-credentials';
-
-      // this._exporter = new OBJExporter();
-
-      var _bounds = this.bounds,
-          width = _bounds.width,
-          height = _bounds.height;
-      var _model = this.model,
-          _model$fov = _model.fov,
-          fov = _model$fov === undefined ? 45 : _model$fov,
-          _model$near = _model.near,
-          near = _model$near === undefined ? 0.1 : _model$near,
-          _model$far = _model.far,
-          far = _model$far === undefined ? 20000 : _model$far,
-          _model$fillStyle = _model.fillStyle,
-          fillStyle = _model$fillStyle === undefined ? '#424b57' : _model$fillStyle,
-          _model$light = _model.light,
-          light = _model$light === undefined ? 0xffffff : _model$light,
-          _model$antialias = _model.antialias,
-          antialias = _model$antialias === undefined ? true : _model$antialias,
-          _model$precision = _model.precision,
-          precision = _model$precision === undefined ? 'highp' : _model$precision,
-          legendTarget = _model.legendTarget;
-
-
-      var components = this.components || [];
-
-      // SCENE
-      this._scene3d = new THREE.Scene();
-
-      // CAMERA
-      var aspect = width / height;
-
-      this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-
-      this._scene3d.add(this._camera);
-      this._camera.position.set(height * 0.8, Math.floor(Math.min(width, height)), width * 0.8);
-      this._camera.lookAt(this._scene3d.position);
-      this._camera.zoom = this.model.zoom * 0.01;
-
-      if (this.model.showAxis) {
-        var axisHelper = new THREE.AxesHelper(width);
-        this._scene3d.add(axisHelper);
-      }
-
-      try {
-        // RENDERER
-        this._renderer = new THREE.WebGLRenderer({
-          precision: precision,
-          alpha: true,
-          antialias: antialias
-        });
-      } catch (e) {
-        this._noSupportWebgl = true;
-      }
-
-      if (this._noSupportWebgl) return;
-
-      this._renderer.autoClear = true;
-      this._renderer.setClearColor(0xffffff, 0); // transparent
-      this._renderer.setSize(Math.min(width, window.innerWidth), Math.min(height, window.innerHeight));
-      // this._renderer.setPixelRatio(window.devicePixelRatio)
-
-      // CONTROLS
-      this._controls = new _threeControls2.default(this._camera, this);
-      this._controls.cameraChanged = true;
-
-      // LIGHT
-      var _light = new THREE.HemisphereLight(light, 0x000000, 1);
-
-      _light.position.set(-this._camera.position.x, this._camera.position.y, -this._camera.position.z);
-      this._camera.add(_light);
-
-      this._raycaster = new THREE.Raycaster();
-      this._mouse = new THREE.Vector2();
-
-      this._tick = 0;
-      this._clock = new THREE.Clock(true);
-      this.mixers = new Array();
-
-      this.createFloor(fillStyle, width, height);
-      this.createObjects(components, {
-        width: width,
-        height: height
-      });
-
-      this._camera.updateProjectionMatrix();
-
-      this._onFocus = function () {
+        texture.repeat.set(1, 1);
         this.render_threed();
-      }.bind(this);
+      });
 
-      window.addEventListener('focus', this._onFocus);
-
-      this.invalidate();
-    }
-  }, {
-    key: 'threed_animate',
-    value: function threed_animate() {
-      if (!this._controls) return;
-
-      this._controls.update();
-      this.render_threed();
-    }
-  }, {
-    key: 'stop',
-    value: function stop() {}
-  }, {
-    key: 'render_threed',
-    value: function render_threed() {
-      if (this._renderer) {
-        this._renderer.render(this._scene3d, this._camera);
-      }
+      var floorMaterial = [new THREE.MeshLambertMaterial({
+        color: color
+      }), new THREE.MeshLambertMaterial({
+        color: color
+      }), new THREE.MeshLambertMaterial({
+        color: color
+      }), new THREE.MeshLambertMaterial({
+        color: color
+      }), new THREE.MeshLambertMaterial({
+        map: floorTexture
+      }), new THREE.MeshLambertMaterial({
+        color: color
+      })];
+    } else {
+      floorMaterial = new THREE.MeshLambertMaterial({
+        color: color
+      });
     }
 
-    /* Container Overides .. */
+    var floorGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
+    var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 
-  }, {
-    key: 'render',
-    value: function render(ctx) {
-      if (this.app.isViewMode) {
-        if (!this.model.threed) this.model.threed = true;
-      }
+    floor.scale.set(width, height, 5);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -2;
 
-      if (this.model.threed && !this._noSupportWebgl) {
+    floor.name = 'floor';
+
+    this._scene3d.add(floor);
+
+    return floor;
+  }
+
+  createObjects(components, canvasSize) {
+
+    components.forEach(component => {
+      var clazz = _component3d2.default.register(component.model.type);
+      if (!clazz) {
+        console.warn(`Class not found : 3d ${component.model.type} class is not exist`);
         return;
       }
 
-      _get(Visualizer.prototype.__proto__ || Object.getPrototypeOf(Visualizer.prototype), 'render', this).call(this, ctx);
-    }
-  }, {
-    key: 'postrender',
-    value: function postrender(ctx) {
-      var _model2 = this.model,
-          left = _model2.left,
-          top = _model2.top,
-          debug = _model2.debug,
-          threed = _model2.threed;
-      var _bounds2 = this.bounds,
-          width = _bounds2.width,
-          height = _bounds2.height;
+      var item = new clazz(component.hierarchy, canvasSize, this, component);
+      if (item) {
+        item.name = component.model.id;
+        this._scene3d.add(item);
+        this.putObject(component.model.id, item);
+      }
+    });
+  }
 
-      // ios에서 width, height에 소수점이 있으면 3d를 표현하지 못하는 문제가 있어 정수화
+  destroy_scene3d() {
+    this.stop();
 
-      width = Math.floor(width);
-      height = Math.floor(height);
+    window.removeEventListener('focus', this._onFocus);
 
-      if (threed) {
+    if (this._renderer) this._renderer.clear();
+    delete this._renderer;
+    delete this._camera;
+    delete this._2dCamera;
+    delete this._keyboard;
+    delete this._controls;
+    delete this._projector;
+    delete this._load_manager;
+    delete this._objects;
 
-        if (!this._scene3d) {
-          this.init_scene3d();
-          this.render_threed();
-        }
-
-        if (this._noSupportWebgl) {
-          this._showWebglNoSupportText(ctx);
-          return;
-        }
-
-        if (this._dataChanged) {
-          this._onDataChanged();
-        }
-
-        if (this._loadComplete === false) return;
-
-        if (!this._renderer) return;
-
-        var rendererSize = this._renderer.getSize();
-        var rendererWidth = rendererSize.width,
-            rendererHeight = rendererSize.height;
-
-
-        ctx.drawImage(this._renderer.domElement, 0, 0, rendererWidth, rendererHeight, left, top, width, height);
-
-        if (debug) {
-          ctx.font = 100 + 'px Arial';
-          ctx.textAlign = 'center';
-          ctx.fillStyle = 'black';
-          ctx.globalAlpha = 0.5;
-          ctx.fillText((0, _thingsScene.FPS)(), 100, 100);
-          this.invalidate();
-        }
-      } else {
-        _get(Visualizer.prototype.__proto__ || Object.getPrototypeOf(Visualizer.prototype), 'postrender', this).call(this, ctx);
+    if (this._scene3d) {
+      let children = this._scene3d.children.slice();
+      for (let i in children) {
+        let child = children[i];
+        if (child.dispose) child.dispose();
+        if (child.geometry && child.geometry.dispose) child.geometry.dispose();
+        if (child.material && child.material.dispose) child.material.dispose();
+        if (child.texture && child.texture.dispose) child.texture.dispose();
+        this._scene3d.remove(child);
       }
     }
-  }, {
-    key: 'dispose',
-    value: function dispose() {
 
-      this._legendTarget && this._legendTarget.off('change', this.onLegendTargetChanged, this);
-      delete this._legendTarget;
+    delete this._scene3d;
+  }
 
-      this.root.off('redraw', this.onredraw, this);
+  init_scene3d() {
 
-      this.destroy_scene3d();
+    this.trigger("visualizer-initialized", this);
 
-      _get(Visualizer.prototype.__proto__ || Object.getPrototypeOf(Visualizer.prototype), 'dispose', this).call(this);
+    this.root.on('redraw', this.onredraw, this);
+
+    if (this._scene3d) this.destroy_scene3d();
+
+    // var self = this;
+
+    // THREE.DefaultLoadingManager.onStart = function (item, loaded, total) {
+    //   createProgressbar(self.root.target_element);
+    //   self._loadComplete = false;
+    // }
+
+    // THREE.DefaultLoadingManager.onProgress = function (item, loaded, total) {
+    //   var a = this;
+    //   showProgressbar(self.root.target_element, loaded, total)
+    // }
+    // THREE.DefaultLoadingManager.onLoad = function (item, loaded, total) {
+    //   removeProgressBar(self.root.target_element)
+    //   self._loadComplete = true;
+    // }
+
+    // THREE.DefaultLoadingManager.onError = function (url) {
+    //   console.warn('There was an error loading ' + url);
+    // }
+
+    registerLoaders();
+    this._textureLoader = new THREE.TextureLoader(THREE.DefaultLoadingManager);
+    this._textureLoader.withCredential = true;
+    this._textureLoader.crossOrigin = 'use-credentials';
+
+    // this._exporter = new OBJExporter();
+
+    var {
+      width,
+      height
+    } = this.bounds;
+
+    var {
+      fov = 45,
+      near = 0.1,
+      far = 20000,
+      fillStyle = '#424b57',
+      light = 0xffffff,
+      antialias = true,
+      precision = 'highp',
+      legendTarget
+    } = this.model;
+
+    var components = this.components || [];
+
+    // SCENE
+    this._scene3d = new THREE.Scene();
+
+    // CAMERA
+    var aspect = width / height;
+
+    this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+
+    this._scene3d.add(this._camera);
+    this._camera.position.set(height * 0.8, Math.floor(Math.min(width, height)), width * 0.8);
+    this._camera.lookAt(this._scene3d.position);
+    this._camera.zoom = this.model.zoom * 0.01;
+
+    if (this.model.showAxis) {
+      var axisHelper = new THREE.AxesHelper(width);
+      this._scene3d.add(axisHelper);
     }
-  }, {
-    key: 'getObjectByRaycast',
-    value: function getObjectByRaycast() {
 
-      var intersects = this.getObjectsByRaycast();
-      var intersected;
-
-      if (intersects.length > 0) {
-        intersected = intersects[0].object;
-      }
-
-      return intersected;
-    }
-  }, {
-    key: 'getObjectsByRaycast',
-    value: function getObjectsByRaycast() {
-      // find intersections
-
-      // create a Ray with origin at the mouse position
-      //   and direction into the scene (camera direction)
-
-      var vector = this._mouse;
-      if (!this._camera) return;
-
-      this._raycaster.setFromCamera(vector, this._camera);
-
-      // create an array containing all objects in the scene with which the ray intersects
-      var intersects = this._raycaster.intersectObjects(this._scene3d.children, true);
-
-      return intersects;
-    }
-  }, {
-    key: 'exportModel',
-    value: function exportModel() {
-      // var exported = this._exporter.parse(this._scene3d);
-      // var blob = new Blob([exported], { type: "text/plain;charset=utf-8" });
-      // console.log(exported)
-      // saveAs(blob, "exported.txt");
-    }
-  }, {
-    key: '_showWebglNoSupportText',
-    value: function _showWebglNoSupportText(context) {
-      context.save();
-
-      var _model3 = this.model,
-          width = _model3.width,
-          height = _model3.height;
-
-
-      context.font = width / 20 + 'px Arial';
-      context.textAlign = 'center';
-      context.fillText(WEBGL_NO_SUPPORT_TEXT, width / 2 - width / 40, height / 2);
-
-      context.restore();
-    }
-  }, {
-    key: 'resetMaterials',
-    value: function resetMaterials() {
-      if (!this._stock_materials) return;
-
-      this._stock_materials.forEach(function (m) {
-        if (m.dispose) m.dispose();
+    try {
+      // RENDERER
+      this._renderer = new THREE.WebGLRenderer({
+        precision: precision,
+        alpha: true,
+        antialias: antialias
       });
-
-      delete this._stock_materials;
+    } catch (e) {
+      this._noSupportWebgl = true;
     }
-  }, {
-    key: '_onDataChanged',
-    value: function _onDataChanged() {
 
-      var locationField = this.getState('locationField') || 'location';
+    if (this._noSupportWebgl) return;
 
-      if (this._data) {
-        if (this._data instanceof Array) {
-          /**
-           *  Array type data
-           *  (e.g. data: [{
-           *    'loc' : 'location1',
-           *    'description': 'description1'
-           *  },
-           *  ...
-           *  ])
-           */
+    this._renderer.autoClear = true;
+    this._renderer.setClearColor(0xffffff, 0); // transparent
+    this._renderer.setSize(Math.min(width, window.innerWidth), Math.min(height, window.innerHeight));
+    // this._renderer.setPixelRatio(window.devicePixelRatio)
 
-          this._data = this._data.reduce(function (acc, value, i, arr) {
-            var val = JSON.parse(JSON.stringify(value));
-            var id = locationField;
-            if (!val[id]) // Rack 데이터가 아니면
-              id = "id";
+    // CONTROLS
+    this._controls = new _threeControls2.default(this._camera, this);
+    this._controls.cameraChanged = true;
 
-            if (acc[value[id]]) {
+    // LIGHT
+    var _light = new THREE.HemisphereLight(light, 0x000000, 1);
 
-              if (!acc[value[id]]["items"]) {
-                var clone = JSON.parse(JSON.stringify(acc[value[id]]));
-                acc[value[id]] = { items: [] };
-                acc[value[id]]["items"].push(clone);
-              }
-            } else {
+    _light.position.set(-this._camera.position.x, this._camera.position.y, -this._camera.position.z);
+    this._camera.add(_light);
+
+    this._raycaster = new THREE.Raycaster();
+    this._mouse = new THREE.Vector2();
+
+    this._tick = 0;
+    this._clock = new THREE.Clock(true);
+    this.mixers = new Array();
+
+    this.createFloor(fillStyle, width, height);
+    this.createObjects(components, {
+      width,
+      height
+    });
+
+    this._camera.updateProjectionMatrix();
+
+    this._onFocus = function () {
+      this.render_threed();
+    }.bind(this);
+
+    window.addEventListener('focus', this._onFocus);
+
+    this.invalidate();
+  }
+
+  threed_animate() {
+    if (!this._controls) return;
+
+    this._controls.update();
+    this.render_threed();
+  }
+
+  stop() {}
+
+  get scene3d() {
+    if (!this._scene3d) this.init_scene3d();
+    return this._scene3d;
+  }
+
+  render_threed() {
+    if (this._renderer) {
+      this._renderer.render(this._scene3d, this._camera);
+    }
+  }
+
+  /* Container Overides .. */
+  render(ctx) {
+    if (this.app.isViewMode) {
+      if (!this.model.threed) this.model.threed = true;
+    }
+
+    if (this.model.threed && !this._noSupportWebgl) {
+      return;
+    }
+
+    super.render(ctx);
+  }
+
+  postrender(ctx) {
+    var {
+      left,
+      top,
+      debug,
+      threed
+    } = this.model;
+
+    var {
+      width,
+      height
+    } = this.bounds;
+
+    // ios에서 width, height에 소수점이 있으면 3d를 표현하지 못하는 문제가 있어 정수화
+    width = Math.floor(width);
+    height = Math.floor(height);
+
+    if (threed) {
+
+      if (!this._scene3d) {
+        this.init_scene3d();
+        this.render_threed();
+      }
+
+      if (this._noSupportWebgl) {
+        this._showWebglNoSupportText(ctx);
+        return;
+      }
+
+      if (this._dataChanged) {
+        this._onDataChanged();
+      }
+
+      if (this._loadComplete === false) return;
+
+      if (!this._renderer) return;
+
+      var rendererSize = this._renderer.getSize();
+      var {
+        width: rendererWidth,
+        height: rendererHeight
+      } = rendererSize;
+
+      ctx.drawImage(this._renderer.domElement, 0, 0, rendererWidth, rendererHeight, left, top, width, height);
+
+      if (debug) {
+        ctx.font = 100 + 'px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'black';
+        ctx.globalAlpha = 0.5;
+        ctx.fillText((0, _thingsScene.FPS)(), 100, 100);
+        this.invalidate();
+      }
+    } else {
+      super.postrender(ctx);
+    }
+  }
+
+  dispose() {
+
+    this._legendTarget && this._legendTarget.off('change', this.onLegendTargetChanged, this);
+    delete this._legendTarget;
+
+    this.root.off('redraw', this.onredraw, this);
+
+    this.destroy_scene3d();
+
+    super.dispose();
+  }
+
+  get layout() {
+    return _thingsScene.Layout.get('three');
+  }
+
+  get nature() {
+    return NATURE;
+  }
+
+  getObjectByRaycast() {
+
+    var intersects = this.getObjectsByRaycast();
+    var intersected;
+
+    if (intersects.length > 0) {
+      intersected = intersects[0].object;
+    }
+
+    return intersected;
+  }
+
+  getObjectsByRaycast() {
+    // find intersections
+
+    // create a Ray with origin at the mouse position
+    //   and direction into the scene (camera direction)
+
+    var vector = this._mouse;
+    if (!this._camera) return;
+
+    this._raycaster.setFromCamera(vector, this._camera);
+
+    // create an array containing all objects in the scene with which the ray intersects
+    var intersects = this._raycaster.intersectObjects(this._scene3d.children, true);
+
+    return intersects;
+  }
+
+  exportModel() {
+    // var exported = this._exporter.parse(this._scene3d);
+    // var blob = new Blob([exported], { type: "text/plain;charset=utf-8" });
+    // console.log(exported)
+    // saveAs(blob, "exported.txt");
+  }
+
+  _showWebglNoSupportText(context) {
+    context.save();
+
+    var {
+      width,
+      height
+    } = this.model;
+
+    context.font = width / 20 + 'px Arial';
+    context.textAlign = 'center';
+    context.fillText(WEBGL_NO_SUPPORT_TEXT, width / 2 - width / 40, height / 2);
+
+    context.restore();
+  }
+
+  resetMaterials() {
+    if (!this._stock_materials) return;
+
+    this._stock_materials.forEach(m => {
+      if (m.dispose) m.dispose();
+    });
+
+    delete this._stock_materials;
+  }
+
+  _onDataChanged() {
+
+    var locationField = this.getState('locationField') || 'location';
+
+    if (this._data) {
+      if (this._data instanceof Array) {
+        /**
+         *  Array type data
+         *  (e.g. data: [{
+         *    'loc' : 'location1',
+         *    'description': 'description1'
+         *  },
+         *  ...
+         *  ])
+         */
+
+        this._data = this._data.reduce((acc, value, i, arr) => {
+          var val = JSON.parse(JSON.stringify(value));
+          var id = locationField;
+          if (!val[id]) // Rack 데이터가 아니면
+            id = "id";
+
+          if (acc[value[id]]) {
+
+            if (!acc[value[id]]["items"]) {
+              var clone = JSON.parse(JSON.stringify(acc[value[id]]));
               acc[value[id]] = { items: [] };
+              acc[value[id]]["items"].push(clone);
             }
+          } else {
+            acc[value[id]] = { items: [] };
+          }
 
-            acc[value[id]]["items"].push(val);
+          acc[value[id]]["items"].push(val);
 
-            return acc;
-          }, {});
+          return acc;
+        }, {});
 
-          return this._onDataChanged();
+        return this._onDataChanged();
 
-          // this._data.forEach(d => {
-          //   let data = d
+        // this._data.forEach(d => {
+        //   let data = d
 
-          //   let loc = data[locationField];
-          //   let object = this.getObject(loc)
-          //   if (object) {
-          //     object.userData = data;
-          //     object.onUserDataChanged()
-          //   }
-          // })
-        } else {
-          /**
-           *  Object type data
-           *  (e.g. data: {
-           *    'location1': {description: 'description'},
-           *    ...
-           *  })
-           */
-          for (var key in this._data) {
-            var id = key;
-            if (this._data.hasOwnProperty(id)) {
-              var d = this._data[id];
-              var object = this.getObject(id);
-              if (object) {
-                object.userData = d;
-                object.onUserDataChanged();
-              }
+        //   let loc = data[locationField];
+        //   let object = this.getObject(loc)
+        //   if (object) {
+        //     object.userData = data;
+        //     object.onUserDataChanged()
+        //   }
+        // })
+      } else {
+        /**
+         *  Object type data
+         *  (e.g. data: {
+         *    'location1': {description: 'description'},
+         *    ...
+         *  })
+         */
+        for (var key in this._data) {
+          let id = key;
+          if (this._data.hasOwnProperty(id)) {
+            let d = this._data[id];
+            let object = this.getObject(id);
+            if (object) {
+              object.userData = d;
+              object.onUserDataChanged();
             }
           }
         }
       }
+    }
 
-      this._dataChanged = false;
+    this._dataChanged = false;
+
+    this.invalidate();
+  }
+
+  /* Event Handlers */
+
+  onLegendTargetChanged(after, before) {
+    if (after.hasOwnProperty('status') && before.hasOwnProperty('status')) this.resetMaterials();
+  }
+
+  onchange(after, before) {
+
+    if (before.hasOwnProperty('legendTarget') || after.hasOwnProperty('legendTarget')) {
+      this._legendTarget && this._legendTarget.off('change', this.onLegendTargetChanged, this);
+      delete this._legendTarget;
+      this.resetMaterials();
+      this._onDataChanged();
+    }
+
+    if (after.hasOwnProperty('width') || after.hasOwnProperty('height') || after.hasOwnProperty('threed')) this.destroy_scene3d();
+
+    if (after.hasOwnProperty('autoRotate')) {
+      if (this._controls) {
+        this._controls.doAutoRotate(after.autoRotate);
+      }
+    }
+
+    if (after.hasOwnProperty('fov') || after.hasOwnProperty('near') || after.hasOwnProperty('far') || after.hasOwnProperty('zoom')) {
+
+      if (this._camera) {
+        this._camera.near = this.model.near;
+        this._camera.far = this.model.far;
+        this._camera.zoom = this.model.zoom * 0.01;
+        this._camera.fov = this.model.fov;
+        this._camera.updateProjectionMatrix();
+
+        this._controls.cameraChanged = true;
+      }
+    }
+
+    if (after.hasOwnProperty("data")) {
+      if (this._data !== after.data) {
+        this._data = after.data;
+        this._dataChanged = true;
+      }
+    }
+
+    this.invalidate();
+  }
+
+  onmousedown(e) {
+    if (this._controls) {
+      this._controls.onMouseDown(e);
+    }
+  }
+
+  onmouseup(e) {
+    if (this._controls) {
+      if (this._lastFocused) this._lastFocused._focused = false;
+
+      var modelLayer = _thingsScene.Layer.register('model-layer');
+      var popup = modelLayer.Popup;
+      var ref = this.model.popupScene;
+
+      var pointer = this.transcoordC2S(e.offsetX, e.offsetY);
+
+      this._mouse.x = (pointer.x - this.model.left) / this.model.width * 2 - 1;
+      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
+
+      var object = this.getObjectByRaycast();
+
+      if (object && object.onmouseup) {
+        if (ref) object.onmouseup(e, this, popup.show.bind(this, this, ref));
+
+        object._focused = true;
+        object._focusedAt = performance.now();
+        this._lastFocused = object;
+      } else {
+        popup.hide(this.root);
+      }
 
       this.invalidate();
+      e.stopPropagation();
     }
+  }
 
-    /* Event Handlers */
+  onmousemove(e) {
+    if (this._controls) {
+      var pointer = this.transcoordC2S(e.offsetX, e.offsetY);
 
-  }, {
-    key: 'onLegendTargetChanged',
-    value: function onLegendTargetChanged(after, before) {
-      if (after.hasOwnProperty('status') && before.hasOwnProperty('status')) this.resetMaterials();
+      this._mouse.x = (pointer.x - this.model.left) / this.model.width * 2 - 1;
+      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
+
+      this._controls.onMouseMove(e);
+
+      e.stopPropagation();
     }
-  }, {
-    key: 'onchange',
-    value: function onchange(after, before) {
+  }
 
-      if (before.hasOwnProperty('legendTarget') || after.hasOwnProperty('legendTarget')) {
-        this._legendTarget && this._legendTarget.off('change', this.onLegendTargetChanged, this);
-        delete this._legendTarget;
-        this.resetMaterials();
-        this._onDataChanged();
-      }
+  onmouseleave(e) {
+    if (!this._scene2d) return;
 
-      if (after.hasOwnProperty('width') || after.hasOwnProperty('height') || after.hasOwnProperty('threed')) this.destroy_scene3d();
-
-      if (after.hasOwnProperty('autoRotate')) {
-        if (this._controls) {
-          this._controls.doAutoRotate(after.autoRotate);
-        }
-      }
-
-      if (after.hasOwnProperty('fov') || after.hasOwnProperty('near') || after.hasOwnProperty('far') || after.hasOwnProperty('zoom')) {
-
-        if (this._camera) {
-          this._camera.near = this.model.near;
-          this._camera.far = this.model.far;
-          this._camera.zoom = this.model.zoom * 0.01;
-          this._camera.fov = this.model.fov;
-          this._camera.updateProjectionMatrix();
-
-          this._controls.cameraChanged = true;
-        }
-      }
-
-      if (after.hasOwnProperty("data")) {
-        if (this._data !== after.data) {
-          this._data = after.data;
-          this._dataChanged = true;
-        }
-      }
-
-      this.invalidate();
+    var tooltip = this._scene2d.getObjectByName('tooltip');
+    if (tooltip) {
+      this._scene2d.remove(tooltip);
     }
-  }, {
-    key: 'onmousedown',
-    value: function onmousedown(e) {
-      if (this._controls) {
-        this._controls.onMouseDown(e);
-      }
+  }
+
+  onwheel(e) {
+    if (this._controls) {
+      this.handleMouseWheel(e);
+      e.stopPropagation();
     }
-  }, {
-    key: 'onmouseup',
-    value: function onmouseup(e) {
-      if (this._controls) {
-        if (this._lastFocused) this._lastFocused._focused = false;
+  }
 
-        var modelLayer = _thingsScene.Layer.register('model-layer');
-        var popup = modelLayer.Popup;
-        var ref = this.model.popupScene;
-
-        var pointer = this.transcoordC2S(e.offsetX, e.offsetY);
-
-        this._mouse.x = (pointer.x - this.model.left) / this.model.width * 2 - 1;
-        this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
-
-        var object = this.getObjectByRaycast();
-
-        if (object && object.onmouseup) {
-          if (ref) object.onmouseup(e, this, popup.show.bind(this, this, ref));
-
-          object._focused = true;
-          object._focusedAt = performance.now();
-          this._lastFocused = object;
-        } else {
-          popup.hide(this.root);
-        }
-
-        this.invalidate();
-        e.stopPropagation();
-      }
-    }
-  }, {
-    key: 'onmousemove',
-    value: function onmousemove(e) {
-      if (this._controls) {
-        var pointer = this.transcoordC2S(e.offsetX, e.offsetY);
-
-        this._mouse.x = (pointer.x - this.model.left) / this.model.width * 2 - 1;
-        this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
-
-        this._controls.onMouseMove(e);
-
-        e.stopPropagation();
-      }
-    }
-  }, {
-    key: 'onmouseleave',
-    value: function onmouseleave(e) {
-      if (!this._scene2d) return;
-
-      var tooltip = this._scene2d.getObjectByName('tooltip');
-      if (tooltip) {
-        this._scene2d.remove(tooltip);
-      }
-    }
-  }, {
-    key: 'onwheel',
-    value: function onwheel(e) {
-      if (this._controls) {
-        this.handleMouseWheel(e);
-        e.stopPropagation();
-      }
-    }
-  }, {
-    key: 'ondblclick',
-    value: function ondblclick(e) {
-      if (this._controls) {
-        this._controls.reset();
-        e.stopPropagation();
-      }
-    }
-  }, {
-    key: 'ondragstart',
-    value: function ondragstart(e) {
-      if (this._controls) {
-        var pointer = this.transcoordC2S(e.offsetX, e.offsetY);
-
-        this._mouse.x = (pointer.x - this.model.left) / this.model.width * 2 - 1;
-        this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
-
-        this._controls.onDragStart(e);
-        e.stopPropagation();
-      }
-    }
-  }, {
-    key: 'ondragmove',
-    value: function ondragmove(e) {
-      if (this._controls) {
-        this._controls.cameraChanged = true;
-        this._controls.onDragMove(e);
-        e.stopPropagation();
-      }
-    }
-  }, {
-    key: 'ondragend',
-    value: function ondragend(e) {
-      if (this._controls) {
-        this._controls.cameraChanged = true;
-        this._controls.onDragEnd(e);
-        e.stopPropagation();
-      }
-    }
-  }, {
-    key: 'ontouchstart',
-    value: function ontouchstart(e) {
-      if (this._controls) {
-        this._controls.onTouchStart(e);
-        e.stopPropagation();
-      }
-    }
-  }, {
-    key: 'onpan',
-    value: function onpan(e) {
-      if (this._controls) {
-        this._controls.cameraChanged = true;
-        this._controls.onTouchMove(e);
-        e.stopPropagation();
-      }
-    }
-  }, {
-    key: 'ontouchend',
-    value: function ontouchend(e) {
-      if (this._controls) {
-        this._controls.onTouchEnd(e);
-        this.onmouseup(e);
-        e.stopPropagation();
-      }
-    }
-  }, {
-    key: 'onkeydown',
-    value: function onkeydown(e) {
-      if (this._controls) {
-        this._controls.onKeyDown(e);
-        e.stopPropagation();
-      }
-    }
-  }, {
-    key: 'onpinch',
-    value: function onpinch(e) {
-      if (this._controls) {
-        var zoom = this.model.zoom;
-        zoom *= e.scale;
-
-        if (zoom < 100) zoom = 100;
-
-        this.set('zoom', zoom);
-        e.stopPropagation();
-      }
-    }
-  }, {
-    key: 'ondoubletap',
-    value: function ondoubletap() {
+  ondblclick(e) {
+    if (this._controls) {
       this._controls.reset();
+      e.stopPropagation();
     }
-  }, {
-    key: 'handleMouseWheel',
-    value: function handleMouseWheel(event) {
-      var delta = 0;
-      var zoom = this.model.zoom;
+  }
 
-      delta = -event.deltaY;
-      zoom += delta * 0.1;
+  ondragstart(e) {
+    if (this._controls) {
+      var pointer = this.transcoordC2S(e.offsetX, e.offsetY);
+
+      this._mouse.x = (pointer.x - this.model.left) / this.model.width * 2 - 1;
+      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
+
+      this._controls.onDragStart(e);
+      e.stopPropagation();
+    }
+  }
+
+  ondragmove(e) {
+    if (this._controls) {
+      this._controls.cameraChanged = true;
+      this._controls.onDragMove(e);
+      e.stopPropagation();
+    }
+  }
+
+  ondragend(e) {
+    if (this._controls) {
+      this._controls.cameraChanged = true;
+      this._controls.onDragEnd(e);
+      e.stopPropagation();
+    }
+  }
+
+  ontouchstart(e) {
+    if (this._controls) {
+      this._controls.onTouchStart(e);
+      e.stopPropagation();
+    }
+  }
+
+  onpan(e) {
+    if (this._controls) {
+      this._controls.cameraChanged = true;
+      this._controls.onTouchMove(e);
+      e.stopPropagation();
+    }
+  }
+  ontouchend(e) {
+    if (this._controls) {
+      this._controls.onTouchEnd(e);
+      this.onmouseup(e);
+      e.stopPropagation();
+    }
+  }
+
+  onkeydown(e) {
+    if (this._controls) {
+      this._controls.onKeyDown(e);
+      e.stopPropagation();
+    }
+  }
+
+  onpinch(e) {
+    if (this._controls) {
+      var zoom = this.model.zoom;
+      zoom *= e.scale;
+
       if (zoom < 100) zoom = 100;
 
       this.set('zoom', zoom);
+      e.stopPropagation();
     }
-  }, {
-    key: 'onredraw',
-    value: function onredraw() {
-      this.threed_animate();
-    }
-  }, {
-    key: 'legendTarget',
-    get: function get() {
-      var legendTarget = this.model.legendTarget;
+  }
 
+  ondoubletap() {
+    this._controls.reset();
+  }
 
-      if (!this._legendTarget && legendTarget) {
-        this._legendTarget = this.root.findById(legendTarget);
-        this._legendTarget && this._legendTarget.on('change', this.onLegendTargetChanged, this);
-      }
+  handleMouseWheel(event) {
+    var delta = 0;
+    var zoom = this.model.zoom;
 
-      return this._legendTarget;
-    }
-  }, {
-    key: 'scene3d',
-    get: function get() {
-      if (!this._scene3d) this.init_scene3d();
-      return this._scene3d;
-    }
-  }, {
-    key: 'layout',
-    get: function get() {
-      return _thingsScene.Layout.get('three');
-    }
-  }, {
-    key: 'nature',
-    get: function get() {
-      return NATURE;
-    }
-  }]);
+    delta = -event.deltaY;
+    zoom += delta * 0.1;
+    if (zoom < 100) zoom = 100;
 
-  return Visualizer;
-}(_thingsScene.Container);
+    this.set('zoom', zoom);
+  }
+
+  onredraw() {
+    this.threed_animate();
+  }
+
+}
 
 exports.default = Visualizer;
-
-
 _thingsScene.Component.register('visualizer', Visualizer);
 
 /***/ }),
@@ -59957,9 +58672,7 @@ if (THREE && THREE.Object3D) {
   };
 
   THREE.Object3D.prototype._setPosition = function (location) {
-    var x = location.x,
-        y = location.y;
-
+    var { x, y } = location;
 
     var index = this._visualizer.mixers.indexOf(this._mixer);
     if (index >= 0) {
@@ -59980,10 +58693,7 @@ if (THREE && THREE.Object3D) {
   };
 
   THREE.Object3D.prototype._setQuaternion = function (quaternion) {
-    var x = quaternion.x,
-        y = quaternion.y,
-        z = quaternion.z,
-        w = quaternion.w;
+    var { x, y, z, w } = quaternion;
 
     // var euler = new THREE.Euler();
 
@@ -60017,10 +58727,7 @@ if (THREE && THREE.Object3D) {
   };
 
   THREE.Object3D.prototype._setEuler = function (euler) {
-    var yaw = euler.yaw,
-        pitch = euler.pitch,
-        roll = euler.roll;
-
+    var { yaw, pitch, roll } = euler;
     var e = new THREE.Euler();
 
     e.set(yaw, pitch, roll, 'ZYX');
@@ -60044,7 +58751,7 @@ var _object3dOverload = __webpack_require__(44);
 
 Object.defineProperty(exports, 'default', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_object3dOverload).default;
   }
 });
@@ -60053,7 +58760,7 @@ var _component3d = __webpack_require__(1);
 
 Object.defineProperty(exports, 'Component3d', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_component3d).default;
   }
 });
@@ -60062,7 +58769,7 @@ var _visualizer = __webpack_require__(43);
 
 Object.defineProperty(exports, 'Visualizer', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_visualizer).default;
   }
 });
@@ -60071,7 +58778,7 @@ var _threeContainer = __webpack_require__(39);
 
 Object.defineProperty(exports, 'ThreeContainer', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_threeContainer).default;
   }
 });
@@ -60080,7 +58787,7 @@ var _videoPlayer = __webpack_require__(38);
 
 Object.defineProperty(exports, 'VideoPlayer360', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_videoPlayer).default;
   }
 });
@@ -60089,7 +58796,7 @@ var _rackTable = __webpack_require__(37);
 
 Object.defineProperty(exports, 'RackTable', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_rackTable).default;
   }
 });
@@ -60098,7 +58805,7 @@ var _rackTableCell = __webpack_require__(35);
 
 Object.defineProperty(exports, 'RackTableCell', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_rackTableCell).default;
   }
 });
@@ -60107,7 +58814,7 @@ var _door = __webpack_require__(34);
 
 Object.defineProperty(exports, 'Door', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_door).default;
   }
 });
@@ -60116,7 +58823,7 @@ var _forkLift = __webpack_require__(33);
 
 Object.defineProperty(exports, 'ForkLift', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_forkLift).default;
   }
 });
@@ -60125,7 +58832,7 @@ var _humiditySensor = __webpack_require__(30);
 
 Object.defineProperty(exports, 'HumiditySensor', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_humiditySensor).default;
   }
 });
@@ -60134,7 +58841,7 @@ var _person = __webpack_require__(29);
 
 Object.defineProperty(exports, 'Person', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_person).default;
   }
 });
@@ -60143,7 +58850,7 @@ var _rectExtrude = __webpack_require__(27);
 
 Object.defineProperty(exports, 'RectExtrude', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_rectExtrude).default;
   }
 });
@@ -60152,7 +58859,7 @@ var _rack = __webpack_require__(8);
 
 Object.defineProperty(exports, 'Rack', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_rack).default;
   }
 });
@@ -60161,7 +58868,7 @@ var _stock = __webpack_require__(7);
 
 Object.defineProperty(exports, 'Stock', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_stock).default;
   }
 });
@@ -60170,7 +58877,7 @@ var _wall = __webpack_require__(24);
 
 Object.defineProperty(exports, 'Wall', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_wall).default;
   }
 });
@@ -60179,7 +58886,7 @@ var _cube = __webpack_require__(23);
 
 Object.defineProperty(exports, 'Cube', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_cube).default;
   }
 });
@@ -60188,7 +58895,7 @@ var _cylinder = __webpack_require__(22);
 
 Object.defineProperty(exports, 'Cylinder', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_cylinder).default;
   }
 });
@@ -60197,7 +58904,7 @@ var _sphere = __webpack_require__(21);
 
 Object.defineProperty(exports, 'Sphere', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_sphere).default;
   }
 });
@@ -60206,7 +58913,7 @@ var _cone = __webpack_require__(20);
 
 Object.defineProperty(exports, 'Cone', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_cone).default;
   }
 });
@@ -60215,7 +58922,7 @@ var _banner = __webpack_require__(19);
 
 Object.defineProperty(exports, 'Banner', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_banner).default;
   }
 });
@@ -60224,7 +58931,7 @@ var _desk = __webpack_require__(18);
 
 Object.defineProperty(exports, 'Desk', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_desk).default;
   }
 });
@@ -60233,7 +58940,7 @@ var _beacon3d = __webpack_require__(17);
 
 Object.defineProperty(exports, 'Beacon3D', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_beacon3d).default;
   }
 });
@@ -60242,7 +58949,7 @@ var _pallet = __webpack_require__(16);
 
 Object.defineProperty(exports, 'Pallet', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_pallet).default;
   }
 });
@@ -60251,7 +58958,7 @@ var _polygonExtrude = __webpack_require__(14);
 
 Object.defineProperty(exports, 'PolygonExtrude', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_polygonExtrude).default;
   }
 });
@@ -60260,7 +58967,7 @@ var _ellipseExtrude = __webpack_require__(13);
 
 Object.defineProperty(exports, 'EllipseExtrude', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_ellipseExtrude).default;
   }
 });
@@ -60269,7 +58976,7 @@ var _textExtrude = __webpack_require__(12);
 
 Object.defineProperty(exports, 'TextExtrude', {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _interopRequireDefault(_textExtrude).default;
   }
 });
