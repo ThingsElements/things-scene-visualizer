@@ -1,7 +1,6 @@
 const path = require('path');
 
 const webpack = require('webpack');
-const WebpackCleanupPlugin = require('webpack-cleanup-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 module.exports = {
@@ -23,8 +22,7 @@ module.exports = {
     "@hatiolab/things-scene": "scene"
   },
   optimization: {
-    minimize: false,
-    // minimize: true,
+    minimize: true
   },
   module: {
     rules: [{
@@ -79,7 +77,6 @@ module.exports = {
     }]
   },
   plugins: [
-    new WebpackCleanupPlugin(),
     new UglifyJsPlugin({
       test: /\-min\.js$/
     })

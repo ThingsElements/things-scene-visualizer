@@ -12,8 +12,17 @@ import {
   Component,
   Container,
   Layout,
-  ScriptLoader
+  Layer,
+  ScriptLoader,
+  error,
+  FPS
 } from '@hatiolab/things-scene'
+
+import 'heatmap.js'
+
+import "imports-loader?THREE=three!three/examples/js/loaders/OBJLoader.js";
+import "imports-loader?THREE=three!three/examples/js/loaders/MTLLoader.js";
+import "imports-loader?THREE=three!three/examples/js/loaders/TGALoader.js";
 
 const NATURE = {
   mutable: false,
@@ -111,11 +120,15 @@ export default class ThreeContainer extends Container {
     if (!this.app.isViewMode)
       return;
 
-    ScriptLoader.load('/node_modules/three/build/three.min.js')
-      .then(() => {
-        THREE.Cache.enabled = true
-        // ScriptLoader.load
-      }, error)
+    if (!THREE) {
+      ScriptLoader.load(three)
+        .then(() => {
+          THREE.Cache.enabled = true
+          // require('./object-3d-overload');
+          // ScriptLoader.load
+          // loadLoaders();
+        }, error)
+    }
   }
 
   /* THREE Object related .. */
@@ -130,6 +143,7 @@ export default class ThreeContainer extends Container {
 
       var floorTexture = this._textureLoader.load(this.app.url(fillStyle.image), texture => {
         texture.minFilter = THREE.LinearFilter
+        texture.repeat.set(1, 1)
         this.render_threed()
       });
 
@@ -145,12 +159,10 @@ export default class ThreeContainer extends Container {
     }
 
 
-    var floorGeometry = new THREE.PlaneGeometry(width, height)
-
+    var floorGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
     var floor = new THREE.Mesh(floorGeometry, floorMaterial)
 
-    // floor.receiveShadow = true
-
+    floor.scale.set(width, height, 5);
     floor.rotation.x = -Math.PI / 2
     floor.position.y = -2
 
@@ -162,25 +174,18 @@ export default class ThreeContainer extends Container {
   createObjects(components, canvasSize) {
 
     components.forEach(component => {
-
       var clazz = Component3d.register(component.model.type)
-
       if (!clazz) {
-        console.warn("Class not found : 3d class is not exist");
+        console.warn(`Class not found : 3d ${component.model.type} class is not exist`);
         return;
       }
 
-      var item = new clazz(component.model, canvasSize, this, component)
-
+      var item = new clazz(component.hierarchy, canvasSize, this, component)
       if (item) {
-        // items.push(item)
-        setTimeout(function () {
-          item.name = component.model.id;
-          this._scene3d.add(item)
-          this.putObject(component.model.id, item);
-        }.bind(this))
+        item.name = component.model.id;
+        this._scene3d.add(item)
+        this.putObject(component.model.id, item);
       }
-
     })
   }
 
@@ -189,34 +194,33 @@ export default class ThreeContainer extends Container {
     if (this._model.useHeatmap === false)
       return
 
-    ScriptLoader.load('/node_modules/heatmap.js/build/heatmap.min.js')
-      .then(() => {
-        var div = document.createElement('div');
 
-        this._heatmap = h337.create({
-          container: div,
-          width: width,
-          height: height,
-          radius: Math.sqrt(width * width + height * height) / 4
-        })
+    var div = document.createElement('div');
 
-        var heatmapMaterial = new THREE.MeshBasicMaterial({
-          side: THREE.FrontSide,
-          transparent: true,
-          visible: false
-        })
+    this._heatmap = h337.create({
+      container: div,
+      width: width,
+      height: height,
+      radius: Math.sqrt(width * width + height * height) / 4
+    })
 
-        var heatmapGeometry = new THREE.PlaneGeometry(width, height)
+    var heatmapMaterial = new THREE.MeshBasicMaterial({
+      side: THREE.FrontSide,
+      transparent: true,
+      visible: false
+    })
 
-        var heatmap = new THREE.Mesh(heatmapGeometry, heatmapMaterial)
+    var heatmapGeometry = new THREE.PlaneGeometry(width, height)
 
-        heatmap.rotation.x = -Math.PI / 2
-        heatmap.position.y = -1
+    var heatmap = new THREE.Mesh(heatmapGeometry, heatmapMaterial)
 
-        heatmap.name = 'heatmap'
+    heatmap.rotation.x = -Math.PI / 2
+    heatmap.position.y = -1
 
-        this._scene3d.add(heatmap)
-      }, error)
+    heatmap.name = 'heatmap'
+
+    this._scene3d.add(heatmap)
+
 
   }
 
@@ -578,49 +582,54 @@ export default class ThreeContainer extends Container {
     this.stop();
     if (this._renderer)
       this._renderer.clear()
-    this._renderer = undefined
-    this._camera = undefined
-    this._2dCamera = undefined
-    this._keyboard = undefined
-    this._controls = undefined
-    this._projector = undefined
-    this._load_manager = undefined
+    delete this._renderer
+    delete this._camera
+    delete this._2dCamera
+    delete this._keyboard
+    delete this._controls
+    delete this._projector
+    delete this._load_manager
+    delete this._objects
 
     if (this._scene3d) {
-      for (let i in this._scene3d.children) {
-        let child = this._scene3d.children[i]
+      let children = this._scene3d.children.slice();
+      for (let i in children) {
+        let child = children[i]
         if (child.dispose)
           child.dispose();
-        if (child.geometry)
+        if (child.geometry && child.geometry.dispose)
           child.geometry.dispose();
-        if (child.material)
+        if (child.material && child.material.dispose)
           child.material.dispose();
-        if (child.texture)
+        if (child.texture && child.texture.dispose)
           child.texture.dispose();
         this._scene3d.remove(child)
       }
     }
 
+    delete this._scene3d
+
     if (this._scene2d) {
-      for (let i in this._scene2d.children) {
-        let child = this._scene2d.children[i]
+      let children = this._scene2d.children.slice();
+      for (let i in children) {
+        let child = children[i]
         if (child.dispose)
           child.dispose();
-        if (child.geometry)
+        if (child.geometry && child.geometry.dispose)
           child.geometry.dispose();
-        if (child.material)
+        if (child.material && child.material.dispose)
           child.material.dispose();
-        if (child.texture)
+        if (child.texture && child.texture.dispose)
           child.texture.dispose();
         this._scene2d.remove(child)
       }
     }
 
-    this._scene3d = undefined
-    this._scene2d = undefined
+    delete this._scene2d
   }
 
   init_scene3d() {
+    this.root.on('redraw', this.onredraw, this)
 
     if (this._scene3d)
       this.destroy_scene3d()
@@ -634,7 +643,10 @@ export default class ThreeContainer extends Container {
 
     var {
       width,
-      height,
+      height
+    } = this.bounds
+
+    var {
       fov = 45,
       near = 0.1,
       far = 20000,
@@ -657,8 +669,8 @@ export default class ThreeContainer extends Container {
 
     this._scene3d.add(this._camera)
     this._scene2d.add(this._2dCamera)
-    this._camera.position.set(height * 0.8, Math.max(width, height) * 0.8, width * 0.8)
-    this._2dCamera.position.set(height * 0.8, Math.max(width, height) * 0.8, width * 0.8)
+    this._camera.position.set(height * 0.8, Math.floor(Math.min(width, height)), width * 0.8)
+    this._2dCamera.position.set(height * 0.8, Math.floor(Math.min(width, height)), width * 0.8)
     this._camera.lookAt(this._scene3d.position)
     this._2dCamera.lookAt(this._scene2d.position)
     this._camera.zoom = this.model.zoom * 0.01
@@ -687,20 +699,20 @@ export default class ThreeContainer extends Container {
     this._renderer.autoClear = false
 
     this._renderer.setClearColor(0xffffff, 0) // transparent
-    this._renderer.setSize(width, height)
+    this._renderer.setSize(Math.min(width, window.innerWidth), Math.min(height, window.innerHeight))
     // this._renderer.setSize(1600, 900)
     // this._renderer.shadowMap.enabled = true
 
     // CONTROLS
     this._controls = new ThreeControls(this._camera, this)
+    this._controls.cameraChanged = true
 
     // LIGHT
-    var _light = new THREE.PointLight(light, 1)
+    var _light = new THREE.HemisphereLight(light, 0x000000, 1)
+    _light.position.set(-this._camera.position.x, this._camera.position.y, -this._camera.position.z)
     this._camera.add(_light)
-    // this._camera.castShadow = true
 
     this._raycaster = new THREE.Raycaster()
-    // this._mouse = { x: 0, y: 0, originX: 0, originY : 0 }
     this._mouse = new THREE.Vector2()
 
 
@@ -715,24 +727,38 @@ export default class ThreeContainer extends Container {
       height
     })
 
-    this._load_manager = new THREE.LoadingManager();
-    this._load_manager.onProgress = function (item, loaded, total) {
+    this._camera.updateProjectionMatrix();
 
-    }
+    this._onFocus = function () {
+      this.render_threed();
+    }.bind(this)
 
-    this.threed_animate()
+    window.addEventListener('focus', this._onFocus);
+
+    this.invalidate();
   }
 
   threed_animate() {
-    this._animationFrame = requestAnimationFrame(this.threed_animate.bind(this));
+    if (!this._controls)
+      return;
 
-    // if (this.model.autoRotate)
-    this.update();
+    this._controls.update()
+    this.render_threed();
 
   }
 
   stop() {
-    cancelAnimationFrame(this._animationFrame)
+
+  }
+
+  get scene3d() {
+    if (!this._scene3d)
+      this.init_scene3d()
+    return this._scene3d
+  }
+
+  get scene2d() {
+    return this._scene2d
   }
 
   update() {
@@ -775,7 +801,7 @@ export default class ThreeContainer extends Container {
   }
 
   /* Container Overides .. */
-  _draw(ctx) {
+  render(ctx) {
     if (this.app.isViewMode) {
       if (!this.model.threed)
         this.model.threed = true
@@ -785,18 +811,26 @@ export default class ThreeContainer extends Container {
       return
     }
 
-    super._draw(ctx)
+    super.render(ctx)
 
   }
 
-  _post_draw(ctx) {
+  postrender(ctx) {
     var {
       left,
       top,
-      width,
-      height,
+      debug,
       threed
     } = this.model
+
+    var {
+      width,
+      height
+    } = this.bounds;
+
+    // ios에서 width, height에 소수점이 있으면 3d를 표현하지 못하는 문제가 있어 정수화
+    width = Math.floor(width);
+    height = Math.floor(height);
 
     if (threed) {
 
@@ -814,21 +848,44 @@ export default class ThreeContainer extends Container {
         this._onDataChanged()
       }
 
+      if (this._loadComplete === false)
+        return;
+
+      if (!this._renderer)
+        return;
+
+      var rendererSize = this._renderer.getSize();
+      var {
+        width: rendererWidth,
+        height: rendererHeight
+      } = rendererSize;
+
       this.showTooltip(this._selectedPickingLocation)
 
       ctx.drawImage(
-        this._renderer.domElement, 0, 0, width, height,
+        this._renderer.domElement, 0, 0, rendererWidth, rendererHeight,
         left, top, width, height
       )
 
-      // this.showTooltip('LOC-2-1-1-A-1')
+      if (debug) {
+        ctx.font = 100 + 'px Arial'
+        ctx.textAlign = 'center'
+        ctx.fillStyle = 'black'
+        ctx.globalAlpha = 0.5
+        ctx.fillText(FPS(), 100, 100)
+        this.invalidate()
+      }
 
     } else {
-      super._post_draw(ctx);
+      super.postrender(ctx);
     }
   }
 
   dispose() {
+    this.root.off('redraw', this.onredraw, this);
+
+    this.destroy_scene3d()
+
     super.dispose();
     this.destroy_scene3d()
   }
@@ -1212,6 +1269,18 @@ export default class ThreeContainer extends Container {
     context.restore();
   }
 
+  resetMaterials() {
+    if (!this._stock_materials)
+      return;
+
+    this._stock_materials.forEach(m => {
+      if (m.dispose)
+        m.dispose();
+    })
+
+    delete this._stock_materials
+  }
+
   _onDataChanged() {
 
     /* for picking navigator
@@ -1337,7 +1406,9 @@ export default class ThreeContainer extends Container {
       this.destroy_scene3d()
 
     if (after.hasOwnProperty('autoRotate')) {
-      this._controls.autoRotate = after.autoRotate
+      if (this._controls) {
+        this._controls.doAutoRotate(after.autoRotate)
+      }
     }
 
     if (after.hasOwnProperty('fov') ||
@@ -1345,15 +1416,16 @@ export default class ThreeContainer extends Container {
       after.hasOwnProperty('far') ||
       after.hasOwnProperty('zoom')) {
 
-      this._camera.near = this.model.near
-      this._camera.far = this.model.far
-      this._camera.zoom = this.model.zoom * 0.01
-      this._camera.fov = this.model.fov
-      this._camera.updateProjectionMatrix();
+      if (this._camera) {
+        this._camera.near = this.model.near
+        this._camera.far = this.model.far
+        this._camera.zoom = this.model.zoom * 0.01
+        this._camera.fov = this.model.fov
+        this._camera.updateProjectionMatrix();
 
-      this._controls.cameraChanged = true
+        this._controls.cameraChanged = true
+      }
 
-      this._controls.update()
     }
 
     if (after.hasOwnProperty("data")) {
@@ -1363,10 +1435,6 @@ export default class ThreeContainer extends Container {
       }
     }
 
-    // if(after.hasOwnProperty('autoRotate')) {
-    //   this.model.autoRotate = after.autoRotate
-    // }
-
     this.invalidate()
   }
 
@@ -1374,6 +1442,40 @@ export default class ThreeContainer extends Container {
     if (this._controls) {
       this._controls.onMouseDown(e)
     }
+  }
+
+  onmouseup(e) {
+    if (this._controls) {
+      if (this._lastFocused)
+        this._lastFocused._focused = false;
+
+      var modelLayer = Layer.register('model-layer')
+      var popup = modelLayer.Popup;
+      var ref = this.model.popupScene
+
+      var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
+
+      this._mouse.x = ((pointer.x - this.model.left) / (this.model.width)) * 2 - 1;
+      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
+
+      var object = this.getObjectByRaycast()
+
+      if (object && object.onmouseup) {
+        if (ref)
+          object.onmouseup(e, this, popup.show.bind(this, this, ref))
+
+        object._focused = true;
+        object._focusedAt = performance.now();
+        this._lastFocused = object
+      }
+      else {
+        popup.hide(this.root)
+      }
+
+      this.invalidate();
+      e.stopPropagation()
+    }
+
   }
 
   onmousemove(e) {
@@ -1420,6 +1522,12 @@ export default class ThreeContainer extends Container {
     }
   }
 
+  ondblclick(e) {
+    if (this._controls) {
+      this._controls.reset();
+      e.stopPropagation()
+    }
+  }
   ondragstart(e) {
     if (this._controls) {
       var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
@@ -1437,6 +1545,7 @@ export default class ThreeContainer extends Container {
 
   ondragmove(e) {
     if (this._controls) {
+      this._controls.cameraChanged = true
       this._controls.onDragMove(e)
       e.stopPropagation()
     }
@@ -1444,6 +1553,7 @@ export default class ThreeContainer extends Container {
 
   ondragend(e) {
     if (this._controls) {
+      this._controls.cameraChanged = true
       this._controls.onDragEnd(e)
       e.stopPropagation()
     }
@@ -1456,16 +1566,17 @@ export default class ThreeContainer extends Container {
     }
   }
 
-  ontouchmove(e) {
+  onpan(e) {
     if (this._controls) {
+      this._controls.cameraChanged = true
       this._controls.onTouchMove(e)
       e.stopPropagation()
     }
   }
-
   ontouchend(e) {
     if (this._controls) {
       this._controls.onTouchEnd(e)
+      this.onmouseup(e);
       e.stopPropagation()
     }
   }
@@ -1477,18 +1588,39 @@ export default class ThreeContainer extends Container {
     }
   }
 
+  onpinch(e) {
+    if (this._controls) {
+      var zoom = this.model.zoom
+      zoom *= e.scale
+
+      if (zoom < 100)
+        zoom = 100
+
+      this.set('zoom', zoom)
+      e.stopPropagation()
+    }
+  }
+
+  ondoubletap() {
+    this._controls.reset();
+  }
+
   handleMouseWheel(event) {
 
     var delta = 0;
     var zoom = this.model.zoom
 
     delta = -event.deltaY
-    zoom += delta * 0.01
-    if (zoom < 0)
-      zoom = 0
+    zoom += delta * 0.1
+    if (zoom < 100)
+      zoom = 100
 
     this.set('zoom', zoom)
 
+  }
+
+  onredraw() {
+    this.threed_animate();
   }
 
 }

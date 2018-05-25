@@ -20,9 +20,9 @@ import {
   FPS
 } from '@hatiolab/things-scene'
 
-require("imports-loader?THREE=three!three/examples/js/loaders/OBJLoader.js");
-require("imports-loader?THREE=three!three/examples/js/loaders/MTLLoader.js");
-require("imports-loader?THREE=three!three/examples/js/loaders/TGALoader.js");
+import "imports-loader?THREE=three!three/examples/js/loaders/OBJLoader.js";
+import "imports-loader?THREE=three!three/examples/js/loaders/MTLLoader.js";
+import "imports-loader?THREE=three!three/examples/js/loaders/TGALoader.js";
 
 const NATURE = {
   mutable: false,
@@ -207,7 +207,7 @@ export default class Visualizer extends Container {
       return;
 
     var loadLoaders = () => {
-      if(!THREE)
+      if (!THREE)
         return;
 
       // ScriptLoader.load(OBJLoader);
@@ -215,7 +215,7 @@ export default class Visualizer extends Container {
       // ScriptLoader.load(TGALoader);
     }
 
-    if(!THREE) {
+    if (!THREE) {
       ScriptLoader.load(three)
         .then(() => {
           THREE.Cache.enabled = true
