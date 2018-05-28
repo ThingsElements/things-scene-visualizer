@@ -23,6 +23,8 @@ import {
 import "imports-loader?THREE=three!three/examples/js/loaders/OBJLoader.js";
 import "imports-loader?THREE=three!three/examples/js/loaders/MTLLoader.js";
 import "imports-loader?THREE=three!three/examples/js/loaders/TGALoader.js";
+import "imports-loader?THREE=three!three/examples/js/loaders/ColladaLoader.js";
+import "imports-loader?THREE=three!three/examples/js/loaders/TDSLoader.js";
 
 const NATURE = {
   mutable: false,
