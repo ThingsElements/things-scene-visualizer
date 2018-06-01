@@ -4,8 +4,10 @@
 import Object3D from './object3d'
 import Component3d from './component-3d'
 
-import forkLiftMtl from '../obj/Fork_lift/fork_lift.mtl?3d'
-import forkLiftObj from '../obj/Fork_lift/fork_lift.obj?3d'
+import forkLiftModel from '../obj/Forklift/forkLift.dae?3d'
+
+import path from 'path'
+const forkLiftPath = path.resolve('../obj/Forklift')
 
 import * as THREE from 'three'
 
@@ -14,22 +16,15 @@ export default class ForkLift extends Object3D {
   static get threedObjectLoader() {
     if (!ForkLift._threedObjectLoader) {
       ForkLift._threedObjectLoader = new Promise((resolve, reject) => {
-        let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
-        let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
+        let colladaLoader = new THREE.ColladaLoader(THREE.DefaultLoadingManager);
 
-        mtlLoader.load(forkLiftMtl, materials => {
-          materials.preload();
-          objLoader.setMaterials(materials)
+        colladaLoader.setPath(`${forkLiftPath}/`);
 
-          objLoader.load(forkLiftObj, obj => {
-            var extObj = obj
-            if (extObj && extObj.children && extObj.children.length > 0) {
-              extObj = extObj.children[0];
-            }
+        colladaLoader.load(forkLiftModel, collada => {
+          var scene = collada.scene;
+          var extObj = scene;
 
-            extObj.geometry.center();
-            resolve(obj)
-          })
+          resolve(extObj);
         })
       });
     }
@@ -51,9 +46,18 @@ export default class ForkLift extends Object3D {
     this.type = 'forklift'
 
     var object = extObject.clone();
-    this.add(object)
+    object.rotation.z = - Math.PI / 2;
 
-    this.scale.set(width, depth, height)
+    var boundingBox = new THREE.Box3().setFromObject(object);
+    var center = boundingBox.getCenter(object.position);
+    var size = boundingBox.getSize(new THREE.Vector3());
+
+    center.multiplyScalar(- 1);
+
+    object.updateMatrix();
+
+    this.add(object);
+    this.scale.set(width / size.x, depth / size.y, height / size.z);
   }
 
 }

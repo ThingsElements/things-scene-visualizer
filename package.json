@@ -38,6 +38,6 @@
   "dependencies": {
     "@hatiolab/things-scene": "*",
     "heatmap.js": "^2.0.5",
-    "three": "^0.91.0"
+    "three": "^0.93.0"
   }
 }

@@ -408,7 +408,7 @@ export default class Visualizer extends Container {
     this._scene3d.add(this._camera)
     this._camera.position.set(height * 0.8, Math.floor(Math.min(width, height)), width * 0.8)
     this._camera.lookAt(this._scene3d.position)
-    this._camera.zoom = this.model.zoom * 0.01
+    this._camera.zoom = this.getState('zoom') * 0.01
 
     if (this.model.showAxis) {
       var axisHelper = new THREE.AxesHelper(width);
@@ -771,7 +771,7 @@ export default class Visualizer extends Container {
       if (this._camera) {
         this._camera.near = this.model.near
         this._camera.far = this.model.far
-        this._camera.zoom = this.model.zoom * 0.01
+        this._camera.zoom = this.getState('zoom') * 0.01
         this._camera.fov = this.model.fov
         this._camera.updateProjectionMatrix();
 
@@ -862,6 +862,7 @@ export default class Visualizer extends Container {
 
   ondblclick(e) {
     if (this._controls) {
+      this.setState('zoom', this.model.zoom);
       this._controls.reset();
       e.stopPropagation()
     }
@@ -926,13 +927,13 @@ export default class Visualizer extends Container {
 
   onpinch(e) {
     if (this._controls) {
-      var zoom = this.model.zoom
+      var zoom = this.getState('zoom')
       zoom *= e.scale
 
       if (zoom < 100)
         zoom = 100
 
-      this.set('zoom', zoom)
+      this.setState('zoom', zoom)
       e.stopPropagation()
     }
   }
@@ -943,14 +944,14 @@ export default class Visualizer extends Container {
 
   handleMouseWheel(event) {
     var delta = 0;
-    var zoom = this.model.zoom
+    var zoom = this.getState('zoom')
 
     delta = -event.deltaY
     zoom += delta * 0.1
     if (zoom < 100)
       zoom = 100
 
-    this.set('zoom', zoom)
+    this.setState('zoom', zoom)
   }
 
   onredraw() {

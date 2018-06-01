@@ -4,6 +4,8 @@
 import Component3d from './component-3d'
 import { Component, Rect } from '@hatiolab/things-scene'
 
+import * as THREE from 'three'
+
 const NATURE = {
   mutable: false,
   resizable: true,
@@ -21,9 +23,7 @@ const NATURE = {
   }]
 }
 
-import { Mesh } from 'three'
-
-export default class Cube extends Mesh {
+export default class Cube extends THREE.Mesh {
 
   constructor(model, canvasSize, visualizer) {
 
@@ -40,8 +40,6 @@ export default class Cube extends Mesh {
       var axisHelper = new THREE.AxesHelper(100);
       this.add(axisHelper);
     }
-
-
 
   }
 

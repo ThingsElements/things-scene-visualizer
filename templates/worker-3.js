@@ -12,7 +12,7 @@ export default {
     top: 100,
     width: 100,
     height: 100,
-    depth: 10,
+    depth: 100,
     fillStyle: '#CCAA76',
     strokeStyle: '#999',
     lineWidth: 1,

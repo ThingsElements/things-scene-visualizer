@@ -1,12 +1,13 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import Object3D from './object3d'
+import Mesh from './mesh'
 import Component3d from './component-3d'
 
 import path from 'path'
-
 const workerPath = path.resolve('../obj/worker2')
+
+import workerModel from '../obj/worker2/Worker2.dae?3d'
 
 import {
   RectPath,
@@ -23,30 +24,20 @@ const NATURE = {
   properties: []
 }
 
-export default class Worker2 extends Object3D {
+export default class Worker2 extends Mesh {
 
   static get threedObjectLoader() {
     if (!Worker2._threedObjectLoader) {
       Worker2._threedObjectLoader = new Promise((resolve, reject) => {
-        let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
-        let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
+        let colladaLoader = new THREE.ColladaLoader(THREE.DefaultLoadingManager);
 
-        objLoader.setPath(`${workerPath}/`)
-        mtlLoader.setPath(`${workerPath}/`)
+        colladaLoader.setPath(`${workerPath}/`);
 
-        mtlLoader.load('Worker2.mtl', materials => {
-          materials.preload();
-          objLoader.setMaterials(materials)
+        colladaLoader.load(workerModel, collada => {
+          var scene = collada.scene;
+          var extObj = scene;
 
-          objLoader.load('Worker2.obj', obj => {
-            var extObj = obj
-            if (extObj && extObj.children && extObj.children.length > 0) {
-              extObj = extObj.children[0];
-            }
-
-            extObj.geometry.center();
-            resolve(extObj)
-          })
+          resolve(extObj);
         })
       });
     }
@@ -67,24 +58,26 @@ export default class Worker2 extends Object3D {
 
     this.type = 'worker-2'
 
-    width /= 447.4
-    height /= 413.1
-    depth /= 1582.58
-
     var object = extObject.clone();
-    this.add(object)
+    object.rotation.z = - Math.PI
 
-    this.scale.set(width, depth, height)
+    var boundingBox = new THREE.Box3().setFromObject(object);
+    var center = boundingBox.getCenter(object.position);
+    var size = boundingBox.getSize(new THREE.Vector3());
 
-    this._beforeRender = () => {
-      this.lookAt(this._visualizer._camera.position)
-    }
+    center.multiplyScalar(- 1);
 
-    object.onBeforeRender = this._beforeRender;
+    object.updateMatrix();
+
+    this.add(object);
+    this.scale.set(width / size.x, depth / size.y, height / size.z);
+
+    this.updateMatrix();
   }
 
-  dispose() {
-    delete this._beforeRender;
+  onBeforeRender(renderer, scene, camera, geometry, material, group) {
+    super.onBeforeRender(renderer, scene, camera, geometry, material, group);
+    this.lookAt(camera.position);
   }
 
 }

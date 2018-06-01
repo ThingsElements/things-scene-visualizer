@@ -1,8 +1,8 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import { Object3D as ThreeObject3D } from 'three'
-export default class Object3D extends ThreeObject3D {
+import * as THREE from 'three'
+export default class Object3D extends THREE.Object3D {
   constructor(model, canvasSize, visualizer) {
     super();
 
@@ -82,6 +82,10 @@ export default class Object3D extends ThreeObject3D {
         child.texture.dispose();
       this.remove(child)
     })
+  }
+
+  onBeforeRender() {
+    super.onBeforeRender();
   }
 
   createObject() { }

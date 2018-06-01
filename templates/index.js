@@ -7,8 +7,33 @@ import sphere from './sphere'
 import banner from './banner'
 import wall from './wall'
 import desk from './desk'
+import cjTruckSmall from './cj-truck-small'
+import cjTruck from './cj-truck'
 import pallet from './pallet'
+import palletJockey from './pallet-jockey'
+import worker from './worker'
 import worker2 from './worker-2'
 import worker3 from './worker-3'
+import rollerConveyor from './roller-conveyor'
+import inspectionDesk from './inspection-desk'
 
-export default [visualizer, rackTable, threeContainer, cube, cylinder, sphere, banner, wall, desk, pallet, worker2, worker3]
+export default [
+  visualizer,
+  rackTable,
+  threeContainer,
+  cube,
+  cylinder,
+  sphere,
+  banner,
+  wall,
+  desk,
+  cjTruckSmall,
+  cjTruck,
+  pallet,
+  palletJockey,
+  worker,
+  worker2,
+  worker3,
+  inspectionDesk,
+  rollerConveyor
+]

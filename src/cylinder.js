@@ -17,9 +17,9 @@ const NATURE = {
   }]
 }
 
-import { Mesh } from 'three'
+import * as THREE from 'three'
 
-export default class Cylinder extends Mesh {
+export default class Cylinder extends THREE.Mesh {
 
   constructor(model, canvasSize) {
 

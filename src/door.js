@@ -5,9 +5,9 @@ import Component3d from './component-3d'
 
 import { Component, Rect } from '@hatiolab/things-scene'
 
-import { Mesh } from 'three'
+import * as THREE from 'three'
 
-export default class Door extends Mesh {
+export default class Door extends THREE.Mesh {
 
   constructor(model, canvasSize) {
 

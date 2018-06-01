@@ -9,12 +9,14 @@ import emptyPallet from '../obj/Pallet/EmptyPallet/EmptyPallet.dae?3d'
 import smallPallet from '../obj/Pallet/SmallPallet/SmallPallet.dae?3d'
 import mediumPallet from '../obj/pallet/MediumPallet/MediumPallet.dae?3d'
 import fullPallet from '../obj/pallet/FullPallet/FullPallet.dae?3d'
+import fullPalletWithJokey from '../obj/pallet/FullWithJockey/FullJockey.dae?3d'
 
 const PALLET_MODELS = {
   empty: emptyPallet,
   small: smallPallet,
   medium: mediumPallet,
-  full: fullPallet
+  full: fullPallet,
+  fullWithJockey: fullPalletWithJokey
 }
 
 import {
@@ -46,6 +48,9 @@ const NATURE = {
       }, {
         display: 'Full',
         value: 'full'
+      }, {
+        display: 'Full With Jockey',
+        value: 'fullWithJockey'
       }]
     }
   }]
@@ -53,25 +58,22 @@ const NATURE = {
 
 export default class Pallet extends Object3D {
 
-  static get threedObjectLoader() {
-    if (!Pallet._threedObjectLoader) {
-      Pallet._threedObjectLoader = new Promise((resolve, reject) => {
+  static getThreedObjectLoader(type) {
+    // if (!Pallet._threedObjectLoader) {
+      // Pallet._threedObjectLoader =
+      return new Promise((resolve, reject) => {
         let colladaLoader = new THREE.ColladaLoader(THREE.DefaultLoadingManager);
 
-        colladaLoader.load(PALLET_MODELS["empty"], collada => {
+        colladaLoader.load(PALLET_MODELS[type], collada => {
           var scene = collada.scene;
           var extObj = scene;
-          // if (extObj && extObj.children && extObj.children.length > 0) {
-          //   extObj = extObj.children[0];
-          // }
 
-          // extObj.geometry.center();
-          resolve(extObj)
+          resolve(extObj);
         })
       });
-    }
+    // }
 
-    return Pallet._threedObjectLoader;
+    // return Pallet._threedObjectLoader;
   }
 
   static getPalletObject(type) {
@@ -83,9 +85,9 @@ export default class Pallet extends Object3D {
       stockType = 'empty'
     } = this.model
 
-    // Pallet.getPalletObject(stockType)
+    Pallet.getThreedObjectLoader(stockType).then(this.addObject.bind(this));
 
-    Pallet.threedObjectLoader.then(this.addObject.bind(this));
+    // Pallet.threedObjectLoader.then(this.addObject.bind(this));
   }
 
   addObject(extObject) {
@@ -99,10 +101,11 @@ export default class Pallet extends Object3D {
     this.type = 'pallet'
 
     var object = extObject.clone();
+    object.rotation.z = Math.PI / 2;
 
-    var box3 = new THREE.Box3().setFromObject(object);
-    var center = box3.getCenter(object.position);
-    var size = box3.getSize(new THREE.Vector3());
+    var boundingBox = new THREE.Box3().setFromObject(object);
+    var center = boundingBox.getCenter(object.position);
+    var size = boundingBox.getSize(new THREE.Vector3());
 
     center.multiplyScalar(- 1);
 
@@ -150,5 +153,5 @@ export class Pallet2d extends RectPath(Shape) {
   }
 }
 
-Component.register('pallet', Pallet2d)
-Component3d.register('pallet', Pallet)
+Component.register('pallet', Pallet2d);
+Component3d.register('pallet', Pallet);

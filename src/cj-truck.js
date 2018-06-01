@@ -5,11 +5,10 @@
 import Object3D from './object3d'
 import Component3d from './component-3d'
 
-import OBJLoader from 'three-obj-loader'
-import MTLLoader from 'three-mtl-loader'
+import truckModel from '../obj/CJ_Truck/Vehicle_big.dae?3d'
 
-import truckMtl from '../obj/CJ_Truck/CJ_Truck.mtl?3d'
-import truckObj from '../obj/CJ_Truck/CJ_Truck.obj?3d'
+import path from 'path'
+const truckPath = path.resolve('../obj/CJ_Truck')
 
 import * as THREE from 'three'
 
@@ -35,22 +34,15 @@ export default class CJTruck extends Object3D {
   static get threedObjectLoader() {
     if (!CJTruck._threedObjectLoader) {
       CJTruck._threedObjectLoader = new Promise((resolve, reject) => {
-        let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
-        let mtlLoader = new MTLLoader(THREE.DefaultLoadingManager);
+        let colladaLoader = new THREE.ColladaLoader(THREE.DefaultLoadingManager);
 
-        mtlLoader.load(truckMtl, materials => {
-          materials.preload();
-          objLoader.setMaterials(materials)
+        colladaLoader.setPath(`${truckPath}/`);
 
-          objLoader.load(truckObj, obj => {
-            var extObj = obj
-            // if (extObj && extObj.children && extObj.children.length > 0) {
-            //   extObj = extObj.children[0];
-            // }
+        colladaLoader.load(truckModel, collada => {
+          var scene = collada.scene;
+          var extObj = scene;
 
-            // extObj.geometry.center();
-            resolve(obj)
-          })
+          resolve(extObj);
         })
       });
     }
@@ -72,13 +64,18 @@ export default class CJTruck extends Object3D {
     this.type = 'cj-truck'
 
     var object = extObject.clone();
-    this.add(object)
+    object.rotation.z = - Math.PI / 2
 
-    width /= 630.674
-    height /= 185.159
-    depth /= 125.607
+    var boundingBox = new THREE.Box3().setFromObject(object);
+    var center = boundingBox.getCenter(object.position);
+    var size = boundingBox.getSize(new THREE.Vector3());
 
-    this.scale.set(width, depth, height)
+    center.multiplyScalar(- 1);
+
+    object.updateMatrix();
+
+    this.add(object);
+    this.scale.set(width / size.x, depth / size.y, height / size.z);
   }
 
 }
@@ -88,7 +85,27 @@ export class CJTruck2D extends RectPath(Shape) {
     return true
   }
 
+  static get image() {
+    if (!CJTruck2D._image) {
+      CJTruck2D._image = new Image()
+    }
+
+    return CJTruck2D._image
+  }
+
   get controls() { }
+
+  render(context) {
+    var {
+      left,
+      top,
+      width,
+      height
+    } = this.bounds;
+
+    context.beginPath();
+    context.drawImage(CJTruck2D.image, left, top, width, height);
+  }
 
   get nature() {
     return NATURE
