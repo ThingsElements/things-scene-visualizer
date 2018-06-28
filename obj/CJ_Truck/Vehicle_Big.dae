@@ -28791,7 +28791,7 @@
     </library_effects>
     <library_images>
         <image id="ID3018">
-            <init_from>Vehicle_Big/fh16_amarillo_vo1.tga</init_from>
+            <init_from>Vehicle_Big/fh16_amarillo_vo1.jpg</init_from>
         </image>
         <image id="ID3557">
             <init_from>Vehicle_Big/material_22.png</init_from>

@@ -11,7 +11,7 @@ export default {
     cy: 100,
     rx: 100,
     ry: 100,
-    rz: 100,
+    depth: 100,
     fillStyle: '#ffffff',
     strokeStyle: '#999',
     lineWidth: 1,

@@ -9,53 +9,62 @@ import {
 } from '@hatiolab/things-scene'
 
 import * as THREE from 'three'
+import Mesh from './mesh'
 
 const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
-  properties: [{
-    type: 'number',
-    label: 'depth',
-    name: 'rz',
-    property: 'rz'
-  }]
+  properties: []
 }
 
 
-export default class Sphere extends THREE.Mesh {
+export default class Sphere extends Mesh {
 
-  constructor(model, canvasSize, visualizer) {
+  get cx() {
+    if (!this._cx) {
+      var {
+        cx = 0
+      } = this.model
+      var canvasSize = this._canvasSize;
 
-    super();
-
-    this._model = model;
-    this._visualizer = visualizer;
-
-    this.createObject(model, canvasSize);
-
+      this._cx = cx - canvasSize.width / 2
+    }
+    return this._cx
   }
 
-  createObject(model, canvasSize) {
+  get cy() {
+    if (!this._cy) {
+      var {
+        cy = 0
+      } = this.model
+      var canvasSize = this._canvasSize;
+
+      this._cy = cy - canvasSize.height / 2
+    }
+    return this._cy
+  }
+
+  get cz() {
+    if (!this._cz) {
+      var {
+        zPos = 0,
+        rx = 0
+      } = this.model
+
+      this._cz = zPos + rx
+    }
+
+    return this._cz
+  }
+
+  createObject() {
 
     var {
-      cx = 0,
-      cy = 0,
-      zPos = 0,
       rx = 0
     } = this.model
 
-    cx -= canvasSize.width / 2
-    cy -= canvasSize.height / 2
-    let cz = zPos + rx
-
-    let rotation = model.rotation
-    this.type = model.type
-
     this.createSphere(rx)
-
-    this.position.set(cx, cz, cy) // z좌표는 땅에 붙어있게 함
-    this.rotation.y = - rotation || 0
 
   }
 

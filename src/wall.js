@@ -23,38 +23,23 @@ const NATURE = {
 
 export default class Wall extends Mesh {
 
-  constructor(model, canvasSize) {
-    super(model);
+  // constructor(model, canvasSize, visualizer) {
+  //   console.log(model, canvasSize);
+  //   super(model, canvasSize, visualizer);
 
-    this.createObject(canvasSize);
-  }
+  //   this.createObject(canvasSize);
+  // }
 
-  createObject(canvasSize) {
+  createObject() {
     var {
       type,
-      left,
-      top,
       width,
       height,
-      depth = 1,
-      rotation = 0,
-      zPos = 0,
-      alpha = 1
+      depth = 1
     } = this.model
 
-    let cx = (left + (width / 2)) - canvasSize.width / 2
-    let cy = (top + (height / 2)) - canvasSize.height / 2
-    let cz = zPos + 0.5 * depth
-
     this.type = type
-
     this.createWall(width, height, depth)
-
-    this.position.set(cx, cz, cy)
-    this.rotation.y = rotation
-
-    this.material.opacity = alpha
-    this.material.transparent = alpha < 1
   }
 
   createWall(w, h, d) {

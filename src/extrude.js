@@ -24,7 +24,7 @@ export default class Extrude extends Object3D {
 
     return {
       steps: 1,
-      amount: depth,
+      depth: depth,
       bevelEnabled: false,
       UVGenerator: this.boundingUVGenerator
     };

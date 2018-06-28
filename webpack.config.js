@@ -22,7 +22,7 @@ module.exports = {
     "@hatiolab/things-scene": "scene"
   },
   optimization: {
-    minimize: true
+    minimize: false
   },
   module: {
     rules: [{

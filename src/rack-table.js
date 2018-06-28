@@ -380,6 +380,8 @@ export default class RackTable3d extends Group3D {
     })
   }
 
+  setOpacity() { }
+
   raycast(raycaster, intersects) {
 
   }

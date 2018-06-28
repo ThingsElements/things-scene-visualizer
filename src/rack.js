@@ -58,8 +58,8 @@ export default class Rack extends Object3D {
         side: THREE.DoubleSide
       })
 
-      Rack._boardMaterial.polygonOffset = true;
-      Rack._boardMaterial.polygonOffsetFactor = -0.1;
+    Rack._boardMaterial.polygonOffset = true;
+    Rack._boardMaterial.polygonOffsetFactor = -0.1;
 
     return Rack._boardMaterial
   }
@@ -127,7 +127,7 @@ export default class Rack extends Object3D {
         height: height * scale,
         depth: depth * scale,
         fillStyle: fillStyle
-      }, this._visualizer)
+      }, this._canvasSize, this._visualizer)
 
       let stockDepth = depth * scale
 
@@ -241,6 +241,8 @@ export default class Rack extends Object3D {
 
     return shelfString
   }
+
+  setOpacity() { }
 
   raycast(raycaster, intersects) {
 

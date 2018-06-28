@@ -1,5 +1,5 @@
 /*
- * Copyright © HatioLab Inc. All rights reserved.
+ * Copyright ï¿½ HatioLab Inc. All rights reserved.
  */
 
 import Mesh from './mesh'
@@ -17,14 +17,14 @@ const STOCK_COLOR = '#ccaa76'
 
 export default class Stock extends Mesh {
 
-  constructor(model, visualizer) {
+  constructor(model, canvasSize, visualizer) {
 
-    super(model);
+    super(model, canvasSize, visualizer);
 
     this._visualizer = visualizer;
     this._hideEmptyStock = visualizer && visualizer.model.hideEmptyStock
 
-    this.createObject();
+    // this.createObject();
 
   }
 
@@ -138,6 +138,8 @@ export default class Stock extends Mesh {
 
   }
 
+  setOpacity() { }
+
   onUserDataChanged() {
     super.onUserDataChanged();
 
@@ -178,7 +180,8 @@ export default class Stock extends Mesh {
           if (min !== undefined) {
             if (min <= status) {
               this.material = this.getMaterial(index)
-            }
+            } else
+              return false;
           } else
             this.material = this.getMaterial(index)
 

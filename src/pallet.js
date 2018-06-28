@@ -115,9 +115,6 @@ export default class Pallet extends Object3D {
     this.scale.set(width / size.x, depth / size.y, height / size.z);
 
     this.updateMatrix();
-
-    this.setRotation();
-    this.setPosition();
   }
 
 }

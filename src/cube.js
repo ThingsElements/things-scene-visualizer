@@ -5,6 +5,7 @@ import Component3d from './component-3d'
 import { Component, Rect } from '@hatiolab/things-scene'
 
 import * as THREE from 'three'
+import Mesh from './mesh'
 
 const NATURE = {
   mutable: false,
@@ -23,16 +24,11 @@ const NATURE = {
   }]
 }
 
-export default class Cube extends THREE.Mesh {
+export default class Cube extends Mesh {
 
   constructor(model, canvasSize, visualizer) {
 
-    super();
-
-    this._model = model;
-    this._visualizer = visualizer;
-
-    this.createObject(model, canvasSize);
+    super(model, canvasSize, visualizer);
 
     this.updateMatrixWorld();
 
@@ -43,19 +39,14 @@ export default class Cube extends THREE.Mesh {
 
   }
 
-  createObject(model, canvasSize) {
+  createObject() {
+    var {
+      width = 0,
+      height = 0,
+      depth = 0
+    } = this.model
 
-    let cx = (model.left + (model.width / 2)) - canvasSize.width / 2
-    let cy = (model.top + (model.height / 2)) - canvasSize.height / 2
-    let cz = model.zPos || 0.5 * model.depth
-
-    let rotation = model.rotation
-    this.type = model.type
-
-    this.createCube(model.width, model.height, model.depth)
-
-    this.position.set(cx, cz, cy)
-    this.rotation.y = rotation || 0
+    this.createCube(width, height, depth)
 
   }
 

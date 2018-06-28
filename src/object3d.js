@@ -17,6 +17,7 @@ export default class Object3D extends THREE.Object3D {
 
     this.setPosition();
     this.setRotation();
+    this.setOpacity();
   }
 
   get model() {
@@ -104,6 +105,28 @@ export default class Object3D extends THREE.Object3D {
     this.rotation.x = - rotationX;
     this.rotation.y = - rotation;
     this.rotation.z = - rotationY;
+  }
+
+  setOpacity() {
+    var {
+      alpha
+    } = this.model
+
+    alpha = alpha == undefined ? 1 : alpha;
+
+    this.traverse(o => {
+      var materials = o.material;
+      if(!o.material)
+        return;
+
+      if(!Array.isArray(materials))
+        materials = [materials];
+
+      materials.forEach(m => {
+        m.opacity *= alpha
+        m.transparent = alpha < 1
+      })
+    })
   }
 
   onUserDataChanged() {
