@@ -17,17 +17,6 @@ const STOCK_COLOR = '#ccaa76'
 
 export default class Stock extends Mesh {
 
-  constructor(model, canvasSize, visualizer) {
-
-    super(model, canvasSize, visualizer);
-
-    this._visualizer = visualizer;
-    this._hideEmptyStock = visualizer && visualizer.model.hideEmptyStock
-
-    // this.createObject();
-
-  }
-
   dispose() {
     super.dispose();
 
@@ -122,6 +111,8 @@ export default class Stock extends Mesh {
       height,
       depth
     } = this.model;
+
+    this._hideEmptyStock = this._visualizer && this._visualizer.model.hideEmptyStock
 
     this.createStock(width, height, depth)
   }
