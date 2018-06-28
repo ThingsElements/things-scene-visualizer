@@ -5,7 +5,7 @@
 import Object3D from './object3d'
 import Component3d from './component-3d'
 
-import truckModel from '../obj/CJ_Truck/Vehicle_big.dae?3d'
+import truckModel from '../obj/CJ_Truck/Vehicle_Big.dae?3d'
 
 import path from 'path'
 const truckPath = path.resolve('../obj/CJ_Truck')
