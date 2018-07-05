@@ -16,6 +16,7 @@ import worker2 from './worker-2'
 import worker3 from './worker-3'
 import rollerConveyor from './roller-conveyor'
 import inspectionDesk from './inspection-desk'
+import GLTFObject from './gltf-object'
 
 export default [
   visualizer,
@@ -35,5 +36,6 @@ export default [
   worker2,
   worker3,
   inspectionDesk,
-  rollerConveyor
+  rollerConveyor,
+  GLTFObject
 ]

@@ -25,6 +25,7 @@ import "imports-loader?THREE=three!three/examples/js/loaders/MTLLoader.js";
 import "imports-loader?THREE=three!three/examples/js/loaders/TGALoader.js";
 import "imports-loader?THREE=three!three/examples/js/loaders/ColladaLoader.js";
 import "imports-loader?THREE=three!three/examples/js/loaders/TDSLoader.js";
+import "imports-loader?THREE=three!three/examples/js/loaders/GLTFLoader.js";
 
 const NATURE = {
   mutable: false,
@@ -283,6 +284,8 @@ export default class Visualizer extends Container {
 
     floor.name = 'floor'
 
+    floor.receiveShadow = true;
+
     this._scene3d.add(floor)
 
     return floor
@@ -431,6 +434,7 @@ export default class Visualizer extends Container {
       return
 
     this._renderer.autoClear = true
+
     this._renderer.setClearColor(0xffffff, 0) // transparent
     this._renderer.setSize(Math.min(width, window.innerWidth), Math.min(height, window.innerHeight))
     // this._renderer.setPixelRatio(window.devicePixelRatio)
@@ -451,6 +455,7 @@ export default class Visualizer extends Container {
     this._tick = 0
     this._clock = new THREE.Clock(true)
     this.mixers = new Array();
+    this.mixer = new THREE.AnimationMixer(this.scene3d)
 
     this.createFloor(fillStyle, width, height)
     this.createObjects(components, {
@@ -472,6 +477,9 @@ export default class Visualizer extends Container {
   threed_animate() {
     if (!this._controls)
       return;
+
+    if ( this.mixer ) this.mixer.update( this._clock.getDelta() );
+
 
     this._controls.update()
     this.render_threed();
