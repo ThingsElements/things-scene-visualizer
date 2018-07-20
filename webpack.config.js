@@ -38,7 +38,7 @@ module.exports = {
                   'env',
                   {
                     targets: {
-                      browsers: ['last 2 Chrome versions', 'Safari 10']
+                      browsers: ['last 2 Chrome versions', 'Safari 10', 'IE 11']
                     },
                     debug: true
                   }
