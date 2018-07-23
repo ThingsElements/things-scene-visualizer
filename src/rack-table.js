@@ -999,7 +999,7 @@ export class RackTable extends Container {
       return [];
 
     return rows.filter(r => {
-      return r[0].isAisle
+      return r[0] && r[0].isAisle
     })
   }
 
