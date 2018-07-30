@@ -1,5 +1,4 @@
-var icon = '';
-// import icon from '';
+import icon from '../assets/gltf-object.png';
 
 export default {
   type: 'gltf-object',

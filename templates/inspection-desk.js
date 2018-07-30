@@ -1,5 +1,4 @@
-var icon = '';
-// import icon from '';
+import icon from '../assets/inspection-desk.png';
 
 export default {
   type: 'inspection-desk',

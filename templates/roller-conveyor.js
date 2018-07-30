@@ -1,5 +1,4 @@
-var icon = '';
-// import icon from '';
+import icon from '../assets/roller-conveyor.png';
 
 export default {
   type: 'roller-conveyor',

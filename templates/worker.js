@@ -1,5 +1,4 @@
-var icon = '';
-// import icon from '';
+import icon from '../assets/worker.png';
 
 export default {
   type: 'worker-1',

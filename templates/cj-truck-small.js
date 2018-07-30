@@ -1,5 +1,4 @@
-var icon = '';
-// import icon from '';
+import icon from '../assets/cj-truck-small.png';
 
 export default {
   type: 'cj-truck-small',

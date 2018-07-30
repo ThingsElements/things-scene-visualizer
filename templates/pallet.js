@@ -1,5 +1,4 @@
-var icon = '';
-// import icon from '';
+import icon from '../assets/pallet.png';
 
 export default {
   type: 'pallet',
