@@ -13,14 +13,6 @@ import {
   Model
 } from '@hatiolab/things-scene';
 
-const LABEL_WIDTH = 25
-const LABEL_HEIGHT = 25
-
-function rgba(r, g, b, a) {
-  return `rgba(${r}, ${g}, ${b}, ${a})`
-}
-
-
 const NATURE = {
   mutable: false,
   resizable: true,
@@ -266,13 +258,6 @@ var rowControlHandler = {
     component.set('heights', heights)
   }
 }
-
-const LOCATION_HEADER_SIZE = 50;
-const LOCATION_HEADER_LINE_WIDTH = 1;
-const LOCATION_HEADER_STROKE_STYLE = '#ccc';
-const LOCATION_HEADER_FILL_STYLE = 'rgba(230, 230, 230, 0.5)';
-const LOCATION_HEADER_HIGHLIGHT_STROKE_STYLE = 'rgba(0, 0, 99, 0.9)';
-const LOCATION_HEADER_HIGHLIGHT_FILL_STYLE = 'rgba(0, 0, 255, 0.5)';
 
 export default class RackTable3d extends Group3D {
 
