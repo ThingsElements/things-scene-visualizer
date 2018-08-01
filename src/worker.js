@@ -3,6 +3,7 @@
  */
 import Mesh from './mesh'
 import Component3d from './component-3d'
+import symbol from '../assets/canvasicon-worker-1.png'
 
 import path from 'path'
 const workerPath = path.resolve('../obj/worker2')
@@ -89,7 +90,7 @@ export class Worker2d extends RectPath(Shape) {
   static get image() {
     if (!Worker2d._image) {
       Worker2d._image = new Image()
-      // Worker2d._image.src = palletSymbol
+      Worker2d._image.src = symbol
     }
 
     return Worker2d._image

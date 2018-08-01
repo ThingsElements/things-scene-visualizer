@@ -4,6 +4,7 @@
 import Object3D from './object3d'
 import Component3d from './component-3d'
 
+import symbol from '../assets/canvasicon-inspection-desk.png'
 import inspectionDeskModel from '../obj/inspection_desk/InspectionDesk.dae?3d'
 
 import path from 'path'
@@ -113,6 +114,7 @@ export class InspectionDesk2d extends RectPath(Shape) {
   static get image() {
     if (!InspectionDesk2d._image) {
       InspectionDesk2d._image = new Image()
+      InspectionDesk2d._image.src = symbol
     }
 
     return InspectionDesk2d._image

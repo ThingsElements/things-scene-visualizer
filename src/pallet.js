@@ -3,7 +3,7 @@
  */
 import Object3D from './object3d'
 import Component3d from './component-3d'
-import palletSymbol from '../assets/pallet_symbol.png'
+import palletSymbol from '../assets/canvasicon-pallet.png'
 
 import emptyPallet from '../obj/pallet/EmptyPallet/EmptyPallet.dae?3d'
 import smallPallet from '../obj/pallet/SmallPallet/SmallPallet.dae?3d'

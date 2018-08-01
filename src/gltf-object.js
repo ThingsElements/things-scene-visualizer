@@ -5,7 +5,7 @@
 import Object3D from './object3d'
 import Component3d from './component-3d'
 
-import GLTFLogo from '../assets/glTF_100px.png'
+import GLTFLogo from '../assets/canvasicon-gltf.png'
 
 import * as THREE from 'three'
 

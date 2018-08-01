@@ -5,6 +5,7 @@
 import Object3D from './object3d'
 import Component3d from './component-3d'
 
+import symbol from '../assets/canvasicon-cj-truck-small.png'
 import truckModel from '../obj/CJ_Truck_Small/Vehicle_Small.dae?3d'
 
 import path from 'path'
@@ -112,6 +113,7 @@ export class CJTruckSmall2D extends RectPath(Shape) {
   static get image() {
     if (!CJTruckSmall2D._image) {
       CJTruckSmall2D._image = new Image()
+      CJTruckSmall2D._image.src = symbol
     }
 
     return CJTruckSmall2D._image

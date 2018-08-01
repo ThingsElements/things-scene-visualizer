@@ -2,8 +2,9 @@
  * Copyright © HatioLab Inc. All rights reserved.
  */
 import Mesh from './mesh'
-// import Object3D from './object3d'
 import Component3d from './component-3d'
+
+import symbol from '../assets/canvasicon-worker-3.png'
 
 import path from 'path'
 const workerPath = path.resolve('../obj/worker3')
@@ -91,7 +92,7 @@ export class Worker2d3 extends RectPath(Shape) {
   static get image() {
     if (!Worker2d3._image) {
       Worker2d3._image = new Image()
-      // Worker2d3._image.src = palletSymbol
+      Worker2d3._image.src = symbol
     }
 
     return Worker2d3._image

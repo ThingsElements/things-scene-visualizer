@@ -4,6 +4,7 @@
 import Object3D from './object3d'
 import Component3d from './component-3d'
 
+import symbol from '../assets/canvasicon-conveyor.png'
 import rollerConveyorModel from '../obj/RollerConveyor/Roller_Conveyor2.dae?3d'
 
 import path from 'path'
@@ -94,6 +95,7 @@ export class RollerConveyor2d extends RectPath(Shape) {
   static get image() {
     if (!RollerConveyor2d._image) {
       RollerConveyor2d._image = new Image()
+      RollerConveyor2d._image.src = symbol
     }
 
     return RollerConveyor2d._image
