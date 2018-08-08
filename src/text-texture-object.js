@@ -103,10 +103,11 @@ export default class TextTextureObject extends Object3D {
     lineHeight = fontSize * 1.2 // default(line-height: normal) lineHeight
   }) {
     var span = document.createElement('span')
-    span.style.font = `${bold ? 'bold' : ''} ${italic ? 'italic' : ''} ${fontSize}px ${font}`
-    span.style.lineHeight = lineHeight
+    span.style.font = `${bold ? 'bold ' : ''}${italic ? 'italic ' : ''}${fontSize}px ${font}`
+    span.style.lineHeight = `${lineHeight}px`
     span.style.whiteSpace = 'pre'
-    span.innerText = text;
+    span.style.position = 'absolute'
+    span.textContent = text;
 
     document.body.appendChild(span)
 
