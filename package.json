@@ -1,6 +1,6 @@
 {
   "name": "@things-scene/visualizer",
-  "version": "0.5.11",
+  "version": "0.5.12",
   "description": "The visualizer component for things-scene.",
   "things-scene": true,
   "main": "src/index.js",
@@ -25,10 +25,10 @@
   },
   "homepage": "https://github.com/ThingsElements/things-scene-visualizer#readme",
   "devDependencies": {
-    "@hatiolab/things-shell": "*",
+    "@hatiolab/things-shell": "0.5.22",
     "@things-scene/chartjs": "*",
     "@things-scene/forklift": "*",
-    "@things-scene/form": "*",
+    "@things-scene/form": "0.3.2",
     "@things-scene/indoor-map": "*",
     "@things-scene/legend": "*",
     "@things-scene/person": "*",
@@ -36,9 +36,9 @@
     "@things-scene/restful": "*"
   },
   "dependencies": {
-    "@hatiolab/things-scene": "*",
+    "@hatiolab/things-scene": "2.2.62",
     "heatmap.js": "^2.0.5",
     "jszip": "^3.1.5",
-    "three": "^0.94.0"
+    "three": "^0.95.0"
   }
 }
