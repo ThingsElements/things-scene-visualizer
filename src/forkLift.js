@@ -4,7 +4,7 @@
 import Object3D from './object3d'
 import Component3d from './component-3d'
 
-import forkLiftModel from '../obj/Forklift/forkLift.dae?3d'
+import forkLiftModel from '../obj/Forklift/ForkLift.dae?3d'
 
 import path from 'path'
 const forkLiftPath = path.resolve('../obj/Forklift')
