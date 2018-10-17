@@ -25,20 +25,22 @@
   },
   "homepage": "https://github.com/ThingsElements/things-scene-visualizer#readme",
   "devDependencies": {
-    "@hatiolab/things-shell": "0.5.22",
-    "@things-scene/chartjs": "*",
+    "@hatiolab/things-shell": "0.5.28",
+    "@things-scene/chartjs": "3.1.2",
     "@things-scene/forklift": "*",
     "@things-scene/form": "0.3.2",
     "@things-scene/indoor-map": "*",
     "@things-scene/legend": "*",
     "@things-scene/person": "*",
     "@things-scene/progressbar": "*",
-    "@things-scene/restful": "*"
+    "@things-scene/restful": "*",
+    "aframe": "^0.8.2",
+    "dom-to-image": "^2.6.0"
   },
   "dependencies": {
-    "@hatiolab/things-scene": "2.2.62",
+    "@hatiolab/things-scene": "2.2.64",
     "heatmap.js": "^2.0.5",
     "jszip": "^3.1.5",
-    "three": "^0.95.0"
+    "three": "^0.97.0"
   }
 }

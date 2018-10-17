@@ -5,10 +5,10 @@ import Object3D from './object3d'
 import Component3d from './component-3d'
 
 import symbol from '../assets/canvasicon-conveyor.png'
-import rollerConveyorModel from '../obj/RollerConveyor/Roller_Conveyor2.dae?3d'
+const ROLLER_CONVEYOR_MODEL = 'Roller_Conveyor2.dae'
 
 import path from 'path'
-const rollerConveyorPath = path.resolve('../obj/RollerConveyor')
+const ROLLER_CONVEYOR_PATH = path.resolve('../obj/RollerConveyor')
 
 import {
   RectPath,
@@ -32,9 +32,9 @@ export default class RollerConveyor extends Object3D {
       RollerConveyor._threedObjectLoader = new Promise((resolve, reject) => {
         let colladaLoader = new THREE.ColladaLoader(THREE.DefaultLoadingManager);
 
-        colladaLoader.setPath(`${rollerConveyorPath}/`)
+        colladaLoader.setPath(`${ROLLER_CONVEYOR_PATH}/`)
 
-        colladaLoader.load(rollerConveyorModel, collada => {
+        colladaLoader.load(ROLLER_CONVEYOR_MODEL, collada => {
           var scene = collada.scene;
           var extObj = scene;
 

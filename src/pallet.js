@@ -5,18 +5,18 @@ import Object3D from './object3d'
 import Component3d from './component-3d'
 import palletSymbol from '../assets/canvasicon-pallet.png'
 
-import emptyPallet from '../obj/pallet/EmptyPallet/EmptyPallet.dae?3d'
-import smallPallet from '../obj/pallet/SmallPallet/SmallPallet.dae?3d'
-import mediumPallet from '../obj/pallet/MediumPallet/MediumPallet.dae?3d'
-import fullPallet from '../obj/pallet/FullPallet/FullPallet.dae?3d'
-import fullPalletWithJokey from '../obj/pallet/FullWithJockey/FullJockey.dae?3d'
+const EMPTY_PALLET = '../obj/pallet/EmptyPallet/EmptyPallet.dae'
+const SMALL_PALLET = '../obj/pallet/SmallPallet/SmallPallet.dae'
+const MEDIUM_PALLET = '../obj/pallet/MediumPallet/MediumPallet.dae'
+const FULL_PALLET = '../obj/pallet/FullPallet/FullPallet.dae'
+const FULL_PALLET_WITH_JOKEY = '../obj/pallet/FullWithJockey/FullJockey.dae'
 
 const PALLET_MODELS = {
-  empty: emptyPallet,
-  small: smallPallet,
-  medium: mediumPallet,
-  full: fullPallet,
-  fullWithJockey: fullPalletWithJokey
+  empty: EMPTY_PALLET,
+  small: SMALL_PALLET,
+  medium: MEDIUM_PALLET,
+  full: FULL_PALLET,
+  fullWithJockey: FULL_PALLET_WITH_JOKEY
 }
 
 import {

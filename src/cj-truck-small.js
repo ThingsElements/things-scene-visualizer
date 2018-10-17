@@ -6,10 +6,11 @@ import Object3D from './object3d'
 import Component3d from './component-3d'
 
 import symbol from '../assets/canvasicon-cj-truck-small.png'
-import truckModel from '../obj/CJ_Truck_Small/Vehicle_Small.dae?3d'
+const TRUCK_MODEL = 'Vehicle_Small.dae'
+// import truckModel from '../obj/CJ_Truck_Small/Vehicle_Small.dae?3d'
 
 import path from 'path'
-const truckPath = path.resolve('../obj/CJ_Truck_Small')
+const TRUCK_PATH = path.resolve('../obj/CJ_Truck_Small')
 
 import * as THREE from 'three'
 
@@ -37,9 +38,9 @@ export default class CJTruckSmall extends Object3D {
       CJTruckSmall._threedObjectLoader = new Promise((resolve, reject) => {
         let colladaLoader = new THREE.ColladaLoader(THREE.DefaultLoadingManager);
 
-        colladaLoader.setPath(`${truckPath}/`);
+        colladaLoader.setPath(`${TRUCK_PATH}/`);
 
-        colladaLoader.load(truckModel, collada => {
+        colladaLoader.load(TRUCK_MODEL, collada => {
           var scene = collada.scene;
           var extObj = scene;
 

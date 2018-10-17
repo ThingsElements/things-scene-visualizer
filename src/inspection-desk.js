@@ -5,10 +5,10 @@ import Object3D from './object3d'
 import Component3d from './component-3d'
 
 import symbol from '../assets/canvasicon-inspection-desk.png'
-import inspectionDeskModel from '../obj/inspection_desk/InspectionDesk.dae?3d'
+const INSPECTION_DESK_MODEL = 'InspectionDesk.dae'
 
 import path from 'path'
-const inspectionDeskPath = path.resolve('../obj/inspection_desk')
+const INSPECTION_DESK_PATH = path.resolve('../obj/inspection_desk')
 
 import {
   RectPath,
@@ -51,9 +51,9 @@ export default class InspectionDesk extends Object3D {
       InspectionDesk._threedObjectLoader = new Promise((resolve, reject) => {
         let colladaLoader = new THREE.ColladaLoader(THREE.DefaultLoadingManager);
 
-        colladaLoader.setPath(`${inspectionDeskPath}/`)
+        colladaLoader.setPath(`${INSPECTION_DESK_PATH}/`)
 
-        colladaLoader.load(inspectionDeskModel, collada => {
+        colladaLoader.load(INSPECTION_DESK_MODEL, collada => {
           var scene = collada.scene;
           var extObj = scene;
 

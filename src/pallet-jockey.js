@@ -5,10 +5,10 @@ import Object3D from './object3d'
 import Component3d from './component-3d'
 import palletJockeySymbol from '../assets/canvasicon-pallet-jockey.png'
 
-import palletJockeyModel from '../obj/Pallet_Jockey/SmallJockey.dae?3d'
+const PALLET_JOKEY_MODEL = 'SmallJockey.dae'
 
 import path from 'path'
-const palletJockeyPath = path.resolve('../obj/Pallet_Jockey')
+const PALLET_JOKEY_PATH = path.resolve('../obj/Pallet_Jockey')
 
 import {
   RectPath,
@@ -32,9 +32,9 @@ export default class PalletJockey extends Object3D {
       PalletJockey._threedObjectLoader = new Promise((resolve, reject) => {
         let colladaLoader = new THREE.ColladaLoader(THREE.DefaultLoadingManager);
 
-        colladaLoader.setPath(`${palletJockeyPath}/`)
+        colladaLoader.setPath(`${PALLET_JOKEY_PATH}/`)
 
-        colladaLoader.load(palletJockeyModel, collada => {
+        colladaLoader.load(PALLET_JOKEY_MODEL, collada => {
           var scene = collada.scene;
           var extObj = scene;
 

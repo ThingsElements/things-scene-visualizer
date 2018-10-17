@@ -6,9 +6,9 @@ import Component3d from './component-3d'
 import symbol from '../assets/canvasicon-worker-1.png'
 
 import path from 'path'
-const workerPath = path.resolve('../obj/worker2')
+const WORKER_PATH = path.resolve('../obj/worker')
 
-import workerModel from '../obj/worker/Worker.dae?3d'
+const WORKER_MODEL = 'Worker.dae'
 
 import {
   RectPath,
@@ -32,9 +32,9 @@ export default class Worker1 extends Mesh {
       Worker1._threedObjectLoader = new Promise((resolve, reject) => {
         let colladaLoader = new THREE.ColladaLoader(THREE.DefaultLoadingManager);
 
-        colladaLoader.setPath(`${workerPath}/`);
+        colladaLoader.setPath(`${WORKER_PATH}/`);
 
-        colladaLoader.load(workerModel, collada => {
+        colladaLoader.load(WORKER_MODEL, collada => {
           var scene = collada.scene;
           var extObj = scene;
 
