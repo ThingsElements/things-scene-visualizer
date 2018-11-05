@@ -29,25 +29,38 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /(node_modules)/,
-        use: [
-          {
-            loader: 'babel-loader',
-            options: {
-              presets: [
-                [
-                  '@babel/preset-env',
-                  {
-                    targets: {
-                      browsers: ['last 2 Chrome versions', 'Safari 10', 'IE 11']
-                    },
-                    debug: true
-                  }
-                ]
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              [
+                '@babel/env',
+                {
+                  targets: {
+                    browsers: ['last 2 Chrome versions', 'Safari 10']
+                  },
+                  debug: true
+                }
+              ]
+            ],
+            plugins: [
+              [
+                '@babel/plugin-proposal-decorators',
+                {
+                  decoratorsBeforeExport: false
+                }
               ],
-              plugins: []
-            }
+              ['@babel/plugin-proposal-class-properties'],
+              ['@babel/plugin-syntax-dynamic-import'],
+              [
+                '@babel/plugin-proposal-object-rest-spread',
+                {
+                  useBuiltIns: true
+                }
+              ]
+            ]
           }
-        ]
+        }
       },
       {
         test: /\.json$/,
