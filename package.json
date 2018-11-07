@@ -1,6 +1,6 @@
 {
   "name": "@things-scene/visualizer",
-  "version": "0.5.12",
+  "version": "0.5.13",
   "description": "The visualizer component for things-scene.",
   "things-scene": true,
   "main": "src/index.js",
@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/ThingsElements/things-scene-visualizer#readme",
   "devDependencies": {
-    "@hatiolab/things-shell": "0.5.30",
+    "@hatiolab/things-shell": "0.5.31",
     "@things-scene/chartjs": "3.1.2",
     "@things-scene/forklift": "*",
     "@things-scene/form": "0.3.2",
