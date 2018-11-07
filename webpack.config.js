@@ -1,6 +1,5 @@
 const path = require('path')
 
-const webpack = require('webpack')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 module.exports = {
@@ -44,20 +43,6 @@ module.exports = {
               ]
             ],
             plugins: [
-              [
-                '@babel/plugin-proposal-decorators',
-                {
-                  decoratorsBeforeExport: false
-                }
-              ],
-              ['@babel/plugin-proposal-class-properties'],
-              ['@babel/plugin-syntax-dynamic-import'],
-              [
-                '@babel/plugin-proposal-object-rest-spread',
-                {
-                  useBuiltIns: true
-                }
-              ]
             ]
           }
         }
