@@ -28,24 +28,7 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /(node_modules)/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: [
-              [
-                '@babel/env',
-                {
-                  targets: {
-                    browsers: ['last 2 Chrome versions', 'Safari 10']
-                  },
-                  debug: true
-                }
-              ]
-            ],
-            plugins: [
-            ]
-          }
-        }
+        loader: 'babel-loader'
       },
       {
         test: /\.json$/,
