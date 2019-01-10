@@ -30,19 +30,13 @@ export default class Extrude extends Object3D {
   }
 
   get boundingUVGenerator() {
-    if (!this._boundingUVGenerator)
-      this._boundingUVGenerator = new BoundingUVGenerator()
+    if (!this._boundingUVGenerator) this._boundingUVGenerator = new BoundingUVGenerator()
 
     return this._boundingUVGenerator
   }
 
   createObject() {
-    var {
-      fillStyle = 0xffffff,
-      strokeStyle = 0x636363,
-      lineWidth = 1,
-      alpha = 1
-    } = this.model
+    var { fillStyle = 0xffffff, strokeStyle = 0x636363, lineWidth = 1, alpha = 1 } = this.model
 
     // 다각형 그리기
     var shape = this.shape
@@ -84,13 +78,10 @@ export default class Extrude extends Object3D {
 
     var material
     if (fillStyle.type == 'pattern' && fillStyle.image) {
-      var texture = this._visualizer._textureLoader.load(
-        this._visualizer.app.url(fillStyle.image),
-        texture => {
-          texture.minFilter = THREE.LinearFilter
-          this._visualizer.render_threed()
-        }
-      )
+      var texture = this._visualizer._textureLoader.load(this._visualizer.app.url(fillStyle.image), texture => {
+        texture.minFilter = THREE.LinearFilter
+        this._visualizer.render_threed()
+      })
 
       material = [
         new THREE.MeshLambertMaterial({
@@ -126,12 +117,7 @@ export default class Extrude extends Object3D {
   }
 
   createSideMesh(geometry, shape) {
-    var {
-      strokeStyle = 0x000000,
-      depth = 0,
-      lineWidth = 0,
-      alpha = 1
-    } = this.model
+    var { strokeStyle = 0x000000, depth = 0, lineWidth = 0, alpha = 1 } = this.model
 
     var hole = new THREE.Path()
     hole.setFromPoints(shape.getPoints())
@@ -161,10 +147,7 @@ export default class Extrude extends Object3D {
       bevelSizeSegments: 5
     }
 
-    var sideGeometry = new THREE.ExtrudeBufferGeometry(
-      shape,
-      sideExtrudeSettings
-    )
+    var sideGeometry = new THREE.ExtrudeBufferGeometry(shape, sideExtrudeSettings)
     sideGeometry.center()
 
     var sideMesh = new THREE.Mesh(sideGeometry, sideMaterial)

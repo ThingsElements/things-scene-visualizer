@@ -1,9 +1,9 @@
-import icon from '../assets/cube.png';
+import icon from '../assets/cube.png'
 
 export default {
   type: 'cube',
   description: '3D cube',
-  group: '3D', /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */
+  group: '3D' /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */,
   icon,
   model: {
     type: 'cube',

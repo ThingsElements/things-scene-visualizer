@@ -7,9 +7,7 @@ if (THREE && THREE.Object3D) {
     if (this.userData.hasOwnProperty('position')) {
       if (!this._visualizer) return
 
-      this._setPosition(
-        this._visualizer.transcoord2dTo3d(this.userData.position)
-      )
+      this._setPosition(this._visualizer.transcoord2dTo3d(this.userData.position))
     }
 
     if (this.userData.hasOwnProperty('euler')) {

@@ -16,23 +16,28 @@ const STOCK_COLOR = '#ccaa76'
 // }
 
 export default class Stock extends Mesh {
-
   dispose() {
-    super.dispose();
+    super.dispose()
 
     delete this._visualizer
   }
 
   getMaterial(index) {
     if (!this.stockMaterials[index]) {
-      if (!(this._visualizer && this._visualizer && this._visualizer.legendTarget && this._visualizer.legendTarget.get('status')))
-        return this.userDefineDefaultMaterial;
+      if (
+        !(
+          this._visualizer &&
+          this._visualizer &&
+          this._visualizer.legendTarget &&
+          this._visualizer.legendTarget.get('status')
+        )
+      )
+        return this.userDefineDefaultMaterial
 
-      var stockStatus = this._visualizer.legendTarget.get('status');
-      var range = stockStatus.ranges[index];
+      var stockStatus = this._visualizer.legendTarget.get('status')
+      var range = stockStatus.ranges[index]
 
-      if (!(range && range.color))
-        this.stockMaterials[index] = this.userDefineDefaultMaterial;
+      if (!(range && range.color)) this.stockMaterials[index] = this.userDefineDefaultMaterial
 
       this.stockMaterials[index] = new THREE.MeshLambertMaterial({
         color: range.color,
@@ -40,33 +45,37 @@ export default class Stock extends Mesh {
       })
     }
 
-    return this.stockMaterials[index];
+    return this.stockMaterials[index]
   }
 
   static get stockGeometry() {
-    if (!Stock._geometry)
-      Stock._geometry = new THREE.BoxBufferGeometry(1, 1, 1);
+    if (!Stock._geometry) Stock._geometry = new THREE.BoxBufferGeometry(1, 1, 1)
 
     return Stock._geometry
   }
 
   get stockMaterials() {
-    if (!this._visualizer._stock_materials)
-      this._visualizer._stock_materials = [];
+    if (!this._visualizer._stock_materials) this._visualizer._stock_materials = []
 
     return this._visualizer._stock_materials
   }
 
   get userDefineDefaultMaterial() {
     if (!this._visualizer._default_material) {
-      if (!(this._visualizer && this._visualizer && this._visualizer.legendTarget && this._visualizer.legendTarget.get('status')))
-        return Stock.defaultMaterial;
+      if (
+        !(
+          this._visualizer &&
+          this._visualizer &&
+          this._visualizer.legendTarget &&
+          this._visualizer.legendTarget.get('status')
+        )
+      )
+        return Stock.defaultMaterial
 
-      var stockStatus = this._visualizer.legendTarget.get('status');
-      var defaultColor = stockStatus.defaultColor;
+      var stockStatus = this._visualizer.legendTarget.get('status')
+      var defaultColor = stockStatus.defaultColor
 
-      if (!defaultColor)
-        return Stock.defaultMaterial;
+      if (!defaultColor) return Stock.defaultMaterial
 
       this._visualizer._default_material = new THREE.MeshLambertMaterial({
         color: defaultColor,
@@ -80,16 +89,21 @@ export default class Stock extends Mesh {
   get emptyMaterial() {
     var defaultColor = STOCK_COLOR
     if (!this._visualizer._empty_material) {
-      if ((this._visualizer && this._visualizer && this._visualizer.legendTarget && this._visualizer.legendTarget.get('status'))) {
-        var stockStatus = this._visualizer.legendTarget.get('status');
-        defaultColor = stockStatus.defaultColor || STOCK_COLOR;
+      if (
+        this._visualizer &&
+        this._visualizer &&
+        this._visualizer.legendTarget &&
+        this._visualizer.legendTarget.get('status')
+      ) {
+        var stockStatus = this._visualizer.legendTarget.get('status')
+        defaultColor = stockStatus.defaultColor || STOCK_COLOR
       }
 
       this._visualizer._empty_material = new THREE.MeshBasicMaterial({
         color: defaultColor
-      });
-      this._visualizer._empty_material.opacity = 0.33;
-      this._visualizer._empty_material.transparent = true;
+      })
+      this._visualizer._empty_material.opacity = 0.33
+      this._visualizer._empty_material.transparent = true
     }
 
     return this._visualizer._empty_material
@@ -106,11 +120,7 @@ export default class Stock extends Mesh {
   }
 
   createObject() {
-    var {
-      width,
-      height,
-      depth
-    } = this.model;
+    var { width, height, depth } = this.model
 
     this._hideEmptyStock = this._visualizer && this._visualizer.model.hideEmptyStock
 
@@ -118,66 +128,64 @@ export default class Stock extends Mesh {
   }
 
   createStock(w, h, d) {
-
-    this.geometry = Stock.stockGeometry;
-    this.material = this._hideEmptyStock ? this.emptyMaterial : this.userDefineDefaultMaterial;
+    this.geometry = Stock.stockGeometry
+    this.material = this._hideEmptyStock ? this.emptyMaterial : this.userDefineDefaultMaterial
     this.type = 'stock'
 
-    this.scale.set(w, d, h);
+    this.scale.set(w, d, h)
 
     // this.castShadow = true
-
   }
 
-  setOpacity() { }
+  setOpacity() {}
 
   onUserDataChanged() {
-    super.onUserDataChanged();
+    super.onUserDataChanged()
 
-    if (!(this._visualizer && this._visualizer && this._visualizer.legendTarget && this._visualizer.legendTarget.get('status')))
+    if (
+      !(
+        this._visualizer &&
+        this._visualizer &&
+        this._visualizer.legendTarget &&
+        this._visualizer.legendTarget.get('status')
+      )
+    )
       return
 
-    var stockStatus = this._visualizer.legendTarget.get('status');
-    var statusField = stockStatus.field;
+    var stockStatus = this._visualizer.legendTarget.get('status')
+    var statusField = stockStatus.field
     var ranges = stockStatus.ranges
 
-    if (!(statusField && ranges))
-      return
+    if (!(statusField && ranges)) return
 
-    var data = this.userData.items ? this.userData.items : [this.userData];
+    var data = this.userData.items ? this.userData.items : [this.userData]
 
     for (let i in data) {
-      let d = data[i];
+      let d = data[i]
 
-      var status = d[statusField];
+      var status = d[statusField]
 
       if (status == undefined) {
         // this.visible = !this._hideEmptyStock;
-        this.material = this._hideEmptyStock ? this.emptyMaterial : this.userDefineDefaultMaterial;
+        this.material = this._hideEmptyStock ? this.emptyMaterial : this.userDefineDefaultMaterial
         return
       }
 
-
       ranges.some((range, index) => {
-        let {
-          min,
-          max
-        } = range
+        let { min, max } = range
 
-        min = Number(min) || min;
-        max = Number(max) || max;
+        min = Number(min) || min
+        max = Number(max) || max
 
         if (max > status) {
           if (min !== undefined) {
             if (min <= status) {
               this.material = this.getMaterial(index)
-            } else
-              return false;
-          } else
-            this.material = this.getMaterial(index)
+            } else return false
+          } else this.material = this.getMaterial(index)
 
           // this.visible = true;
-          return true;
+          return true
         } else {
           this.material = this._hideEmptyStock ? this.emptyMaterial : this.userDefineDefaultMaterial
         }
@@ -250,8 +258,8 @@ export default class Stock extends Mesh {
     //   this._originScale = this.scale.toArray();
 
     if (this._focused) {
-      var lastTime = (performance.now() - this._focusedAt);
-      var progress = (lastTime / 2000);
+      var lastTime = performance.now() - this._focusedAt
+      var progress = lastTime / 2000
 
       // if (progress > 1)
       //   progress %= 1
@@ -262,24 +270,20 @@ export default class Stock extends Mesh {
       // currScale.multiplyScalar(1 + total_scale * progress)
 
       // this.scale.copy(currScale);
-      this.rotation.y = 2 * Math.PI * progress;
-      this._visualizer.invalidate();
-    }
-    else {
+      this.rotation.y = 2 * Math.PI * progress
+      this._visualizer.invalidate()
+    } else {
       if (this._focusedAt) {
-        delete this._focusedAt;
-        this.rotation.y = 0;
-        this._visualizer.invalidate();
+        delete this._focusedAt
+        this.rotation.y = 0
+        this._visualizer.invalidate()
       }
 
       // this.scale.fromArray(this._originScale);
     }
-
   }
 
   onmouseup(e, visualizer, callback) {
-
-
     // var tooltip = visualizer.tooltip || visualizer._scene2d.getObjectByName("tooltip")
 
     // if (tooltip) {
@@ -288,21 +292,25 @@ export default class Stock extends Mesh {
     //   visualizer.render_threed()
     // }
 
-    if (!this.visible)
-      return;
+    if (!this.visible) return
 
     if (!this.userData || Object.keys(this.userData).length === 0)
       this.userData = {
         loc: this.name,
-        items: [{
-          loc: this.name
-        }]
-      };
+        items: [
+          {
+            loc: this.name
+          }
+        ]
+      }
 
     if (callback && typeof callback == 'function') {
-      var data = Object.assign({
-        color: '#' + this.material.color.getHexString()
-      }, this.userData);
+      var data = Object.assign(
+        {
+          color: '#' + this.material.color.getHexString()
+        },
+        this.userData
+      )
 
       callback.call(this, {
         data: data,
@@ -351,8 +359,5 @@ export default class Stock extends Mesh {
     //   visualizer._renderer && visualizer._renderer.render(visualizer._scene2d, visualizer._2dCamera)
     //   visualizer.invalidate()
     // }
-
-
   }
 }
-

@@ -1,10 +1,8 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-
 import Object3D from './object3d'
-
-var { Component3d } = scene
+import Component3d from './component-3d'
 
 import * as THREE from 'three'
 

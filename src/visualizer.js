@@ -1,8 +1,8 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import ThreeLayout from './three-layout'
 import ThreeControls from './three-controls'
+import './three-layout'
 
 import * as THREE from 'three'
 
@@ -10,15 +10,7 @@ import Component3d from './component-3d'
 
 // import OBJExporter from 'three-obj-exporter'
 
-import {
-  Component,
-  Container,
-  Layout,
-  Layer,
-  ScriptLoader,
-  error,
-  FPS
-} from '@hatiolab/things-scene'
+import { Component, Container, Layout, Layer, ScriptLoader, error, FPS } from '@hatiolab/things-scene'
 
 import TGALoader from 'three-dlc/src/loaders/TGALoader'
 
@@ -172,8 +164,7 @@ function createProgressbar(targetEl) {
 function showProgressbar(targetEl, loaded, total) {
   if (!progress) createProgressbar(targetEl)
 
-  progress.style.background = `linear-gradient(90deg, #000 ${(loaded / total) *
-    100}%, transparent)`
+  progress.style.background = `linear-gradient(90deg, #000 ${(loaded / total) * 100}%, transparent)`
 }
 
 function removeProgressBar(targetEl) {
@@ -192,8 +183,7 @@ export default class Visualizer extends Container {
 
     if (!this._legendTarget && legendTarget) {
       this._legendTarget = this.root.findById(legendTarget)
-      this._legendTarget &&
-        this._legendTarget.on('change', this.onLegendTargetChanged, this)
+      this._legendTarget && this._legendTarget.on('change', this.onLegendTargetChanged, this)
     }
 
     return this._legendTarget
@@ -246,35 +236,32 @@ export default class Visualizer extends Container {
     var floorMaterial
 
     if (fillStyle.type == 'pattern' && fillStyle.image) {
-      var floorTexture = this._textureLoader.load(
-        this.app.url(fillStyle.image),
-        texture => {
-          texture.minFilter = THREE.LinearFilter
+      var floorTexture = this._textureLoader.load(this.app.url(fillStyle.image), texture => {
+        texture.minFilter = THREE.LinearFilter
 
-          texture.repeat.set(1, 1)
-          this.render_threed()
-        }
-      )
+        texture.repeat.set(1, 1)
+        this.render_threed()
+      })
 
       var floorMaterial = [
-        (floorMaterial = new THREE.MeshLambertMaterial({
+        new THREE.MeshLambertMaterial({
           color: color
-        })),
-        (floorMaterial = new THREE.MeshLambertMaterial({
+        }),
+        new THREE.MeshLambertMaterial({
           color: color
-        })),
-        (floorMaterial = new THREE.MeshLambertMaterial({
+        }),
+        new THREE.MeshLambertMaterial({
           color: color
-        })),
-        (floorMaterial = new THREE.MeshLambertMaterial({
+        }),
+        new THREE.MeshLambertMaterial({
           color: color
-        })),
+        }),
         new THREE.MeshLambertMaterial({
           map: floorTexture
         }),
-        (floorMaterial = new THREE.MeshLambertMaterial({
+        new THREE.MeshLambertMaterial({
           color: color
-        }))
+        })
       ]
     } else {
       floorMaterial = new THREE.MeshLambertMaterial({
@@ -294,15 +281,15 @@ export default class Visualizer extends Container {
     floor.receiveShadow = true
 
     this._scene3d.add(floor)
+
+    return floor
   }
 
   createObjects(components, canvasSize) {
     components.forEach(component => {
-      var clazz = scene.Component3d.register(component.model.type)
+      var clazz = Component3d.register(component.model.type)
       if (!clazz) {
-        console.warn(
-          `Class not found : 3d ${component.model.type} class is not exist`
-        )
+        console.warn(`Class not found : 3d ${component.model.type} class is not exist`)
         return
       }
 
@@ -377,7 +364,7 @@ export default class Visualizer extends Container {
     this._textureLoader.withCredential = true
     this._textureLoader.crossOrigin = 'use-credentials'
 
-    this._exporter = new THREE.OBJExporter()
+    // this._exporter = new OBJExporter();
 
     var { width, height } = this.bounds
 
@@ -403,11 +390,7 @@ export default class Visualizer extends Container {
     this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
 
     this._scene3d.add(this._camera)
-    this._camera.position.set(
-      height * 0.8,
-      Math.floor(Math.min(width, height)),
-      width * 0.8
-    )
+    this._camera.position.set(height * 0.8, Math.floor(Math.min(width, height)), width * 0.8)
     this._camera.lookAt(this._scene3d.position)
     this._camera.zoom = this.getState('zoom') * 0.01
 
@@ -432,10 +415,7 @@ export default class Visualizer extends Container {
     this._renderer.autoClear = true
 
     this._renderer.setClearColor(0xffffff, 0) // transparent
-    this._renderer.setSize(
-      Math.min(width, window.innerWidth),
-      Math.min(height, window.innerHeight)
-    )
+    this._renderer.setSize(Math.min(width, window.innerWidth), Math.min(height, window.innerHeight))
     // this._renderer.setPixelRatio(window.devicePixelRatio)
 
     // CONTROLS
@@ -445,11 +425,7 @@ export default class Visualizer extends Container {
     // LIGHT
     var _light = new THREE.HemisphereLight(light, 0x000000, 1)
 
-    _light.position.set(
-      -this._camera.position.x,
-      this._camera.position.y,
-      -this._camera.position.z
-    )
+    _light.position.set(-this._camera.position.x, this._camera.position.y, -this._camera.position.z)
     this._camera.add(_light)
 
     this._raycaster = new THREE.Raycaster()
@@ -543,24 +519,14 @@ export default class Visualizer extends Container {
       var rendererSize = this._renderer.getSize()
       var { width: rendererWidth, height: rendererHeight } = rendererSize
 
-      ctx.drawImage(
-        this._renderer.domElement,
-        0,
-        0,
-        rendererWidth,
-        rendererHeight,
-        left,
-        top,
-        width,
-        height
-      )
+      ctx.drawImage(this._renderer.domElement, 0, 0, rendererWidth, rendererHeight, left, top, width, height)
 
       if (debug) {
         ctx.font = 100 + 'px Arial'
         ctx.textAlign = 'center'
         ctx.fillStyle = 'black'
         ctx.globalAlpha = 0.5
-        ctx.fillText(scene.FPS(), 100, 100)
+        ctx.fillText(FPS(), 100, 100)
         this.invalidate()
       }
     } else {
@@ -569,8 +535,7 @@ export default class Visualizer extends Container {
   }
 
   dispose() {
-    this._legendTarget &&
-      this._legendTarget.off('change', this.onLegendTargetChanged, this)
+    this._legendTarget && this._legendTarget.off('change', this.onLegendTargetChanged, this)
     delete this._legendTarget
 
     this.root.off('redraw', this.onredraw, this)
@@ -611,18 +576,15 @@ export default class Visualizer extends Container {
     this._raycaster.setFromCamera(vector, this._camera)
 
     // create an array containing all objects in the scene with which the ray intersects
-    var intersects = this._raycaster.intersectObjects(
-      this._scene3d.children,
-      true
-    )
+    var intersects = this._raycaster.intersectObjects(this._scene3d.children, true)
 
     return intersects
   }
 
   exportModel() {
-    var exported = this._exporter.parse(this._scene3d)
-    var blob = new Blob([exported], { type: 'text/plain;charset=utf-8' })
-    console.log(exported)
+    // var exported = this._exporter.parse(this._scene3d);
+    // var blob = new Blob([exported], { type: "text/plain;charset=utf-8" });
+    // console.log(exported)
     // saveAs(blob, "exported.txt");
   }
 
@@ -727,27 +689,18 @@ export default class Visualizer extends Container {
   /* Event Handlers */
 
   onLegendTargetChanged(after, before) {
-    if (after.hasOwnProperty('status') && before.hasOwnProperty('status'))
-      this.resetMaterials()
+    if (after.hasOwnProperty('status') && before.hasOwnProperty('status')) this.resetMaterials()
   }
 
   onchange(after, before) {
-    if (
-      before.hasOwnProperty('legendTarget') ||
-      after.hasOwnProperty('legendTarget')
-    ) {
-      this._legendTarget &&
-        this._legendTarget.off('change', this.onLegendTargetChanged, this)
+    if (before.hasOwnProperty('legendTarget') || after.hasOwnProperty('legendTarget')) {
+      this._legendTarget && this._legendTarget.off('change', this.onLegendTargetChanged, this)
       delete this._legendTarget
       this.resetMaterials()
       this._onDataChanged()
     }
 
-    if (
-      after.hasOwnProperty('width') ||
-      after.hasOwnProperty('height') ||
-      after.hasOwnProperty('threed')
-    )
+    if (after.hasOwnProperty('width') || after.hasOwnProperty('height') || after.hasOwnProperty('threed'))
       this.destroy_scene3d()
 
     if (after.hasOwnProperty('autoRotate')) {
@@ -800,8 +753,7 @@ export default class Visualizer extends Container {
       var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
 
       this._mouse.x = ((pointer.x - this.model.left) / this.model.width) * 2 - 1
-      this._mouse.y =
-        -((pointer.y - this.model.top) / this.model.height) * 2 + 1
+      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1
 
       var object = this.getObjectByRaycast()
 
@@ -825,8 +777,7 @@ export default class Visualizer extends Container {
       var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
 
       this._mouse.x = ((pointer.x - this.model.left) / this.model.width) * 2 - 1
-      this._mouse.y =
-        -((pointer.y - this.model.top) / this.model.height) * 2 + 1
+      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1
 
       this._controls.onMouseMove(e)
 
@@ -863,8 +814,7 @@ export default class Visualizer extends Container {
       var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
 
       this._mouse.x = ((pointer.x - this.model.left) / this.model.width) * 2 - 1
-      this._mouse.y =
-        -((pointer.y - this.model.top) / this.model.height) * 2 + 1
+      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1
 
       this._controls.onDragStart(e)
       e.stopPropagation()

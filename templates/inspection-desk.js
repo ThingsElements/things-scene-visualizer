@@ -1,9 +1,9 @@
-import icon from '../assets/inspection-desk.png';
+import icon from '../assets/inspection-desk.png'
 
 export default {
   type: 'inspection-desk',
   description: '3D inspection-desk',
-  group: 'warehouse', /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */
+  group: 'warehouse' /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */,
   icon,
   model: {
     type: 'inspection-desk',

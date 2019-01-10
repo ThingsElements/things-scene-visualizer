@@ -1,7 +1,9 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-var { Component, Ellipse } = scene
+import Component3d from './component-3d'
+
+import { Component, Ellipse } from '@hatiolab/things-scene'
 
 const NATURE = {
   mutable: false,
@@ -14,13 +16,10 @@ import * as THREE from 'three'
 import Mesh from './mesh'
 
 export default class Cylinder extends Mesh {
-
   get cx() {
     if (!this._cx) {
-      var {
-        cx = 0
-      } = this.model
-      var canvasSize = this._canvasSize;
+      var { cx = 0 } = this.model
+      var canvasSize = this._canvasSize
 
       this._cx = cx - canvasSize.width / 2
     }
@@ -29,10 +28,8 @@ export default class Cylinder extends Mesh {
 
   get cy() {
     if (!this._cy) {
-      var {
-        cy = 0
-      } = this.model
-      var canvasSize = this._canvasSize;
+      var { cy = 0 } = this.model
+      var canvasSize = this._canvasSize
 
       this._cy = cy - canvasSize.height / 2
     }
@@ -41,10 +38,7 @@ export default class Cylinder extends Mesh {
 
   get cz() {
     if (!this._cz) {
-      var {
-        zPos = 0,
-        depth = 0
-      } = this.model
+      var { zPos = 0, depth = 0 } = this.model
 
       this._cz = zPos + depth / 2
     }
@@ -53,31 +47,23 @@ export default class Cylinder extends Mesh {
   }
 
   createObject() {
-    var {
-      depth = 0,
-      rx = 0
-    } = this.model
+    var { depth = 0, rx = 0 } = this.model
 
     this.createCylinder(rx, depth)
   }
 
   createCylinder(rx, rz) {
+    let { fillStyle = 'lightgray' } = this.model
 
-    let {
-      fillStyle = 'lightgray'
-    } = this.model
-
-    this.geometry = new THREE.CylinderBufferGeometry(rx, rx, rz, 25);
-    this.material = new THREE.MeshLambertMaterial({ color: fillStyle, side: THREE.FrontSide });
+    this.geometry = new THREE.CylinderBufferGeometry(rx, rx, rz, 25)
+    this.material = new THREE.MeshLambertMaterial({ color: fillStyle, side: THREE.FrontSide })
 
     // this.castShadow = true
-
   }
 
   get model() {
     return this._model
   }
-
 }
 
 export class Cylinder2d extends Ellipse {
@@ -85,13 +71,12 @@ export class Cylinder2d extends Ellipse {
     return true
   }
 
-  get controls() { }
+  get controls() {}
 
   get nature() {
     return NATURE
   }
 }
 
-
 Component.register('cylinder', Cylinder2d)
-scene.Component3d.register('cylinder', Cylinder)
+Component3d.register('cylinder', Cylinder)

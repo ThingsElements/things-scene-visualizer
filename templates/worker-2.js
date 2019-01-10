@@ -1,9 +1,9 @@
-import icon from '../assets/worker-2.png';
+import icon from '../assets/worker-2.png'
 
 export default {
   type: 'worker-2',
   description: '3D worker-2',
-  group: 'warehouse', /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */
+  group: 'warehouse' /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */,
   icon,
   model: {
     type: 'worker-2',

@@ -1,7 +1,9 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-var { Component, Ellipse } = scene
+import Component3d from './component-3d'
+
+import { Component, Ellipse } from '@hatiolab/things-scene'
 
 import * as THREE from 'three'
 import Mesh from './mesh'
@@ -80,4 +82,4 @@ export class Sphere2d extends Ellipse {
 }
 
 Component.register('sphere', Sphere2d)
-scene.Component3d.register('sphere', Sphere)
+Component3d.register('sphere', Sphere)

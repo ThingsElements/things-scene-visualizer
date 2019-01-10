@@ -1,44 +1,43 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-var {
-  Component,
-  Component3d,
-  Container,
-  RectPath,
-  Layout,
-  TableCell
-} = scene;
+import { Component, RectPath } from '@hatiolab/things-scene'
 
 const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
-  properties: [{
-    type: 'string',
-    label: 'section',
-    name: 'section'
-  }, {
-    type: 'string',
-    label: 'unit',
-    name: 'unit'
-  }, {
-    type: 'checkbox',
-    label: 'is-empty',
-    name: 'isEmpty'
-  }, {
-    type: 'location-increase-pattern',
-    label: '',
-    name: ''
-  }, {
-    type: 'editor-table',
-    label: '',
-    name: '',
-    property: {
-      merge: false,
-      split: false
+  properties: [
+    {
+      type: 'string',
+      label: 'section',
+      name: 'section'
+    },
+    {
+      type: 'string',
+      label: 'unit',
+      name: 'unit'
+    },
+    {
+      type: 'checkbox',
+      label: 'is-empty',
+      name: 'isEmpty'
+    },
+    {
+      type: 'location-increase-pattern',
+      label: '',
+      name: ''
+    },
+    {
+      type: 'editor-table',
+      label: '',
+      name: '',
+      property: {
+        merge: false,
+        split: false
+      }
     }
-  }]
+  ]
 }
 
 const EMPTY_BORDER = {}
@@ -53,8 +52,7 @@ function isRightMost(idx, rows, columns) {
 
 function hasAnyProperty(o, ...properties) {
   for (let p in properties) {
-    if (o.hasOwnProperty(properties[p]))
-      return true
+    if (o.hasOwnProperty(properties[p])) return true
   }
 }
 
@@ -68,7 +66,6 @@ const EMPTY_CELL_FILL_STYLE = '#efefef'
  * 3. 데이타를 받을 수 있음.
  */
 export default class RackTableCell extends RectPath(Component) {
-
   get hasTextProperty() {
     return false
   }
@@ -79,8 +76,7 @@ export default class RackTableCell extends RectPath(Component) {
 
   set merged(merged) {
     this.set('merged', !!merged)
-    if (merged)
-      this.set('text', '')
+    if (merged) this.set('text', '')
   }
 
   get merged() {
@@ -88,7 +84,7 @@ export default class RackTableCell extends RectPath(Component) {
   }
 
   set rowspan(rowspan) {
-    this.set('rowspan', rowspan);
+    this.set('rowspan', rowspan)
   }
 
   get rowspan() {
@@ -96,7 +92,7 @@ export default class RackTableCell extends RectPath(Component) {
   }
 
   set colspan(colspan) {
-    this.set('colspan', colspan);
+    this.set('colspan', colspan)
   }
 
   get colspan() {
@@ -104,39 +100,33 @@ export default class RackTableCell extends RectPath(Component) {
   }
 
   get border() {
-    var border = this.model.border || EMPTY_BORDER;
+    var border = this.model.border || EMPTY_BORDER
   }
 
   get isEmpty() {
-    return this.get('isEmpty');
+    return this.get('isEmpty')
   }
 
   _drawBorder(context, x, y, to_x, to_y, style) {
     if (style && style.strokeStyle && style.lineWidth && style.lineDash) {
-      context.beginPath();
+      context.beginPath()
       context.moveTo(x, y)
-      context.lineTo(to_x, to_y);
-      Component.drawStroke(context, style, this);
+      context.lineTo(to_x, to_y)
+      Component.drawStroke(context, style, this)
     }
   }
 
   _draw(context) {
-    var {
-      left,
-      top,
-      width,
-      height
-    } = this.model;
+    var { left, top, width, height } = this.model
 
-    var border = this.model.border || {};
+    var border = this.model.border || {}
 
-    if (!this.model.isEmpty)
-      this._draw_rack_cell(context);
+    if (!this.model.isEmpty) this._draw_rack_cell(context)
 
     // Cell 채우기.
-    context.beginPath();
-    context.lineWidth = 0;
-    context.rect(left, top, width, height);
+    context.beginPath()
+    context.lineWidth = 0
+    context.rect(left, top, width, height)
 
     // Border 그리기
     var parent = this.parent
@@ -144,85 +134,77 @@ export default class RackTableCell extends RectPath(Component) {
     var columns = parent.columns || 1
     var rows = parent.rows || 1
 
-    this._drawBorder(context, left, top, left + width, top, border.top);
-    this._drawBorder(context, left, top + height, left, top, border.left);
+    this._drawBorder(context, left, top, left + width, top, border.top)
+    this._drawBorder(context, left, top + height, left, top, border.left)
     if (isRightMost(idx, rows, columns))
-      this._drawBorder(context, left + width, top, left + width, top + height, border.right);
+      this._drawBorder(context, left + width, top, left + width, top + height, border.right)
     if (isBottomMost(idx, rows, columns))
-      this._drawBorder(context, left + width, top + height, left, top + height, border.bottom);
-
+      this._drawBorder(context, left + width, top + height, left, top + height, border.bottom)
   }
 
   _post_draw(context) {
-    var {
-      left, top, width, height
-    } = this.bounds
+    var { left, top, width, height } = this.bounds
 
-    super._post_draw(context);
+    super._post_draw(context)
 
-    if (this._focused)
-      this._draw_location_info(context)
+    if (this._focused) this._draw_location_info(context)
   }
 
   _draw_rack_cell(context) {
-    var {
-      left, top, width, height
-    } = this.model;
+    var { left, top, width, height } = this.model
 
-    context.save();
-    context.fillStyle = EMPTY_CELL_FILL_STYLE;
-    context.fillRect(left, top, width, height);
+    context.save()
+    context.fillStyle = EMPTY_CELL_FILL_STYLE
+    context.fillRect(left, top, width, height)
 
-    context.beginPath();
+    context.beginPath()
     context.lineWidth = EMPTY_CELL_LINE_WIDTH
     context.strokeStyle = EMPTY_CELL_STROKE_STYLE
 
-    context.moveTo(left, top);
-    context.lineTo(left + width, top + height);
-    context.moveTo(left + width, top);
-    context.lineTo(left, top + height);
+    context.moveTo(left, top)
+    context.lineTo(left + width, top + height)
+    context.moveTo(left + width, top)
+    context.lineTo(left, top + height)
 
-    context.stroke();
-    context.closePath();
-    context.restore();
+    context.stroke()
+    context.closePath()
+    context.restore()
   }
 
   _draw_location_info(context) {
-    var rackTable = this.parent;
-    var {
-      locPattern,
-      zone
-    } = rackTable.model
+    var rackTable = this.parent
+    var { locPattern, zone } = rackTable.model
 
-    locPattern = locPattern.substring(0, locPattern.indexOf('{u}') + 3);
+    locPattern = locPattern.substring(0, locPattern.indexOf('{u}') + 3)
 
     var locationString = ''
     if (this.get('section') && this.get('unit'))
-      locationString = locPattern.replace('{z}', zone).replace('{s}', this.get('section')).replace('{u}', this.get('unit'))
+      locationString = locPattern
+        .replace('{z}', zone)
+        .replace('{s}', this.get('section'))
+        .replace('{u}', this.get('unit'))
 
-    if (!locationString)
-      return
-
+    if (!locationString) return
 
     let { left, top } = this.bounds
 
     left = Math.max(left, 0)
     top = top - 18
 
-    context.font = '12px Arial';
+    context.font = '12px Arial'
     let metrics = context.measureText(locationString)
 
-    context.fillStyle = "#FF0000";
-    context.fillRect(left, top, metrics.width + 6, 16);
+    context.fillStyle = '#FF0000'
+    context.fillRect(left, top, metrics.width + 6, 16)
 
-    context.fillStyle = 'white';
+    context.fillStyle = 'white'
 
-    context.fillText(locationString, left + 3, top + 13);
+    context.fillText(locationString, left + 3, top + 13)
   }
 
   get index() {
-    let rackTable = this.parent;
-    var index = rackTable.components.indexOf(this);
+    let rackTable = this.parent
+    var index = rackTable.components.indexOf(this)
 
     var rowIndex = Math.floor(index / rackTable.columns)
     var columnIndex = index % rackTable.columns
@@ -234,120 +216,113 @@ export default class RackTableCell extends RectPath(Component) {
   }
 
   get rowIndex() {
-    return this.index.row;
+    return this.index.row
   }
 
   get columnIndex() {
-    return this.index.column;
+    return this.index.column
   }
 
   get leftCell() {
-    let rackTable = this.parent;
-    var index = rackTable.components.indexOf(this);
+    let rackTable = this.parent
+    var index = rackTable.components.indexOf(this)
 
-    var rowIndex = this.rowIndex;
-    var columnIndex = this.columnIndex;
+    var rowIndex = this.rowIndex
+    var columnIndex = this.columnIndex
 
-    if (columnIndex === 0)
-      return null
+    if (columnIndex === 0) return null
 
-    var leftCell = rackTable.components[rowIndex * rackTable.columns + columnIndex - 1];
+    var leftCell = rackTable.components[rowIndex * rackTable.columns + columnIndex - 1]
 
     return leftCell
   }
 
   get rightCell() {
-    let rackTable = this.parent;
-    var index = rackTable.components.indexOf(this);
+    let rackTable = this.parent
+    var index = rackTable.components.indexOf(this)
 
-    var rowIndex = this.rowIndex;
-    var columnIndex = this.columnIndex;
+    var rowIndex = this.rowIndex
+    var columnIndex = this.columnIndex
 
-    if (columnIndex === rackTable.columns)
-      return null
+    if (columnIndex === rackTable.columns) return null
 
-    var rightCell = rackTable.components[rowIndex * rackTable.columns + columnIndex + 1];
+    var rightCell = rackTable.components[rowIndex * rackTable.columns + columnIndex + 1]
 
     return rightCell
   }
 
   get aboveCell() {
-    let rackTable = this.parent;
-    var index = rackTable.components.indexOf(this);
+    let rackTable = this.parent
+    var index = rackTable.components.indexOf(this)
 
-    var rowIndex = this.rowIndex;
-    var columnIndex = this.columnIndex;
+    var rowIndex = this.rowIndex
+    var columnIndex = this.columnIndex
 
-    if (rowIndex === 0)
-      return null
+    if (rowIndex === 0) return null
 
-    var aboveCell = rackTable.components[(rowIndex - 1) * rackTable.columns + columnIndex];
+    var aboveCell = rackTable.components[(rowIndex - 1) * rackTable.columns + columnIndex]
 
     return aboveCell
   }
 
   get belowCell() {
-    var rackTable = this.parent;
-    var index = rackTable.components.indexOf(this);
+    var rackTable = this.parent
+    var index = rackTable.components.indexOf(this)
 
-    var rowIndex = this.rowIndex;
-    var columnIndex = this.columnIndex;
+    var rowIndex = this.rowIndex
+    var columnIndex = this.columnIndex
 
-    if (rowIndex === rackTable.rows)
-      return null
+    if (rowIndex === rackTable.rows) return null
 
-    var belowCell = rackTable.components[(rowIndex + 1) * rackTable.columns + columnIndex];
+    var belowCell = rackTable.components[(rowIndex + 1) * rackTable.columns + columnIndex]
 
     return belowCell
   }
 
   get rowCells() {
-    var rackTable = this.parent;
-    return rackTable.getCellsByRow(this.rowIndex);
+    var rackTable = this.parent
+    return rackTable.getCellsByRow(this.rowIndex)
   }
 
   get columnCells() {
-    var rackTable = this.parent;
-    return rackTable.getCellsByColumn(this.columnIndex);
+    var rackTable = this.parent
+    return rackTable.getCellsByColumn(this.columnIndex)
   }
 
   get aboveRowCells() {
     var aboveCell = this.aboveCell
     while (1) {
-      var aboveRowCells = aboveCell.notEmptyRowCells;
+      var aboveRowCells = aboveCell.notEmptyRowCells
 
-      if (aboveRowCells.length > 0)
-        return aboveRowCells
+      if (aboveRowCells.length > 0) return aboveRowCells
 
       aboveCell = aboveCell.aboveCell
     }
   }
 
   get lastUnit() {
-    var rowCells = this.aboveRowCells;
+    var rowCells = this.aboveRowCells
 
     for (let i = rowCells.length - 1; i > 0; i--) {
-      var cell = rowCells[i];
+      var cell = rowCells[i]
 
       var unit = cell.get('unit')
 
-      if (unit)
-        return Number(unit)
+      if (unit) return Number(unit)
     }
 
     return 0
   }
 
   get firstUnit() {
-    var rowCells = this.aboveRowCells;
+    var rowCells = this.aboveRowCells
 
     for (let i = 0; i < rowCells.length; i++) {
-      var cell = rowCells[i];
+      var cell = rowCells[i]
 
       var unit = cell.get('unit')
 
-      if (unit)
-        return Number(unit)
+      if (unit) return Number(unit)
     }
 
     return 0
@@ -370,34 +345,33 @@ export default class RackTableCell extends RectPath(Component) {
   }
 
   onchange(after, before) {
-    if (hasAnyProperty(after, "isEmpty")) {
+    if (hasAnyProperty(after, 'isEmpty')) {
       delete this.model.unit
       delete this.model.section
     }
   }
 
   onmouseenter() {
-    this._focused = true;
+    this._focused = true
     this.invalidate()
   }
 
   onmouseleave() {
-    this._focused = false;
+    this._focused = false
     this.invalidate()
   }
 
   contains(x, y) {
-    var contains = super.contains(x, y);
+    var contains = super.contains(x, y)
     if (!contains) {
-      this._focused = false;
+      this._focused = false
       this.invalidate()
     }
 
     return contains
   }
-
 }
 
-["border"].forEach(getter => Component.memoize(RackTableCell.prototype, getter, false));
+;['border'].forEach(getter => Component.memoize(RackTableCell.prototype, getter, false))
 
-Component.register('rack-table-cell', RackTableCell);
+Component.register('rack-table-cell', RackTableCell)

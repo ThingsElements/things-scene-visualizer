@@ -1,20 +1,17 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
+import Component3d from './component-3d'
 
 import Group3D from './group3d'
-
-import RackTableCell from './rack-table-cell'
 import Rack from './rack'
 
-var {
-  Table,
+import {
   Component,
-  Component3d,
   Container,
   Layout,
   Model
-} = scene;
+} from '@hatiolab/things-scene';
 
 const NATURE = {
   mutable: false,

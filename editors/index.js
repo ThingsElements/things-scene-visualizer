@@ -1,9 +1,10 @@
-import LocationIncreasePatternEditor from './things-editor-location-increase-pattern';
+import LocationIncreasePatternEditor from './things-editor-location-increase-pattern'
 
-export default [{
-  type: 'location-increase-pattern',
-  element: LocationIncreasePatternEditor.is
-}]
+export default [
+  {
+    type: 'location-increase-pattern',
+    element: LocationIncreasePatternEditor.is
+  }
+]
 
-
-import './things-editor-location-increase-pattern';
+import './things-editor-location-increase-pattern'

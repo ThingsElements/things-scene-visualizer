@@ -1,11 +1,12 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-
+import Component3d from './component-3d'
 import Group3D from './group3d'
 
-import RackTableCell from './rack-table-cell'
 import Rack from './rack'
+
+import { Component, Container, Layout, Model } from '@hatiolab/things-scene'
 
 const NATURE = {
   mutable: false,
@@ -151,10 +152,7 @@ function buildBorderStyle(style, where) {
 
 function setCellBorder(cell, style, where) {
   if (!cell) return
-  cell.set(
-    'border',
-    Object.assign({}, cell.get('border') || {}, buildBorderStyle(style, where))
-  )
+  cell.set('border', Object.assign({}, cell.get('border') || {}, buildBorderStyle(style, where)))
 }
 
 function isLeftMost(total, columns, indices, i) {
@@ -162,9 +160,7 @@ function isLeftMost(total, columns, indices, i) {
 }
 
 function isRightMost(total, columns, indices, i) {
-  return (
-    i == total - 1 || i % columns == columns - 1 || indices.indexOf(i + 1) == -1
-  )
+  return i == total - 1 || i % columns == columns - 1 || indices.indexOf(i + 1) == -1
 }
 
 function isTopMost(total, columns, indices, i) {
@@ -205,9 +201,7 @@ var columnControlHandler = {
     var widths = component.widths.slice()
 
     /* 컨트롤의 원래 위치를 구한다. */
-    var origin_pos_unit = widths
-      .slice(0, index + 1)
-      .reduce((sum, width) => sum + width, 0)
+    var origin_pos_unit = widths.slice(0, index + 1).reduce((sum, width) => sum + width, 0)
     var origin_offset = left + (origin_pos_unit / widths_sum) * width
 
     /*
@@ -223,8 +217,7 @@ var columnControlHandler = {
 
     var min_width_unit = (widths_sum / width) * 5 // 5픽셀정도를 최소로
 
-    if (diff_unit < 0)
-      diff_unit = -Math.min(widths[index] - min_width_unit, -diff_unit)
+    if (diff_unit < 0) diff_unit = -Math.min(widths[index] - min_width_unit, -diff_unit)
     else diff_unit = Math.min(widths[index + 1] - min_width_unit, diff_unit)
 
     widths[index] = Math.round((widths[index] + diff_unit) * 100) / 100
@@ -243,9 +236,7 @@ var rowControlHandler = {
 
     /* 컨트롤의 원래 위치를 구한다. */
     index -= component.columns - 1
-    var origin_pos_unit = heights
-      .slice(0, index + 1)
-      .reduce((sum, height) => sum + height, 0)
+    var origin_pos_unit = heights.slice(0, index + 1).reduce((sum, height) => sum + height, 0)
     var origin_offset = top + (origin_pos_unit / heights_sum) * height
 
     /*
@@ -261,13 +252,11 @@ var rowControlHandler = {
 
     var min_height_unit = (heights_sum / height) * 5 // 5픽셀정도를 최소로
 
-    if (diff_unit < 0)
-      diff_unit = -Math.min(heights[index] - min_height_unit, -diff_unit)
+    if (diff_unit < 0) diff_unit = -Math.min(heights[index] - min_height_unit, -diff_unit)
     else diff_unit = Math.min(heights[index + 1] - min_height_unit, diff_unit)
 
     heights[index] = Math.round((heights[index] + diff_unit) * 100) / 100
-    heights[index + 1] =
-      Math.round((heights[index + 1] - diff_unit) * 100) / 100
+    heights[index + 1] = Math.round((heights[index + 1] - diff_unit) * 100) / 100
 
     component.set('heights', heights)
   }
@@ -415,8 +404,7 @@ export class RackTable extends Container {
     var heights = this.get('heights')
 
     if (!widths || widths.length < this.columns) this.set('widths', this.widths)
-    if (!heights || heights.length < this.rows)
-      this.set('heights', this.heights)
+    if (!heights || heights.length < this.rows) this.set('heights', this.heights)
   }
 
   // 컴포넌트를 임의로 추가 및 삭제할 수 있는 지를 지정하는 속성임.
@@ -429,8 +417,7 @@ export class RackTable extends Container {
 
     if (!widths) return array(1, this.columns)
 
-    if (widths.length < this.columns)
-      return widths.concat(array(1, this.columns - widths.length))
+    if (widths.length < this.columns) return widths.concat(array(1, this.columns - widths.length))
     else if (widths.length > this.columns) return widths.slice(0, this.columns)
 
     return widths
@@ -441,8 +428,7 @@ export class RackTable extends Container {
 
     if (!heights) return array(1, this.rows)
 
-    if (heights.length < this.rows)
-      return heights.concat(array(1, this.rows - heights.length))
+    if (heights.length < this.rows) return heights.concat(array(1, this.rows - heights.length))
     else if (heights.length > this.rows) return heights.slice(0, this.rows)
 
     return heights
@@ -512,8 +498,7 @@ export class RackTable extends Container {
         let row = this.getRowColumn(c).row
         for (let i = row; i < row + c.rowspan; i++)
           for (let j = col; j < col + c.colspan; j++)
-            if (i != row || j != col)
-              _cells.push(this.components[i * this.columns + j])
+            if (i != row || j != col) _cells.push(this.components[i * this.columns + j])
       }
     })
     var indices = _cells.map(cell => components.indexOf(cell))
@@ -524,14 +509,10 @@ export class RackTable extends Container {
         case 'all':
           setCellBorder(cell, style, where)
 
-          if (isLeftMost(total, columns, indices, i))
-            setCellBorder(components[before(columns, i)], style, 'right')
-          if (isRightMost(total, columns, indices, i))
-            setCellBorder(components[after(columns, i)], style, 'left')
-          if (isTopMost(total, columns, indices, i))
-            setCellBorder(components[above(columns, i)], style, 'bottom')
-          if (isBottomMost(total, columns, indices, i))
-            setCellBorder(components[below(columns, i)], style, 'top')
+          if (isLeftMost(total, columns, indices, i)) setCellBorder(components[before(columns, i)], style, 'right')
+          if (isRightMost(total, columns, indices, i)) setCellBorder(components[after(columns, i)], style, 'left')
+          if (isTopMost(total, columns, indices, i)) setCellBorder(components[above(columns, i)], style, 'bottom')
+          if (isBottomMost(total, columns, indices, i)) setCellBorder(components[below(columns, i)], style, 'top')
           break
         case 'in':
           if (!isLeftMost(total, columns, indices, i)) {
@@ -610,12 +591,9 @@ export class RackTable extends Container {
 
           if (isLeftMost(total, columns, indices, i))
             setCellBorder(components[before(columns, i)], CLEAR_STYLE, 'right')
-          if (isRightMost(total, columns, indices, i))
-            setCellBorder(components[after(columns, i)], CLEAR_STYLE, 'left')
-          if (isTopMost(total, columns, indices, i))
-            setCellBorder(components[above(columns, i)], CLEAR_STYLE, 'bottom')
-          if (isBottomMost(total, columns, indices, i))
-            setCellBorder(components[below(columns, i)], CLEAR_STYLE, 'top')
+          if (isRightMost(total, columns, indices, i)) setCellBorder(components[after(columns, i)], CLEAR_STYLE, 'left')
+          if (isTopMost(total, columns, indices, i)) setCellBorder(components[above(columns, i)], CLEAR_STYLE, 'bottom')
+          if (isBottomMost(total, columns, indices, i)) setCellBorder(components[below(columns, i)], CLEAR_STYLE, 'top')
       }
     })
   }
@@ -636,8 +614,7 @@ export class RackTable extends Container {
 
   getCellsByColumn(column) {
     var cells = []
-    for (var i = 0; i < this.rows; i++)
-      cells.push(this.components[this.columns * i + column])
+    for (var i = 0; i < this.rows; i++) cells.push(this.components[this.columns * i + column])
 
     return cells
   }
@@ -701,12 +678,7 @@ export class RackTable extends Container {
     let newbieCells = []
     rows.forEach(row => {
       for (let i = 0; i < this.columns; i++)
-        newbieCells.push(
-          buildCopiedCell(
-            this.components[row * this.columns + i].model,
-            this.app
-          )
-        )
+        newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app))
 
       newbieRowHeights.push(this.heights[row])
 
@@ -742,12 +714,7 @@ export class RackTable extends Container {
     let newbieCells = []
     rows.forEach(row => {
       for (let i = 0; i < this.columns; i++)
-        newbieCells.push(
-          buildCopiedCell(
-            this.components[row * this.columns + i].model,
-            this.app
-          )
-        )
+        newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app))
       newbieRowHeights.push(this.heights[row])
 
       newbieCells.reverse().forEach(cell => {
@@ -782,12 +749,7 @@ export class RackTable extends Container {
     let newbieCells = []
     columns.forEach(column => {
       for (let i = 0; i < this.rows; i++)
-        newbieCells.push(
-          buildCopiedCell(
-            this.components[column + this.columns * i].model,
-            this.app
-          )
-        )
+        newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app))
       newbieColumnWidths.push(this.widths[column])
 
       let increasedColumns = this.columns
@@ -799,10 +761,7 @@ export class RackTable extends Container {
         }
 
         index--
-        this.insertComponentAt(
-          cell,
-          insertionColumnPosition + index * increasedColumns
-        )
+        this.insertComponentAt(cell, insertionColumnPosition + index * increasedColumns)
       })
 
       let widths = this.widths.slice()
@@ -832,12 +791,7 @@ export class RackTable extends Container {
     let newbieCells = []
     columns.forEach(column => {
       for (let i = 0; i < this.rows; i++)
-        newbieCells.push(
-          buildCopiedCell(
-            this.components[column + this.columns * i].model,
-            this.app
-          )
-        )
+        newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app))
       newbieColumnWidths.push(this.widths[column])
 
       let increasedColumns = this.columns
@@ -849,10 +803,7 @@ export class RackTable extends Container {
         }
 
         index--
-        this.insertComponentAt(
-          cell,
-          insertionColumnPosition + index * increasedColumns
-        )
+        this.insertComponentAt(cell, insertionColumnPosition + index * increasedColumns)
       })
 
       let widths = this.widths.slice()
@@ -870,8 +821,7 @@ export class RackTable extends Container {
     cells.forEach(cell => {
       let rowcolumn = this.getRowColumn(cell)
 
-      if (-1 == columns.indexOf(rowcolumn.column))
-        columns.push(rowcolumn.column)
+      if (-1 == columns.indexOf(rowcolumn.column)) columns.push(rowcolumn.column)
     })
 
     var sum = columns.reduce((sum, column) => {
@@ -1076,9 +1026,7 @@ export class RackTable extends Container {
 
           var chunkSize = tempRow.length / sectionLength
           for (var idx = 0; idx < sectionLength; idx++) {
-            tempSection.push(
-              tempRow.slice(idx * chunkSize, (idx + 1) * chunkSize)
-            )
+            tempSection.push(tempRow.slice(idx * chunkSize, (idx + 1) * chunkSize))
           }
 
           rearranged.push(tempSection)
@@ -1107,9 +1055,7 @@ export class RackTable extends Container {
 
           var chunkSize = tempRow.length / sectionLength
           for (var idx = 0; idx < sectionLength; idx++) {
-            tempSection.push(
-              tempRow.slice(idx * chunkSize, (idx + 1) * chunkSize)
-            )
+            tempSection.push(tempRow.slice(idx * chunkSize, (idx + 1) * chunkSize))
           }
 
           rearranged.push(tempSection)
@@ -1214,20 +1160,12 @@ export class RackTable extends Container {
 
   get widths_sum() {
     var widths = this.widths
-    return widths
-      ? widths
-          .filter((width, i) => i < this.columns)
-          .reduce((sum, width) => sum + width, 0)
-      : this.columns
+    return widths ? widths.filter((width, i) => i < this.columns).reduce((sum, width) => sum + width, 0) : this.columns
   }
 
   get heights_sum() {
     var heights = this.heights
-    return heights
-      ? heights
-          .filter((height, i) => i < this.rows)
-          .reduce((sum, height) => sum + height, 0)
-      : this.rows
+    return heights ? heights.filter((height, i) => i < this.rows).reduce((sum, height) => sum + height, 0) : this.rows
   }
 
   get nature() {
@@ -1296,15 +1234,9 @@ export class RackTable extends Container {
   }
 }
 
-;[
-  'rows',
-  'columns',
-  'widths',
-  'heights',
-  'widths_sum',
-  'heights_sum',
-  'controls'
-].forEach(getter => Component.memoize(RackTable.prototype, getter, false))
+;['rows', 'columns', 'widths', 'heights', 'widths_sum', 'heights_sum', 'controls'].forEach(getter =>
+  Component.memoize(RackTable.prototype, getter, false)
+)
 
 Component.register('rack-table', RackTable)
 Component3d.register('rack-table', RackTable3d)

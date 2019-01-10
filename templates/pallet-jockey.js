@@ -1,9 +1,9 @@
-import icon from '../assets/pallet-jockey.png';
+import icon from '../assets/pallet-jockey.png'
 
 export default {
   type: 'pallet-jockey',
   description: '3D pallet-jockey',
-  group: 'warehouse', /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */
+  group: 'warehouse' /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */,
   icon,
   model: {
     type: 'pallet-jockey',

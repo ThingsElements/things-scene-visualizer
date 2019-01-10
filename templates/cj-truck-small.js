@@ -1,9 +1,9 @@
-import icon from '../assets/cj-truck-small.png';
+import icon from '../assets/cj-truck-small.png'
 
 export default {
   type: 'cj-truck-small',
   description: '3D cj-truck-small',
-  group: 'warehouse', /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */
+  group: 'warehouse' /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */,
   icon,
   model: {
     type: 'cj-truck-small',

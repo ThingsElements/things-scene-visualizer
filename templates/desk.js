@@ -1,9 +1,9 @@
-import icon from '../assets/desk.png';
+import icon from '../assets/desk.png'
 
 export default {
   type: 'desk',
   description: '3D desk',
-  group: '3D', /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */
+  group: '3D' /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */,
   icon,
   model: {
     type: 'desk',

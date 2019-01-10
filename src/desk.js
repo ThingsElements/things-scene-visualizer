@@ -1,10 +1,10 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-
 import Object3D from './object3d'
+import Component3d from './component-3d'
 
-var { Component, Rect } = scene
+import { Component, Rect } from '@hatiolab/things-scene'
 
 import * as THREE from 'three'
 
@@ -132,4 +132,4 @@ export class Desk2d extends Rect {
 }
 
 Component.register('desk', Desk2d)
-scene.Component3d.register('desk', Desk)
+Component3d.register('desk', Desk)

@@ -1,8 +1,8 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-
 import Object3D from './object3d'
+import Component3d from './component-3d'
 
 import { Component, Rect } from '@hatiolab/things-scene'
 
@@ -70,21 +70,18 @@ export default class Banner extends Object3D {
     let { fillStyle = '#ccaa76' } = this.model
 
     if (fillStyle && fillStyle.type == 'pattern' && fillStyle.image) {
-      var texture = this._visualizer._textureLoader.load(
-        this._visualizer.app.url(fillStyle.image),
-        function() {
-          self._visualizer.render_threed()
-        }
-      )
+      var texture = this._visualizer._textureLoader.load(this._visualizer.app.url(fillStyle.image), () => {
+        texture.minFilter = THREE.LinearFilter
+        texture.repeat.set(1, 1)
+        this._visualizer.render_threed()
+      })
       // texture.wrapS = THREE.RepeatWrapping
       // texture.wrapT = THREE.RepeatWrapping
-      texture.repeat.set(1, 1)
-      texture.minFilter = THREE.LinearFilter
+      // texture.repeat.set(1, 1)
+      // texture.minFilter = THREE.LinearFilter
 
-      boardMaterial = new THREE.MeshBasicMaterial({
-        map: texture,
-        side: THREE.FrontSide
-      })
+      // boardMaterial = new THREE.MeshBasicMaterial({ map: texture, side: THREE.FrontSide });
+      boardMaterial = new THREE.MeshLambertMaterial({ map: texture })
     } else {
       boardMaterial = new THREE.MeshLambertMaterial({
         color: fillStyle || '#ccaa76',
@@ -97,6 +94,8 @@ export default class Banner extends Object3D {
 
     return board
   }
+
+  raycast(raycaster, intersects) {}
 }
 
 export class Banner2d extends Rect {

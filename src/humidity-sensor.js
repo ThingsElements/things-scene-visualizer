@@ -1,8 +1,10 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-
 import Object3D from './object3d'
+import Component3d from './component-3d'
+
+import { Component, Ellipse } from '@hatiolab/things-scene'
 
 import * as THREE from 'three'
 
@@ -57,20 +59,15 @@ export default class HumiditySensor extends Object3D {
     return this._cz
   }
 
-  createObject() {
-    var { depth, rx, ry, rotation = 0, location } = this.model
+  createObject(canvasSize) {
+    var { depth, cx, cy, rx, ry, rotation = 0, location } = this.model
 
     this.type = 'humidity-sensor'
 
     if (location) this.name = location
 
     for (var i = 0; i < 3; i++) {
-      let mesh = this.createSensor(
-        rx * (1 + 0.5 * i),
-        ry * (1 + 0.5 * i),
-        depth * (1 + 0.5 * i),
-        i
-      )
+      let mesh = this.createSensor(rx * (1 + 0.5 * i), ry * (1 + 0.5 * i), depth * (1 + 0.5 * i), i)
       mesh.material.opacity = 0.5 - i * 0.15
     }
 
@@ -116,10 +113,7 @@ export default class HumiditySensor extends Object3D {
       // texture.repeat.set(1,1)
       // // texture.premultiplyAlpha = true
       //  material = new THREE.MeshBasicMaterial( { color : '#cc3300', side: THREE.FrontSide, wireframe: true, wireframeLinewidth : 1} );
-      material = new THREE.MeshLambertMaterial({
-        color: '#cc3300',
-        side: THREE.FrontSide
-      })
+      material = new THREE.MeshLambertMaterial({ color: '#cc3300', side: THREE.FrontSide })
       // material = new THREE.MeshLambertMaterial( { color : '#74e98a', side: THREE.FrontSide} );
     } else {
       material = new THREE.MeshBasicMaterial({
@@ -189,8 +183,7 @@ export default class HumiditySensor extends Object3D {
   }
 
   onmousemove(e, visualizer) {
-    var tooltip =
-      visualizer.tooltip || visualizer._scene2d.getObjectByName('tooltip')
+    var tooltip = visualizer.tooltip || visualizer._scene2d.getObjectByName('tooltip')
 
     if (tooltip) {
       visualizer._scene2d.remove(tooltip)
@@ -205,8 +198,7 @@ export default class HumiditySensor extends Object3D {
     var tooltipText = ''
 
     for (let key in this.parent.userData) {
-      if (this.parent.userData[key])
-        tooltipText += key + ': ' + this.parent.userData[key] + '\n'
+      if (this.parent.userData[key]) tooltipText += key + ': ' + this.parent.userData[key] + '\n'
     }
 
     // tooltipText = 'loc : ' + loc
@@ -242,14 +234,11 @@ export default class HumiditySensor extends Object3D {
       // visualizer._scene3d.add(tooltip)
 
       visualizer._scene2d.add(tooltip)
-      visualizer._renderer &&
-        visualizer._renderer.render(visualizer._scene2d, visualizer._2dCamera)
+      visualizer._renderer && visualizer._renderer.render(visualizer._scene2d, visualizer._2dCamera)
       visualizer.invalidate()
     }
   }
 }
-
-var { Component, Ellipse } = scene
 
 export class Sensor extends Ellipse {
   is3dish() {
@@ -277,4 +266,4 @@ export class Sensor extends Ellipse {
 }
 
 Component.register('humidity-sensor', Sensor)
-scene.Component3d.register('humidity-sensor', HumiditySensor)
+Component3d.register('humidity-sensor', HumiditySensor)

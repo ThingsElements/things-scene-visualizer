@@ -1,6 +1,7 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
+import Component3d from './component-3d'
 
 import Mesh from './mesh'
 
@@ -41,10 +42,7 @@ export default class Wall extends Mesh {
     let { fillStyle = 'gray' } = this.model
 
     this.geometry = new THREE.BoxBufferGeometry(w, d, h)
-    this.material = new THREE.MeshLambertMaterial({
-      color: fillStyle,
-      side: THREE.FrontSide
-    })
+    this.material = new THREE.MeshLambertMaterial({ color: fillStyle, side: THREE.FrontSide })
 
     // this.castShadow = true
   }
@@ -65,4 +63,4 @@ export class Wall2d extends Rect {
 }
 
 Component.register('wall', Wall2d)
-scene.Component3d.register('wall', Wall)
+Component3d.register('wall', Wall)

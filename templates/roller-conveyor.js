@@ -1,9 +1,9 @@
-import icon from '../assets/roller-conveyor.png';
+import icon from '../assets/roller-conveyor.png'
 
 export default {
   type: 'roller-conveyor',
   description: '3D roller-conveyor',
-  group: 'warehouse', /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */
+  group: 'warehouse' /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */,
   icon,
   model: {
     type: 'roller-conveyor',

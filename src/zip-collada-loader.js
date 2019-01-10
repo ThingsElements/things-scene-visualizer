@@ -66,10 +66,7 @@ export default class ZipColladaLoader {
               if (!material.build) continue
 
               setTextureImage(image.build, material, (img, material) => {
-                var map =
-                  material.build.map ||
-                  material.build.specularMap ||
-                  material.build.emissiveMap
+                var map = material.build.map || material.build.specularMap || material.build.emissiveMap
 
                 if (!map) return
 

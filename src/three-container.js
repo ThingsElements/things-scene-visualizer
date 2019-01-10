@@ -8,15 +8,7 @@ import Component3d from './component-3d'
 
 import * as THREE from 'three'
 
-import {
-  Component,
-  Container,
-  Layout,
-  Layer,
-  ScriptLoader,
-  error,
-  FPS
-} from '@hatiolab/things-scene'
+import { Component, Container, Layout, Layer, ScriptLoader, error, FPS } from '@hatiolab/things-scene'
 
 import 'heatmap.js'
 
@@ -144,14 +136,11 @@ export default class ThreeContainer extends Container {
     var floorMaterial
 
     if (fillStyle.type == 'pattern' && fillStyle.image) {
-      var floorTexture = this._textureLoader.load(
-        this.app.url(fillStyle.image),
-        texture => {
-          texture.minFilter = THREE.LinearFilter
-          texture.repeat.set(1, 1)
-          this.render_threed()
-        }
-      )
+      var floorTexture = this._textureLoader.load(this.app.url(fillStyle.image), texture => {
+        texture.minFilter = THREE.LinearFilter
+        texture.repeat.set(1, 1)
+        this.render_threed()
+      })
 
       floorMaterial = new THREE.MeshBasicMaterial({
         map: floorTexture,
@@ -180,9 +169,7 @@ export default class ThreeContainer extends Container {
     components.forEach(component => {
       var clazz = Component3d.register(component.model.type)
       if (!clazz) {
-        console.warn(
-          `Class not found : 3d ${component.model.type} class is not exist`
-        )
+        console.warn(`Class not found : 3d ${component.model.type} class is not exist`)
         return
       }
 
@@ -399,13 +386,7 @@ export default class ThreeContainer extends Container {
     if (hAlign == 'left') tx = textWidth
     else if (hAlign == 'right') tx = 0
 
-    context.drawImage(
-      image,
-      cx - image.width * 0.5,
-      cy - image.height * 0.5,
-      image.width,
-      image.height
-    )
+    context.drawImage(image, cx - image.width * 0.5, cy - image.height * 0.5, image.width, image.height)
 
     // text color
     context.fillStyle = textColor
@@ -422,11 +403,7 @@ export default class ThreeContainer extends Container {
       map: texture
     })
     var sprite = new THREE.Sprite(spriteMaterial)
-    sprite.scale.set(
-      Math.floor(image.width * 0.5),
-      Math.floor(image.height * 0.5),
-      1
-    )
+    sprite.scale.set(Math.floor(image.width * 0.5), Math.floor(image.height * 0.5), 1)
     // sprite.scale.set(canvas.width, canvas.height,1.0);
 
     sprite.raycast = function() {}
@@ -439,25 +416,15 @@ export default class ThreeContainer extends Container {
 
     if (parameters === undefined) parameters = {}
 
-    var fontFace = parameters.hasOwnProperty('fontFace')
-      ? parameters['fontFace']
-      : 'Arial'
+    var fontFace = parameters.hasOwnProperty('fontFace') ? parameters['fontFace'] : 'Arial'
 
-    var fontSize = parameters.hasOwnProperty('fontSize')
-      ? parameters['fontSize']
-      : 32
+    var fontSize = parameters.hasOwnProperty('fontSize') ? parameters['fontSize'] : 32
 
-    var textColor = parameters.hasOwnProperty('textColor')
-      ? parameters['textColor']
-      : 'rgba(255,255,255,1)'
+    var textColor = parameters.hasOwnProperty('textColor') ? parameters['textColor'] : 'rgba(255,255,255,1)'
 
-    var borderWidth = parameters.hasOwnProperty('borderWidth')
-      ? parameters['borderWidth']
-      : 2
+    var borderWidth = parameters.hasOwnProperty('borderWidth') ? parameters['borderWidth'] : 2
 
-    var borderColor = parameters.hasOwnProperty('borderColor')
-      ? parameters['borderColor']
-      : 'rgba(0, 0, 0, 1.0)'
+    var borderColor = parameters.hasOwnProperty('borderColor') ? parameters['borderColor'] : 'rgba(0, 0, 0, 1.0)'
 
     var backgroundColor = parameters.hasOwnProperty('backgroundColor')
       ? // parameters["backgroundColor"] : 'rgba(51, 51, 51, 1.0)';
@@ -466,13 +433,9 @@ export default class ThreeContainer extends Container {
 
     var radius = parameters.hasOwnProperty('radius') ? parameters['radius'] : 30
 
-    var vAlign = parameters.hasOwnProperty('vAlign')
-      ? parameters['vAlign']
-      : 'middle'
+    var vAlign = parameters.hasOwnProperty('vAlign') ? parameters['vAlign'] : 'middle'
 
-    var hAlign = parameters.hasOwnProperty('hAlign')
-      ? parameters['hAlign']
-      : 'center'
+    var hAlign = parameters.hasOwnProperty('hAlign') ? parameters['hAlign'] : 'center'
 
     var canvas = document.createElement('canvas')
     var context = canvas.getContext('2d')
@@ -635,27 +598,12 @@ export default class ThreeContainer extends Container {
     var aspect = width / height
 
     this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
-    this._2dCamera = new THREE.OrthographicCamera(
-      -width / 2,
-      width / 2,
-      height / 2,
-      -height / 2,
-      1,
-      1000
-    )
+    this._2dCamera = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 1, 1000)
 
     this._scene3d.add(this._camera)
     this._scene2d.add(this._2dCamera)
-    this._camera.position.set(
-      height * 0.8,
-      Math.floor(Math.min(width, height)),
-      width * 0.8
-    )
-    this._2dCamera.position.set(
-      height * 0.8,
-      Math.floor(Math.min(width, height)),
-      width * 0.8
-    )
+    this._camera.position.set(height * 0.8, Math.floor(Math.min(width, height)), width * 0.8)
+    this._2dCamera.position.set(height * 0.8, Math.floor(Math.min(width, height)), width * 0.8)
     this._camera.lookAt(this._scene3d.position)
     this._2dCamera.lookAt(this._scene2d.position)
     this._camera.zoom = this.model.zoom * 0.01
@@ -681,10 +629,7 @@ export default class ThreeContainer extends Container {
     this._renderer.autoClear = false
 
     this._renderer.setClearColor(0xffffff, 0) // transparent
-    this._renderer.setSize(
-      Math.min(width, window.innerWidth),
-      Math.min(height, window.innerHeight)
-    )
+    this._renderer.setSize(Math.min(width, window.innerWidth), Math.min(height, window.innerHeight))
     // this._renderer.setSize(1600, 900)
     // this._renderer.shadowMap.enabled = true
 
@@ -694,11 +639,7 @@ export default class ThreeContainer extends Container {
 
     // LIGHT
     var _light = new THREE.HemisphereLight(light, 0x000000, 1)
-    _light.position.set(
-      -this._camera.position.x,
-      this._camera.position.y,
-      -this._camera.position.z
-    )
+    _light.position.set(-this._camera.position.x, this._camera.position.y, -this._camera.position.z)
     this._camera.add(_light)
 
     this._raycaster = new THREE.Raycaster()
@@ -826,17 +767,7 @@ export default class ThreeContainer extends Container {
 
       this.showTooltip(this._selectedPickingLocation)
 
-      ctx.drawImage(
-        this._renderer.domElement,
-        0,
-        0,
-        rendererWidth,
-        rendererHeight,
-        left,
-        top,
-        width,
-        height
-      )
+      ctx.drawImage(this._renderer.domElement, 0, 0, rendererWidth, rendererHeight, left, top, width, height)
 
       if (debug) {
         ctx.font = 100 + 'px Arial'
@@ -868,19 +799,7 @@ export default class ThreeContainer extends Container {
     return NATURE
   }
 
-  roundRect(
-    ctx,
-    x,
-    y,
-    w,
-    h,
-    r,
-    borderWidth,
-    borderColor,
-    fillColor,
-    padding,
-    image
-  ) {
+  roundRect(ctx, x, y, w, h, r, borderWidth, borderColor, fillColor, padding, image) {
     // no point in drawing it if it isn't going to be rendered
     if (fillColor == undefined && borderColor == undefined) return
 
@@ -941,10 +860,7 @@ export default class ThreeContainer extends Container {
     this._raycaster.setFromCamera(vector, this._camera)
 
     // create an array containing all objects in the scene with which the ray intersects
-    var intersects = this._raycaster.intersectObjects(
-      this._scene3d.children,
-      true
-    )
+    var intersects = this._raycaster.intersectObjects(this._scene3d.children, true)
 
     return intersects
   }
@@ -1115,11 +1031,7 @@ export default class ThreeContainer extends Container {
       map: texture
     })
     var sprite = new THREE.Sprite(spriteMaterial)
-    sprite.scale.set(
-      (window.innerWidth / 4) * 3,
-      (window.innerWidth / 8) * 3,
-      1
-    )
+    sprite.scale.set((window.innerWidth / 4) * 3, (window.innerWidth / 8) * 3, 1)
     // sprite.scale.set(canvas.width, canvas.height,1.0);
 
     sprite.raycast = function() {}
@@ -1214,14 +1126,17 @@ export default class ThreeContainer extends Container {
 
   _onDataChanged() {
     /* for picking navigator
+
     if (this._pickingLocations) {
       // set picking locations
       for (let i in this._pickingLocations) {
         let loc = this._pickingLocations[i]
+
         let obj = this._scene3d.getObjectByName(loc, true)
         if (obj) {
           obj.userData = {}
         }
+
         let empObj = this._scene3d.getObjectByName(loc + '-emp', true)
         if (empObj) {
           this._scene3d.remove(empObj)
@@ -1230,12 +1145,14 @@ export default class ThreeContainer extends Container {
         if (navObj) {
           navObj.parent.remove(navObj)
         }
+
         let navTooltipObj = this._scene2d.getObjectByName('navigator-tooltip', true)
         if (navTooltipObj) {
           this._scene2d.remove(navTooltipObj)
         }
       }
     }
+
     if (this._selectedPickingLocation) {
       // set selected picking location
       let obj = this._scene3d.getObjectByName(this._selectedPickingLocation, true)
@@ -1243,8 +1160,10 @@ export default class ThreeContainer extends Container {
         delete obj.userData.selected
       }
     }
+
     this._pickingLocations = []
     this._selectedPickingLocation = null
+
     */
 
     if (this._data) {
@@ -1315,8 +1234,7 @@ export default class ThreeContainer extends Container {
     this._dataChanged = false
 
     // draw navigatePath
-    if (this._pickingLocations && this._pickingLocations.length > 0)
-      this.navigatePath(this._pickingLocations)
+    if (this._pickingLocations && this._pickingLocations.length > 0) this.navigatePath(this._pickingLocations)
 
     this.render_threed()
   }
@@ -1324,11 +1242,7 @@ export default class ThreeContainer extends Container {
   /* Event Handlers */
 
   onchange(after, before) {
-    if (
-      after.hasOwnProperty('width') ||
-      after.hasOwnProperty('height') ||
-      after.hasOwnProperty('threed')
-    )
+    if (after.hasOwnProperty('width') || after.hasOwnProperty('height') || after.hasOwnProperty('threed'))
       this.destroy_scene3d()
 
     if (after.hasOwnProperty('autoRotate')) {
@@ -1381,8 +1295,7 @@ export default class ThreeContainer extends Container {
       var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
 
       this._mouse.x = ((pointer.x - this.model.left) / this.model.width) * 2 - 1
-      this._mouse.y =
-        -((pointer.y - this.model.top) / this.model.height) * 2 + 1
+      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1
 
       var object = this.getObjectByRaycast()
 
@@ -1409,8 +1322,7 @@ export default class ThreeContainer extends Container {
       // this._mouse.originY = this.getContext().canvas.offsetTop + e.offsetY;
 
       this._mouse.x = ((pointer.x - this.model.left) / this.model.width) * 2 - 1
-      this._mouse.y =
-        -((pointer.y - this.model.top) / this.model.height) * 2 + 1
+      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1
 
       var object = this.getObjectByRaycast()
 
@@ -1457,8 +1369,7 @@ export default class ThreeContainer extends Container {
       // this._mouse.originY = this.getContext().canvas.offsetTop + e.offsetY;
 
       this._mouse.x = ((pointer.x - this.model.left) / this.model.width) * 2 - 1
-      this._mouse.y =
-        -((pointer.y - this.model.top) / this.model.height) * 2 + 1
+      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1
 
       this._controls.onDragStart(e)
       e.stopPropagation()

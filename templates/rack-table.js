@@ -1,9 +1,9 @@
-import icon from '../assets/rack-table.png';
+import icon from '../assets/rack-table.png'
 
 export default {
   type: 'rack-table',
   description: '3D rack-table',
-  group: '3D', /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */
+  group: '3D' /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */,
   icon,
   model: {
     type: 'rack-table',

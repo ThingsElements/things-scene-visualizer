@@ -1,7 +1,7 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-var { RectPath, Component } = scene
+import { RectPath, Component } from '@hatiolab/things-scene'
 
 import * as THREE from 'three'
 

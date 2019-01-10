@@ -56,11 +56,8 @@ export default class Person extends Object3D {
     height /= 3.7
     depth /= 3.7
 
-    this.type = 'person'
-    var object = extObject.clone()
-    this.add(object)
     this.scale.set(width, depth, height)
   }
 }
 
-scene.Component3d.register('person', Person)
+Component3d.register('person', Person)

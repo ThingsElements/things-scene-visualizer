@@ -1,26 +1,24 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-var { Component, Rect } = scene
+import Component3d from './component-3d'
+
+import { Component, Rect } from '@hatiolab/things-scene'
 
 import * as THREE from 'three'
 
 export default class Door extends THREE.Mesh {
-
   constructor(model, canvasSize) {
+    super()
 
-    super();
+    this._model = model
 
-    this._model = model;
-
-    this.createObject(model, canvasSize);
-
+    this.createObject(model, canvasSize)
   }
 
   createObject(model, canvasSize) {
-
-    let cx = (model.left + (model.width / 2)) - canvasSize.width / 2
-    let cy = (model.top + (model.height / 2)) - canvasSize.height / 2
+    let cx = model.left + model.width / 2 - canvasSize.width / 2
+    let cy = model.top + model.height / 2 - canvasSize.height / 2
     let cz = 0.5 * model.depth
 
     let rotation = model.rotation
@@ -30,20 +28,15 @@ export default class Door extends THREE.Mesh {
 
     this.position.set(cx, cz, cy)
     this.rotation.y = rotation || 0
-
   }
 
   createDoor(w, h, d) {
+    let { fillStyle = 'saddlebrown' } = this.model
 
-    let {
-      fillStyle = 'saddlebrown'
-    } = this.model
-
-    this.geometry = new THREE.BoxBufferGeometry(w, d, h);
-    this.material = new THREE.MeshLambertMaterial({ color: fillStyle, side: THREE.FrontSide });
+    this.geometry = new THREE.BoxBufferGeometry(w, d, h)
+    this.material = new THREE.MeshLambertMaterial({ color: fillStyle, side: THREE.FrontSide })
 
     // this.castShadow = true
-
   }
 
   get model() {
@@ -58,4 +51,4 @@ export class Door2d extends Rect {
 }
 
 Component.register('door', Door2d)
-scene.Component3d.register('door', Door)
+Component3d.register('door', Door)

@@ -1,9 +1,9 @@
-import icon from '../assets/three-container.png';
+import icon from '../assets/three-container.png'
 
 export default {
   type: 'three container',
   description: '3D container',
-  group: '3D', /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */
+  group: '3D' /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */,
   icon,
   model: {
     type: 'three-container',

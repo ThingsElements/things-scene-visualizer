@@ -1,9 +1,9 @@
-import icon from '../assets/gltf-object.png';
+import icon from '../assets/gltf-object.png'
 
 export default {
   type: 'gltf-object',
   description: '3D gltf-object',
-  group: '3D', /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */
+  group: '3D' /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */,
   icon,
   model: {
     type: 'gltf-object',

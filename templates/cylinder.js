@@ -1,9 +1,9 @@
-import icon from '../assets/cylinder.png';
+import icon from '../assets/cylinder.png'
 
 export default {
   type: 'cylinder',
   description: '3D cylinder',
-  group: '3D', /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */
+  group: '3D' /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */,
   icon,
   model: {
     type: 'cylinder',

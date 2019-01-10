@@ -1,9 +1,9 @@
-import icon from '../assets/banner.png';
+import icon from '../assets/banner.png'
 
 export default {
   type: 'banner',
   description: '3D banner',
-  group: '3D', /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */
+  group: '3D' /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */,
   icon,
   model: {
     type: 'banner',

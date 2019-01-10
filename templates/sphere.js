@@ -1,9 +1,9 @@
-import icon from '../assets/sphere.png';
+import icon from '../assets/sphere.png'
 
 export default {
   type: 'sphere',
   description: '3D sphere',
-  group: '3D', /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */
+  group: '3D' /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */,
   icon,
   model: {
     type: 'sphere',

@@ -10,11 +10,12 @@ import * as THREE from 'three'
 import Stock from './stock'
 
 export default class Rack extends Object3D {
-  constructor(model, canvasSize, visualizer) {
-    super(model, canvasSize, visualizer)
 
-    this._frames = []
-    this._boards = []
+  constructor(model, canvasSize, visualizer) {
+    super(model, canvasSize, visualizer);
+
+    this._frames = [];
+    this._boards = [];
   }
 
   dispose() {
@@ -25,7 +26,10 @@ export default class Rack extends Object3D {
 
   get cz() {
     if (!this._cz) {
-      var { shelves = 1, depth = 1 } = this.model
+      var {
+        shelves = 1,
+        depth = 1
+      } = this.model
 
       this._cz = 0.5 * depth * shelves
     }
@@ -35,14 +39,14 @@ export default class Rack extends Object3D {
 
   static get rackFrameGeometry() {
     if (!Rack._rackFrameGeometry)
-      Rack._rackFrameGeometry = new THREE.BoxBufferGeometry(1, 1, 1)
+      Rack._rackFrameGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
 
     return Rack._rackFrameGeometry
   }
 
   static get boardGeometry() {
     if (!Rack._boardGeometry)
-      Rack._boardGeometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1)
+      Rack._boardGeometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1);
 
     return Rack._boardGeometry
   }
@@ -54,8 +58,8 @@ export default class Rack extends Object3D {
         side: THREE.DoubleSide
       })
 
-    Rack._boardMaterial.polygonOffset = true
-    Rack._boardMaterial.polygonOffsetFactor = -0.1
+    Rack._boardMaterial.polygonOffset = true;
+    Rack._boardMaterial.polygonOffsetFactor = -0.1;
 
     return Rack._boardMaterial
   }
@@ -71,11 +75,11 @@ export default class Rack extends Object3D {
   }
 
   get frames() {
-    return this._frames
+    return this._frames;
   }
 
   get boards() {
-    return this._boards
+    return this._boards;
   }
 
   createObject() {
@@ -88,10 +92,11 @@ export default class Rack extends Object3D {
       hideRackFrame,
       shelves,
       shelfPattern,
-      stockScale = 0.7
-    } = this.model
+      stockScale = 0.7,
+    } = this.model;
 
-    let scale = stockScale
+    let scale = stockScale;
+
     this.type = type
 
     if (!hideRackFrame) {
@@ -102,11 +107,12 @@ export default class Rack extends Object3D {
     }
 
     for (var i = 0; i < shelves; i++) {
+
       let bottom = -depth * shelves * 0.5
       if (i > 0 && !hideRackFrame) {
         let board = this.createRackBoard(width, height)
-        board.position.set(0, bottom + depth * i, 0)
-        board.rotation.x = Math.PI / 2
+        board.position.set(0, bottom + (depth * i), 0)
+        board.rotation.x = Math.PI / 2;
         board.material.opacity = 0.5
         board.material.transparent = true
 
@@ -116,30 +122,26 @@ export default class Rack extends Object3D {
         // this._boards.push(board)
       }
 
-      let stock = new Stock(
-        {
-          width: width * scale,
-          height: height * scale,
-          depth: depth * scale,
-          fillStyle: fillStyle
-        },
-        this._canvasSize,
-        this._visualizer
-      )
+      let stock = new Stock({
+        width: width * scale,
+        height: height * scale,
+        depth: depth * scale,
+        fillStyle: fillStyle
+      }, this._canvasSize, this._visualizer)
 
       let stockDepth = depth * scale
 
-      stock.position.set(0, bottom + depth * i + stockDepth * 0.5, 0)
-      stock.name = this.makeLocationString(
-        this.makeShelfString(shelfPattern, i + 1, shelves)
-      )
+      stock.position.set(0, bottom + (depth * i) + (stockDepth * 0.5), 0)
+      stock.name = this.makeLocationString(this.makeShelfString(shelfPattern, i + 1, shelves))
 
       this.add(stock)
-      this._visualizer.putObject(stock.name, stock)
+      this._visualizer.putObject(stock.name, stock);
     }
+
   }
 
   createRackFrame(w, h, d) {
+
     // this.geometry = this.cube({
     //   width: w,
     //   height : d,
@@ -150,23 +152,23 @@ export default class Rack extends Object3D {
 
     var frames = new THREE.Group()
     for (var i = 0; i < 4; i++) {
-      var geometry = Rack.rackFrameGeometry
-      var material = Rack.frameMaterial
-      var frame = new THREE.Mesh(geometry, material)
-      frame.scale.set(frameWeight, d, frameWeight)
+      var geometry = Rack.rackFrameGeometry;
+      var material = Rack.frameMaterial;
+      var frame = new THREE.Mesh(geometry, material);
+      frame.scale.set(frameWeight, d, frameWeight);
       switch (i) {
         case 0:
           frame.position.set(w / 2, 0, h / 2)
-          break
+          break;
         case 1:
           frame.position.set(w / 2, 0, -h / 2)
-          break
+          break;
         case 2:
           frame.position.set(-w / 2, 0, h / 2)
-          break
+          break;
         case 3:
           frame.position.set(-w / 2, 0, -h / 2)
-          break
+          break;
       }
 
       frames.add(frame)
@@ -178,13 +180,15 @@ export default class Rack extends Object3D {
     //   this.geometry,
     //   Rack.frameMaterial
     // );
+
   }
 
   createRackBoard(w, h) {
-    var boardMaterial = Rack.boardMaterial
-    var boardGeometry = Rack.boardGeometry
+
+    var boardMaterial = Rack.boardMaterial;
+    var boardGeometry = Rack.boardGeometry;
     // var boardGeometry = new THREE.PlaneGeometry(w, h, 1, 1);
-    var board = new THREE.Mesh(boardGeometry, boardMaterial)
+    var board = new THREE.Mesh(boardGeometry, boardMaterial);
 
     board.scale.set(w, h, 1)
 
@@ -193,20 +197,20 @@ export default class Rack extends Object3D {
 
   makeLocationString(shelfString) {
     var {
-      locPattern = '{z}{s}-{u}-{sh}',
-      zone = '',
-      section = '',
-      unit = ''
+      locPattern = "{z}{s}-{u}-{sh}",
+      zone = "",
+      section = "",
+      unit = ""
     } = this._model
 
     var locationString = locPattern
 
-    locationString = locationString.replace(/{z}/i, zone)
-    locationString = locationString.replace(/{s}/i, section)
-    locationString = locationString.replace(/{u}/i, unit)
-    locationString = locationString.replace(/{sh}/i, shelfString)
+    locationString = locationString.replace(/{z}/i, zone);
+    locationString = locationString.replace(/{s}/i, section);
+    locationString = locationString.replace(/{u}/i, unit);
+    locationString = locationString.replace(/{sh}/i, shelfString);
 
-    return locationString
+    return locationString;
   }
 
   makeShelfString(pattern, shelf, length) {
@@ -216,39 +220,42 @@ export default class Rack extends Object3D {
      *  pattern -: 역순
      */
 
-    if (!pattern || !shelf || !length) return
+    if (!pattern || !shelf || !length)
+      return
 
-    var isReverse = /^\-/.test(pattern)
-    pattern = pattern.replace(/#+/, '#')
+    var isReverse = /^\-/.test(pattern);
+    pattern = pattern.replace(/#+/, '#');
 
     var fixedLength = (pattern.match(/0/g) || []).length || 0
     var shelfString = String(isReverse ? length - shelf + 1 : shelf)
 
     if (shelfString.length > fixedLength && fixedLength > 0) {
-      shelfString = shelfString
-        .split('')
-        .shift(shelfString.length - fixedLength)
-        .join('')
+      shelfString = shelfString.split('').shift(shelfString.length - fixedLength).join('')
     } else {
-      var prefix = ''
+      var prefix = '';
       for (var i = 0; i < fixedLength - shelfString.length; i++) {
-        prefix += '0'
+        prefix += '0';
       }
-      shelfString = prefix + shelfString
+      shelfString = prefix + shelfString;
     }
 
     return shelfString
   }
 
-  setOpacity() {}
+  setOpacity() { }
 
-  raycast(raycaster, intersects) {}
+  raycast(raycaster, intersects) {
+
+  }
 
   onchange(after, before) {
-    if (after.hasOwnProperty('data')) {
-      this.data = after.data
+    if (after.hasOwnProperty("data")) {
+      this.data = after.data;
     }
   }
+
 }
 
-scene.Component3d.register('rack', Rack)
+
+Component3d.register('rack', Rack)
+
