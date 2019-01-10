@@ -1,15 +1,15 @@
 import * as THREE from 'three'
 
 if (THREE && THREE.Object3D) {
-  THREE.Object3D.prototype.onUserDataChanged = function () {
-    if (!this.userData)
-      return
+  THREE.Object3D.prototype.onUserDataChanged = function() {
+    if (!this.userData) return
 
     if (this.userData.hasOwnProperty('position')) {
-      if (!this._visualizer)
-        return
+      if (!this._visualizer) return
 
-      this._setPosition(this._visualizer.transcoord2dTo3d(this.userData.position));
+      this._setPosition(
+        this._visualizer.transcoord2dTo3d(this.userData.position)
+      )
     }
 
     if (this.userData.hasOwnProperty('euler')) {
@@ -28,27 +28,31 @@ if (THREE && THREE.Object3D) {
         w: this.userData.quaternion.qw
       })
     }
-  };
+  }
 
   THREE.Object3D.prototype._setPosition = function(location) {
-    var { x, y } = location;
+    var { x, y } = location
 
-    var index = this._visualizer.mixers.indexOf(this._mixer);
+    var index = this._visualizer.mixers.indexOf(this._mixer)
     if (index >= 0) {
-      this._visualizer.mixers.splice(index, 1);
+      this._visualizer.mixers.splice(index, 1)
     }
 
-    this._mixer = new THREE.AnimationMixer(this);
-    this._visualizer.mixers.push(this._mixer);
+    this._mixer = new THREE.AnimationMixer(this)
+    this._visualizer.mixers.push(this._mixer)
 
-    var positionKF = new THREE.VectorKeyframeTrack( '.position', [ 0, 1 ], [ this.position.x, this.position.y, this.position.z, x, this.position.y, y] );
-    var clip = new THREE.AnimationClip('Move', 2, [positionKF]);
+    var positionKF = new THREE.VectorKeyframeTrack(
+      '.position',
+      [0, 1],
+      [this.position.x, this.position.y, this.position.z, x, this.position.y, y]
+    )
+    var clip = new THREE.AnimationClip('Move', 2, [positionKF])
 
     // create a ClipAction and set it to play
-    var clipAction = this._mixer.clipAction(clip);
-    clipAction.clampWhenFinished = true;
-    clipAction.loop = THREE.LoopOnce;
-    clipAction.play();
+    var clipAction = this._mixer.clipAction(clip)
+    clipAction.clampWhenFinished = true
+    clipAction.loop = THREE.LoopOnce
+    clipAction.play()
   }
 
   THREE.Object3D.prototype._setQuaternion = function(quaternion) {
@@ -60,9 +64,9 @@ if (THREE && THREE.Object3D) {
 
     // // console.log(currentRotation)
 
-    var q = new THREE.Quaternion();
+    var q = new THREE.Quaternion()
 
-    q.set(x, y, z, w);
+    q.set(x, y, z, w)
 
     // euler.setFromQuaternion(q, 'ZYX');
 
@@ -78,19 +82,21 @@ if (THREE && THREE.Object3D) {
     // this.setRotationFromEuler(euler);
 
     this.setRotationFromQuaternion(q)
-    this.rotateOnAxis(new THREE.Vector3(1, 0, 0), -Math.PI);
-    this.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI);
-    this.rotateOnAxis(new THREE.Vector3(0, 0, 1), -Math.PI / 2);
+    this.rotateOnAxis(new THREE.Vector3(1, 0, 0), -Math.PI)
+    this.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI)
+    this.rotateOnAxis(new THREE.Vector3(0, 0, 1), -Math.PI / 2)
     // this.rotateOnAxis(new THREE.Vector3(0, 0, 1), -Math.PI);
     // this.updateMatrix()
   }
 
   THREE.Object3D.prototype._setEuler = function(euler) {
     var { yaw, pitch, roll } = euler
-    var e = new THREE.Euler();
+    var e = new THREE.Euler()
 
-    e.set(yaw, pitch, roll, 'ZYX');
+    e.set(yaw, pitch, roll, 'ZYX')
 
-    this.setRotationFromEuler(e);
+    this.setRotationFromEuler(e)
   }
 }
+
+export default THREE

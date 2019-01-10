@@ -11,55 +11,50 @@ import path from 'path'
 const forkLiftPath = path.resolve('../obj/Forklift')
 
 import * as THREE from 'three'
+import ColladaLoader from 'three-dlc/src/loaders/ColladaLoader'
 
 export default class ForkLift extends Object3D {
-
   static get threedObjectLoader() {
     if (!ForkLift._threedObjectLoader) {
       ForkLift._threedObjectLoader = new Promise((resolve, reject) => {
-        let colladaLoader = new THREE.ColladaLoader(THREE.DefaultLoadingManager);
+        let colladaLoader = new ColladaLoader(THREE.DefaultLoadingManager)
 
-        colladaLoader.setPath(`${forkLiftPath}/`);
+        colladaLoader.setPath(`${forkLiftPath}/`)
 
         colladaLoader.load(forkLiftModel, collada => {
-          var scene = collada.scene;
-          var extObj = scene;
+          var scene = collada.scene
+          var extObj = scene
 
-          resolve(extObj);
+          resolve(extObj)
         })
-      });
+      })
     }
 
-    return ForkLift._threedObjectLoader;
+    return ForkLift._threedObjectLoader
   }
 
   createObject() {
-    ForkLift.threedObjectLoader.then(this.addObject.bind(this));
+    ForkLift.threedObjectLoader.then(this.addObject.bind(this))
   }
 
   addObject(extObject) {
-    var {
-      width,
-      height,
-      depth
-    } = this.model
+    var { width, height, depth } = this.model
 
     this.type = 'forklift'
 
-    var object = extObject.clone();
-    object.rotation.z = - Math.PI / 2;
+    var object = extObject.clone()
+    object.rotation.z = -Math.PI / 2
 
-    var boundingBox = new THREE.Box3().setFromObject(object);
-    var center = boundingBox.getCenter(object.position);
-    var size = boundingBox.getSize(new THREE.Vector3());
+    var boundingBox = new THREE.Box3().setFromObject(object)
+    var center = boundingBox.getCenter(object.position)
+    var size = boundingBox.getSize(new THREE.Vector3())
 
-    center.multiplyScalar(- 1);
+    center.multiplyScalar(-1)
 
-    object.updateMatrix();
+    object.updateMatrix()
 
-    this.add(object);
-    this.scale.set(width / size.x, depth / size.y, height / size.z);
+    this.add(object)
+    this.scale.set(width / size.x, depth / size.y, height / size.z)
   }
-
 }
 Component3d.register('forklift', ForkLift)
