@@ -4,81 +4,75 @@
 
 import Object3D from './object3d'
 
-var { Component, ImageView, Component3d } = scene
+import { Component, Rect } from '@hatiolab/things-scene'
+
+import * as THREE from 'three'
 
 const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
-  properties: [{
-    type: 'number',
-    label: 'z-pos',
-    name: 'zPos',
-    property: 'zPos'
-  }, {
-    type: 'number',
-    label: 'depth',
-    name: 'depth',
-    property: 'depth'
-  }, {
-    type: 'number',
-    label: 'rotation',
-    name: 'rotation',
-    property: 'rotation'
-  }, {
-    type: 'color',
-    label: 'box-color',
-    name: 'boxColor',
-    property: 'boxColor'
-  }]
+  properties: [
+    {
+      type: 'number',
+      label: 'z-pos',
+      name: 'zPos',
+      property: 'zPos'
+    },
+    {
+      type: 'number',
+      label: 'depth',
+      name: 'depth',
+      property: 'depth'
+    },
+    {
+      type: 'number',
+      label: 'rotation',
+      name: 'rotation',
+      property: 'rotation'
+    },
+    {
+      type: 'color',
+      label: 'box-color',
+      name: 'boxColor',
+      property: 'boxColor'
+    }
+  ]
 }
 
 export default class Banner extends Object3D {
-
-  createObject(canvasSize) {
-    var {
-      type,
-      width = 1,
-      height = 1,
-      depth = 1
-    } = this.model
+  createObject() {
+    var { width = 1, height = 1, depth = 1 } = this.model
 
     this.add(this.createCube(width, height, depth))
     let textureBoard = this.createTextureBoard(width, depth)
     this.add(textureBoard)
     textureBoard.position.set(0, 0, 0.5 * height)
-
-    this.type = type
-
   }
 
   createCube(w, h, d) {
-
     var { boxColor = '#ccaa76' } = this.model
 
-    var geometry = new THREE.BoxBufferGeometry(w, d, h);
-    var material = new THREE.MeshLambertMaterial({ color: boxColor, side: THREE.FrontSide });
+    var geometry = new THREE.BoxBufferGeometry(w, d, h)
+    var material = new THREE.MeshLambertMaterial({
+      color: boxColor,
+      side: THREE.FrontSide
+    })
 
-    var cube = new THREE.Mesh(geometry, material);
+    var cube = new THREE.Mesh(geometry, material)
 
     return cube
-
   }
 
   createTextureBoard(w, h) {
-
     var boardMaterial
-    var self = this
 
-    let {
-      fillStyle = '#ccaa76'
-    } = this.model
+    let { fillStyle = '#ccaa76' } = this.model
 
     if (fillStyle && fillStyle.type == 'pattern' && fillStyle.image) {
-
       var texture = this._visualizer._textureLoader.load(
         this._visualizer.app.url(fillStyle.image),
-        function () {
+        function() {
           self._visualizer.render_threed()
         }
       )
@@ -87,21 +81,25 @@ export default class Banner extends Object3D {
       texture.repeat.set(1, 1)
       texture.minFilter = THREE.LinearFilter
 
-      boardMaterial = new THREE.MeshBasicMaterial({ map: texture, side: THREE.FrontSide });
-
+      boardMaterial = new THREE.MeshBasicMaterial({
+        map: texture,
+        side: THREE.FrontSide
+      })
     } else {
-      boardMaterial = new THREE.MeshLambertMaterial({ color: fillStyle || '#ccaa76', side: THREE.FrontSide });
+      boardMaterial = new THREE.MeshLambertMaterial({
+        color: fillStyle || '#ccaa76',
+        side: THREE.FrontSide
+      })
     }
 
-    var boardGeometry = new THREE.PlaneBufferGeometry(w, h, 1, 1);
-    var board = new THREE.Mesh(boardGeometry, boardMaterial);
+    var boardGeometry = new THREE.PlaneBufferGeometry(w, h, 1, 1)
+    var board = new THREE.Mesh(boardGeometry, boardMaterial)
 
     return board
   }
-
 }
 
-export class Banner2d extends ImageView {
+export class Banner2d extends Rect {
   is3dish() {
     return true
   }
@@ -109,8 +107,9 @@ export class Banner2d extends ImageView {
   get nature() {
     return NATURE
   }
-}
 
+  get controls() {}
+}
 
 Component.register('banner', Banner2d)
 Component3d.register('banner', Banner)

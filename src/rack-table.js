@@ -7,89 +7,84 @@ import Group3D from './group3d'
 import RackTableCell from './rack-table-cell'
 import Rack from './rack'
 
-
-const LABEL_WIDTH = 25
-const LABEL_HEIGHT = 25
-
-function rgba(r, g, b, a) {
-  return `rgba(${r}, ${g}, ${b}, ${a})`
-}
-
-var {
-  Table,
-  Component,
-  Component3d,
-  Container,
-  Layout,
-  Model
-} = scene;
-
 const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
-  properties: [{
-    type: 'number',
-    label: 'rows',
-    name: 'rows',
-    property: 'rows'
-  }, {
-    type: 'number',
-    label: 'columns',
-    name: 'columns',
-    property: 'columns'
-  }, {
-    type: 'string',
-    label: 'zone',
-    name: 'zone',
-    property: 'zone'
-  }, {
-    type: 'number',
-    label: 'shelves',
-    name: 'shelves',
-    property: 'shelves'
-  }, {
-    type: 'number',
-    label: 'depth',
-    name: 'depth',
-    property: 'depth'
-  }, {
-    type: 'string',
-    label: 'location-pattern',
-    name: 'locPattern',
-    property: {
-      placeholder: '{z}{s}-{u}-{sh}'
+  properties: [
+    {
+      type: 'number',
+      label: 'rows',
+      name: 'rows',
+      property: 'rows'
+    },
+    {
+      type: 'number',
+      label: 'columns',
+      name: 'columns',
+      property: 'columns'
+    },
+    {
+      type: 'string',
+      label: 'zone',
+      name: 'zone',
+      property: 'zone'
+    },
+    {
+      type: 'number',
+      label: 'shelves',
+      name: 'shelves',
+      property: 'shelves'
+    },
+    {
+      type: 'number',
+      label: 'depth',
+      name: 'depth',
+      property: 'depth'
+    },
+    {
+      type: 'string',
+      label: 'location-pattern',
+      name: 'locPattern',
+      property: {
+        placeholder: '{z}{s}-{u}-{sh}'
+      }
+    },
+    {
+      type: 'number',
+      label: 'section-digits',
+      name: 'sectionDigits',
+      property: {
+        placeholder: '1, 2, 3, ...'
+      }
+    },
+    {
+      type: 'number',
+      label: 'unit-digits',
+      name: 'unitDigits',
+      property: {
+        placeholder: '1, 2, 3, ...'
+      }
+    },
+    {
+      type: 'string',
+      label: 'shelf-pattern',
+      name: 'shelfPattern',
+      property: {
+        placeholder: '#, 00, 000'
+      }
+    },
+    {
+      type: 'number',
+      label: 'stock-scale',
+      name: 'stockScale'
+    },
+    {
+      type: 'checkbox',
+      label: 'hide-rack-frame',
+      name: 'hideRackFrame'
     }
-  }, {
-    type: 'number',
-    label: 'section-digits',
-    name: 'sectionDigits',
-    property: {
-      placeholder: '1, 2, 3, ...'
-    }
-  }, {
-    type: 'number',
-    label: 'unit-digits',
-    name: 'unitDigits',
-    property: {
-      placeholder: '1, 2, 3, ...'
-    }
-  }, {
-    type: 'string',
-    label: 'shelf-pattern',
-    name: 'shelfPattern',
-    property: {
-      placeholder: '#, 00, 000'
-    }
-  }, {
-    type: 'number',
-    label: 'stock-scale',
-    name: 'stockScale'
-  }, {
-    type: 'checkbox',
-    label: 'hide-rack-frame',
-    name: 'hideRackFrame'
-  }]
+  ]
 }
 
 const SIDES = {
@@ -119,24 +114,26 @@ const TABLE_LAYOUT = Layout.get('table')
 
 function hasAnyProperty(o, ...properties) {
   for (let p in properties) {
-    if (o.hasOwnProperty(properties[p]))
-      return true
+    if (o.hasOwnProperty(properties[p])) return true
   }
 }
 
 function buildNewCell(app) {
-  return Model.compile({
-    type: 'rack-table-cell',
-    strokeStyle: 'black',
-    fillStyle: 'transparent',
-    left: 0,
-    top: 0,
-    width: 1,
-    height: 1,
-    textWrap: true,
-    isEmpty: false,
-    border: buildBorderStyle(DEFAULT_STYLE, 'all')
-  }, app)
+  return Model.compile(
+    {
+      type: 'rack-table-cell',
+      strokeStyle: 'black',
+      fillStyle: 'transparent',
+      left: 0,
+      top: 0,
+      width: 1,
+      height: 1,
+      textWrap: true,
+      isEmpty: false,
+      border: buildBorderStyle(DEFAULT_STYLE, 'all')
+    },
+    app
+  )
 }
 
 function buildCopiedCell(copy, app) {
@@ -153,60 +150,65 @@ function buildBorderStyle(style, where) {
 }
 
 function setCellBorder(cell, style, where) {
-  if (!cell)
-    return
-  cell.set('border', Object.assign({}, cell.get('border') || {}, buildBorderStyle(style, where)))
+  if (!cell) return
+  cell.set(
+    'border',
+    Object.assign({}, cell.get('border') || {}, buildBorderStyle(style, where))
+  )
 }
 
 function isLeftMost(total, columns, indices, i) {
-  return i == 0 || !(i % columns) || indices.indexOf(i - 1) == -1;
+  return i == 0 || !(i % columns) || indices.indexOf(i - 1) == -1
 }
 
 function isRightMost(total, columns, indices, i) {
-  return i == total - 1 || (i % columns == columns - 1) || indices.indexOf(i + 1) == -1;
+  return (
+    i == total - 1 || i % columns == columns - 1 || indices.indexOf(i + 1) == -1
+  )
 }
 
 function isTopMost(total, columns, indices, i) {
-  return i < columns || indices.indexOf(i - columns) == -1;
+  return i < columns || indices.indexOf(i - columns) == -1
 }
 
 function isBottomMost(total, columns, indices, i) {
-  return i > (total - columns - 1) || indices.indexOf(i + columns) == -1;
+  return i > total - columns - 1 || indices.indexOf(i + columns) == -1
 }
 
 function above(columns, i) {
-  return i - columns;
+  return i - columns
 }
 
 function below(columns, i) {
-  return i + columns;
+  return i + columns
 }
 
 function before(columns, i) {
-  return !(i % columns) ? -1 : i - 1;
+  return !(i % columns) ? -1 : i - 1
 }
 
 function after(columns, i) {
-  return !((i + 1) % columns) ? -1 : i + 1;
+  return !((i + 1) % columns) ? -1 : i + 1
 }
 
 function array(value, size) {
   var arr = []
-  for (let i = 0; i < size; i++)
-    arr.push(1)
+  for (let i = 0; i < size; i++) arr.push(1)
   return arr
 }
 
 var columnControlHandler = {
-  ondragmove: function (point, index, component) {
+  ondragmove: function(point, index, component) {
     var { left, top, width, height } = component.textBounds
     var widths_sum = component.widths_sum
 
     var widths = component.widths.slice()
 
     /* 컨트롤의 원래 위치를 구한다. */
-    var origin_pos_unit = widths.slice(0, index + 1).reduce((sum, width) => sum + width, 0)
-    var origin_offset = left + origin_pos_unit / widths_sum * width
+    var origin_pos_unit = widths
+      .slice(0, index + 1)
+      .reduce((sum, width) => sum + width, 0)
+    var origin_offset = left + (origin_pos_unit / widths_sum) * width
 
     /*
      * point의 좌표는 부모 레이어 기준의 x, y 값이다.
@@ -217,14 +219,13 @@ var columnControlHandler = {
     var transcoorded = component.transcoordP2S(point.x, point.y)
     var diff = transcoorded.x - origin_offset
 
-    var diff_unit = diff / width * widths_sum
+    var diff_unit = (diff / width) * widths_sum
 
     var min_width_unit = (widths_sum / width) * 5 // 5픽셀정도를 최소로
 
     if (diff_unit < 0)
-      diff_unit = - Math.min(widths[index] - min_width_unit, -diff_unit)
-    else
-      diff_unit = Math.min(widths[index + 1] - min_width_unit, diff_unit)
+      diff_unit = -Math.min(widths[index] - min_width_unit, -diff_unit)
+    else diff_unit = Math.min(widths[index + 1] - min_width_unit, diff_unit)
 
     widths[index] = Math.round((widths[index] + diff_unit) * 100) / 100
     widths[index + 1] = Math.round((widths[index + 1] - diff_unit) * 100) / 100
@@ -234,7 +235,7 @@ var columnControlHandler = {
 }
 
 var rowControlHandler = {
-  ondragmove: function (point, index, component) {
+  ondragmove: function(point, index, component) {
     var { left, top, width, height } = component.textBounds
     var heights_sum = component.heights_sum
 
@@ -242,8 +243,10 @@ var rowControlHandler = {
 
     /* 컨트롤의 원래 위치를 구한다. */
     index -= component.columns - 1
-    var origin_pos_unit = heights.slice(0, index + 1).reduce((sum, height) => sum + height, 0)
-    var origin_offset = top + origin_pos_unit / heights_sum * height
+    var origin_pos_unit = heights
+      .slice(0, index + 1)
+      .reduce((sum, height) => sum + height, 0)
+    var origin_offset = top + (origin_pos_unit / heights_sum) * height
 
     /*
      * point의 좌표는 부모 레이어 기준의 x, y 값이다.
@@ -254,51 +257,40 @@ var rowControlHandler = {
     var transcoorded = component.transcoordP2S(point.x, point.y)
     var diff = transcoorded.y - origin_offset
 
-    var diff_unit = diff / height * heights_sum
+    var diff_unit = (diff / height) * heights_sum
 
     var min_height_unit = (heights_sum / height) * 5 // 5픽셀정도를 최소로
 
     if (diff_unit < 0)
-      diff_unit = - Math.min(heights[index] - min_height_unit, -diff_unit)
-    else
-      diff_unit = Math.min(heights[index + 1] - min_height_unit, diff_unit)
+      diff_unit = -Math.min(heights[index] - min_height_unit, -diff_unit)
+    else diff_unit = Math.min(heights[index + 1] - min_height_unit, diff_unit)
 
     heights[index] = Math.round((heights[index] + diff_unit) * 100) / 100
-    heights[index + 1] = Math.round((heights[index + 1] - diff_unit) * 100) / 100
+    heights[index + 1] =
+      Math.round((heights[index + 1] - diff_unit) * 100) / 100
 
     component.set('heights', heights)
   }
 }
 
-const LOCATION_HEADER_SIZE = 50;
-const LOCATION_HEADER_LINE_WIDTH = 1;
-const LOCATION_HEADER_STROKE_STYLE = '#ccc';
-const LOCATION_HEADER_FILL_STYLE = 'rgba(230, 230, 230, 0.5)';
-const LOCATION_HEADER_HIGHLIGHT_STROKE_STYLE = 'rgba(0, 0, 99, 0.9)';
-const LOCATION_HEADER_HIGHLIGHT_FILL_STYLE = 'rgba(0, 0, 255, 0.5)';
-
 export default class RackTable3d extends Group3D {
-
   constructor(model, canvasSize, visualizer, sceneComponent) {
+    super(model)
 
-    super(model);
+    this._visualizer = visualizer
+    this._sceneComponent = sceneComponent
 
-    this._visualizer = visualizer;
-    this._sceneComponent = sceneComponent;
-
-    this.createRacks(canvasSize);
+    this.createRacks(canvasSize)
     // this.mergeObjects()
-
   }
 
   dispose() {
-    super.dispose();
+    super.dispose()
 
     delete this._visualizer
   }
 
   createRacks(canvasSize) {
-
     var {
       components = [],
       left,
@@ -317,17 +309,16 @@ export default class RackTable3d extends Group3D {
       minSection = 1,
       stockScale = 0.7,
       hideRackFrame
-    } = this.model;
+    } = this.model
 
-    let cx = (left + (width / 2)) - canvasSize.width / 2
-    let cy = (top + (height / 2)) - canvasSize.height / 2
-    let cz = 0;
+    let cx = left + width / 2 - canvasSize.width / 2
+    let cy = top + height / 2 - canvasSize.height / 2
+    let cz = 0
 
     this.position.set(cx, cz, cy)
-    this.rotation.y = - rotation
+    this.rotation.y = -rotation
 
     components.forEach(rack => {
-
       var rackModel = {
         left: rack.left,
         top: rack.top,
@@ -346,60 +337,56 @@ export default class RackTable3d extends Group3D {
       }
 
       if (!rackModel.isEmpty) {
-        var rack = new Rack(rackModel, this.model, this._visualizer);
-        this.add(rack);
+        var rack = new Rack(rackModel, this.model, this._visualizer)
+        this.add(rack)
       }
     })
-
   }
 
   mergeObjects() {
-    var frames = [];
-    var boards = [];
+    var frames = []
+    var boards = []
     this.children.forEach(rack => {
-      frames = frames.concat(rack.frames);
-      boards = boards.concat(rack.boards);
+      frames = frames.concat(rack.frames)
+      boards = boards.concat(rack.boards)
     })
 
     var targetFrame
     frames.forEach(frameGroup => {
       frameGroup.children.forEach(f => {
         if (!targetFrame) {
-          targetFrame = f;
-          return;
+          targetFrame = f
+          return
         }
 
-        targetFrame.geometry.merge(f.geometry);
+        targetFrame.geometry.merge(f.geometry)
       })
     })
     var targetBoard
     boards.forEach(b => {
       if (!targetBoard) {
-        targetBoard = b;
-        return;
+        targetBoard = b
+        return
       }
 
-      targetBoard.geometry.merge(b.geometry);
+      targetBoard.geometry.merge(b.geometry)
     })
   }
 
-  raycast(raycaster, intersects) {
+  setOpacity() {}
 
-  }
+  raycast(raycaster, intersects) {}
 
   onchange(after, before) {
-    if (after.hasOwnProperty("data")) {
-      this.data = after.data;
+    if (after.hasOwnProperty('data')) {
+      this.data = after.data
     }
   }
-
 }
 
-
 export class RackTable extends Container {
-
   is3dish() {
-    return true;
+    return true
   }
 
   dispose() {
@@ -414,22 +401,20 @@ export class RackTable extends Container {
     if (gap == 0) {
       return
     } else if (gap > 0) {
-      let removals = this._components.slice(gap);
-      this.remove(removals);
+      let removals = this._components.slice(gap)
+      this.remove(removals)
     } else {
       let newbies = []
 
-      for (let i = 0; i < -gap; i++)
-        newbies.push(buildNewCell(this.app));
+      for (let i = 0; i < -gap; i++) newbies.push(buildNewCell(this.app))
 
-      this.add(newbies);
+      this.add(newbies)
     }
 
     var widths = this.get('widths')
     var heights = this.get('heights')
 
-    if (!widths || widths.length < this.columns)
-      this.set('widths', this.widths)
+    if (!widths || widths.length < this.columns) this.set('widths', this.widths)
     if (!heights || heights.length < this.rows)
       this.set('heights', this.heights)
   }
@@ -442,13 +427,11 @@ export class RackTable extends Container {
   get widths() {
     var widths = this.get('widths')
 
-    if (!widths)
-      return array(1, this.columns)
+    if (!widths) return array(1, this.columns)
 
     if (widths.length < this.columns)
       return widths.concat(array(1, this.columns - widths.length))
-    else if (widths.length > this.columns)
-      return widths.slice(0, this.columns)
+    else if (widths.length > this.columns) return widths.slice(0, this.columns)
 
     return widths
   }
@@ -456,21 +439,19 @@ export class RackTable extends Container {
   get heights() {
     var heights = this.get('heights')
 
-    if (!heights)
-      return array(1, this.rows)
+    if (!heights) return array(1, this.rows)
 
     if (heights.length < this.rows)
       return heights.concat(array(1, this.rows - heights.length))
-    else if (heights.length > this.rows)
-      return heights.slice(0, this.rows)
+    else if (heights.length > this.rows) return heights.slice(0, this.rows)
 
     return heights
   }
 
   buildCells(newrows, newcolumns, oldrows, oldcolumns) {
     if (newrows < oldrows) {
-      let removals = this._components.slice(oldcolumns * newrows);
-      this.remove(removals);
+      let removals = this._components.slice(oldcolumns * newrows)
+      this.remove(removals)
     }
 
     var minrows = Math.min(newrows, oldrows)
@@ -478,7 +459,7 @@ export class RackTable extends Container {
     if (newcolumns > oldcolumns) {
       for (let r = 0; r < minrows; r++) {
         for (let c = oldcolumns; c < newcolumns; c++) {
-          this.insertComponentAt(buildNewCell(this.app), r * newcolumns + c);
+          this.insertComponentAt(buildNewCell(this.app), r * newcolumns + c)
         }
       }
     } else if (newcolumns < oldcolumns) {
@@ -489,7 +470,7 @@ export class RackTable extends Container {
           removals.push(this.components[r * oldcolumns + c])
         }
       }
-      this.remove(removals);
+      this.remove(removals)
     }
 
     if (newrows > oldrows) {
@@ -497,21 +478,20 @@ export class RackTable extends Container {
 
       for (let r = oldrows; r < newrows; r++) {
         for (let i = 0; i < newcolumns; i++) {
-          newbies.push(buildNewCell(this.app));
+          newbies.push(buildNewCell(this.app))
         }
       }
-      this.add(newbies);
+      this.add(newbies)
     }
 
     this.set({
       widths: this.widths,
       heights: this.heights
-    });
-
+    })
   }
 
   get layout() {
-    return TABLE_LAYOUT;
+    return TABLE_LAYOUT
   }
 
   get rows() {
@@ -519,30 +499,30 @@ export class RackTable extends Container {
   }
 
   setCellsStyle(cells, style, where) {
-    var components = this.components;
-    var total = components.length;
-    var columns = this.get('columns');
+    var components = this.components
+    var total = components.length
+    var columns = this.get('columns')
 
     // 병합된 셀도 포함시킨다.
     var _cells = []
     cells.forEach(c => {
-      _cells.push(c);
+      _cells.push(c)
       if (c.colspan || c.rowspan) {
-        let col = this.getRowColumn(c).column;
-        let row = this.getRowColumn(c).row;
+        let col = this.getRowColumn(c).column
+        let row = this.getRowColumn(c).row
         for (let i = row; i < row + c.rowspan; i++)
           for (let j = col; j < col + c.colspan; j++)
             if (i != row || j != col)
-              _cells.push(this.components[i * this.columns + j]);
+              _cells.push(this.components[i * this.columns + j])
       }
     })
-    var indices = _cells.map(cell => components.indexOf(cell));
+    var indices = _cells.map(cell => components.indexOf(cell))
     indices.forEach(i => {
-      var cell = components[i];
+      var cell = components[i]
 
       switch (where) {
         case 'all':
-          setCellBorder(cell, style, where);
+          setCellBorder(cell, style, where)
 
           if (isLeftMost(total, columns, indices, i))
             setCellBorder(components[before(columns, i)], style, 'right')
@@ -552,7 +532,7 @@ export class RackTable extends Container {
             setCellBorder(components[above(columns, i)], style, 'bottom')
           if (isBottomMost(total, columns, indices, i))
             setCellBorder(components[below(columns, i)], style, 'top')
-          break;
+          break
         case 'in':
           if (!isLeftMost(total, columns, indices, i)) {
             setCellBorder(cell, style, 'left')
@@ -566,7 +546,7 @@ export class RackTable extends Container {
           if (!isBottomMost(total, columns, indices, i)) {
             setCellBorder(cell, style, 'bottom')
           }
-          break;
+          break
         case 'out':
           if (isLeftMost(total, columns, indices, i)) {
             setCellBorder(cell, style, 'left')
@@ -584,19 +564,19 @@ export class RackTable extends Container {
             setCellBorder(cell, style, 'bottom')
             setCellBorder(components[below(columns, i)], style, 'top')
           }
-          break;
+          break
         case 'left':
           if (isLeftMost(total, columns, indices, i)) {
             setCellBorder(cell, style, 'left')
             setCellBorder(components[before(columns, i)], style, 'right')
           }
-          break;
+          break
         case 'right':
           if (isRightMost(total, columns, indices, i)) {
             setCellBorder(cell, style, 'right')
             setCellBorder(components[after(columns, i)], style, 'left')
           }
-          break;
+          break
         case 'center':
           if (!isLeftMost(total, columns, indices, i)) {
             setCellBorder(cell, style, 'left')
@@ -604,7 +584,7 @@ export class RackTable extends Container {
           if (!isRightMost(total, columns, indices, i)) {
             setCellBorder(cell, style, 'right')
           }
-          break;
+          break
         case 'middle':
           if (!isTopMost(total, columns, indices, i)) {
             setCellBorder(cell, style, 'top')
@@ -612,19 +592,19 @@ export class RackTable extends Container {
           if (!isBottomMost(total, columns, indices, i)) {
             setCellBorder(cell, style, 'bottom')
           }
-          break;
+          break
         case 'top':
           if (isTopMost(total, columns, indices, i)) {
             setCellBorder(cell, style, 'top')
             setCellBorder(components[above(columns, i)], style, 'bottom')
           }
-          break;
+          break
         case 'bottom':
           if (isBottomMost(total, columns, indices, i)) {
             setCellBorder(cell, style, 'bottom')
             setCellBorder(components[below(columns, i)], style, 'top')
           }
-          break;
+          break
         case 'clear':
           setCellBorder(cell, CLEAR_STYLE, 'all')
 
@@ -664,215 +644,230 @@ export class RackTable extends Container {
 
   deleteRows(cells) {
     // 먼저 cells 위치의 행을 구한다.
-    let rows = [];
-    cells.forEach((cell) => {
-      let row = this.getRowColumn(cell).row;
-      if (-1 == rows.indexOf(row))
-        rows.push(row);
-    });
+    let rows = []
+    cells.forEach(cell => {
+      let row = this.getRowColumn(cell).row
+      if (-1 == rows.indexOf(row)) rows.push(row)
+    })
     rows.sort((a, b) => {
-      return a - b;
-    });
-    rows.reverse();
-    var heights = this.heights.slice();
-    rows.forEach((row) => {
-      this.remove(this.getCellsByRow(row));
-    });
-    heights.splice(rows, 1);
-    this.model.rows -= rows.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
-    this.set('heights', heights);
+      return a - b
+    })
+    rows.reverse()
+    var heights = this.heights.slice()
+    rows.forEach(row => {
+      this.remove(this.getCellsByRow(row))
+    })
+    heights.splice(rows, 1)
+    this.model.rows -= rows.length // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+    this.set('heights', heights)
   }
 
   deleteColumns(cells) {
     // 먼저 cells 위치의 열을 구한다.
-    let columns = [];
-    cells.forEach((cell) => {
-      let column = this.getRowColumn(cell).column;
-      if (-1 == columns.indexOf(column))
-        columns.push(column);
-    });
+    let columns = []
+    cells.forEach(cell => {
+      let column = this.getRowColumn(cell).column
+      if (-1 == columns.indexOf(column)) columns.push(column)
+    })
     columns.sort((a, b) => {
-      return a - b;
-    });
-    columns.reverse();
+      return a - b
+    })
+    columns.reverse()
 
-    columns.forEach((column) => {
-      var widths = this.widths.slice();
-      this.remove(this.getCellsByColumn(column));
-      widths.splice(column, 1);
-      this.model.columns -= 1; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
-      this.set('widths', widths);
-    });
+    columns.forEach(column => {
+      var widths = this.widths.slice()
+      this.remove(this.getCellsByColumn(column))
+      widths.splice(column, 1)
+      this.model.columns -= 1 // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+      this.set('widths', widths)
+    })
   }
 
   insertCellsAbove(cells) {
     // 먼저 cells 위치의 행을 구한다.
-    let rows = [];
-    cells.forEach((cell) => {
-      let row = this.getRowColumn(cell).row;
-      if (-1 == rows.indexOf(row))
-        rows.push(row);
-    });
+    let rows = []
+    cells.forEach(cell => {
+      let row = this.getRowColumn(cell).row
+      if (-1 == rows.indexOf(row)) rows.push(row)
+    })
     rows.sort((a, b) => {
-      return a - b;
-    });
-    rows.reverse();
+      return a - b
+    })
+    rows.reverse()
     // 행 2개 이상은 추가 안함. 임시로 막아놓음
-    if (rows.length >= 2)
-      return false;
-    let insertionRowPosition = rows[0];
-    let newbieRowHeights = [];
-    let newbieCells = [];
-    rows.forEach((row) => {
+    if (rows.length >= 2) return false
+    let insertionRowPosition = rows[0]
+    let newbieRowHeights = []
+    let newbieCells = []
+    rows.forEach(row => {
       for (let i = 0; i < this.columns; i++)
-        newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app));
+        newbieCells.push(
+          buildCopiedCell(
+            this.components[row * this.columns + i].model,
+            this.app
+          )
+        )
 
-      newbieRowHeights.push(this.heights[row]);
+      newbieRowHeights.push(this.heights[row])
 
-      newbieCells.reverse().forEach((cell) => {
-        this.insertComponentAt(cell, insertionRowPosition * this.columns);
-      });
+      newbieCells.reverse().forEach(cell => {
+        this.insertComponentAt(cell, insertionRowPosition * this.columns)
+      })
 
-      let heights = this.heights.slice();
-      heights.splice(insertionRowPosition, 0, ...newbieRowHeights);
-      this.set('heights', heights);
+      let heights = this.heights.slice()
+      heights.splice(insertionRowPosition, 0, ...newbieRowHeights)
+      this.set('heights', heights)
 
-      this.model.rows += rows.length;
+      this.model.rows += rows.length
 
-      this.clearCache();
-
-    });
+      this.clearCache()
+    })
   }
 
   insertCellsBelow(cells) {
     // 먼저 cells 위치의 행을 구한다.
-    let rows = [];
-    cells.forEach((cell) => {
-      let row = this.getRowColumn(cell).row;
-      if (-1 == rows.indexOf(row))
-        rows.push(row);
-    });
+    let rows = []
+    cells.forEach(cell => {
+      let row = this.getRowColumn(cell).row
+      if (-1 == rows.indexOf(row)) rows.push(row)
+    })
     rows.sort((a, b) => {
-      return a - b;
-    });
-    rows.reverse();
+      return a - b
+    })
+    rows.reverse()
     // 행 2개 이상은 추가 안함. 임시로 막아놓음
-    if (rows.length >= 2)
-      return false;
-    let insertionRowPosition = rows[rows.length - 1] + 1;
-    let newbieRowHeights = [];
-    let newbieCells = [];
-    rows.forEach((row) => {
+    if (rows.length >= 2) return false
+    let insertionRowPosition = rows[rows.length - 1] + 1
+    let newbieRowHeights = []
+    let newbieCells = []
+    rows.forEach(row => {
       for (let i = 0; i < this.columns; i++)
-        newbieCells.push(buildCopiedCell(this.components[row * this.columns + i].model, this.app));
-      newbieRowHeights.push(this.heights[row]);
+        newbieCells.push(
+          buildCopiedCell(
+            this.components[row * this.columns + i].model,
+            this.app
+          )
+        )
+      newbieRowHeights.push(this.heights[row])
 
-      newbieCells.reverse().forEach((cell) => {
-        this.insertComponentAt(cell, insertionRowPosition * this.columns);
-      });
+      newbieCells.reverse().forEach(cell => {
+        this.insertComponentAt(cell, insertionRowPosition * this.columns)
+      })
 
-      let heights = this.heights.slice();
-      heights.splice(insertionRowPosition, 0, ...newbieRowHeights);
-      this.set('heights', heights);
+      let heights = this.heights.slice()
+      heights.splice(insertionRowPosition, 0, ...newbieRowHeights)
+      this.set('heights', heights)
 
-      this.model.rows += 1;
+      this.model.rows += 1
 
-      this.clearCache();
-    });
+      this.clearCache()
+    })
   }
 
   insertCellsLeft(cells) {
     // 먼저 cells 위치의 열을 구한다.
-    let columns = [];
-    cells.forEach((cell) => {
-      let column = this.getRowColumn(cell).column;
-      if (-1 == columns.indexOf(column))
-        columns.push(column);
-    });
+    let columns = []
+    cells.forEach(cell => {
+      let column = this.getRowColumn(cell).column
+      if (-1 == columns.indexOf(column)) columns.push(column)
+    })
     columns.sort((a, b) => {
-      return a - b;
-    });
-    columns.reverse();
+      return a - b
+    })
+    columns.reverse()
     // 열 2개 이상은 추가 안함. 임시로 막아놓음
-    if (columns.length >= 2)
-      return false;
-    let insertionColumnPosition = columns[0];
-    let newbieColumnWidths = [];
-    let newbieCells = [];
-    columns.forEach((column) => {
+    if (columns.length >= 2) return false
+    let insertionColumnPosition = columns[0]
+    let newbieColumnWidths = []
+    let newbieCells = []
+    columns.forEach(column => {
       for (let i = 0; i < this.rows; i++)
-        newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app));
-      newbieColumnWidths.push(this.widths[column]);
+        newbieCells.push(
+          buildCopiedCell(
+            this.components[column + this.columns * i].model,
+            this.app
+          )
+        )
+      newbieColumnWidths.push(this.widths[column])
 
-      let increasedColumns = this.columns;
-      let index = this.rows;
-      newbieCells.reverse().forEach((cell) => {
+      let increasedColumns = this.columns
+      let index = this.rows
+      newbieCells.reverse().forEach(cell => {
         if (index == 0) {
-          index = this.rows;
-          increasedColumns++;
+          index = this.rows
+          increasedColumns++
         }
 
-        index--;
-        this.insertComponentAt(cell, insertionColumnPosition + (index * increasedColumns));
-      });
+        index--
+        this.insertComponentAt(
+          cell,
+          insertionColumnPosition + index * increasedColumns
+        )
+      })
 
-      let widths = this.widths.slice();
-      this.model.columns += columns.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+      let widths = this.widths.slice()
+      this.model.columns += columns.length // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
 
-      widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths);
+      widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths)
 
-      this.set('widths', widths);
-    });
+      this.set('widths', widths)
+    })
   }
 
   insertCellsRight(cells) {
     // 먼저 cells 위치의 열을 구한다.
-    let columns = [];
-    cells.forEach((cell) => {
-      let column = this.getRowColumn(cell).column;
-      if (-1 == columns.indexOf(column))
-        columns.push(column);
-    });
+    let columns = []
+    cells.forEach(cell => {
+      let column = this.getRowColumn(cell).column
+      if (-1 == columns.indexOf(column)) columns.push(column)
+    })
     columns.sort((a, b) => {
-      return a - b;
-    });
-    columns.reverse();
+      return a - b
+    })
+    columns.reverse()
     // 열 2개 이상은 추가 안함. 임시로 막아놓음
-    if (columns.length >= 2)
-      return false;
-    let insertionColumnPosition = columns[columns.length - 1] + 1;
-    let newbieColumnWidths = [];
-    let newbieCells = [];
-    columns.forEach((column) => {
+    if (columns.length >= 2) return false
+    let insertionColumnPosition = columns[columns.length - 1] + 1
+    let newbieColumnWidths = []
+    let newbieCells = []
+    columns.forEach(column => {
       for (let i = 0; i < this.rows; i++)
-        newbieCells.push(buildCopiedCell(this.components[column + this.columns * i].model, this.app));
-      newbieColumnWidths.push(this.widths[column]);
+        newbieCells.push(
+          buildCopiedCell(
+            this.components[column + this.columns * i].model,
+            this.app
+          )
+        )
+      newbieColumnWidths.push(this.widths[column])
 
-      let increasedColumns = this.columns;
-      let index = this.rows;
-      newbieCells.reverse().forEach((cell) => {
+      let increasedColumns = this.columns
+      let index = this.rows
+      newbieCells.reverse().forEach(cell => {
         if (index == 0) {
-          index = this.rows;
-          increasedColumns++;
+          index = this.rows
+          increasedColumns++
         }
 
-        index--;
-        this.insertComponentAt(cell, insertionColumnPosition + (index * increasedColumns));
-      });
+        index--
+        this.insertComponentAt(
+          cell,
+          insertionColumnPosition + index * increasedColumns
+        )
+      })
 
-      let widths = this.widths.slice();
-      this.model.columns += columns.length; // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
+      let widths = this.widths.slice()
+      this.model.columns += columns.length // 고의적으로, change 이벤트가 발생하지 않도록 set(..)을 사용하지 않음.
 
-      widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths);
+      widths.splice(insertionColumnPosition, 0, ...newbieColumnWidths)
 
-      this.set('widths', widths);
-    });
+      this.set('widths', widths)
+    })
   }
 
   distributeHorizontal(cells) {
     var columns = []
 
-    cells.forEach((cell) => {
+    cells.forEach(cell => {
       let rowcolumn = this.getRowColumn(cell)
 
       if (-1 == columns.indexOf(rowcolumn.column))
@@ -885,7 +880,7 @@ export class RackTable extends Container {
 
     var newval = Math.round((sum / columns.length) * 100) / 100
     var widths = this.widths.slice()
-    columns.forEach((column) => {
+    columns.forEach(column => {
       widths[column] = newval
     })
 
@@ -895,11 +890,10 @@ export class RackTable extends Container {
   distributeVertical(cells) {
     var rows = []
 
-    cells.forEach((cell) => {
+    cells.forEach(cell => {
       let rowcolumn = this.getRowColumn(cell)
 
-      if (-1 == rows.indexOf(rowcolumn.row))
-        rows.push(rowcolumn.row)
+      if (-1 == rows.indexOf(rowcolumn.row)) rows.push(rowcolumn.row)
     })
 
     var sum = rows.reduce((sum, row) => {
@@ -908,7 +902,7 @@ export class RackTable extends Container {
 
     var newval = Math.round((sum / rows.length) * 100) / 100
     var heights = this.heights.slice()
-    rows.forEach((row) => {
+    rows.forEach(row => {
       heights[row] = newval
     })
 
@@ -924,14 +918,14 @@ export class RackTable extends Container {
      *
      * selected collect rack-cell
      */
-    var selectedCells = this.root.selected;
+    var selectedCells = this.root.selected
 
     /**
      * step 2
      *
      * classify cells by row
      */
-    var classified = this.classifyByRow(selectedCells);
+    var classified = this.classifyByRow(selectedCells)
 
     /**
      * step 3
@@ -945,22 +939,21 @@ export class RackTable extends Container {
      *
      * classify cells by section
      */
-    var sections = this.classifyCellsBySection(classified, aisleRowIndices);
+    var sections = this.classifyCellsBySection(classified, aisleRowIndices)
 
     /**
      * step 5
      *
      * rearrange by aisle
      */
-    var rearranged = this.rearrangeByAisle(type, sections, aisleRowIndices);
+    var rearranged = this.rearrangeByAisle(type, sections, aisleRowIndices)
 
     /**
      * step 6
      *
      * if skip numbering, remove empty cells
      */
-    if (skipNumbering)
-      rearranged = this.removeEmptyCells(rearranged)
+    if (skipNumbering) rearranged = this.removeEmptyCells(rearranged)
 
     /**
      * step 7
@@ -975,37 +968,32 @@ export class RackTable extends Container {
      * set location
      */
     this.setLocations(merged, startSection, startUnit)
-
   }
 
   classifyByRow(cells) {
     var classified = []
     cells.forEach(c => {
-      var index = c.index;
-      var {
-        row, column
-      } = index;
+      var index = c.index
+      var { row, column } = index
 
-      if (!classified[row])
-        classified[row] = []
+      if (!classified[row]) classified[row] = []
 
-      classified[row][column] = c;
+      classified[row][column] = c
     })
 
-    return classified;
+    return classified
   }
 
   findAisle(rows) {
-    if (!rows)
-      return [];
+    if (!rows) return []
 
     return rows.filter(r => {
-      return r[0].isAisle
+      return r[0] && r[0].isAisle
     })
   }
 
   getAisleRowIndices(rows) {
-    var aisles = this.findAisle(rows);
+    var aisles = this.findAisle(rows)
     var aisleRowIndices = []
     aisles.forEach(aisle => {
       aisleRowIndices.push(rows.indexOf(aisle))
@@ -1030,9 +1018,7 @@ export class RackTable extends Container {
       section.push(row)
     })
 
-
-
-    return sections;
+    return sections
   }
 
   rearrangeByAisle(type, sections) {
@@ -1041,117 +1027,114 @@ export class RackTable extends Container {
       case 'cw':
         var reverse = false
         sections.forEach((rows, i) => {
-          var section = [];
+          var section = []
           rearranged.push(section)
           rows.forEach((r, i) => {
-            if (reverse)
-              r.reverse()
+            if (reverse) r.reverse()
 
             if (i % 2 === 0) {
-              section.push(r);
-              reverse = !reverse;
+              section.push(r)
+              reverse = !reverse
             }
           })
-        });
-        break;
+        })
+        break
       case 'ccw':
         var reverse = true
         sections.forEach((rows, i) => {
-          var section = [];
+          var section = []
           rearranged.push(section)
           rows.forEach((r, i) => {
-            if (reverse)
-              r.reverse()
+            if (reverse) r.reverse()
 
             if (i % 2 === 0) {
-              section.push(r);
-              reverse = !reverse;
+              section.push(r)
+              reverse = !reverse
             }
           })
-        });
-        break;
+        })
+        break
       case 'zigzag':
         sections.forEach((rows, i) => {
-          var section = [];
+          var section = []
 
           rows.forEach((r, i) => {
-
             if (i % 2 === 0) {
-              section.push(r);
+              section.push(r)
             }
           })
 
-          var sectionLength = section.length;
-          var tempRow = [];
-          var tempSection = [];
+          var sectionLength = section.length
+          var tempRow = []
+          var tempSection = []
 
           section.forEach((row, rowIdx) => {
             row.forEach((cell, idx) => {
-              tempRow[rowIdx + idx * section.length] = cell;
+              tempRow[rowIdx + idx * section.length] = cell
             })
           })
 
           var chunkSize = tempRow.length / sectionLength
           for (var idx = 0; idx < sectionLength; idx++) {
-            tempSection.push(tempRow.slice(idx * chunkSize, (idx + 1) * chunkSize))
+            tempSection.push(
+              tempRow.slice(idx * chunkSize, (idx + 1) * chunkSize)
+            )
           }
 
-          rearranged.push(tempSection);
-
-        });
-        break;
+          rearranged.push(tempSection)
+        })
+        break
       case 'zigzag-reverse':
         sections.forEach((rows, i) => {
-          var section = [];
+          var section = []
 
           rows.forEach((r, i) => {
-
             if (i % 2 === 0) {
-              r.reverse();
-              section.push(r);
+              r.reverse()
+              section.push(r)
             }
           })
 
-          var sectionLength = section.length;
-          var tempRow = [];
-          var tempSection = [];
+          var sectionLength = section.length
+          var tempRow = []
+          var tempSection = []
 
           section.forEach((row, rowIdx) => {
             row.forEach((cell, idx) => {
-              tempRow[rowIdx + idx * section.length] = cell;
+              tempRow[rowIdx + idx * section.length] = cell
             })
           })
 
           var chunkSize = tempRow.length / sectionLength
           for (var idx = 0; idx < sectionLength; idx++) {
-            tempSection.push(tempRow.slice(idx * chunkSize, (idx + 1) * chunkSize))
+            tempSection.push(
+              tempRow.slice(idx * chunkSize, (idx + 1) * chunkSize)
+            )
           }
 
-          rearranged.push(tempSection);
-
-        });
-        break;
+          rearranged.push(tempSection)
+        })
+        break
     }
 
-    return rearranged;
+    return rearranged
   }
 
   removeEmptyCells(sections) {
-    var newSections = [];
+    var newSections = []
     sections.forEach(rows => {
-      var newRows = [];
-      newSections.push(newRows);
+      var newRows = []
+      newSections.push(newRows)
       rows.forEach(row => {
         var newRow = []
         newRows.push(newRow)
         row.forEach((c, i) => {
-          if (!c.isEmpty)
-            newRow.push(c)
+          if (!c.isEmpty) newRow.push(c)
         })
       })
     })
 
-    return newSections;
+    return newSections
   }
 
   mergeRows(sections) {
@@ -1159,27 +1142,24 @@ export class RackTable extends Container {
     sections.forEach(section => {
       var newSection = []
       section.forEach(rows => {
-        var mergedRow = [];
+        var mergedRow = []
         rows.forEach(row => {
           mergedRow = mergedRow.concat(row)
         })
         newSection = newSection.concat(mergedRow)
       })
-      merged.push(newSection);
+      merged.push(newSection)
     })
-    return merged;
+    return merged
   }
 
   setLocations(sections, startSection, startUnit) {
-    var {
-      sectionDigits = 2,
-      unitDigits = 2
-    } = this.model
+    var { sectionDigits = 2, unitDigits = 2 } = this.model
 
-    var sectionNumber = Number(startSection) || 1;
+    var sectionNumber = Number(startSection) || 1
 
     sections.forEach(section => {
-      var unitNumber = Number(startUnit) || 1;
+      var unitNumber = Number(startUnit) || 1
       section.forEach(c => {
         if (!c.isEmpty) {
           c.set('section', String(sectionNumber).padStart(sectionDigits, 0))
@@ -1188,12 +1168,11 @@ export class RackTable extends Container {
           c.set('section', null)
           c.set('unit', null)
         }
-        unitNumber++;
+        unitNumber++
       })
-      sectionNumber++;
+      sectionNumber++
     })
   }
-
 
   get columns() {
     return this.get('columns')
@@ -1202,19 +1181,19 @@ export class RackTable extends Container {
   get lefts() {
     return this.components.filter((c, i) => {
       return !(i % this.columns)
-    });
+    })
   }
 
   get centers() {
     return this.components.filter((c, i) => {
-      return (i % this.columns) && ((i + 1) % this.columns)
-    });
+      return i % this.columns && (i + 1) % this.columns
+    })
   }
 
   get rights() {
     return this.components.filter((c, i) => {
       return !((i + 1) % this.columns)
-    });
+    })
   }
 
   get tops() {
@@ -1234,13 +1213,21 @@ export class RackTable extends Container {
   }
 
   get widths_sum() {
-    var widths = this.widths;
-    return widths ? widths.filter((width, i) => i < this.columns).reduce((sum, width) => sum + width, 0) : this.columns
+    var widths = this.widths
+    return widths
+      ? widths
+          .filter((width, i) => i < this.columns)
+          .reduce((sum, width) => sum + width, 0)
+      : this.columns
   }
 
   get heights_sum() {
-    var heights = this.heights;
-    return heights ? heights.filter((height, i) => i < this.rows).reduce((sum, height) => sum + height, 0) : this.rows
+    var heights = this.heights
+    return heights
+      ? heights
+          .filter((height, i) => i < this.rows)
+          .reduce((sum, height) => sum + height, 0)
+      : this.rows
   }
 
   get nature() {
@@ -1248,17 +1235,17 @@ export class RackTable extends Container {
   }
 
   get controls() {
-    var widths = this.widths;
-    var heights = this.heights;
-    var inside = this.textBounds;
+    var widths = this.widths
+    var heights = this.heights
+    var inside = this.textBounds
 
-    var width_unit = inside.width / this.widths_sum;
-    var height_unit = inside.height / this.heights_sum;
+    var width_unit = inside.width / this.widths_sum
+    var height_unit = inside.height / this.heights_sum
 
-    var x = inside.left;
-    var y = inside.top;
+    var x = inside.left
+    var y = inside.top
 
-    var controls = [];
+    var controls = []
 
     widths.slice(0, this.columns - 1).forEach(width => {
       x += width * width_unit
@@ -1282,7 +1269,7 @@ export class RackTable extends Container {
   }
 
   onchange(after, before) {
-    if (hasAnyProperty(after, "rows", "columns")) {
+    if (hasAnyProperty(after, 'rows', 'columns')) {
       this.buildCells(
         this.get('rows'),
         this.get('columns'),
@@ -1291,7 +1278,7 @@ export class RackTable extends Container {
       )
     }
 
-    this.invalidate();
+    this.invalidate()
   }
 
   get eventMap() {
@@ -1309,7 +1296,15 @@ export class RackTable extends Container {
   }
 }
 
-["rows", "columns", "widths", "heights", "widths_sum", "heights_sum", "controls"].forEach(getter => Component.memoize(RackTable.prototype, getter, false));
+;[
+  'rows',
+  'columns',
+  'widths',
+  'heights',
+  'widths_sum',
+  'heights_sum',
+  'controls'
+].forEach(getter => Component.memoize(RackTable.prototype, getter, false))
 
-Component.register('rack-table', RackTable);
-Component3d.register('rack-table', RackTable3d);
+Component.register('rack-table', RackTable)
+Component3d.register('rack-table', RackTable3d)

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebVR UI with A-Frame</title>
+    <meta name="description" content="A WebVR User Interface created with A-Frame">
+    <script src="../node_modules/aframe/dist/aframe-master.js"></script>
+    <script src="https://unpkg.com/aframe-animation-component/dist/aframe-animation-component.min.js"></script>
+    <script src="aframe.propagate.js"></script>
+    <script type="text/javascript">
+    AFRAME.registerComponent('main-ui', {
+      schema: {
+        events: {type: 'string', default: ''},
+      },
+      init: function ()
+      {
+          var viewButton = document.querySelector('#center-tile-cta')
+          var mainCamera = document.querySelector('#main-camera')
+          var mainBg = document.querySelector('#main-bg')
+          var tiles = document.querySelectorAll('.tile')
+
+          viewButton.addEventListener('click', function (e) {
+
+            // Tell the camera to start its animation forward
+            mainCamera.emit('viewDetail')
+
+            // Wait till the last millisecond to swap the background
+            // and make it brighter.
+            // Finally hide the tiles.
+            setTimeout(function()
+            {
+                mainBg.setAttribute('material', 'src', '#detail-bg')
+                mainBg.setAttribute('material', 'color', '#fff');
+                mainBg.setAttribute('rotation', { x: 0, y: -90, z: 0 });
+                hideTiles()
+            }, 999)
+
+            function hideTiles ()
+            {
+              for (var i = 0; i< tiles.length; i++) {
+                tiles[i].setAttribute('visible', false)
+              }
+            }
+          })
+      }
+    });
+    </script>
+  </head>
+  <body>
+    <a-scene main-ui>
+      <a-entity id="main-camera" camera look-controls
+                animation="property: position; dir: normal; dur: 1000;
+                       easing: easeInOutQuad; loop: false; from: 0 0 0; to: 0 0 -8;
+                       startEvents: viewDetail;">
+        <a-entity cursor="rayOrigin: mouse;" raycaster="objects: .clickable"></a-entity>
+      </a-entity>
+
+      <a-assets>
+        <img id="start-bg" src="https://cdn.glitch.com/5da0d073-5eaf-4724-9a37-9aeed88ba735%2F3356557402_4bf41d2ca8_b.jpg?1504760654466">
+        <img id="detail-bg" src="https://cdn.glitch.com/5da0d073-5eaf-4724-9a37-9aeed88ba735%2F3952693183_a5ba5a4a59_b.jpg?1504758346763">
+        <img id="left-tile-image" src="https://cdn.glitch.com/5da0d073-5eaf-4724-9a37-9aeed88ba735%2Famy-hanley-97667.jpg?1504739794283">
+        <img id="center-tile-image" src="https://cdn.glitch.com/5da0d073-5eaf-4724-9a37-9aeed88ba735%2Fferdinand-stohr-140923.jpg?1504739794393">
+        <img id="right-tile-image" src="https://cdn.glitch.com/5da0d073-5eaf-4724-9a37-9aeed88ba735%2Fjon-flobrant-155200.jpg?1504739794383">
+        <a-mixin id="overlay-fade-in" animation="property: opacity; dir: normal; dur: 500; easing: easeOutQuad; loop: false; from:0; to: .75; startEvents: clickDown;"></a-mixin>
+      </a-assets>
+      <a-sky color="#ECECEC"></a-sky>
+
+      <a-sphere id="main-bg" radius="100" position="0 0 0" rotation="0 90 0" src="#start-bg" color="#333333" material="side: double;"
+      ></a-sphere>
+
+      <a-image
+        id="left-tile"
+        class="tile"
+        position="-4.5 1 -8"
+        src="#left-tile-image"
+        width="4"
+        height="3"
+        opacity="0"
+        animation="property: opacity; dir: normal; dur: 1500;
+                   easing: easeOutQuad; loop: false; from:0; to: 1; delay: 1000">
+      </a-image>
+
+      <a-plane width="2" height="10" position="-6 0 -7" opacity="0.5" rotation="0 30 0">
+          <a-plane width="1.7" height="1.7" position="0 4 0.1">
+            <a-text value="그룹1"></a-text>
+          </a-plane>
+          <a-plane width="1.7" height="1.7" position="0 2 0.1">
+            <a-text value="그룹2"></a-text>
+          </a-plane>
+          <a-plane width="1.7" height="1.7" position="0 0 0.1">
+            <a-text value="그룹3"></a-text>
+          </a-plane>
+          <a-plane width="1.7" height="1.7" position="0 -2 0.1">
+            <a-text value="그룹4"></a-text>
+          </a-plane>
+          <a-plane width="1.7" height="1.7" position="0 -4 0.1">
+            <a-text value="그룹5"></a-text>
+          </a-plane>
+      </a-plane>
+
+      <a-plane propagate="events:clickDown" id="center-tile" class="clickable" position="0 1 -8" width="4" height="3" opacity="0"
+               animation="property: scale; dir: normal; dur: 750; easing: easeOutElastic; loop: false; from: 1 1 1; to: 1.5 1.5 1.5; startEvents: mouseenter;">
+        <a-image
+          id="center-tile-image-entity"
+          class="tile"
+          position="0 0 0"
+          src="#detail-bg"
+          width="4"
+          height="3"
+          opacity="0"
+          animation="property: opacity; dir: normal; dur: 1500;
+                           easing: easeOutQuad; loop: false; from:0; to: 1; delay: 1250;"></a-image>
+
+        <a-plane id="center-tile-overlay" width="4" height="3" position="0 0 0.01" color="#000" opacity="0"
+                 mixin="overlay-fade-in"></a-plane>
+        <a-text id="center-tile-text" position="0 .25 .02" align="center" line-height="64" opacity="0" value="Kumamoto City\nJapan"
+                mixin="overlay-fade-in"></a-text>
+
+        <a-plane id="center-tile-cta" width="2" height=".5" position="0 -.75 .01" color="#000" opacity="0"
+                 mixin="overlay-fade-in">
+          <a-text id="center-tile-cta-text" position="0 0 .02" align="center" line-height="64" opacity="0" value="View"
+                  mixin="overlay-fade-in"></a-text>
+        </a-plane>
+      </a-plane>
+
+      <a-image
+        id="right-tile"
+        class="tile"
+        position="4.5 1 -8"
+        src="#right-tile-image"
+        width="4"
+        height="3"
+        opacity="0"
+        animation="property: opacity; dir: normal; dur: 1500;
+                   easing: easeOutQuad; loop: false; from:0; to: 1; delay: 1500;"></a-image>
+
+    </a-scene>
+  </body>
+</html>

@@ -61,8 +61,6 @@ function hasAnyProperty(o, ...properties) {
 const EMPTY_CELL_STROKE_STYLE = '#ccc'
 const EMPTY_CELL_LINE_WIDTH = 1
 const EMPTY_CELL_FILL_STYLE = '#efefef'
-const HIGHLIGHT_FILL_STYLE = 'rgba(255, 00, 00, 0.7)'
-const HIGHLIGHT_TEXT_STYLE = '#fff'
 
 /**
  * 1. 스타일을 상속 받아야 함. (cascade-style)

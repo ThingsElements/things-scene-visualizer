@@ -1,66 +1,59 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-
 import Object3D from './object3d'
+import Component3d from './component-3d'
 
-var {
-  Component3d
-} = scene
+const forkLiftModel = 'ForkLift.dae'
+// import forkLiftModel from '../obj/Forklift/ForkLift.dae?3d'
+
+import path from 'path'
+const forkLiftPath = path.resolve('../obj/Forklift')
+
+import * as THREE from 'three'
 
 export default class ForkLift extends Object3D {
-
   static get threedObjectLoader() {
     if (!ForkLift._threedObjectLoader) {
       ForkLift._threedObjectLoader = new Promise((resolve, reject) => {
-        let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
-        let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
+        let colladaLoader = new THREE.ColladaLoader(THREE.DefaultLoadingManager)
 
-        objLoader.setPath('/obj/Fork_lift/')
-        mtlLoader.setPath('/obj/Fork_lift/')
+        colladaLoader.setPath(`${forkLiftPath}/`)
 
-        mtlLoader.load('fork_lift.mtl', (materials) => {
-          materials.preload();
-          objLoader.setMaterials(materials)
-          materials.side = THREE.frontSide
+        colladaLoader.load(forkLiftModel, collada => {
+          var scene = collada.scene
+          var extObj = scene
 
-          objLoader.load('fork_lift.obj', (obj) => {
-            var extObj = obj
-            if (extObj && extObj.children && extObj.children.length > 0) {
-              extObj = extObj.children[0];
-            }
-
-            extObj.geometry.center();
-            resolve(extObj);
-          })
+          resolve(extObj)
         })
-      });
+      })
     }
 
-    return ForkLift._threedObjectLoader;
+    return ForkLift._threedObjectLoader
   }
 
   createObject() {
-    ForkLift.threedObjectLoader.then(this.addObject.bind(this));
+    ForkLift.threedObjectLoader.then(this.addObject.bind(this))
   }
 
   addObject(extObject) {
-    var {
-      width,
-      height,
-      depth,
-      rotation = 0
-    } = this.model
+    var { width, height, depth } = this.model
 
     this.type = 'forklift'
 
-    var object = extObject.clone();
+    var object = extObject.clone()
+    object.rotation.z = -Math.PI / 2
+
+    var boundingBox = new THREE.Box3().setFromObject(object)
+    var center = boundingBox.getCenter(object.position)
+    var size = boundingBox.getSize(new THREE.Vector3())
+
+    center.multiplyScalar(-1)
+
+    object.updateMatrix()
 
     this.add(object)
-
-    this.scale.set(width, depth, height)
+    this.scale.set(width / size.x, depth / size.y, height / size.z)
   }
-
 }
-
 Component3d.register('forklift', ForkLift)

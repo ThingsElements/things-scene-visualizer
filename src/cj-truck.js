@@ -3,138 +3,76 @@
  */
 
 import Object3D from './object3d'
-import ThreeControls from './three-controls';
-import ZipLoader from './zip-loader';
+import Component3d from './component-3d'
 
-var {
-  RectPath,
-  Shape,
-  Component,
-  Component3d
-} = scene
+import symbol from '../assets/canvasicon-cj-truck.png'
+const TRUCK_MODEL = 'Vehicle_Big.dae'
+// import truckModel from '../obj/CJ_Truck/Vehicle_Big.dae?3d'
+
+import path from 'path'
+const TRUCK_PATH = path.resolve('../obj/CJ_Truck')
+
+import * as THREE from 'three'
+
+import { RectPath, Shape, Component } from '@hatiolab/things-scene'
 
 const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
-  properties: [{
-    type: 'number',
-    label: 'depth',
-    name: 'depth',
-    property: 'depth'
-  }]
+  properties: [
+    {
+      type: 'number',
+      label: 'depth',
+      name: 'depth',
+      property: 'depth'
+    }
+  ]
 }
-
-// function init() {
-//   if (initDone)
-//     return
-
-//   initDone = true
-
-//   // let zipLoader = new ZipLoader();
-
-//   // zipLoader.load('/obj/untitled/untitle.zip', function(obj) {
-//   //   extObj = obj;
-//   // })
-
-//   let tdsLoader = new THREE.TDSLoader(THREE.DefaultLoadingManager);
-
-//   tdsLoader.setPath( '/obj/CJ_Truck/' );
-//   tdsLoader.load( '/obj/CJ_Truck/Commercial_Truck_Transfer.3ds', function ( object ) {
-//     extObj = object;
-//   });
-//   // let colladaLoader = new THREE.ColladaLoader(THREE.DefaultLoadingManager);
-
-//   // colladaLoader.load('/obj/CJ_Truck/Commercial_Truck_Transfer.dae', function (collada) {
-//   //   extObj = collada.scene;
-//   //   // if (extObj && extObj.children && extObj.children.length > 0) {
-//   //   //   extObj = extObj.children[0];
-//   //   // }
-
-//   //   // extObj.geometry.center();
-//   // })
-// //   let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
-// //   let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
-
-// //   mtlLoader.setPath('/obj/CJ_Truck/');
-// //   objLoader.setPath('/obj/CJ_Truck/');
-
-// //   mtlLoader.load('CJ_Truck.mtl', function (materials) {
-// //     materials.preload();
-// //     objLoader.setMaterials(materials)
-// //     if(materials && materials.length > 0) {
-// //       materials.forEach(m => {
-// //         m.side = THREE.DoubleSide;
-// //         m.transparent = true;
-// //       })
-// //     }
-
-
-// //     objLoader.load('CJ_Truck.obj', function (obj) {
-// //       extObj = obj
-// //       // if (extObj && extObj.children && extObj.children.length > 0) {
-// //       //   extObj = extObj.children[0];
-// //       // }
-
-// //       // extObj.geometry.center();
-// //     })
-// //   })
-// }
 
 export default class CJTruck extends Object3D {
   static get threedObjectLoader() {
     if (!CJTruck._threedObjectLoader) {
       CJTruck._threedObjectLoader = new Promise((resolve, reject) => {
-        let colladaLoader = new THREE.ColladaLoader(THREE.DefaultLoadingManager);
-          colladaLoader.load('obj/CJ_Truck/Commercial_Truck_Transfer.dae', (collada) => {
-            var extObj = collada.scene;
+        let colladaLoader = new THREE.ColladaLoader(THREE.DefaultLoadingManager)
 
-            // if (extObj && extObj.children && extObj.children.length > 0) {
-            //   extObj = extObj.children[0];
-            // }
+        colladaLoader.setPath(`${TRUCK_PATH}/`)
 
-            // extObj.geometry.center();
+        colladaLoader.load(TRUCK_MODEL, collada => {
+          var scene = collada.scene
+          var extObj = scene
 
-            // var extObj = obj
-            // if (extObj && extObj.children && extObj.children.length > 0) {
-            //   extObj = extObj.children[0];
-            // }
-
-            // extObj.geometry.center();
-            resolve(extObj);
+          resolve(extObj)
         })
-      });
+      })
     }
 
-    return CJTruck._threedObjectLoader;
+    return CJTruck._threedObjectLoader
   }
 
   createObject() {
-    CJTruck.threedObjectLoader.then(this.addObject.bind(this));
+    CJTruck.threedObjectLoader.then(this.addObject.bind(this))
   }
 
   addObject(extObject) {
-    var {
-      width,
-      height,
-      depth,
-      rotation = 0
-    } = this.model
+    var { width, height, depth } = this.model
 
-    this.type = 'cj-truck';
+    this.type = 'cj-truck'
 
-    this.scale.set(width, depth, height)
+    var object = extObject.clone()
+    object.rotation.z = -Math.PI / 2
 
-    width /= 63.173
-    height /= 72.1887
-    depth /= 9.0388
+    var boundingBox = new THREE.Box3().setFromObject(object)
+    var center = boundingBox.getCenter(object.position)
+    var size = boundingBox.getSize(new THREE.Vector3())
 
-    var object = extObject.clone();
+    center.multiplyScalar(-1)
+
+    object.updateMatrix()
+
     this.add(object)
-
-    this.scale.set(width, depth, height)
+    this.scale.set(width / size.x, depth / size.y, height / size.z)
   }
-
 }
 
 export class CJTruck2D extends RectPath(Shape) {
@@ -142,7 +80,23 @@ export class CJTruck2D extends RectPath(Shape) {
     return true
   }
 
-  get controls() { }
+  static get image() {
+    if (!CJTruck2D._image) {
+      CJTruck2D._image = new Image()
+      CJTruck2D._image.src = symbol
+    }
+
+    return CJTruck2D._image
+  }
+
+  get controls() {}
+
+  render(context) {
+    var { left, top, width, height } = this.bounds
+
+    context.beginPath()
+    context.drawImage(CJTruck2D.image, left, top, width, height)
+  }
 
   get nature() {
     return NATURE

@@ -7,40 +7,58 @@ const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
-  properties: [{
-    type: 'number',
-    label: 'depth',
-    name: 'rz',
-    property: 'rz'
-  }]
+  properties: []
 }
 
-export default class Cylinder extends THREE.Mesh {
+import * as THREE from 'three'
+import Mesh from './mesh'
 
-  constructor(model, canvasSize) {
+export default class Cylinder extends Mesh {
 
-    super();
+  get cx() {
+    if (!this._cx) {
+      var {
+        cx = 0
+      } = this.model
+      var canvasSize = this._canvasSize;
 
-    this._model = model;
-
-    this.createObject(model, canvasSize);
-
+      this._cx = cx - canvasSize.width / 2
+    }
+    return this._cx
   }
 
-  createObject(model, canvasSize) {
+  get cy() {
+    if (!this._cy) {
+      var {
+        cy = 0
+      } = this.model
+      var canvasSize = this._canvasSize;
 
-    let cx = (model.cx) - canvasSize.width / 2
-    let cy = (model.cy) - canvasSize.height / 2
-    let cz = this.model.rz / 2
+      this._cy = cy - canvasSize.height / 2
+    }
+    return this._cy
+  }
 
-    let rotation = model.rotation
-    this.type = model.type
+  get cz() {
+    if (!this._cz) {
+      var {
+        zPos = 0,
+        depth = 0
+      } = this.model
 
-    this.createCylinder(this.model.rx, this.model.rz)
+      this._cz = zPos + depth / 2
+    }
 
-    this.position.set(cx, cz, cy) // z좌표는 땅에 붙어있게 함
-    this.rotation.y = rotation || 0
+    return this._cz
+  }
 
+  createObject() {
+    var {
+      depth = 0,
+      rx = 0
+    } = this.model
+
+    this.createCylinder(rx, depth)
   }
 
   createCylinder(rx, rz) {

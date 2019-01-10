@@ -1,80 +1,70 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-var {
-  Component,
-  Ellipse
-} = scene
+var { Component, Ellipse } = scene
+
+import * as THREE from 'three'
+import Mesh from './mesh'
 
 const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
-  properties: [{
-    type: 'number',
-    label: 'depth',
-    name: 'rz',
-    property: 'rz'
-  }]
+  properties: []
 }
 
+export default class Sphere extends Mesh {
+  get cx() {
+    if (!this._cx) {
+      var { cx = 0 } = this.model
+      var canvasSize = this._canvasSize
 
-export default class Sphere extends THREE.Mesh {
-
-  constructor(model, canvasSize, visualizer) {
-
-    super();
-
-    this._model = model;
-    this._visualizer = visualizer;
-
-    this.createObject(model, canvasSize);
-
+      this._cx = cx - canvasSize.width / 2
+    }
+    return this._cx
   }
 
-  createObject(model, canvasSize) {
+  get cy() {
+    if (!this._cy) {
+      var { cy = 0 } = this.model
+      var canvasSize = this._canvasSize
 
-    var {
-      cx = 0,
-      cy = 0,
-      zPos = 0,
-      rx = 0
-    } = this.model
+      this._cy = cy - canvasSize.height / 2
+    }
+    return this._cy
+  }
 
-    cx -= canvasSize.width / 2
-    cy -= canvasSize.height / 2
-    let cz = zPos + rx
+  get cz() {
+    if (!this._cz) {
+      var { zPos = 0, rx = 0 } = this.model
 
-    let rotation = model.rotation
-    this.type = model.type
+      this._cz = zPos + rx
+    }
+
+    return this._cz
+  }
+
+  createObject() {
+    var { rx = 0 } = this.model
 
     this.createSphere(rx)
-
-    this.position.set(cx, cz, cy) // z좌표는 땅에 붙어있게 함
-    this.rotation.y = - rotation || 0
-
   }
 
   createSphere(rx) {
+    let { fillStyle = 'lightgray' } = this.model
 
-    let {
-      fillStyle = 'lightgray'
-    } = this.model
-
-    this.geometry = new THREE.SphereBufferGeometry(rx, 20, 20);
+    this.geometry = new THREE.SphereBufferGeometry(rx, 20, 20)
     this.material = new THREE.MeshLambertMaterial({
       color: fillStyle,
       side: THREE.FrontSide
-    });
+    })
 
     // this.castShadow = true
-
   }
 
   get model() {
     return this._model
   }
-
 }
 
 export class Sphere2d extends Ellipse {
@@ -82,14 +72,12 @@ export class Sphere2d extends Ellipse {
     return true
   }
 
-  get controls() { }
+  get controls() {}
 
   get nature() {
     return NATURE
   }
 }
 
-
 Component.register('sphere', Sphere2d)
 scene.Component3d.register('sphere', Sphere)
-

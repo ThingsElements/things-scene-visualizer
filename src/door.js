@@ -3,6 +3,8 @@
  */
 var { Component, Rect } = scene
 
+import * as THREE from 'three'
+
 export default class Door extends THREE.Mesh {
 
   constructor(model, canvasSize) {

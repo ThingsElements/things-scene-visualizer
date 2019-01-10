@@ -1,4 +1,5 @@
 /* from https://bl.ocks.org/sfpgmr/61fe805bb2a72bda86eff955838fda94 */
+import * as THREE from 'three'
 
 export default class BoundUVGenerator {
 

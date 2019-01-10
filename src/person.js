@@ -1,37 +1,38 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-
 import Object3D from './object3d'
+import Component3d from './component-3d'
 
-export default class Person extends Object3D {
+import path from 'path'
+const personPath = path.resolve('../obj/Casual_Man_02')
 
-  static get threedObjectLoader() {
-    if (!Person._threedObjectLoader) {
-      Person._threedObjectLoader = new Promise((resolve, reject) => {
-        let tgaLoader = new THREE.TGALoader();
-
-        THREE.Loader.Handlers.add(/\.tga$/i, tgaLoader);
+import * as THREE from 'three'
 
         let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
         let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
 
-        objLoader.setPath('/obj/Casual_Man_02/')
-        mtlLoader.setPath('/obj/Casual_Man_02/')
+  static get threedObjectLoader() {
+    if (!Person._threedObjectLoader) {
+      Person._threedObjectLoader = new Promise((resolve, reject) => {
+        let objLoader = new THREE.OBJLoader(THREE.DefaultLoadingManager);
+        let mtlLoader = new THREE.MTLLoader(THREE.DefaultLoadingManager);
 
-        mtlLoader.load('Casual_Man.mtl', (materials) => {
+        objLoader.setPath(`${personPath}/`)
+        mtlLoader.setPath(`${personPath}/`)
+
+        mtlLoader.load('Casual_Man.mtl', materials => {
           materials.preload();
           objLoader.setMaterials(materials)
-          materials.side = THREE.frontSide
 
-          objLoader.load('Casual_Man.obj', (obj) => {
+          objLoader.load('Casual_Man.obj', obj => {
             var extObj = obj
             if (extObj && extObj.children && extObj.children.length > 0) {
               extObj = extObj.children[0];
             }
 
             extObj.geometry.center();
-            resolve(extObj);
+            resolve(obj)
           })
         })
       });
@@ -48,9 +49,12 @@ export default class Person extends Object3D {
     var {
       width,
       height,
-      depth,
-      rotation = 0
+      depth
     } = this.model
+
+    this.type = 'person'
+    let object = extObject.clone();
+    this.add(object);
 
     width /= 3.7
     height /= 3.7

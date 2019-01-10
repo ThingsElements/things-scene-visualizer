@@ -6,6 +6,8 @@ var {
   Ellipse
 } = scene
 
+import * as THREE from 'three'
+
 const NATURE = {
   mutable: false,
   resizable: true,

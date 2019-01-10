@@ -1,41 +1,81 @@
-const path = require('path');
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
+const path = require('path')
+
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 module.exports = {
+  mode: 'production',
   entry: {
-    "things-scene-visualizer": "./src/index.js",
-    "things-scene-visualizer-min": "./src/index.js"
+    'things-scene-visualizer': ['./src/index.js']
   },
   output: {
-    filename: "[name].js",
-    path: path.resolve(__dirname, '.')
+    path: path.resolve('./dist'),
+    filename: '[name].js'
   },
   resolve: {
-    modules: [
-      path.resolve(__dirname, 'node_modules'),
-      path.resolve(__dirname, 'bower_components')
-    ]
+    modules: ['./node_modules']
+  },
+  resolveLoader: {
+    modules: ['./node_modules']
+  },
+  externals: {
+    '@hatiolab/things-scene': 'scene'
+  },
+  optimization: {
+    minimize: true
   },
   module: {
-    rules: [{
-      test: /\.js$/,
-      exclude: [],
-      use: [{
-        loader: 'babel-loader',
-        options: {
-          presets: ["env"]
-        }
-      }]
-    }]
-  },
-  devServer: {
-    contentBase: path.join(__dirname, '.'),
-    compress: true,
-    port: 9000
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /(node_modules)/,
+        loader: 'babel-loader'
+      },
+      {
+        test: /\.json$/,
+        type: 'javascript/auto',
+        resourceQuery: /3d/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[path][name].[ext]',
+              emitFile: false
+            }
+          }
+        ]
+      },
+      {
+        test: /\.(gif|jpe?g|png)$/,
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              limit: 10240,
+              name: '[path][name].[hash:8].[ext]'
+            }
+          }
+        ]
+      },
+      {
+        test: /obj[\w\/]+\.\w+$/,
+        exclude: /\.json$/,
+        resourceQuery: /3d/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[path][name].[ext]',
+              emitFile: false
+            }
+          }
+        ]
+      }
+    ]
   },
   plugins: [
-    new UglifyJSPlugin({
+    new UglifyJsPlugin({
       test: /\-min\.js$/
     })
-  ]
-};
+  ],
+  devtool: 'cheap-module-source-map'
+}

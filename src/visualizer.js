@@ -4,130 +4,153 @@
 import ThreeLayout from './three-layout'
 import ThreeControls from './three-controls'
 
-THREE.Cache.enabled = true
+import * as THREE from 'three'
 
-var {
-  Component,
-  Container,
-  Layout,
-  Layer
-} = scene
+import Component3d from './component-3d'
+
+var { Component, Container, Layout, Layer } = scene
+
+import 'imports-loader?THREE=three!three/examples/js/loaders/OBJLoader.js'
+import 'imports-loader?THREE=three!three/examples/js/loaders/MTLLoader.js'
+import 'imports-loader?THREE=three!three/examples/js/loaders/TGALoader.js'
+import 'imports-loader?THREE=three!three/examples/js/loaders/ColladaLoader.js'
+import 'imports-loader?THREE=three!three/examples/js/loaders/TDSLoader.js'
+import 'imports-loader?THREE=three!three/examples/js/loaders/GLTFLoader.js'
 
 const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
-  properties: [{
-    type: 'number',
-    label: 'fov',
-    name: 'fov',
-    property: 'fov'
-  }, {
-    type: 'number',
-    label: 'near',
-    name: 'near',
-    property: 'near'
-  }, {
-    type: 'number',
-    label: 'far',
-    name: 'far',
-    property: 'far'
-  }, {
-    type: 'number',
-    label: 'zoom',
-    name: 'zoom',
-    property: 'zoom'
-  }, {
-    type: 'select',
-    label: 'precision',
-    name: 'precision',
-    property: {
-      options: [{
-        display: 'High',
-        value: 'highp'
-      }, {
-        display: 'Medium',
-        value: 'mediump'
-      }, {
-        display: 'Low',
-        value: 'lowp'
-      }]
+  properties: [
+    {
+      type: 'number',
+      label: 'fov',
+      name: 'fov',
+      property: 'fov'
+    },
+    {
+      type: 'number',
+      label: 'near',
+      name: 'near',
+      property: 'near'
+    },
+    {
+      type: 'number',
+      label: 'far',
+      name: 'far',
+      property: 'far'
+    },
+    {
+      type: 'number',
+      label: 'zoom',
+      name: 'zoom',
+      property: 'zoom'
+    },
+    {
+      type: 'select',
+      label: 'precision',
+      name: 'precision',
+      property: {
+        options: [
+          {
+            display: 'High',
+            value: 'highp'
+          },
+          {
+            display: 'Medium',
+            value: 'mediump'
+          },
+          {
+            display: 'Low',
+            value: 'lowp'
+          }
+        ]
+      }
+    },
+    {
+      type: 'checkbox',
+      label: 'anti-alias',
+      name: 'antialias',
+      property: 'antialias'
+    },
+    {
+      type: 'checkbox',
+      label: 'auto-rotate',
+      name: 'autoRotate',
+      property: 'autoRotate'
+    },
+    {
+      type: 'checkbox',
+      label: 'show-axis',
+      name: 'showAxis',
+      property: 'showAxis'
+    },
+    {
+      type: 'checkbox',
+      label: '3dmode',
+      name: 'threed',
+      property: 'threed'
+    },
+    {
+      type: 'checkbox',
+      label: 'debug',
+      name: 'debug',
+      property: 'threed'
+    },
+    {
+      type: 'string',
+      label: 'location-field',
+      name: 'locationField'
+    },
+    {
+      type: 'string',
+      label: 'popup-scene',
+      name: 'popupScene'
+    },
+    {
+      type: 'string',
+      label: 'legend-target',
+      name: 'legendTarget'
+    },
+    {
+      type: 'number',
+      label: 'rotation-speed',
+      name: 'rotationSpeed'
+    },
+    {
+      type: 'checkbox',
+      label: 'hide-empty-stock',
+      name: 'hideEmptyStock'
     }
-  }, {
-    type: 'checkbox',
-    label: 'anti-alias',
-    name: 'antialias',
-    property: 'antialias'
-  }, {
-    type: 'checkbox',
-    label: 'auto-rotate',
-    name: 'autoRotate',
-    property: 'autoRotate'
-  }, {
-    type: 'checkbox',
-    label: 'show-axis',
-    name: 'showAxis',
-    property: 'showAxis'
-  }, {
-    type: 'checkbox',
-    label: '3dmode',
-    name: 'threed',
-    property: 'threed'
-  }, {
-    type: 'checkbox',
-    label: 'debug',
-    name: 'debug',
-    property: 'threed'
-  }, {
-    type: 'string',
-    label: 'location-field',
-    name: 'locationField'
-  }, {
-    type: 'string',
-    label: 'popup-scene',
-    name: 'popupScene'
-  }, {
-    type: 'string',
-    label: 'legend-target',
-    name: 'legendTarget'
-  }, {
-    type: 'number',
-    label: 'rotation-speed',
-    name: 'rotationSpeed'
-  }, {
-    type: 'checkbox',
-    label: 'hide-empty-stock',
-    name: 'hideEmptyStock'
-  }]
+  ]
 }
 
 const WEBGL_NO_SUPPORT_TEXT = 'WebGL no support'
 
 function registerLoaders() {
   if (!registerLoaders.done) {
-    THREE.Loader.Handlers.add(/\.tga$/i, new THREE.TGALoader());
+    THREE.Loader.Handlers.add(/\.tga$/i, new THREE.TGALoader())
     registerLoaders.done = true
   }
 }
 
-var progress;
+var progress
 
 function createProgressbar(targetEl) {
-  if (progress)
-    return;
+  if (progress) return
 
-  progress = document.createElement('div');
+  progress = document.createElement('div')
 
-  targetEl = targetEl || document.body;
+  targetEl = targetEl || document.body
 
-  progress.style.width = `200px`;
-  progress.style.height = `20px`;
-  progress.style.border = '2px solid #000';
-  progress.style.position = 'absolute';
-  progress.style.marginLeft = '-100px';
-  progress.style.left = '50%';
-  progress.style.marginTop = '-10px';
-  progress.style.top = '50%';
+  progress.style.width = `200px`
+  progress.style.height = `20px`
+  progress.style.border = '2px solid #000'
+  progress.style.position = 'absolute'
+  progress.style.marginLeft = '-100px'
+  progress.style.left = '50%'
+  progress.style.marginTop = '-10px'
+  progress.style.top = '50%'
   progress.style.fontSize = '12px'
   progress.style.color = '#ccc'
   progress.style.textAlign = 'center'
@@ -136,38 +159,36 @@ function createProgressbar(targetEl) {
 
   progress.style.background = `linear-gradient(90deg, #000 0%, transparent)`
 
-  targetEl.appendChild(progress);
+  targetEl.appendChild(progress)
 
-  progress.hidden = (targetEl.clientWidth <= 200 || targetEl.clientHeight <= 20)
-
+  progress.hidden = targetEl.clientWidth <= 200 || targetEl.clientHeight <= 20
 }
 
 function showProgressbar(targetEl, loaded, total) {
-  if (!progress)
-    createProgressbar(targetEl);
+  if (!progress) createProgressbar(targetEl)
 
-  progress.style.background = `linear-gradient(90deg, #000 ${(loaded / total * 100)}%, transparent)`
-
+  progress.style.background = `linear-gradient(90deg, #000 ${(loaded / total) *
+    100}%, transparent)`
 }
 
 function removeProgressBar(targetEl) {
-  targetEl = targetEl || document.body;
+  targetEl = targetEl || document.body
 
-  targetEl.removeChild(progress);
+  targetEl.removeChild(progress)
 
-  progress.remove();
+  progress.remove()
 
-  progress = null;
+  progress = null
 }
 
 export default class Visualizer extends Container {
-
   get legendTarget() {
     var { legendTarget } = this.model
 
     if (!this._legendTarget && legendTarget) {
       this._legendTarget = this.root.findById(legendTarget)
-      this._legendTarget && this._legendTarget.on('change', this.onLegendTargetChanged, this)
+      this._legendTarget &&
+        this._legendTarget.on('change', this.onLegendTargetChanged, this)
     }
 
     return this._legendTarget
@@ -178,55 +199,77 @@ export default class Visualizer extends Container {
   }
 
   putObject(id, object) {
-    if (!this._objects)
-      this._objects = {}
+    if (!this._objects) this._objects = {}
 
-    this._objects[id] = object;
+    this._objects[id] = object
   }
 
   getObject(id) {
-    if (!this._objects)
-      this._objects = {}
+    if (!this._objects) this._objects = {}
 
     return this._objects[id]
+  }
+
+  added() {
+    if (!this.app.isViewMode) return
+
+    var loadLoaders = () => {
+      if (!THREE) return
+
+      // ScriptLoader.load(OBJLoader);
+      // ScriptLoader.load(MTLLoader);
+      // ScriptLoader.load(TGALoader);
+    }
+
+    if (!THREE) {
+      ScriptLoader.load(three).then(() => {
+        THREE.Cache.enabled = true
+        // require('./object-3d-overload');
+        // ScriptLoader.load
+        // loadLoaders();
+      }, error)
+    }
+    //  else
+    //   loadLoaders();
   }
 
   /* THREE Object related .. */
 
   createFloor(color, width, height) {
-
     let fillStyle = this.model.fillStyle
 
     var floorMaterial
 
-    var self = this;
+    var self = this
 
     if (fillStyle.type == 'pattern' && fillStyle.image) {
-
-      var floorTexture = this._textureLoader.load(this.app.url(fillStyle.image), function (texture) {
-        texture.minFilter = THREE.LinearFilter
-        self.render_threed()
-      })
+      var floorTexture = this._textureLoader.load(
+        this.app.url(fillStyle.image),
+        function(texture) {
+          texture.minFilter = THREE.LinearFilter
+          self.render_threed()
+        }
+      )
 
       var floorMaterial = [
-        floorMaterial = new THREE.MeshLambertMaterial({
+        (floorMaterial = new THREE.MeshLambertMaterial({
           color: color
-        }),
-        floorMaterial = new THREE.MeshLambertMaterial({
+        })),
+        (floorMaterial = new THREE.MeshLambertMaterial({
           color: color
-        }),
-        floorMaterial = new THREE.MeshLambertMaterial({
+        })),
+        (floorMaterial = new THREE.MeshLambertMaterial({
           color: color
-        }),
-        floorMaterial = new THREE.MeshLambertMaterial({
+        })),
+        (floorMaterial = new THREE.MeshLambertMaterial({
           color: color
-        }),
+        })),
         new THREE.MeshLambertMaterial({
           map: floorTexture
         }),
-        floorMaterial = new THREE.MeshLambertMaterial({
+        (floorMaterial = new THREE.MeshLambertMaterial({
           color: color
-        })
+        }))
       ]
     } else {
       floorMaterial = new THREE.MeshLambertMaterial({
@@ -234,45 +277,45 @@ export default class Visualizer extends Container {
       })
     }
 
-
-    var floorGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
+    var floorGeometry = new THREE.BoxBufferGeometry(1, 1, 1)
     var floor = new THREE.Mesh(floorGeometry, floorMaterial)
 
-    floor.scale.set(width, height, 5);
+    floor.scale.set(width, height, 5)
     floor.rotation.x = -Math.PI / 2
     floor.position.y = -2
 
     floor.name = 'floor'
 
+    floor.receiveShadow = true
+
     this._scene3d.add(floor)
   }
 
   createObjects(components, canvasSize) {
-
     components.forEach(component => {
       var clazz = scene.Component3d.register(component.model.type)
       if (!clazz) {
-        console.warn("Class not found : 3d class is not exist");
-        return;
+        console.warn(
+          `Class not found : 3d ${component.model.type} class is not exist`
+        )
+        return
       }
 
       var item = new clazz(component.hierarchy, canvasSize, this, component)
       if (item) {
-        item.name = component.model.id;
+        item.name = component.model.id
         this._scene3d.add(item)
-        this.putObject(component.model.id, item);
+        this.putObject(component.model.id, item)
       }
     })
   }
 
-
   destroy_scene3d() {
-    this.stop();
+    this.stop()
 
-    window.removeEventListener('focus', this._onFocus);
+    window.removeEventListener('focus', this._onFocus)
 
-    if (this._renderer)
-      this._renderer.clear()
+    if (this._renderer) this._renderer.clear()
     delete this._renderer
     delete this._camera
     delete this._2dCamera
@@ -283,17 +326,13 @@ export default class Visualizer extends Container {
     delete this._objects
 
     if (this._scene3d) {
-      let children = this._scene3d.children.slice();
+      let children = this._scene3d.children.slice()
       for (let i in children) {
         let child = children[i]
-        if (child.dispose)
-          child.dispose();
-        if (child.geometry && child.geometry.dispose)
-          child.geometry.dispose();
-        if (child.material && child.material.dispose)
-          child.material.dispose();
-        if (child.texture && child.texture.dispose)
-          child.texture.dispose();
+        if (child.dispose) child.dispose()
+        if (child.geometry && child.geometry.dispose) child.geometry.dispose()
+        if (child.material && child.material.dispose) child.material.dispose()
+        if (child.texture && child.texture.dispose) child.texture.dispose()
         this._scene3d.remove(child)
       }
     }
@@ -302,13 +341,11 @@ export default class Visualizer extends Container {
   }
 
   init_scene3d() {
-
-    this.trigger("visualizer-initialized", this)
+    this.trigger('visualizer-initialized', this)
 
     this.root.on('redraw', this.onredraw, this)
 
-    if (this._scene3d)
-      this.destroy_scene3d()
+    if (this._scene3d) this.destroy_scene3d()
 
     // var self = this;
 
@@ -335,12 +372,9 @@ export default class Visualizer extends Container {
     this._textureLoader.withCredential = true
     this._textureLoader.crossOrigin = 'use-credentials'
 
-    this._exporter = new THREE.OBJExporter();
+    this._exporter = new THREE.OBJExporter()
 
-    var {
-      width,
-      height
-    } = this.bounds
+    var { width, height } = this.bounds
 
     var {
       fov = 45,
@@ -353,7 +387,6 @@ export default class Visualizer extends Container {
       legendTarget
     } = this.model
 
-
     var components = this.components || []
 
     // SCENE
@@ -365,13 +398,17 @@ export default class Visualizer extends Container {
     this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
 
     this._scene3d.add(this._camera)
-    this._camera.position.set(height * 0.8, Math.floor(Math.min(width, height)), width * 0.8)
+    this._camera.position.set(
+      height * 0.8,
+      Math.floor(Math.min(width, height)),
+      width * 0.8
+    )
     this._camera.lookAt(this._scene3d.position)
-    this._camera.zoom = this.model.zoom * 0.01
+    this._camera.zoom = this.getState('zoom') * 0.01
 
     if (this.model.showAxis) {
-      var axisHelper = new THREE.AxesHelper(width);
-      this._scene3d.add(axisHelper);
+      var axisHelper = new THREE.AxesHelper(width)
+      this._scene3d.add(axisHelper)
     }
 
     try {
@@ -380,18 +417,20 @@ export default class Visualizer extends Container {
         precision: precision,
         alpha: true,
         antialias: antialias
-      });
-
+      })
     } catch (e) {
       this._noSupportWebgl = true
     }
 
-    if (this._noSupportWebgl)
-      return
+    if (this._noSupportWebgl) return
 
     this._renderer.autoClear = true
+
     this._renderer.setClearColor(0xffffff, 0) // transparent
-    this._renderer.setSize(Math.min(width, window.innerWidth), Math.min(height, window.innerHeight))
+    this._renderer.setSize(
+      Math.min(width, window.innerWidth),
+      Math.min(height, window.innerHeight)
+    )
     // this._renderer.setPixelRatio(window.devicePixelRatio)
 
     // CONTROLS
@@ -401,7 +440,11 @@ export default class Visualizer extends Container {
     // LIGHT
     var _light = new THREE.HemisphereLight(light, 0x000000, 1)
 
-    _light.position.set(-this._camera.position.x, this._camera.position.y, -this._camera.position.z)
+    _light.position.set(
+      -this._camera.position.x,
+      this._camera.position.y,
+      -this._camera.position.z
+    )
     this._camera.add(_light)
 
     this._raycaster = new THREE.Raycaster()
@@ -409,7 +452,8 @@ export default class Visualizer extends Container {
 
     this._tick = 0
     this._clock = new THREE.Clock(true)
-    this.mixers = new Array();
+    this.mixers = new Array()
+    this.mixer = new THREE.AnimationMixer(this.scene3d)
 
     this.createFloor(fillStyle, width, height)
     this.createObjects(components, {
@@ -417,33 +461,30 @@ export default class Visualizer extends Container {
       height
     })
 
-    this._camera.updateProjectionMatrix();
+    this._camera.updateProjectionMatrix()
 
-    this._onFocus = function () {
-      this.render_threed();
+    this._onFocus = function() {
+      this.render_threed()
     }.bind(this)
 
-    window.addEventListener('focus', this._onFocus);
+    window.addEventListener('focus', this._onFocus)
 
-    this.invalidate();
+    this.invalidate()
   }
 
   threed_animate() {
-    if (!this._controls)
-      return;
+    if (!this._controls) return
+
+    if (this.mixer) this.mixer.update(this._clock.getDelta())
 
     this._controls.update()
-    this.render_threed();
-
+    this.render_threed()
   }
 
-  stop() {
-
-  }
+  stop() {}
 
   get scene3d() {
-    if (!this._scene3d)
-      this.init_scene3d()
+    if (!this._scene3d) this.init_scene3d()
     return this._scene3d
   }
 
@@ -456,8 +497,7 @@ export default class Visualizer extends Container {
   /* Container Overides .. */
   render(ctx) {
     if (this.app.isViewMode) {
-      if (!this.model.threed)
-        this.model.threed = true
+      if (!this.model.threed) this.model.threed = true
     }
 
     if (this.model.threed && !this._noSupportWebgl) {
@@ -465,35 +505,25 @@ export default class Visualizer extends Container {
     }
 
     super.render(ctx)
-
   }
 
   postrender(ctx) {
-    var {
-      left,
-      top,
-      debug,
-      threed
-    } = this.model
+    var { left, top, debug, threed } = this.model
 
-    var {
-      width,
-      height
-    } = this.bounds
+    var { width, height } = this.bounds
 
     // ios에서 width, height에 소수점이 있으면 3d를 표현하지 못하는 문제가 있어 정수화
-    width = Math.floor(width);
-    height = Math.floor(height);
+    width = Math.floor(width)
+    height = Math.floor(height)
 
     if (threed) {
-
       if (!this._scene3d) {
         this.init_scene3d()
         this.render_threed()
       }
 
       if (this._noSupportWebgl) {
-        this._showWebglNoSupportText(ctx);
+        this._showWebglNoSupportText(ctx)
         return
       }
 
@@ -501,18 +531,21 @@ export default class Visualizer extends Container {
         this._onDataChanged()
       }
 
-      if (this._loadComplete === false)
-        return;
+      if (this._loadComplete === false) return
 
-      var rendererSize = this._renderer.getSize();
-      var {
-        width: rendererWidth,
-        height: rendererHeight
-      } = rendererSize;
+      var rendererSize = this._renderer.getSize()
+      var { width: rendererWidth, height: rendererHeight } = rendererSize
 
       ctx.drawImage(
-        this._renderer.domElement, 0, 0, rendererWidth, rendererHeight,
-        left, top, width, height
+        this._renderer.domElement,
+        0,
+        0,
+        rendererWidth,
+        rendererHeight,
+        left,
+        top,
+        width,
+        height
       )
 
       if (debug) {
@@ -523,22 +556,21 @@ export default class Visualizer extends Container {
         ctx.fillText(scene.FPS(), 100, 100)
         this.invalidate()
       }
-
     } else {
-      super.postrender(ctx);
+      super.postrender(ctx)
     }
   }
 
   dispose() {
-
-    this._legendTarget && this._legendTarget.off('change', this.onLegendTargetChanged, this)
+    this._legendTarget &&
+      this._legendTarget.off('change', this.onLegendTargetChanged, this)
     delete this._legendTarget
 
-    this.root.off('redraw', this.onredraw, this);
+    this.root.off('redraw', this.onredraw, this)
 
     this.destroy_scene3d()
 
-    super.dispose();
+    super.dispose()
   }
 
   get layout() {
@@ -550,7 +582,6 @@ export default class Visualizer extends Container {
   }
 
   getObjectByRaycast() {
-
     var intersects = this.getObjectsByRaycast()
     var intersected
 
@@ -568,54 +599,50 @@ export default class Visualizer extends Container {
     //   and direction into the scene (camera direction)
 
     var vector = this._mouse
-    if (!this._camera)
-      return
+    if (!this._camera) return
 
     this._raycaster.setFromCamera(vector, this._camera)
 
     // create an array containing all objects in the scene with which the ray intersects
-    var intersects = this._raycaster.intersectObjects(this._scene3d.children, true);
+    var intersects = this._raycaster.intersectObjects(
+      this._scene3d.children,
+      true
+    )
 
     return intersects
   }
 
   exportModel() {
-    var exported = this._exporter.parse(this._scene3d);
-    var blob = new Blob([exported], { type: "text/plain;charset=utf-8" });
+    var exported = this._exporter.parse(this._scene3d)
+    var blob = new Blob([exported], { type: 'text/plain;charset=utf-8' })
     console.log(exported)
     // saveAs(blob, "exported.txt");
   }
 
   _showWebglNoSupportText(context) {
-    context.save();
+    context.save()
 
-    var {
-      width,
-      height
-    } = this.model
+    var { width, height } = this.model
 
     context.font = width / 20 + 'px Arial'
     context.textAlign = 'center'
     context.fillText(WEBGL_NO_SUPPORT_TEXT, width / 2 - width / 40, height / 2)
 
-    context.restore();
+    context.restore()
   }
 
   resetMaterials() {
-    if (!this._stock_materials)
-      return;
+    if (!this._stock_materials) return
 
     this._stock_materials.forEach(m => {
-      if (m.dispose)
-        m.dispose();
+      if (m.dispose) m.dispose()
     })
 
     delete this._stock_materials
   }
 
   _onDataChanged() {
-
-    var locationField = this.getState('locationField') || 'location';
+    var locationField = this.getState('locationField') || 'location'
 
     if (this._data) {
       if (this._data instanceof Array) {
@@ -631,24 +658,27 @@ export default class Visualizer extends Container {
 
         this._data = this._data.reduce((acc, value, i, arr) => {
           var val = JSON.parse(JSON.stringify(value))
-          if (acc[value[locationField]]) {
+          var id = locationField
+          if (!val[id])
+            // Rack 데이터가 아니면
+            id = 'id'
 
-            if (!acc[value[locationField]]["items"]) {
-              var clone = JSON.parse(JSON.stringify(acc[value[locationField]]))
-              acc[value[locationField]] = { items: [] }
-              acc[value[locationField]]["items"].push(clone)
+          if (acc[value[id]]) {
+            if (!acc[value[id]]['items']) {
+              var clone = JSON.parse(JSON.stringify(acc[value[id]]))
+              acc[value[id]] = { items: [] }
+              acc[value[id]]['items'].push(clone)
             }
-
           } else {
-            acc[value[locationField]] = { items: [] };
+            acc[value[id]] = { items: [] }
           }
 
-          acc[value[locationField]]["items"].push(val)
+          acc[value[id]]['items'].push(val)
 
           return acc
         }, {})
 
-        return this._onDataChanged();
+        return this._onDataChanged()
 
         // this._data.forEach(d => {
         //   let data = d
@@ -668,15 +698,14 @@ export default class Visualizer extends Container {
          *    ...
          *  })
          */
-        for (var loc in this._data) {
-          let location = loc
-          if (this._data.hasOwnProperty(location)) {
-            let d = this._data[location]
-            let object = this.getObject(location)
+        for (var key in this._data) {
+          let id = key
+          if (this._data.hasOwnProperty(id)) {
+            let d = this._data[id]
+            let object = this.getObject(id)
             if (object) {
-              object.userData = d;
+              object.userData = d
               object.onUserDataChanged()
-
             }
           }
         }
@@ -685,7 +714,7 @@ export default class Visualizer extends Container {
 
     this._dataChanged = false
 
-    this.invalidate();
+    this.invalidate()
   }
 
   /* Event Handlers */
@@ -696,17 +725,22 @@ export default class Visualizer extends Container {
   }
 
   onchange(after, before) {
-
-    if (before.hasOwnProperty('legendTarget') || after.hasOwnProperty('legendTarget')) {
-      this._legendTarget && this._legendTarget.off('change', this.onLegendTargetChanged, this)
+    if (
+      before.hasOwnProperty('legendTarget') ||
+      after.hasOwnProperty('legendTarget')
+    ) {
+      this._legendTarget &&
+        this._legendTarget.off('change', this.onLegendTargetChanged, this)
       delete this._legendTarget
       this.resetMaterials()
       this._onDataChanged()
     }
 
-    if (after.hasOwnProperty('width') ||
+    if (
+      after.hasOwnProperty('width') ||
       after.hasOwnProperty('height') ||
-      after.hasOwnProperty('threed'))
+      after.hasOwnProperty('threed')
+    )
       this.destroy_scene3d()
 
     if (after.hasOwnProperty('autoRotate')) {
@@ -715,24 +749,24 @@ export default class Visualizer extends Container {
       }
     }
 
-    if (after.hasOwnProperty('fov') ||
+    if (
+      after.hasOwnProperty('fov') ||
       after.hasOwnProperty('near') ||
       after.hasOwnProperty('far') ||
-      after.hasOwnProperty('zoom')) {
-
+      after.hasOwnProperty('zoom')
+    ) {
       if (this._camera) {
         this._camera.near = this.model.near
         this._camera.far = this.model.far
-        this._camera.zoom = this.model.zoom * 0.01
+        this._camera.zoom = this.getState('zoom') * 0.01
         this._camera.fov = this.model.fov
-        this._camera.updateProjectionMatrix();
+        this._camera.updateProjectionMatrix()
 
         this._controls.cameraChanged = true
       }
-
     }
 
-    if (after.hasOwnProperty("data")) {
+    if (after.hasOwnProperty('data')) {
       if (this._data !== after.data) {
         this._data = after.data
         this._dataChanged = true
@@ -750,58 +784,59 @@ export default class Visualizer extends Container {
 
   onmouseup(e) {
     if (this._controls) {
-      if (this._lastFocused)
-        this._lastFocused._focused = false;
+      if (this._lastFocused) this._lastFocused._focused = false
 
       var modelLayer = Layer.register('model-layer')
-      var popup = modelLayer.Popup;
+      var popup = modelLayer.Popup
       var ref = this.model.popupScene
 
       var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
 
-      this._mouse.x = ((pointer.x - this.model.left) / (this.model.width)) * 2 - 1;
-      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
+      this._mouse.x = ((pointer.x - this.model.left) / this.model.width) * 2 - 1
+      this._mouse.y =
+        -((pointer.y - this.model.top) / this.model.height) * 2 + 1
 
       var object = this.getObjectByRaycast()
 
       if (object && object.onmouseup) {
         if (ref)
-          object.onmouseup(e, this, function() {
-            popup.hide(this, ref);
-            popup.show(this, ref);
+          object.onmouseup(
+            e,
+            this,
+            function() {
+              popup.hide(this, ref)
+              popup.show(this, ref)
+            }.bind(this)
+          )
 
-          }.bind(this))
-
-        object._focused = true;
-        object._focusedAt = performance.now();
+        object._focused = true
+        object._focusedAt = performance.now()
         this._lastFocused = object
-      }
-      else {
+      } else {
         popup.hide(this.root)
       }
 
-      this.invalidate();
+      this.invalidate()
       e.stopPropagation()
     }
-
   }
 
   onmousemove(e) {
     if (this._controls) {
-      var pointer = this.transcoordC2S(e.offsetX, e.offsetY);
+      var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
 
-      this._mouse.x = ((pointer.x - this.model.left) / (this.model.width)) * 2 - 1;
-      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
+      this._mouse.x = ((pointer.x - this.model.left) / this.model.width) * 2 - 1
+      this._mouse.y =
+        -((pointer.y - this.model.top) / this.model.height) * 2 + 1
 
-      this._controls.onMouseMove(e);
+      this._controls.onMouseMove(e)
 
-      e.stopPropagation();
+      e.stopPropagation()
     }
   }
 
   onmouseleave(e) {
-    if (!this._scene2d)
-      return
+    if (!this._scene2d) return
 
     var tooltip = this._scene2d.getObjectByName('tooltip')
     if (tooltip) {
@@ -818,7 +853,8 @@ export default class Visualizer extends Container {
 
   ondblclick(e) {
     if (this._controls) {
-      this._controls.reset();
+      this.setState('zoom', this.model.zoom)
+      this._controls.reset()
       e.stopPropagation()
     }
   }
@@ -827,8 +863,9 @@ export default class Visualizer extends Container {
     if (this._controls) {
       var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
 
-      this._mouse.x = ((pointer.x - this.model.left) / (this.model.width)) * 2 - 1;
-      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1;
+      this._mouse.x = ((pointer.x - this.model.left) / this.model.width) * 2 - 1
+      this._mouse.y =
+        -((pointer.y - this.model.top) / this.model.height) * 2 + 1
 
       this._controls.onDragStart(e)
       e.stopPropagation()
@@ -868,7 +905,7 @@ export default class Visualizer extends Container {
   ontouchend(e) {
     if (this._controls) {
       this._controls.onTouchEnd(e)
-      this.onmouseup(e);
+      this.onmouseup(e)
       e.stopPropagation()
     }
   }
@@ -882,38 +919,34 @@ export default class Visualizer extends Container {
 
   onpinch(e) {
     if (this._controls) {
-      var zoom = this.model.zoom
+      var zoom = this.getState('zoom')
       zoom *= e.scale
 
-      if (zoom < 100)
-        zoom = 100
+      if (zoom < 100) zoom = 100
 
-      this.set('zoom', zoom)
+      this.setState('zoom', zoom)
       e.stopPropagation()
     }
   }
 
   ondoubletap() {
-    this._controls.reset();
+    this._controls.reset()
   }
 
   handleMouseWheel(event) {
-    var delta = 0;
-    var zoom = this.model.zoom
+    var delta = 0
+    var zoom = this.getState('zoom')
 
     delta = -event.deltaY
     zoom += delta * 0.1
-    if (zoom < 100)
-      zoom = 100
+    if (zoom < 100) zoom = 100
 
-    this.set('zoom', zoom)
+    this.setState('zoom', zoom)
   }
 
   onredraw() {
-    this.threed_animate();
+    this.threed_animate()
   }
-
 }
 
 Component.register('visualizer', Visualizer)
-
