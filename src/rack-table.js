@@ -6,7 +6,7 @@ import Group3D from './group3d'
 
 import Rack from './rack'
 
-import { Component, Container, Layout, Model } from '@hatiolab/things-scene'
+import { Component, ContainerAbstract, Layout, Model } from '@hatiolab/things-scene'
 
 const NATURE = {
   mutable: false,
@@ -373,7 +373,7 @@ export default class RackTable3d extends Group3D {
   }
 }
 
-export class RackTable extends Container {
+export class RackTable extends ContainerAbstract {
   is3dish() {
     return true
   }
