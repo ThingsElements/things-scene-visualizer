@@ -13,6 +13,7 @@ import path from 'path'
 const TRUCK_PATH = path.resolve('../obj/CJ_Truck')
 
 import * as THREE from 'three'
+import ColladaLoader from 'three-dlc/src/loaders/ColladaLoader'
 
 import { RectPath, Shape, Component } from '@hatiolab/things-scene'
 
@@ -34,7 +35,7 @@ export default class CJTruck extends Object3D {
   static get threedObjectLoader() {
     if (!CJTruck._threedObjectLoader) {
       CJTruck._threedObjectLoader = new Promise((resolve, reject) => {
-        let colladaLoader = new THREE.ColladaLoader(THREE.DefaultLoadingManager)
+        let colladaLoader = new ColladaLoader(THREE.DefaultLoadingManager)
 
         colladaLoader.setPath(`${TRUCK_PATH}/`)
 

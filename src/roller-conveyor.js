@@ -10,13 +10,10 @@ const ROLLER_CONVEYOR_MODEL = 'Roller_Conveyor2.dae'
 import path from 'path'
 const ROLLER_CONVEYOR_PATH = path.resolve('../obj/RollerConveyor')
 
-import {
-  RectPath,
-  Shape,
-  Component
-} from '@hatiolab/things-scene'
+import { RectPath, Shape, Component } from '@hatiolab/things-scene'
 
 import * as THREE from 'three'
+import ColladaLoader from 'three-dlc/src/loaders/ColladaLoader'
 
 const NATURE = {
   mutable: false,
@@ -26,65 +23,54 @@ const NATURE = {
 }
 
 export default class RollerConveyor extends Object3D {
-
   static get threedObjectLoader() {
     if (!RollerConveyor._threedObjectLoader) {
       RollerConveyor._threedObjectLoader = new Promise((resolve, reject) => {
-        let colladaLoader = new THREE.ColladaLoader(THREE.DefaultLoadingManager);
+        let colladaLoader = new ColladaLoader(THREE.DefaultLoadingManager)
 
         colladaLoader.setPath(`${ROLLER_CONVEYOR_PATH}/`)
 
         colladaLoader.load(ROLLER_CONVEYOR_MODEL, collada => {
-          var scene = collada.scene;
-          var extObj = scene;
+          var scene = collada.scene
+          var extObj = scene
 
-          resolve(extObj);
+          resolve(extObj)
         })
-      });
+      })
     }
 
-    return RollerConveyor._threedObjectLoader;
+    return RollerConveyor._threedObjectLoader
   }
 
-  static getRollerConveyorObject(type) {
-
-  }
+  static getRollerConveyorObject(type) {}
 
   createObject() {
-    var {
-      stockType = 'empty'
-    } = this.model
+    var { stockType = 'empty' } = this.model
 
-    RollerConveyor.threedObjectLoader.then(this.addObject.bind(this));
+    RollerConveyor.threedObjectLoader.then(this.addObject.bind(this))
   }
 
   addObject(extObject) {
-    var {
-      width,
-      height,
-      depth,
-      rotation = 0
-    } = this.model
+    var { width, height, depth, rotation = 0 } = this.model
 
     this.type = 'roller-conveyor'
 
-    var object = extObject.clone();
-    object.rotation.z = - Math.PI / 2;
+    var object = extObject.clone()
+    object.rotation.z = -Math.PI / 2
 
-    var boundingBox = new THREE.Box3().setFromObject(object);
-    var center = boundingBox.getCenter(object.position);
-    var size = boundingBox.getSize(new THREE.Vector3());
+    var boundingBox = new THREE.Box3().setFromObject(object)
+    var center = boundingBox.getCenter(object.position)
+    var size = boundingBox.getSize(new THREE.Vector3())
 
-    center.multiplyScalar(- 1);
+    center.multiplyScalar(-1)
 
-    object.updateMatrix();
+    object.updateMatrix()
 
-    this.add(object);
-    this.scale.set(width / size.x, depth / size.y, height / size.z);
+    this.add(object)
+    this.scale.set(width / size.x, depth / size.y, height / size.z)
 
-    this.updateMatrix();
+    this.updateMatrix()
   }
-
 }
 
 export class RollerConveyor2d extends RectPath(Shape) {
@@ -102,15 +88,10 @@ export class RollerConveyor2d extends RectPath(Shape) {
   }
 
   render(context) {
-    var {
-      left,
-      top,
-      width,
-      height
-    } = this.bounds;
+    var { left, top, width, height } = this.bounds
 
-    context.beginPath();
-    context.drawImage(RollerConveyor2d.image, left, top, width, height);
+    context.beginPath()
+    context.drawImage(RollerConveyor2d.image, left, top, width, height)
   }
 
   get nature() {
@@ -118,5 +99,5 @@ export class RollerConveyor2d extends RectPath(Shape) {
   }
 }
 
-Component.register('roller-conveyor', RollerConveyor2d);
-Component3d.register('roller-conveyor', RollerConveyor);
+Component.register('roller-conveyor', RollerConveyor2d)
+Component3d.register('roller-conveyor', RollerConveyor)

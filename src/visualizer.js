@@ -8,14 +8,19 @@ import * as THREE from 'three'
 
 import Component3d from './component-3d'
 
-var { Component, Container, Layout, Layer } = scene
+// import OBJExporter from 'three-obj-exporter'
 
-import 'imports-loader?THREE=three!three/examples/js/loaders/OBJLoader.js'
-import 'imports-loader?THREE=three!three/examples/js/loaders/MTLLoader.js'
-import 'imports-loader?THREE=three!three/examples/js/loaders/TGALoader.js'
-import 'imports-loader?THREE=three!three/examples/js/loaders/ColladaLoader.js'
-import 'imports-loader?THREE=three!three/examples/js/loaders/TDSLoader.js'
-import 'imports-loader?THREE=three!three/examples/js/loaders/GLTFLoader.js'
+import {
+  Component,
+  Container,
+  Layout,
+  Layer,
+  ScriptLoader,
+  error,
+  FPS
+} from '@hatiolab/things-scene'
+
+import TGALoader from 'three-dlc/src/loaders/TGALoader'
 
 const NATURE = {
   mutable: false,
@@ -129,7 +134,7 @@ const WEBGL_NO_SUPPORT_TEXT = 'WebGL no support'
 
 function registerLoaders() {
   if (!registerLoaders.done) {
-    THREE.Loader.Handlers.add(/\.tga$/i, new THREE.TGALoader())
+    THREE.Loader.Handlers.add(/\.tga$/i, new TGALoader())
     registerLoaders.done = true
   }
 }
@@ -240,14 +245,14 @@ export default class Visualizer extends Container {
 
     var floorMaterial
 
-    var self = this
-
     if (fillStyle.type == 'pattern' && fillStyle.image) {
       var floorTexture = this._textureLoader.load(
         this.app.url(fillStyle.image),
-        function(texture) {
+        texture => {
           texture.minFilter = THREE.LinearFilter
-          self.render_threed()
+
+          texture.repeat.set(1, 1)
+          this.render_threed()
         }
       )
 
@@ -533,6 +538,8 @@ export default class Visualizer extends Container {
 
       if (this._loadComplete === false) return
 
+      if (!this._renderer) return
+
       var rendererSize = this._renderer.getSize()
       var { width: rendererWidth, height: rendererHeight } = rendererSize
 
@@ -799,15 +806,7 @@ export default class Visualizer extends Container {
       var object = this.getObjectByRaycast()
 
       if (object && object.onmouseup) {
-        if (ref)
-          object.onmouseup(
-            e,
-            this,
-            function() {
-              popup.hide(this, ref)
-              popup.show(this, ref)
-            }.bind(this)
-          )
+        if (ref) object.onmouseup(e, this, popup.show.bind(this, this, ref))
 
         object._focused = true
         object._focusedAt = performance.now()

@@ -13,36 +13,35 @@ import path from 'path'
 const TRUCK_PATH = path.resolve('../obj/CJ_Truck_Small')
 
 import * as THREE from 'three'
+import ColladaLoader from 'three-dlc/src/loaders/ColladaLoader'
 
-import {
-  RectPath,
-  Shape,
-  Component
-} from '@hatiolab/things-scene'
+import { RectPath, Shape, Component } from '@hatiolab/things-scene'
 
 const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
-  properties: [{
-    type: 'number',
-    label: 'depth',
-    name: 'depth',
-    property: 'depth'
-  }]
+  properties: [
+    {
+      type: 'number',
+      label: 'depth',
+      name: 'depth',
+      property: 'depth'
+    }
+  ]
 }
 
 export default class CJTruckSmall extends Object3D {
   static get threedObjectLoader() {
     if (!CJTruckSmall._threedObjectLoader) {
       CJTruckSmall._threedObjectLoader = new Promise((resolve, reject) => {
-        let colladaLoader = new THREE.ColladaLoader(THREE.DefaultLoadingManager);
+        let colladaLoader = new ColladaLoader(THREE.DefaultLoadingManager)
 
-        colladaLoader.setPath(`${TRUCK_PATH}/`);
+        colladaLoader.setPath(`${TRUCK_PATH}/`)
 
         colladaLoader.load(TRUCK_MODEL, collada => {
-          var scene = collada.scene;
-          var extObj = scene;
+          var scene = collada.scene
+          var extObj = scene
 
           // for (const key in collada.library.images) {
           //   if (collada.library.images.hasOwnProperty(key)) {
@@ -68,42 +67,37 @@ export default class CJTruckSmall extends Object3D {
           //     o.material.transparent = false;
           // })
 
-          resolve(extObj);
+          resolve(extObj)
         })
-      });
+      })
     }
 
-    return CJTruckSmall._threedObjectLoader;
+    return CJTruckSmall._threedObjectLoader
   }
 
   createObject() {
-    CJTruckSmall.threedObjectLoader.then(this.addObject.bind(this));
+    CJTruckSmall.threedObjectLoader.then(this.addObject.bind(this))
   }
 
   addObject(extObject) {
-    var {
-      width,
-      height,
-      depth
-    } = this.model
+    var { width, height, depth } = this.model
 
     this.type = 'cj-truck-small'
 
-    var object = extObject.clone();
-    object.rotation.z = - Math.PI / 2
+    var object = extObject.clone()
+    object.rotation.z = -Math.PI / 2
 
-    var boundingBox = new THREE.Box3().setFromObject(object);
-    var center = boundingBox.getCenter(object.position);
-    var size = boundingBox.getSize(new THREE.Vector3());
+    var boundingBox = new THREE.Box3().setFromObject(object)
+    var center = boundingBox.getCenter(object.position)
+    var size = boundingBox.getSize(new THREE.Vector3())
 
-    center.multiplyScalar(- 1);
+    center.multiplyScalar(-1)
 
-    object.updateMatrix();
+    object.updateMatrix()
 
-    this.add(object);
-    this.scale.set(width / size.x, depth / size.y, height / size.z);
+    this.add(object)
+    this.scale.set(width / size.x, depth / size.y, height / size.z)
   }
-
 }
 
 export class CJTruckSmall2D extends RectPath(Shape) {
@@ -120,18 +114,13 @@ export class CJTruckSmall2D extends RectPath(Shape) {
     return CJTruckSmall2D._image
   }
 
-  get controls() { }
+  get controls() {}
 
   render(context) {
-    var {
-      left,
-      top,
-      width,
-      height
-    } = this.bounds;
+    var { left, top, width, height } = this.bounds
 
-    context.beginPath();
-    context.drawImage(CJTruckSmall2D.image, left, top, width, height);
+    context.beginPath()
+    context.drawImage(CJTruckSmall2D.image, left, top, width, height)
   }
 
   get nature() {

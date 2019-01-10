@@ -18,7 +18,8 @@ module.exports = {
     modules: ['./node_modules']
   },
   externals: {
-    '@hatiolab/things-scene': 'scene'
+    '@hatiolab/things-scene': 'scene',
+    'three.js': 'THREE'
   },
   optimization: {
     minimize: true

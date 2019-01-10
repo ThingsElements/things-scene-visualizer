@@ -11,12 +11,13 @@ import path from 'path'
 const forkLiftPath = path.resolve('../obj/Forklift')
 
 import * as THREE from 'three'
+import ColladaLoader from 'three-dlc/src/loaders/ColladaLoader'
 
 export default class ForkLift extends Object3D {
   static get threedObjectLoader() {
     if (!ForkLift._threedObjectLoader) {
       ForkLift._threedObjectLoader = new Promise((resolve, reject) => {
-        let colladaLoader = new THREE.ColladaLoader(THREE.DefaultLoadingManager)
+        let colladaLoader = new ColladaLoader(THREE.DefaultLoadingManager)
 
         colladaLoader.setPath(`${forkLiftPath}/`)
 

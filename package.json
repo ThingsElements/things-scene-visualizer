@@ -33,14 +33,13 @@
     "@things-scene/legend": "*",
     "@things-scene/person": "*",
     "@things-scene/progressbar": "*",
-    "@things-scene/restful": "*",
-    "aframe": "^0.8.2",
-    "dom-to-image": "^2.6.0"
+    "@things-scene/restful": "*"
   },
   "dependencies": {
     "@hatiolab/things-scene": "*",
     "heatmap.js": "^2.0.5",
     "jszip": "^3.1.5",
-    "three": "^0.98.0"
+    "three": "^0.100.0",
+    "three-dlc": "^0.100.0-alpha-1"
   }
 }

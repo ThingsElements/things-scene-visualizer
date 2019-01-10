@@ -10,13 +10,10 @@ const PALLET_JOKEY_MODEL = 'SmallJockey.dae'
 import path from 'path'
 const PALLET_JOKEY_PATH = path.resolve('../obj/Pallet_Jockey')
 
-import {
-  RectPath,
-  Shape,
-  Component
-} from '@hatiolab/things-scene'
+import { RectPath, Shape, Component } from '@hatiolab/things-scene'
 
 import * as THREE from 'three'
+import ColladaLoader from 'three-dlc/src/loaders/ColladaLoader'
 
 const NATURE = {
   mutable: false,
@@ -26,68 +23,57 @@ const NATURE = {
 }
 
 export default class PalletJockey extends Object3D {
-
   static get threedObjectLoader() {
     if (!PalletJockey._threedObjectLoader) {
       PalletJockey._threedObjectLoader = new Promise((resolve, reject) => {
-        let colladaLoader = new THREE.ColladaLoader(THREE.DefaultLoadingManager);
+        let colladaLoader = new ColladaLoader(THREE.DefaultLoadingManager)
 
         colladaLoader.setPath(`${PALLET_JOKEY_PATH}/`)
 
         colladaLoader.load(PALLET_JOKEY_MODEL, collada => {
-          var scene = collada.scene;
-          var extObj = scene;
+          var scene = collada.scene
+          var extObj = scene
 
-          resolve(extObj);
+          resolve(extObj)
         })
-      });
+      })
     }
 
-    return PalletJockey._threedObjectLoader;
+    return PalletJockey._threedObjectLoader
   }
 
-  static getPalletJockeyObject(type) {
-
-  }
+  static getPalletJockeyObject(type) {}
 
   createObject() {
-    var {
-      stockType = 'empty'
-    } = this.model
+    var { stockType = 'empty' } = this.model
 
-    PalletJockey.threedObjectLoader.then(this.addObject.bind(this));
+    PalletJockey.threedObjectLoader.then(this.addObject.bind(this))
   }
 
   addObject(extObject) {
-    var {
-      width,
-      height,
-      depth,
-      rotation = 0
-    } = this.model
+    var { width, height, depth, rotation = 0 } = this.model
 
     this.type = 'pallet-jockey'
 
-    var object = extObject.clone();
-    object.rotation.z = - Math.PI / 2;
+    var object = extObject.clone()
+    object.rotation.z = -Math.PI / 2
 
-    var boundingBox = new THREE.Box3().setFromObject(object);
-    var center = boundingBox.getCenter(object.position);
-    var size = boundingBox.getSize(new THREE.Vector3());
+    var boundingBox = new THREE.Box3().setFromObject(object)
+    var center = boundingBox.getCenter(object.position)
+    var size = boundingBox.getSize(new THREE.Vector3())
 
-    center.multiplyScalar(- 1);
+    center.multiplyScalar(-1)
 
-    object.updateMatrix();
+    object.updateMatrix()
 
-    this.add(object);
-    this.scale.set(width / size.x, depth / size.y, height / size.z);
+    this.add(object)
+    this.scale.set(width / size.x, depth / size.y, height / size.z)
 
-    this.updateMatrix();
+    this.updateMatrix()
 
-    this.setRotation();
-    this.setPosition();
+    this.setRotation()
+    this.setPosition()
   }
-
 }
 
 export class PalletJockey2d extends RectPath(Shape) {
@@ -105,15 +91,10 @@ export class PalletJockey2d extends RectPath(Shape) {
   }
 
   render(context) {
-    var {
-      left,
-      top,
-      width,
-      height
-    } = this.bounds;
+    var { left, top, width, height } = this.bounds
 
-    context.beginPath();
-    context.drawImage(PalletJockey2d.image, left, top, width, height);
+    context.beginPath()
+    context.drawImage(PalletJockey2d.image, left, top, width, height)
   }
 
   get nature() {
@@ -121,5 +102,5 @@ export class PalletJockey2d extends RectPath(Shape) {
   }
 }
 
-Component.register('pallet-jockey', PalletJockey2d);
-Component3d.register('pallet-jockey', PalletJockey);
+Component.register('pallet-jockey', PalletJockey2d)
+Component3d.register('pallet-jockey', PalletJockey)
