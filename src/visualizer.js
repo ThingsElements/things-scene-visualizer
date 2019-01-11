@@ -749,8 +749,10 @@ export default class Visualizer extends Container {
       var modelLayer = Layer.register('model-layer')
       var popup = modelLayer.Popup
       var ref = this.model.popupScene
-
-      var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
+      var pointer = {
+        x: e.offsetX,
+        y: e.offsetY
+      }
 
       this._mouse.x = ((pointer.x - this.model.left) / this.model.width) * 2 - 1
       this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1
@@ -774,7 +776,10 @@ export default class Visualizer extends Container {
 
   onmousemove(e) {
     if (this._controls) {
-      var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
+      var pointer = {
+        x: e.offsetX,
+        y: e.offsetY
+      }
 
       this._mouse.x = ((pointer.x - this.model.left) / this.model.width) * 2 - 1
       this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1
@@ -811,7 +816,10 @@ export default class Visualizer extends Container {
 
   ondragstart(e) {
     if (this._controls) {
-      var pointer = this.transcoordC2S(e.offsetX, e.offsetY)
+      var pointer = {
+        x: e.offsetX,
+        y: e.offsetY
+      }
 
       this._mouse.x = ((pointer.x - this.model.left) / this.model.width) * 2 - 1
       this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1
