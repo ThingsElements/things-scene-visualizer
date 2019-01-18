@@ -19,6 +19,14 @@ const NATURE = {
       name: 'unit'
     },
     {
+      type: 'string',
+      label: 'shelf-locations',
+      name: 'shelfLocations',
+      property: {
+        placeholder: '1,2,3,... / ,,,04'
+      }
+    },
+    {
       type: 'checkbox',
       label: 'is-empty',
       name: 'isEmpty'

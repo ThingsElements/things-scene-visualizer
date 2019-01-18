@@ -1,4 +1,4 @@
-import { html } from '@polymer/polymer/polymer-element'
+import { html } from 'lit-element'
 import { ThingsEditorProperty } from '@hatiolab/things-shell/things-module'
 
 export default class LocationIncreasePatternEditor extends ThingsEditorProperty {
@@ -6,7 +6,7 @@ export default class LocationIncreasePatternEditor extends ThingsEditorProperty 
     return 'things-editor-location-increase-pattern'
   }
 
-  static get editorTemplate() {
+  editorTemplate() {
     // TODO: background image change to use the url-loader
     return html`
       <style>
@@ -86,13 +86,13 @@ export default class LocationIncreasePatternEditor extends ThingsEditorProperty 
 
       <legend><things-i18n-msg msgid="label.location-increase-pattern" auto>Increase Pattern</things-i18n-msg></legend>
       <label> <things-i18n-msg msgid="label.start-section" auto>Start Section</things-i18n-msg> </label>
-      <input type="number" data-start-section value="{{startSection::change}}" />
+      <input type="number" data-start-section value="${this.startSection}" />
       <label> <things-i18n-msg msgid="label.start-unit" auto>Start Unit</things-i18n-msg> </label>
-      <input type="number" data-start-unit value="{{startUnit::change}}" />
+      <input type="number" data-start-unit value="${this.startUnit}" />
       <label for="skip-numbering">
         <things-i18n-msg msgid="label.skip-numbering" auto>Skip Numbering</things-i18n-msg>
       </label>
-      <input id="skip-numbering" type="checkbox" data-skip-numbering checked="{{skipNumbering::change}}" />
+      <input id="skip-numbering" type="checkbox" data-skip-numbering ?checked="${this.skipNumbering}" />
       <div id="pattern-set" class="location-increase-pattern-btn">
         <paper-button data-value="cw"> <iron-icon icon="editor:border-outer"></iron-icon> </paper-button>
         <paper-button data-value="ccw"> <iron-icon icon="editor:border-inner"></iron-icon> </paper-button>
@@ -104,42 +104,27 @@ export default class LocationIncreasePatternEditor extends ThingsEditorProperty 
 
   static get properties() {
     return {
-      startSection: {
-        type: Number,
-        value: 1
-      },
-      startUnit: {
-        type: Number,
-        value: 1
-      },
-      skipNumbering: {
-        type: Boolean,
-        value: true
-      },
-      _specificPropEl: {
-        type: HTMLElement,
-        value: null
-      }
+      startSection: Number,
+      startUnit: Number,
+      skipNumbering: Boolean,
+      _specificPropEl: HTMLElement
     }
   }
 
-  connectedCallback() {
-    super.connectedCallback()
-    this._specificPropEl = this._getSpecificPropEl()
-    if (this._specificPropEl)
-      this._specificPropEl.addEventListener(
-        'rack-table-cell-increment-set',
-        this._handleRackTableCellIncrementSet,
-        false
-      )
-    this.$['pattern-set'].addEventListener('tap', this._onTapType)
+  constructor() {
+    super()
+
+    this.startSection = 1
+    this.startUnit = 1
+    this.skipNumbering = true
+    this._specificPropEl = null
   }
 
-  disconnectedCallback() {
-    super.disconnectedCallback()
-    if (this._specificPropEl)
-      this._specificPropEl.removeEventListener('rack-table-cell-increment-set', this._handleRackTableCellIncrementSet)
-    this.$['pattern-set'].removeEventListener('tap', this._onTapType)
+  firstUpdated(changedProperties) {
+    // this._specificPropEl = this._getSpecificPropEl()
+    // if (this._specificPropEl)
+    this.shadowRoot.addEventListener('rack-table-cell-increment-set', this._handleRackTableCellIncrementSet, false)
+    this.shadowRoot.querySelector('#pattern-set').addEventListener('tap', this._onTapType)
   }
 
   _onTapType(e) {

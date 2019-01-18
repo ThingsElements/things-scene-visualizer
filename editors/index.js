@@ -6,5 +6,3 @@ export default [
     element: LocationIncreasePatternEditor.is
   }
 ]
-
-import './things-editor-location-increase-pattern'

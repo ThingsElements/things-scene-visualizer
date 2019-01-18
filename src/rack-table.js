@@ -69,10 +69,10 @@ const NATURE = {
     },
     {
       type: 'string',
-      label: 'shelf-pattern',
-      name: 'shelfPattern',
+      label: 'shelf-locations',
+      name: 'shelfLocations',
       property: {
-        placeholder: '#, 00, 000'
+        placeholder: '1,2,3,... / ,,,04'
       }
     },
     {
@@ -112,12 +112,6 @@ const DEFAULT_STYLE = {
 }
 
 const TABLE_LAYOUT = Layout.get('table')
-
-function hasAnyProperty(o, ...properties) {
-  for (let p in properties) {
-    if (o.hasOwnProperty(properties[p])) return true
-  }
-}
 
 function buildNewCell(app) {
   return Model.compile(
@@ -289,7 +283,8 @@ export default class RackTable3d extends Group3D {
       rotation = 0,
       zone,
       locPattern = '{z}{s}-{u}{sh}',
-      shelfPattern = '00',
+      shelfPattern,
+      shelfLocations,
       shelves = 1,
       depth = 1,
       columns,
@@ -307,6 +302,18 @@ export default class RackTable3d extends Group3D {
     this.position.set(cx, cz, cy)
     this.rotation.y = -rotation
 
+    if (shelfPattern) {
+      var shelfLocIds = []
+      for (var i = 0; i < shelves; i++) {
+        var locId = this.makeShelfString(shelfPattern, i + 1, shelves)
+        shelfLocIds.push(locId)
+      }
+
+      shelfLocations = shelfLocIds.join(',')
+    }
+
+    delete this.model.shelfPattern
+
     components.forEach(rack => {
       var rackModel = {
         left: rack.left,
@@ -319,13 +326,14 @@ export default class RackTable3d extends Group3D {
         section: rack.section,
         zone,
         locPattern,
-        shelfPattern,
+        shelfLocations: rack.shelfLocations || shelfLocations,
         isEmpty: rack.isEmpty,
         hideRackFrame,
         stockScale
       }
 
-      if (!rackModel.isEmpty) {
+      var rackLocationIds = (rack.shelfLocations || '').split(/\s*,\s*/)
+      if (!rackModel.isEmpty || (rackLocationIds && rackLocationIds.length == shelves)) {
         var rack = new Rack(rackModel, this.model, this._visualizer)
         this.add(rack)
       }
@@ -360,6 +368,37 @@ export default class RackTable3d extends Group3D {
 
       targetBoard.geometry.merge(b.geometry)
     })
+  }
+
+  makeShelfString(pattern, shelf, length) {
+    /**
+     *  pattern #: 숫자
+     *  pattern 0: 고정 자리수
+     *  pattern -: 역순
+     */
+
+    if (!pattern || !shelf || !length) return
+
+    var isReverse = /^\-/.test(pattern)
+    pattern = pattern.replace(/#+/, '#')
+
+    var fixedLength = (pattern.match(/0/g) || []).length || 0
+    var shelfString = String(isReverse ? length - shelf + 1 : shelf)
+
+    if (shelfString.length > fixedLength && fixedLength > 0) {
+      shelfString = shelfString
+        .split('')
+        .shift(shelfString.length - fixedLength)
+        .join('')
+    } else {
+      var prefix = ''
+      for (var i = 0; i < fixedLength - shelfString.length; i++) {
+        prefix += '0'
+      }
+      shelfString = prefix + shelfString
+    }
+
+    return shelfString
   }
 
   setOpacity() {}
@@ -1207,13 +1246,17 @@ export class RackTable extends ContainerAbstract {
   }
 
   onchange(after, before) {
-    if (hasAnyProperty(after, 'rows', 'columns')) {
+    if ('rows' in after || 'columns' in after) {
       this.buildCells(
         this.get('rows'),
         this.get('columns'),
         before.hasOwnProperty('rows') ? before.rows : this.get('rows'),
         before.hasOwnProperty('columns') ? before.columns : this.get('columns')
       )
+    }
+
+    if ('shelfLocations' in after) {
+      delete this.model.shelfPattern
     }
 
     this.invalidate()
