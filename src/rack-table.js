@@ -47,33 +47,25 @@ const NATURE = {
       type: 'string',
       label: 'location-pattern',
       name: 'locPattern',
-      property: {
-        placeholder: '{z}{s}-{u}-{sh}'
-      }
+      placeholder: '{z}{s}-{u}-{sh}'
     },
     {
       type: 'number',
       label: 'section-digits',
       name: 'sectionDigits',
-      property: {
-        placeholder: '1, 2, 3, ...'
-      }
+      placeholder: '1, 2, 3, ...'
     },
     {
       type: 'number',
       label: 'unit-digits',
       name: 'unitDigits',
-      property: {
-        placeholder: '1, 2, 3, ...'
-      }
+      placeholder: '1, 2, 3, ...'
     },
     {
       type: 'string',
       label: 'shelf-locations',
       name: 'shelfLocations',
-      property: {
-        placeholder: '1,2,3,... / ,,,04'
-      }
+      placeholder: '1,2,3,... / ,,,04'
     },
     {
       type: 'number',

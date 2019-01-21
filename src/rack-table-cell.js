@@ -22,9 +22,7 @@ const NATURE = {
       type: 'string',
       label: 'shelf-locations',
       name: 'shelfLocations',
-      property: {
-        placeholder: '1,2,3,... / ,,,04'
-      }
+      placeholder: '1,2,3,... / ,,,04'
     },
     {
       type: 'checkbox',
