@@ -1,7 +1,8 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import ThreeControls from './three-controls'
+// import ThreeControls from './three-controls'
+import ThreeControls from 'three-dlc/src/controls/OrbitControls'
 import './three-layout'
 
 import * as THREE from 'three'
@@ -187,6 +188,10 @@ export default class Visualizer extends Container {
     }
 
     return this._legendTarget
+  }
+
+  oncreate_element(element) {
+    element.style.pointerEvents = 'initial'
   }
 
   containable(component) {
@@ -419,7 +424,7 @@ export default class Visualizer extends Container {
     // this._renderer.setPixelRatio(window.devicePixelRatio)
 
     // CONTROLS
-    this._controls = new ThreeControls(this._camera, this)
+    this._controls = new ThreeControls(this._camera, this.element)
     this._controls.cameraChanged = true
 
     // LIGHT
@@ -736,12 +741,6 @@ export default class Visualizer extends Container {
     this.invalidate()
   }
 
-  onmousedown(e) {
-    if (this._controls) {
-      this._controls.onMouseDown(e)
-    }
-  }
-
   onmouseup(e) {
     if (this._controls) {
       if (this._lastFocused) this._lastFocused._focused = false
@@ -774,38 +773,6 @@ export default class Visualizer extends Container {
     }
   }
 
-  onmousemove(e) {
-    if (this._controls) {
-      var pointer = {
-        x: e.offsetX,
-        y: e.offsetY
-      }
-
-      this._mouse.x = ((pointer.x - this.model.left) / this.model.width) * 2 - 1
-      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1
-
-      this._controls.onMouseMove(e)
-
-      e.stopPropagation()
-    }
-  }
-
-  onmouseleave(e) {
-    if (!this._scene2d) return
-
-    var tooltip = this._scene2d.getObjectByName('tooltip')
-    if (tooltip) {
-      this._scene2d.remove(tooltip)
-    }
-  }
-
-  onwheel(e) {
-    if (this._controls) {
-      this.handleMouseWheel(e)
-      e.stopPropagation()
-    }
-  }
-
   ondblclick(e) {
     if (this._controls) {
       this.setState('zoom', this.model.zoom)
@@ -814,80 +781,9 @@ export default class Visualizer extends Container {
     }
   }
 
-  ondragstart(e) {
-    if (this._controls) {
-      var pointer = {
-        x: e.offsetX,
-        y: e.offsetY
-      }
-
-      this._mouse.x = ((pointer.x - this.model.left) / this.model.width) * 2 - 1
-      this._mouse.y = -((pointer.y - this.model.top) / this.model.height) * 2 + 1
-
-      this._controls.onDragStart(e)
-      e.stopPropagation()
-    }
-  }
-
-  ondragmove(e) {
-    if (this._controls) {
-      this._controls.cameraChanged = true
-      this._controls.onDragMove(e)
-      e.stopPropagation()
-    }
-  }
-
-  ondragend(e) {
-    if (this._controls) {
-      this._controls.cameraChanged = true
-      this._controls.onDragEnd(e)
-      e.stopPropagation()
-    }
-  }
-
-  ontouchstart(e) {
-    if (this._controls) {
-      this._controls.onTouchStart(e)
-      e.stopPropagation()
-    }
-  }
-
-  onpan(e) {
-    if (this._controls) {
-      this._controls.cameraChanged = true
-      this._controls.onTouchMove(e)
-      e.stopPropagation()
-    }
-  }
-  ontouchend(e) {
-    if (this._controls) {
-      this._controls.onTouchEnd(e)
-      this.onmouseup(e)
-      e.stopPropagation()
-    }
-  }
-
-  onkeydown(e) {
-    if (this._controls) {
-      this._controls.onKeyDown(e)
-      e.stopPropagation()
-    }
-  }
-
-  onpinch(e) {
-    if (this._controls) {
-      var zoom = this.getState('zoom')
-      zoom *= e.scale
-
-      if (zoom < 100) zoom = 100
-
-      this.setState('zoom', zoom)
-      e.stopPropagation()
-    }
-  }
-
   ondoubletap() {
     this._controls.reset()
+    this.invalidate()
   }
 
   handleMouseWheel(event) {
