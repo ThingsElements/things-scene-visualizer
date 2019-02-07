@@ -8,7 +8,7 @@ import Component3d from './component-3d'
 import GLTFLogo from '../assets/canvasicon-gltf.png'
 
 import * as THREE from 'three'
-import GLTFLoader from 'three-dlc/src/loaders/GLTFLoader'
+import GLTFLoader from 'three/examples/js/loaders/GLTFLoader'
 
 import { RectPath, Shape, Component } from '@hatiolab/things-scene'
 

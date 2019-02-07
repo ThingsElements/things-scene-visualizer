@@ -158,7 +158,7 @@ export default class Stock extends Mesh {
 
     if (!(statusField && ranges)) return
 
-    var data = this.userData.items ? this.userData.items : [this.userData]
+    var data = (this.userData.items ? this.userData.items : [this.userData]).slice(0, 1)
 
     for (let i in data) {
       let d = data[i]

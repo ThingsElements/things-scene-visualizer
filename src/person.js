@@ -8,8 +8,8 @@ import path from 'path'
 const personPath = path.resolve('../obj/Casual_Man_02')
 
 import * as THREE from 'three'
-import OBJLoader from 'three-dlc/src/loaders/OBJLoader'
-import MTLLoader from 'three-dlc/src/loaders/MTLLoader'
+import OBJLoader from 'three/examples/js/loaders/OBJLoader'
+import MTLLoader from 'three/examples/js/loaders/MTLLoader'
 
 export default class Person extends Object3D {
   static get threedObjectLoader() {

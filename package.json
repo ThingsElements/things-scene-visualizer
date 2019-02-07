@@ -40,7 +40,6 @@
     "heatmap.js": "^2.0.5",
     "jszip": "^3.1.5",
     "lit-element": "^2.0.0-rc.3",
-    "three": "^0.100.0",
-    "three-dlc": "^0.100.0-alpha-2"
+    "three": "^0.101.1"
   }
 }

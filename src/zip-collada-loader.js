@@ -1,7 +1,7 @@
 import JSZip from 'jszip'
 
 import * as THREE from 'three'
-import ColladaLoader from 'three-dlc/src/loaders/ColladaLoader'
+import ColladaLoader from 'three/examples/js/loaders/ColladaLoader'
 
 export default class ZipColladaLoader {
   constructor(manager) {

@@ -13,7 +13,7 @@ import path from 'path'
 const TRUCK_PATH = path.resolve('../obj/CJ_Truck')
 
 import * as THREE from 'three'
-import ColladaLoader from 'three-dlc/src/loaders/ColladaLoader'
+import ColladaLoader from 'three/examples/js/loaders/ColladaLoader'
 
 import { RectPath, Shape, Component } from '@hatiolab/things-scene'
 
