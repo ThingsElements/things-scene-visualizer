@@ -42,7 +42,7 @@ export default class BoundUVGenerator {
       dy = vertices[indexD * 3 + 1],
       dz = vertices[indexD * 3 + 2]
 
-    const amt = this.extrudedOptions.amount,
+    const amt = this.extrudedOptions.depth,
       bb = this.bb, //extrudedShape.getBoundingBox(),
       bbx = bb.max.x - bb.min.x,
       bby = bb.max.y - bb.min.y

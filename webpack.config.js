@@ -18,8 +18,7 @@ module.exports = {
     modules: ['./node_modules']
   },
   externals: {
-    '@hatiolab/things-scene': 'scene',
-    'three.js': 'THREE'
+    '@hatiolab/things-scene': 'scene'
   },
   optimization: {
     minimize: true
@@ -29,7 +28,10 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /(node_modules)/,
-        loader: 'babel-loader'
+        loader: 'babel-loader',
+        options: {
+          plugins: [['@babel/plugin-proposal-export-default-from']]
+        }
       },
       {
         test: /\.json$/,

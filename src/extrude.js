@@ -140,7 +140,7 @@ export default class Extrude extends Object3D {
 
     var sideExtrudeSettings = {
       steps: 1,
-      amount: depth,
+      depth,
       bevelEnabled: true,
       bevelThickness: 0,
       bevelSize: lineWidth,

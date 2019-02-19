@@ -11,7 +11,7 @@ import path from 'path'
 const forkLiftPath = path.resolve('../obj/Forklift')
 
 import * as THREE from 'three'
-import ColladaLoader from 'three/examples/js/loaders/ColladaLoader'
+import ColladaLoader from 'three-dlc/src/loaders/ColladaLoader'
 
 export default class ForkLift extends Object3D {
   static get threedObjectLoader() {

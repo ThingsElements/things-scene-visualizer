@@ -12,7 +12,7 @@ import Component3d from './component-3d'
 
 import { Component, ContainerAbstract, Layout, Layer, ScriptLoader, error, FPS } from '@hatiolab/things-scene'
 
-import TGALoader from 'three/examples/js/loaders/TGALoader'
+import TGALoader from 'three-dlc/src/loaders/TGALoader'
 
 const NATURE = {
   mutable: false,

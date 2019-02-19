@@ -13,7 +13,7 @@ const PALLET_JOKEY_PATH = path.resolve('../obj/Pallet_Jockey')
 import { RectPath, Shape, Component } from '@hatiolab/things-scene'
 
 import * as THREE from 'three'
-import ColladaLoader from 'three/examples/js/loaders/ColladaLoader'
+import ColladaLoader from 'three-dlc/src/loaders/ColladaLoader'
 
 const NATURE = {
   mutable: false,
