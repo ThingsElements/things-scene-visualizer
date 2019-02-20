@@ -26,18 +26,18 @@
   "homepage": "https://github.com/ThingsElements/things-scene-visualizer#readme",
   "devDependencies": {
     "@babel/plugin-proposal-export-default-from": "^7.2.0",
-    "@hatiolab/things-shell": "^0.6.114",
-    "@things-scene/chartjs": "^4.0.8",
-    "@things-scene/forklift": "^2.2.2",
-    "@things-scene/form": "^0.3.20",
-    "@things-scene/indoor-map": "^2.3.11",
-    "@things-scene/legend": "^0.4.6",
-    "@things-scene/person": "^2.2.2",
-    "@things-scene/progressbar": "^2.3.8",
-    "@things-scene/restful": "^0.3.10"
+    "@hatiolab/things-shell": "*",
+    "@things-scene/chartjs": "*",
+    "@things-scene/forklift": "*",
+    "@things-scene/form": "*",
+    "@things-scene/indoor-map": "*",
+    "@things-scene/legend": "*",
+    "@things-scene/person": "*",
+    "@things-scene/progressbar": "*",
+    "@things-scene/restful": "*"
   },
   "dependencies": {
-    "@hatiolab/things-scene": "^2.5.7",
+    "@hatiolab/things-scene": "*",
     "heatmap.js": "^2.0.5",
     "lit-element": "^2.0.1",
     "three": "^0.101.1",
