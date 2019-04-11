@@ -1,9 +1,12 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import Object3D from './object3d'
-import Component3d from './component-3d'
+import { Component, RectPath, Shape } from '@hatiolab/things-scene'
+import * as THREE from 'three'
 import palletSymbol from '../assets/canvasicon-pallet.png'
+import Component3d from './component-3d'
+import ColladaLoader from './loaders/ColladaLoader'
+import Object3D from './object3d'
 
 const EMPTY_PALLET = '../obj/pallet/EmptyPallet/EmptyPallet.dae'
 const SMALL_PALLET = '../obj/pallet/SmallPallet/SmallPallet.dae'
@@ -18,11 +21,6 @@ const PALLET_MODELS = {
   full: FULL_PALLET,
   fullWithJockey: FULL_PALLET_WITH_JOKEY
 }
-
-import { RectPath, Shape, Component } from '@hatiolab/things-scene'
-
-import * as THREE from 'three'
-import ColladaLoader from 'three-dlc/src/loaders/ColladaLoader'
 
 const NATURE = {
   mutable: false,

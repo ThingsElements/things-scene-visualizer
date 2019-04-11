@@ -2,20 +2,17 @@
  * Copyright © HatioLab Inc. All rights reserved.
  */
 
-import Object3D from './object3d'
-import Component3d from './component-3d'
-
-import symbol from '../assets/canvasicon-cj-truck.png'
-const TRUCK_MODEL = 'Vehicle_Big.dae'
+import { Component, RectPath, Shape } from '@hatiolab/things-scene'
 // import truckModel from '../obj/CJ_Truck/Vehicle_Big.dae?3d'
-
 import path from 'path'
-const TRUCK_PATH = path.resolve('../obj/CJ_Truck')
-
 import * as THREE from 'three'
-import ColladaLoader from 'three-dlc/src/loaders/ColladaLoader'
+import symbol from '../assets/canvasicon-cj-truck.png'
+import Component3d from './component-3d'
+import ColladaLoader from './loaders/ColladaLoader'
+import Object3D from './object3d'
 
-import { RectPath, Shape, Component } from '@hatiolab/things-scene'
+const TRUCK_MODEL = 'Vehicle_Big.dae'
+const TRUCK_PATH = path.resolve('../obj/CJ_Truck')
 
 const NATURE = {
   mutable: false,

@@ -1,12 +1,10 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
+import { Component, ContainerAbstract, Layout, Model } from '@hatiolab/things-scene'
 import Component3d from './component-3d'
 import Group3D from './group3d'
-
 import Rack from './rack'
-
-import { Component, ContainerAbstract, Layout, Model } from '@hatiolab/things-scene'
 
 const NATURE = {
   mutable: false,

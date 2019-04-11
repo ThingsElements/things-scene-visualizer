@@ -1,9 +1,10 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import Component3d from './component-3d'
-
 import { Component, Ellipse } from '@hatiolab/things-scene'
+import * as THREE from 'three'
+import Component3d from './component-3d'
+import Mesh from './mesh'
 
 const NATURE = {
   mutable: false,
@@ -11,9 +12,6 @@ const NATURE = {
   rotatable: true,
   properties: []
 }
-
-import * as THREE from 'three'
-import Mesh from './mesh'
 
 export default class Cylinder extends Mesh {
   get cx() {

@@ -1,11 +1,9 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import Component3d from './component-3d'
-
 import { Component, Ellipse } from '@hatiolab/things-scene'
-
 import * as THREE from 'three'
+import Component3d from './component-3d'
 import Mesh from './mesh'
 
 const NATURE = {

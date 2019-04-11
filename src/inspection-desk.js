@@ -1,19 +1,17 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import Object3D from './object3d'
-import Component3d from './component-3d'
-
+import { Component, RectPath, Shape } from '@hatiolab/things-scene'
+import path from 'path'
+import * as THREE from 'three'
 import symbol from '../assets/canvasicon-inspection-desk.png'
+import Component3d from './component-3d'
+import ColladaLoader from './loaders/ColladaLoader'
+import Object3D from './object3d'
+
 const INSPECTION_DESK_MODEL = 'InspectionDesk.dae'
 
-import path from 'path'
 const INSPECTION_DESK_PATH = path.resolve('../obj/inspection_desk')
-
-import { RectPath, Shape, Component } from '@hatiolab/things-scene'
-
-import * as THREE from 'three'
-import ColladaLoader from 'three-dlc/src/loaders/ColladaLoader'
 
 const NATURE = {
   mutable: false,

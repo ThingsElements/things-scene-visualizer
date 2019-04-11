@@ -1,22 +1,20 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import Object3D from './object3d'
-import Component3d from './component-3d'
-
 import path from 'path'
-const personPath = path.resolve('../obj/Casual_Man_02')
+import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader'
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
+import Component3d from './component-3d'
+import Object3D from './object3d'
 
-import * as THREE from 'three'
-import OBJLoader from 'three-dlc/src/loaders/OBJLoader'
-import MTLLoader from 'three-dlc/src/loaders/MTLLoader'
+const personPath = path.resolve('../obj/Casual_Man_02')
 
 export default class Person extends Object3D {
   static get threedObjectLoader() {
     if (!Person._threedObjectLoader) {
       Person._threedObjectLoader = new Promise((resolve, reject) => {
-        let objLoader = new OBJLoader(THREE.DefaultLoadingManager)
-        let mtlLoader = new MTLLoader(THREE.DefaultLoadingManager)
+        let objLoader = new OBJLoader()
+        let mtlLoader = new MTLLoader()
 
         objLoader.setPath(`${personPath}/`)
         mtlLoader.setPath(`${personPath}/`)

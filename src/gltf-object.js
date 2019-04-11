@@ -2,15 +2,12 @@
  * Copyright © HatioLab Inc. All rights reserved.
  */
 
-import Object3D from './object3d'
-import Component3d from './component-3d'
-
-import GLTFLogo from '../assets/canvasicon-gltf.png'
-
+import { Component, RectPath, Shape } from '@hatiolab/things-scene'
 import * as THREE from 'three'
-import GLTFLoader from 'three-dlc/src/loaders/GLTFLoader'
-
-import { RectPath, Shape, Component } from '@hatiolab/things-scene'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import GLTFLogo from '../assets/canvasicon-gltf.png'
+import Component3d from './component-3d'
+import Object3D from './object3d'
 
 const NATURE = {
   mutable: false,

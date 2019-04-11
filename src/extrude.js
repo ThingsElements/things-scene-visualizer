@@ -1,12 +1,10 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import Object3D from './object3d'
-import tinycolor from 'tinycolor2'
-
-import BoundingUVGenerator from './bounding-uv-generator'
-
 import * as THREE from 'three'
+import tinycolor from 'tinycolor2'
+import BoundingUVGenerator from './bounding-uv-generator'
+import Object3D from './object3d'
 
 export default class Extrude extends Object3D {
   get shape() {

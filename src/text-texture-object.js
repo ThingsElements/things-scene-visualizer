@@ -2,10 +2,9 @@
  * Copyright © HatioLab Inc. All rights reserved.
  */
 
-import Object3D from './object3d'
-import Component3d from './component-3d'
-
 import * as THREE from 'three'
+import Component3d from './component-3d'
+import Object3D from './object3d'
 
 export default class TextTextureObject extends Object3D {
   createObject() {

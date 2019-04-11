@@ -1,19 +1,17 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import Mesh from './mesh'
-import Component3d from './component-3d'
-
-import symbol from '../assets/canvasicon-worker-2.png'
+import { Component, RectPath, Shape } from '@hatiolab/things-scene'
 import path from 'path'
+import * as THREE from 'three'
+import symbol from '../assets/canvasicon-worker-2.png'
+import Component3d from './component-3d'
+import ColladaLoader from './loaders/ColladaLoader'
+import Mesh from './mesh'
+
 const WORKER_PATH = path.resolve('../obj/worker2')
 
 const WORKER_MODEL = 'Worker2.dae'
-
-import { RectPath, Shape, Component } from '@hatiolab/things-scene'
-
-import * as THREE from 'three'
-import ColladaLoader from 'three-dlc/src/loaders/ColladaLoader'
 
 const NATURE = {
   mutable: false,

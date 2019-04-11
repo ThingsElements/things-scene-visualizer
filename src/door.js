@@ -1,11 +1,9 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import Component3d from './component-3d'
-
 import { Component, Rect } from '@hatiolab/things-scene'
-
 import * as THREE from 'three'
+import Component3d from './component-3d'
 
 export default class Door extends THREE.Mesh {
   constructor(model, canvasSize) {

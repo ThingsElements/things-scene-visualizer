@@ -1,8 +1,8 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import Component3d from './component-3d'
 import * as THREE from 'three'
+import Component3d from './component-3d'
 
 export default class Group3D extends THREE.Group {
   constructor(model, canvasSize, visualizer) {

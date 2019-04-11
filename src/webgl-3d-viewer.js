@@ -1,11 +1,10 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import Rack from './rack'
+import * as THREE from 'three'
 import ForkLift from './forkLift'
 import Person from './person'
-
-import * as THREE from 'three'
+import Rack from './rack'
 
 export default class WebGL3dViewer {
   constructor(target, model, data) {

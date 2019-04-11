@@ -1,12 +1,10 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import Object3D from './object3d'
-import Component3d from './component-3d'
-
 import { Component, Ellipse } from '@hatiolab/things-scene'
-
 import * as THREE from 'three'
+import Component3d from './component-3d'
+import Object3D from './object3d'
 
 const STATUS_COLORS = ['#6666ff', '#ccccff', '#ffcccc', '#cc3300']
 

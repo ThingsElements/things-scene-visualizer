@@ -1,16 +1,10 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import ThreeLayout from './three-layout'
-import ThreeControls from './three-controls'
-
-import Component3d from './component-3d'
-
+import { Component, Container, error, FPS, Layer, Layout, ScriptLoader } from '@hatiolab/things-scene'
 import * as THREE from 'three'
-
-import { Component, Container, Layout, Layer, ScriptLoader, error, FPS } from '@hatiolab/things-scene'
-
-import 'heatmap.js'
+import Component3d from './component-3d'
+import ThreeControls from './three-controls'
 
 const NATURE = {
   mutable: false,
@@ -187,12 +181,13 @@ export default class ThreeContainer extends Container {
 
     var div = document.createElement('div')
 
-    this._heatmap = h337.create({
-      container: div,
-      width: width,
-      height: height,
-      radius: Math.sqrt(width * width + height * height) / 4
-    })
+    this._heatmap = {}
+    // h337.create({
+    //   container: div,
+    //   width: width,
+    //   height: height,
+    //   radius: Math.sqrt(width * width + height * height) / 4
+    // })
 
     var heatmapMaterial = new THREE.MeshBasicMaterial({
       side: THREE.FrontSide,

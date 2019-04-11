@@ -1,17 +1,15 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import Object3D from './object3d'
+// import forkLiftModel from '../obj/Forklift/ForkLift.dae?3d'
+import path from 'path'
+import * as THREE from 'three'
 import Component3d from './component-3d'
+import ColladaLoader from './loaders/ColladaLoader'
+import Object3D from './object3d'
 
 const forkLiftModel = 'ForkLift.dae'
-// import forkLiftModel from '../obj/Forklift/ForkLift.dae?3d'
-
-import path from 'path'
 const forkLiftPath = path.resolve('../obj/Forklift')
-
-import * as THREE from 'three'
-import ColladaLoader from 'three-dlc/src/loaders/ColladaLoader'
 
 export default class ForkLift extends Object3D {
   static get threedObjectLoader() {

@@ -1,18 +1,13 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
+// import OBJExporter from 'three-obj-exporter'
+import { Component, ContainerAbstract, error, FPS, Layer, Layout, ScriptLoader } from '@hatiolab/things-scene'
+import * as THREE from 'three'
+import Component3d from './component-3d'
+import TGALoader from './loaders/TGALoader'
 import ThreeControls from './three-controls'
 import './three-layout'
-
-import * as THREE from 'three'
-
-import Component3d from './component-3d'
-
-// import OBJExporter from 'three-obj-exporter'
-
-import { Component, ContainerAbstract, Layout, Layer, ScriptLoader, error, FPS } from '@hatiolab/things-scene'
-
-import TGALoader from 'three-dlc/src/loaders/TGALoader'
 
 const NATURE = {
   mutable: false,
@@ -516,7 +511,8 @@ export default class Visualizer extends ContainerAbstract {
 
       if (!this._renderer) return
 
-      var rendererSize = this._renderer.getSize()
+      var rendererSize = new THREE.Vector2()
+      this._renderer.getSize(rendererSize)
       var { width: rendererWidth, height: rendererHeight } = rendererSize
 
       ctx.drawImage(this._renderer.domElement, 0, 0, rendererWidth, rendererHeight, left, top, width, height)

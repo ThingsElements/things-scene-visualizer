@@ -1,10 +1,9 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import Extrude from './extrude'
-import Component3d from './component-3d'
-
 import * as THREE from 'three'
+import Component3d from './component-3d'
+import Extrude from './extrude'
 
 export default class EllipseExtrude extends Extrude {
   get cx() {

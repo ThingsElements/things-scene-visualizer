@@ -1,19 +1,17 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import Object3D from './object3d'
-import Component3d from './component-3d'
+import { Component, RectPath, Shape } from '@hatiolab/things-scene'
+import path from 'path'
+import * as THREE from 'three'
 import palletJockeySymbol from '../assets/canvasicon-pallet-jockey.png'
+import Component3d from './component-3d'
+import ColladaLoader from './loaders/ColladaLoader'
+import Object3D from './object3d'
 
 const PALLET_JOKEY_MODEL = 'SmallJockey.dae'
 
-import path from 'path'
 const PALLET_JOKEY_PATH = path.resolve('../obj/Pallet_Jockey')
-
-import { RectPath, Shape, Component } from '@hatiolab/things-scene'
-
-import * as THREE from 'three'
-import ColladaLoader from 'three-dlc/src/loaders/ColladaLoader'
 
 const NATURE = {
   mutable: false,
