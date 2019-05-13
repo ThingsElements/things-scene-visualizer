@@ -39,6 +39,21 @@ const NATURE = {
       property: 'zoom'
     },
     {
+      type: 'number',
+      label: 'camera-x',
+      name: 'cameraX'
+    },
+    {
+      type: 'number',
+      label: 'camera-y',
+      name: 'cameraY'
+    },
+    {
+      type: 'number',
+      label: 'camera-z',
+      name: 'cameraZ'
+    },
+    {
       type: 'select',
       label: 'precision',
       name: 'precision',
@@ -371,6 +386,9 @@ export default class Visualizer extends ContainerAbstract {
       light = 0xffffff,
       antialias = true,
       precision = 'highp',
+      cameraX,
+      cameraY,
+      cameraZ,
       legendTarget
     } = this.model
 
@@ -384,8 +402,17 @@ export default class Visualizer extends ContainerAbstract {
 
     this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
 
+    var cameraXPos = height * 0.8,
+      cameraYPos = width * 0.8,
+      cameraZPos = Math.floor(Math.min(width, height))
+
+    if (cameraX) cameraXPos = cameraX * width
+    if (cameraY) cameraYPos = cameraY * height
+    if (cameraZ) cameraZPos = cameraZ * Math.floor(Math.min(width, height))
+
+    this._camera.position.set(cameraXPos, cameraZPos, cameraYPos)
+
     this._scene3d.add(this._camera)
-    this._camera.position.set(height * 0.8, Math.floor(Math.min(width, height)), width * 0.8)
     this._camera.lookAt(this._scene3d.position)
     this._camera.zoom = this.getState('zoom') * 0.01
 

@@ -37,8 +37,8 @@
     "@things-scene/restful": "*"
   },
   "dependencies": {
-    "@hatiolab/things-scene": "2.5.19",
+    "@hatiolab/things-scene": "2.5.23",
     "lit-element": "^2.1.0",
-    "three": "^0.103.0"
+    "three": "^0.104.0"
   }
 }
