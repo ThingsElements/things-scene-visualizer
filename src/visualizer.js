@@ -406,9 +406,9 @@ export default class Visualizer extends ContainerAbstract {
       cameraYPos = width * 0.8,
       cameraZPos = Math.floor(Math.min(width, height))
 
-    if (cameraX) cameraXPos = cameraX * width
-    if (cameraY) cameraYPos = cameraY * height
-    if (cameraZ) cameraZPos = cameraZ * Math.floor(Math.min(width, height))
+    if (cameraX != undefined) cameraXPos = cameraX * width
+    if (cameraY != undefined) cameraYPos = cameraY * height
+    if (cameraZ != undefined) cameraZPos = cameraZ * Math.floor(Math.min(width, height))
 
     this._camera.position.set(cameraXPos, cameraZPos, cameraYPos)
 
