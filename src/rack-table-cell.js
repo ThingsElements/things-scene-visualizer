@@ -25,7 +25,7 @@ const NATURE = {
       placeholder: '1,2,3,... / ,,,04'
     },
     {
-      type: 'string',
+      type: 'textarea',
       label: 'bin-locations',
       name: 'binLocations',
       placeholder: '1,2,3,...'

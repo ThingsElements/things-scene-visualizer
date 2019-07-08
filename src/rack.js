@@ -77,7 +77,18 @@ export default class Rack extends Object3D {
   }
 
   createObject() {
-    var { type, width, height, depth, fillStyle, hideRackFrame, shelves, shelfLocations, binLocations = '', stockScale = 0.7 } = this.model
+    var {
+      type,
+      width,
+      height,
+      depth,
+      fillStyle,
+      hideRackFrame,
+      shelves,
+      shelfLocations,
+      binLocations = '',
+      stockScale = 0.7
+    } = this.model
 
     let scale = stockScale
 
@@ -97,6 +108,11 @@ export default class Rack extends Object3D {
       for (var i = 0; i < shelves; i++) shelfLocIds.push(i + 1)
     } else shelfLocIds = shelfLocations.split(/\s*,\s*/)
 
+    var shelfBins = binLocations
+      .trim()
+      .split('\n')
+      .reverse()
+
     for (var i = 0; i < shelves; i++) {
       let bottom = -depth * shelves * 0.5
       if (i > 0 && !hideRackFrame) {
@@ -114,10 +130,10 @@ export default class Rack extends Object3D {
 
       if (shelfLocIds[i] == '') continue
 
-      var bins = binLocations.split(/\s*,\s*/)
+      var bins = (shelfBins[i] || '').trim().split(/\s*,\s*/)
 
       var binWidth = width / (bins.length || 1)
-      for(var b = 0; b < bins.length; b++) {
+      for (var b = 0; b < bins.length; b++) {
         let stock = new Stock(
           {
             width: binWidth * scale,
@@ -128,17 +144,19 @@ export default class Rack extends Object3D {
           this._canvasSize,
           this._visualizer
         )
-  
+
         let stockDepth = depth * scale
-  
-        stock.position.set(width/2 * ((2 * b - (bins.length - 1) )/ bins.length), bottom + depth * i + stockDepth * 0.5, 0)
+
+        stock.position.set(
+          (width / 2) * ((2 * b - (bins.length - 1)) / bins.length),
+          bottom + depth * i + stockDepth * 0.5,
+          0
+        )
         stock.name = this.makeLocationString(shelfLocIds[i])
-  
+
         this.add(stock)
         this._visualizer.putObject(stock.name, stock)
       }
-      
-
     }
   }
 
