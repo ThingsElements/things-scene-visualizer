@@ -77,7 +77,7 @@ export default class Rack extends Object3D {
   }
 
   createObject() {
-    var { type, width, height, depth, fillStyle, hideRackFrame, shelves, shelfLocations, stockScale = 0.7 } = this.model
+    var { type, width, height, depth, fillStyle, hideRackFrame, shelves, shelfLocations, binLocations = '', stockScale = 0.7 } = this.model
 
     let scale = stockScale
 
@@ -114,24 +114,31 @@ export default class Rack extends Object3D {
 
       if (shelfLocIds[i] == '') continue
 
-      let stock = new Stock(
-        {
-          width: width * scale,
-          height: height * scale,
-          depth: depth * scale,
-          fillStyle: fillStyle
-        },
-        this._canvasSize,
-        this._visualizer
-      )
+      var bins = binLocations.split(/\s*,\s*/)
 
-      let stockDepth = depth * scale
+      var binWidth = width / (bins.length || 1)
+      for(var b = 0; b < bins.length; b++) {
+        let stock = new Stock(
+          {
+            width: binWidth * scale,
+            height: height * scale,
+            depth: depth * scale,
+            fillStyle: fillStyle
+          },
+          this._canvasSize,
+          this._visualizer
+        )
+  
+        let stockDepth = depth * scale
+  
+        stock.position.set(width/2 * ((2 * b - (bins.length - 1) )/ bins.length), bottom + depth * i + stockDepth * 0.5, 0)
+        stock.name = this.makeLocationString(shelfLocIds[i])
+  
+        this.add(stock)
+        this._visualizer.putObject(stock.name, stock)
+      }
+      
 
-      stock.position.set(0, bottom + depth * i + stockDepth * 0.5, 0)
-      stock.name = this.makeLocationString(shelfLocIds[i])
-
-      this.add(stock)
-      this._visualizer.putObject(stock.name, stock)
     }
   }
 

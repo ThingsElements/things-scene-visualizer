@@ -25,6 +25,12 @@ const NATURE = {
       placeholder: '1,2,3,... / ,,,04'
     },
     {
+      type: 'string',
+      label: 'bin-locations',
+      name: 'binLocations',
+      placeholder: '1,2,3,...'
+    },
+    {
       type: 'checkbox',
       label: 'is-empty',
       name: 'isEmpty'

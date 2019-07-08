@@ -317,6 +317,7 @@ export default class RackTable3d extends Group3D {
         zone,
         locPattern,
         shelfLocations: rack.shelfLocations || shelfLocations,
+        binLocations: rack.binLocations,
         isEmpty: rack.isEmpty,
         hideRackFrame,
         stockScale
