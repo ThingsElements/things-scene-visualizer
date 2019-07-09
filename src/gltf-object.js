@@ -9,27 +9,52 @@ import GLTFLogo from '../assets/canvasicon-gltf.png'
 import Component3d from './component-3d'
 import Object3D from './object3d'
 
+const BASE_URL_ALIAS = '$base_url'
+
 const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
   properties: [
     {
-      type: 'string',
-      label: 'url',
-      name: 'url',
-      property: 'url'
+      type: 'gltf-selector',
+      label: 'image-src',
+      name: 'src',
+      property: {
+        displayField: 'id',
+        displayFullUrl: true,
+        baseUrlAlias: BASE_URL_ALIAS,
+        defaultStorage: 'scene-image',
+        storageFilters: {
+          type: Array,
+          value: [
+            {
+              name: 'category',
+              value: 'image'
+            }
+          ]
+        },
+        useUpload: true
+      }
     }
+    // {
+    //   type: 'string',
+    //   label: 'url',
+    //   name: 'url',
+    //   property: 'url'
+    // }
   ]
 }
 
 export default class GLTFObject extends Object3D {
   createObject() {
-    var { url } = this.model
+    var { src } = this.model
 
     let gltfLoader = new GLTFLoader()
 
-    gltfLoader.load(url, gltf => {
+    var fullSrc = this._visualizer.app.url(src)
+    gltfLoader.setCrossOrigin('use-credentials')
+    gltfLoader.load(fullSrc, gltf => {
       var scene = gltf.scene
       var extObj = scene
 
