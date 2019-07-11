@@ -876,7 +876,6 @@ export default class Visualizer extends ContainerAbstract {
   ontouchend(e) {
     if (this._controls) {
       this._controls.onTouchEnd(e)
-      this.onmouseup(e)
       e.stopPropagation()
     }
   }
