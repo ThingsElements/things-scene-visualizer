@@ -18,13 +18,13 @@ const NATURE = {
   properties: [
     {
       type: 'gltf-selector',
-      label: 'image-src',
+      label: 'url',
       name: 'src',
       property: {
         displayField: 'id',
         displayFullUrl: true,
         baseUrlAlias: BASE_URL_ALIAS,
-        defaultStorage: 'scene-image',
+        defaultStorage: '3d-model',
         storageFilters: {
           type: Array,
           value: [
@@ -37,12 +37,6 @@ const NATURE = {
         useUpload: true
       }
     }
-    // {
-    //   type: 'string',
-    //   label: 'url',
-    //   name: 'url',
-    //   property: 'url'
-    // }
   ]
 }
 
