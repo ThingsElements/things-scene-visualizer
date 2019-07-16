@@ -152,7 +152,8 @@ export default class Rack extends Object3D {
           bottom + depth * i + stockDepth * 0.5,
           0
         )
-        stock.name = this.makeLocationString(shelfLocIds[i])
+        var binCode = (bins[b] || '').replace('.', '')
+        stock.name = `${this.makeLocationString(shelfLocIds[i])}${binCode}`
 
         this.add(stock)
         this._visualizer.putObject(stock.name, stock)
