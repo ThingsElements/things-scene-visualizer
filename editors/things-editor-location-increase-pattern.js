@@ -1,5 +1,5 @@
 import { html, css } from 'lit-element'
-import { ThingsEditorProperty } from '@hatiolab/things-shell/things-module'
+import { ThingsEditorProperty } from '@things-factory/board-ui/client/modeller-module'
 
 export default class LocationIncreasePatternEditor extends ThingsEditorProperty {
   static get is() {
@@ -89,13 +89,13 @@ export default class LocationIncreasePatternEditor extends ThingsEditorProperty 
   editorTemplate() {
     // TODO: background image change to use the url-loader
     return html`
-      <legend><things-i18n-msg msgid="label.location-increase-pattern" auto>Increase Pattern</things-i18n-msg></legend>
-      <label> <things-i18n-msg msgid="label.start-section" auto>Start Section</things-i18n-msg> </label>
+      <legend><i18n-msg msgid="label.location-increase-pattern" auto>Increase Pattern</i18n-msg></legend>
+      <label> <i18n-msg msgid="label.start-section" auto>Start Section</i18n-msg> </label>
       <input type="number" data-start-section value="${this.startSection}" />
-      <label> <things-i18n-msg msgid="label.start-unit" auto>Start Unit</things-i18n-msg> </label>
+      <label> <i18n-msg msgid="label.start-unit" auto>Start Unit</i18n-msg> </label>
       <input type="number" data-start-unit value="${this.startUnit}" />
       <label for="skip-numbering">
-        <things-i18n-msg msgid="label.skip-numbering" auto>Skip Numbering</things-i18n-msg>
+        <i18n-msg msgid="label.skip-numbering" auto>Skip Numbering</i18n-msg>
       </label>
       <input id="skip-numbering" type="checkbox" data-skip-numbering ?checked="${this.skipNumbering}" />
       <div id="pattern-set" class="location-increase-pattern-btn">
