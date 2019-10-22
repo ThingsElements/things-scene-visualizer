@@ -119,7 +119,7 @@ const NATURE = {
       name: 'locationField'
     },
     {
-      type: 'string',
+      type: 'board-selector',
       label: 'popup-scene',
       name: 'popupScene'
     },

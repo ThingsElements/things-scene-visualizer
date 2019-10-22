@@ -1,5 +1,5 @@
-import { html, css } from 'lit-element'
-import { ThingsEditorProperty } from '@hatiolab/things-shell/things-module'
+import { ThingsEditorProperty } from '@things-factory/board-ui/client/modeller-module'
+import { css, html } from 'lit-element'
 
 export default class LocationIncreasePatternEditor extends ThingsEditorProperty {
   static get is() {
