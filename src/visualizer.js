@@ -124,9 +124,12 @@ const NATURE = {
       name: 'popupScene'
     },
     {
-      type: 'string',
+      type: 'id-input',
       label: 'legend-target',
-      name: 'legendTarget'
+      name: 'legendTarget',
+      property: {
+        component: 'legend'
+      }
     },
     {
       type: 'number',
