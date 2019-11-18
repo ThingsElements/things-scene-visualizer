@@ -1,7 +1,7 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import * as THREE from 'three'
+import * as THREE from '!three'
 import Component3d from './component-3d'
 import Extrude from './extrude'
 

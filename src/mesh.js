@@ -1,7 +1,7 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import * as THREE from 'three'
+import * as THREE from '!three'
 
 export default class Mesh extends THREE.Mesh {
   constructor(model, canvasSize, visualizer) {

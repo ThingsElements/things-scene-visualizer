@@ -28,8 +28,8 @@
   "homepage": "https://github.com/ThingsElements/things-scene-visualizer#readme",
   "devDependencies": {
     "@babel/plugin-proposal-export-default-from": "^7.2.0",
-    "@things-factory/board-app": "*",
-    "@things-factory/board-test": "^0.1.1",
+    "@things-factory/board-app": "^1.0.0-alpha.1",
+    "@things-factory/board-test": "^1.0.0-alpha.1",
     "@things-scene/chartjs": "*",
     "@things-scene/forklift": "*",
     "@things-scene/form": "*",
@@ -42,6 +42,6 @@
   "dependencies": {
     "@hatiolab/things-scene": "^2.5.47",
     "lit-element": "^2.1.0",
-    "three": "^0.109.0"
+    "three": "^0.110.0"
   }
 }

@@ -2,8 +2,8 @@
  * Copyright © HatioLab Inc. All rights reserved.
  */
 import path from 'path'
-import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader'
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
+import { MTLLoader } from '!three/examples/jsm/loaders/MTLLoader'
+import { OBJLoader } from '!three/examples/jsm/loaders/OBJLoader'
 import Component3d from './component-3d'
 import Object3D from './object3d'
 

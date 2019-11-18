@@ -1,7 +1,7 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import * as THREE from 'three'
+import * as THREE from '!three'
 import ForkLift from './forkLift'
 import Person from './person'
 import Rack from './rack'

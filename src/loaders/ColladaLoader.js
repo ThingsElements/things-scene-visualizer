@@ -3,7 +3,7 @@
  * @author Mugen87 / https://github.com/Mugen87
  */
 
-import * as THREE from 'three'
+import * as THREE from '!three'
 import TGALoader from './TGALoader'
 
 function ColladaLoader(manager) {

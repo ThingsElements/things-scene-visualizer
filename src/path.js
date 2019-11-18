@@ -1,7 +1,7 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import * as THREE from 'three'
+import * as THREE from '!three'
 import Object3D from './object3d'
 
 const STATUS_COLORS = ['#6666ff', '#ccccff', '#ffcccc', '#cc3300']

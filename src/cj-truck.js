@@ -5,7 +5,7 @@
 import { Component, RectPath, Shape } from '@hatiolab/things-scene'
 // import truckModel from '../obj/CJ_Truck/Vehicle_Big.dae?3d'
 import path from 'path'
-import * as THREE from 'three'
+import * as THREE from '!three'
 import symbol from '../assets/canvasicon-cj-truck.png'
 import Component3d from './component-3d'
 import ColladaLoader from './loaders/ColladaLoader'

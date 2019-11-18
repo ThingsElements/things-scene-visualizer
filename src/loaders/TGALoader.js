@@ -4,7 +4,7 @@
  * @author takahirox / https://github.com/takahirox/
  */
 
-import * as THREE from 'three'
+import * as THREE from '!three'
 
 function TGALoader(manager) {
   this.manager = manager !== undefined ? manager : THREE.DefaultLoadingManager

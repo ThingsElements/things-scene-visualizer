@@ -19,7 +19,10 @@ module.exports = {
     '@hatiolab/things-scene': 'scene'
   },
   optimization: {
-    minimize: true
+    minimize: true,
+    splitChunks: {
+      chunks: 'all'
+    }
   },
   module: {
     rules: [

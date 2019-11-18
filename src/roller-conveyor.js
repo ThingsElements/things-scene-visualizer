@@ -3,7 +3,7 @@
  */
 import { Component, RectPath, Shape } from '@hatiolab/things-scene'
 import path from 'path'
-import * as THREE from 'three'
+import * as THREE from '!three'
 import symbol from '../assets/canvasicon-conveyor.png'
 import Component3d from './component-3d'
 import ColladaLoader from './loaders/ColladaLoader'

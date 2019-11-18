@@ -2,7 +2,7 @@
  * Copyright © HatioLab Inc. All rights reserved.
  */
 import { Component, Container, error, FPS, Layer, Layout, ScriptLoader } from '@hatiolab/things-scene'
-import * as THREE from 'three'
+import * as THREE from '!three'
 import Component3d from './component-3d'
 import ThreeControls from './three-controls'
 

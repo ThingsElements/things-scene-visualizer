@@ -2,7 +2,7 @@
  * Copyright � HatioLab Inc. All rights reserved.
  */
 
-import * as THREE from 'three'
+import * as THREE from '!three'
 import Mesh from './mesh'
 
 const STOCK_COLOR = '#ccaa76'
