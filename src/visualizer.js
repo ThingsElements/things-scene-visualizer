@@ -54,6 +54,15 @@ const NATURE = {
       name: 'cameraZ'
     },
     {
+      type: 'number',
+      label: 'gamma-factor',
+      name: 'gammaFactor',
+      property: {
+        step: 0.1,
+        min: 0
+      }
+    },
+    {
       type: 'select',
       label: 'precision',
       name: 'precision',
@@ -110,14 +119,17 @@ const NATURE = {
       name: 'locationField'
     },
     {
-      type: 'string',
+      type: 'board-selector',
       label: 'popup-scene',
       name: 'popupScene'
     },
     {
-      type: 'string',
+      type: 'id-input',
       label: 'legend-target',
-      name: 'legendTarget'
+      name: 'legendTarget',
+      property: {
+        component: 'legend'
+      }
     },
     {
       type: 'number',
@@ -248,6 +260,7 @@ export default class Visualizer extends ContainerAbstract {
     if (fillStyle.type == 'pattern' && fillStyle.image) {
       var floorTexture = this._textureLoader.load(this.app.url(fillStyle.image), texture => {
         texture.minFilter = THREE.LinearFilter
+        texture.encoding = THREE.sRGBEncoding
 
         texture.repeat.set(1, 1)
         this.render_threed()
@@ -389,6 +402,7 @@ export default class Visualizer extends ContainerAbstract {
       cameraX,
       cameraY,
       cameraZ,
+      gammaFactor = 1,
       legendTarget
     } = this.model
 
@@ -436,6 +450,13 @@ export default class Visualizer extends ContainerAbstract {
 
     this._renderer.autoClear = true
 
+    this._renderer.gammaFactor = gammaFactor
+    this._renderer.gammaInput = true
+    this._renderer.gammaOutput = true
+    // this._renderer.physicallyCorrectLights = true
+
+    this._renderer.shadowMap.enabled = true
+
     this._renderer.setClearColor(0xffffff, 0) // transparent
     this._renderer.setSize(Math.min(width, window.innerWidth), Math.min(height, window.innerHeight))
     // this._renderer.setPixelRatio(window.devicePixelRatio)
@@ -445,10 +466,10 @@ export default class Visualizer extends ContainerAbstract {
     this._controls.cameraChanged = true
 
     // LIGHT
-    var _light = new THREE.HemisphereLight(light, 0x000000, 1)
+    var _hemiLight = new THREE.HemisphereLight(0xffffff, 0x000000, 1)
 
-    _light.position.set(-this._camera.position.x, this._camera.position.y, -this._camera.position.z)
-    this._camera.add(_light)
+    _hemiLight.position.set(0, this._camera.position.y * 2, 0)
+    this.scene3d.add(_hemiLight)
 
     this._raycaster = new THREE.Raycaster()
     this._mouse = new THREE.Vector2()

@@ -68,7 +68,12 @@ const NATURE = {
     {
       type: 'number',
       label: 'stock-scale',
-      name: 'stockScale'
+      name: 'stockScale',
+      property: {
+        step: 0.01,
+        min: 0,
+        max: 1
+      }
     },
     {
       type: 'checkbox',

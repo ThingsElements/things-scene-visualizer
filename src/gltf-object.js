@@ -34,7 +34,8 @@ const NATURE = {
             }
           ]
         },
-        useUpload: true
+        useUpload: true,
+        category: 'application'
       }
     }
   ]
