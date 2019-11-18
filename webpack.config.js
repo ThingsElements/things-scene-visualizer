@@ -1,7 +1,5 @@
 const path = require('path')
 
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
-
 module.exports = {
   mode: 'production',
   entry: {
@@ -85,10 +83,5 @@ module.exports = {
       }
     ]
   },
-  plugins: [
-    new UglifyJsPlugin({
-      test: /\-min\.js$/
-    })
-  ],
   devtool: 'cheap-module-source-map'
 }
