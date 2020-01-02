@@ -3,6 +3,7 @@ DEVELOPMENT.md
 bower_components
 node_modules
 dist-client
+/attachments
 licenses
 .editorconfig
 .gitignore

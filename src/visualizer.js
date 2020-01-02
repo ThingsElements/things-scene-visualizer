@@ -148,7 +148,7 @@ const WEBGL_NO_SUPPORT_TEXT = 'WebGL no support'
 
 function registerLoaders() {
   if (!registerLoaders.done) {
-    THREE.Loader.Handlers.add(/\.tga$/i, new TGALoader())
+    THREE.DefaultLoadingManager.addHandler(/\.tga$/i, new TGALoader())
     registerLoaders.done = true
   }
 }
@@ -450,9 +450,10 @@ export default class Visualizer extends ContainerAbstract {
 
     this._renderer.autoClear = true
 
-    this._renderer.gammaFactor = gammaFactor
-    this._renderer.gammaInput = true
-    this._renderer.gammaOutput = true
+    if (gammaFactor) {
+      this._renderer.outputEncoding = THREE.GammaEncoding
+      this._renderer.gammaFactor = gammaFactor
+    }
     // this._renderer.physicallyCorrectLights = true
 
     this._renderer.shadowMap.enabled = true
@@ -801,7 +802,10 @@ export default class Visualizer extends ContainerAbstract {
       var object = this.getObjectByRaycast()
 
       if (object && object.onmouseup) {
-        if (ref) object.onmouseup(e, this, popup.show.bind(this, this, ref))
+        if (ref)
+          object.onmouseup(e, this, data => {
+            popup.show(this, ref, data)
+          })
 
         object._focused = true
         object._focusedAt = performance.now()

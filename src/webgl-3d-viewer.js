@@ -102,7 +102,7 @@ export default class WebGL3dViewer {
   }
 
   registerLoaders() {
-    THREE.Loader.Handlers.add(/\.tga$/i, new THREE.TGALoader())
+    THREE.THREE.Loader.Handlers.add(/\.tga$/i, new THREE.TGALoader())
   }
 
   loadExtMtl(path, filename, texturePath, funcSuccess) {

@@ -311,7 +311,7 @@ export default class Stock extends Mesh {
         this.userData
       )
 
-      callback.call(this, {
+      callback({
         data: data,
         location: 'right-top'
       })

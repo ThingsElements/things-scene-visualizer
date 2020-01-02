@@ -8,6 +8,7 @@ bower_components
 dist-client
 *.report.html
 licenses/*.js
+/attachments
 package-lock.json
 yarn.lock
 db.sqlite

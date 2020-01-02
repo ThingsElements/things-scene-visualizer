@@ -42,6 +42,6 @@
   "dependencies": {
     "@hatiolab/things-scene": "^2.5.47",
     "lit-element": "^2.1.0",
-    "three": "^0.110.0"
+    "three": "^0.112.1"
   }
 }
