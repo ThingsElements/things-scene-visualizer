@@ -1,7 +1,7 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import * as THREE from '!three'
+import * as THREE from 'three'
 export default class Object3D extends THREE.Object3D {
   constructor(model, canvasSize, visualizer) {
     super()
