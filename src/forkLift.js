@@ -3,7 +3,7 @@
  */
 // import forkLiftModel from '../obj/Forklift/ForkLift.dae?3d'
 import path from 'path'
-import * as THREE from '!three'
+import * as THREE from 'three'
 import Component3d from './component-3d'
 import ColladaLoader from './loaders/ColladaLoader'
 import Object3D from './object3d'

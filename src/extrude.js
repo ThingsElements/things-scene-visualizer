@@ -1,7 +1,7 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-import * as THREE from '!three'
+import * as THREE from 'three'
 import tinycolor from 'tinycolor2'
 import BoundingUVGenerator from './bounding-uv-generator'
 import Object3D from './object3d'

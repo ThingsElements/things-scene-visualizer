@@ -2,7 +2,7 @@
  * Copyright © HatioLab Inc. All rights reserved.
  */
 
-import * as THREE from '!three'
+import * as THREE from 'three'
 import Component3d from './component-3d'
 import Object3D from './object3d'
 

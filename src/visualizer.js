@@ -3,7 +3,7 @@
  */
 // import OBJExporter from 'three-obj-exporter'
 import { Component, ContainerAbstract, error, FPS, Layer, Layout, ScriptLoader } from '@hatiolab/things-scene'
-import * as THREE from '!three'
+import * as THREE from 'three'
 import Component3d from './component-3d'
 import TGALoader from './loaders/TGALoader'
 import ThreeControls from './three-controls'

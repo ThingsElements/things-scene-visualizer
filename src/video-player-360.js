@@ -2,7 +2,7 @@
  * Copyright © HatioLab Inc. All rights reserved.
  */
 import { Component, RectPath } from '@hatiolab/things-scene'
-import * as THREE from '!three'
+import * as THREE from 'three'
 
 const NATURE = {
   mutable: false,

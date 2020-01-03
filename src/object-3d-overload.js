@@ -1,4 +1,4 @@
-import * as THREE from '!three'
+import * as THREE from 'three'
 
 if (THREE && THREE.Object3D) {
   THREE.Object3D.prototype.onUserDataChanged = function() {
