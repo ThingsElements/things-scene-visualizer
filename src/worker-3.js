@@ -40,8 +40,9 @@ export default class Worker3 extends Mesh {
     return Worker3._threedObjectLoader
   }
 
-  createObject() {
-    Worker3.threedObjectLoader.then(this.addObject.bind(this))
+  async createObject() {
+    var extObj = await Worker3.threedObjectLoader
+    this.addObject(extObj)
   }
 
   addObject(extObject) {

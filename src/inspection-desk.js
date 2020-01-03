@@ -68,10 +68,9 @@ export default class InspectionDesk extends Object3D {
 
   static getInspectionDeskObject(type) {}
 
-  createObject() {
-    var { stockType = 'empty' } = this.model
-
-    InspectionDesk.threedObjectLoader.then(this.addObject.bind(this))
+  async createObject() {
+    var extObj = await InspectionDesk.threedObjectLoader
+    this.addObject(extObj)
   }
 
   addObject(extObject) {

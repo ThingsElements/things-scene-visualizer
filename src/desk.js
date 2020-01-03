@@ -45,7 +45,7 @@ export default class Desk extends Object3D {
     return Math.min(this.legThickness / 5, 2)
   }
 
-  createObject() {
+  async createObject() {
     var { left, top, width, height, depth } = this.model
 
     var legs = this.createDeskLegs(width, height, depth)

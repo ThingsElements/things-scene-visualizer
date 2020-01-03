@@ -80,12 +80,10 @@ export default class Pallet extends Object3D {
 
   static getPalletObject(type) {}
 
-  createObject() {
+  async createObject() {
     var { stockType = 'empty' } = this.model
-
-    Pallet.getThreedObjectLoader(stockType).then(this.addObject.bind(this))
-
-    // Pallet.threedObjectLoader.then(this.addObject.bind(this));
+    var extObj = await Pallet.getThreedObjectLoader(stockType)
+    this.addObject(extObj)
   }
 
   addObject(extObject) {

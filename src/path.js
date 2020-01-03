@@ -15,7 +15,7 @@ export default class Path extends Object3D {
     this.createObject(canvasSize)
   }
 
-  createObject(canvasSize) {
+  async createObject(canvasSize) {
     var { x1, y1, x2, y2, lineWidth = 5, location } = this.model
 
     x1 = x1 - canvasSize.width / 2

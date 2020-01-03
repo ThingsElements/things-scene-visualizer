@@ -39,7 +39,7 @@ const NATURE = {
 }
 
 export default class Banner extends Object3D {
-  createObject() {
+  async createObject() {
     var { width = 1, height = 1, depth = 1 } = this.model
 
     this.add(this.createCube(width, height, depth))

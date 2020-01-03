@@ -76,7 +76,7 @@ export default class Rack extends Object3D {
     return this._boards
   }
 
-  createObject() {
+  async createObject() {
     var {
       type,
       width,
@@ -129,7 +129,6 @@ export default class Rack extends Object3D {
 
         // this._boards.push(board)
       }
-
 
       var bins = (shelfBins[i] || '').trim().split(/\s*,\s*/)
 

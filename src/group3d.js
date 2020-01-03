@@ -25,7 +25,7 @@ export default class Group3D extends THREE.Group {
     })
   }
 
-  createObject(canvasSize) {
+async createObject(canvasSize) {
     var { left = 0, top = 0, width = 0, height = 0 } = this.model
 
     let cx = left + width / 2 - canvasSize.width / 2

@@ -71,7 +71,7 @@ export default superclass => {
       super.onBeforeRender()
     }
 
-    createObject() {}
+async createObject() {}
 
     setPosition() {
       this.position.set(this.cx, this.cz, this.cy)

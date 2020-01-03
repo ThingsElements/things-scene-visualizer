@@ -321,24 +321,19 @@ export default class Visualizer extends ContainerAbstract {
     resolve()
   }
 
-  createObjects(components, canvasSize, resolve) {
-    this.createIndex = 0
+  async createObjects(components, canvasSize, resolve) {
     if (this._createObjectsRAF) cancelAnimationFrame(this._createObjectsRAF)
 
-    this._createObject(components, canvasSize, resolve)
+    this._createObject(components, canvasSize, 0, resolve)
   }
 
-  _createObject(components, canvasSize, resolve) {
-    if (this.createIndex == components.length) {
+  async _createObject(components, canvasSize, createIndex, resolve) {
+    if (createIndex == components.length) {
       resolve()
       return
     }
 
-    this._createObjectsRAF = requestAnimationFrame(() => {
-      this._createObject(components, canvasSize, resolve)
-    })
-
-    const component = components[this.createIndex]
+    const component = components[createIndex]
     var clazz = Component3d.register(component.model.type)
     if (!clazz) {
       console.warn(`Class not found : 3d ${component.model.type} class is not exist`)
@@ -347,12 +342,15 @@ export default class Visualizer extends ContainerAbstract {
 
     var item = new clazz(component.hierarchy, canvasSize, this, component)
     if (item) {
+      await item.initializeComplete
       item.name = component.model.id
       this._scene3d.add(item)
       this.putObject(component.model.id, item)
-    }
 
-    this.createIndex++
+      this._createObjectsRAF = requestAnimationFrame(() => {
+        this._createObject(components, canvasSize, createIndex + 1, resolve)
+      })
+    }
   }
 
   destroy_scene3d() {

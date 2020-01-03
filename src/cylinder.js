@@ -44,7 +44,7 @@ export default class Cylinder extends Mesh {
     return this._cz
   }
 
-  createObject() {
+  async createObject() {
     var { depth = 0, rx = 0 } = this.model
 
     this.createCylinder(rx, depth)

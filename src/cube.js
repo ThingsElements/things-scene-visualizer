@@ -38,7 +38,7 @@ export default class Cube extends Mesh {
     }
   }
 
-  createObject() {
+  async createObject() {
     var { width = 0, height = 0, depth = 0 } = this.model
 
     this.createCube(width, height, depth)

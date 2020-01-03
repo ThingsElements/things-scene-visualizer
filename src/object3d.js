@@ -13,15 +13,23 @@ export default class Object3D extends THREE.Object3D {
 
     this.name = this.model.id
 
-    this.initialize()
+    this._initializeComplete = new Promise(resolve => {
+      this.initialize(resolve)
+    })
   }
 
-  async initialize() {
+  async initialize(resolve) {
     await this.createObject()
 
     this.setPosition()
     this.setRotation()
     this.setOpacity()
+
+    resolve()
+  }
+
+  get initializeComplete() {
+    return this._initializeComplete
   }
 
   get model() {

@@ -28,7 +28,7 @@ export default class Cone extends THREE.Mesh {
     this.createObject(model, canvasSize)
   }
 
-  createObject(model, canvasSize) {
+  async createObject(model, canvasSize) {
     let cx = model.cx - canvasSize.width / 2
     let cy = model.cy - canvasSize.height / 2
     let cz = this.model.rx

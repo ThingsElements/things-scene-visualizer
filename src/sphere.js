@@ -44,7 +44,7 @@ export default class Sphere extends Mesh {
     return this._cz
   }
 
-  createObject() {
+  async createObject() {
     var { rx = 0 } = this.model
 
     this.createSphere(rx)

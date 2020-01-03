@@ -159,7 +159,7 @@ export default class WebGL3dViewer {
     this._scene.add(skyBox)
   }
 
-  createObjects(models) {
+  async createObjects(models) {
     let scene = this._scene
     let model = this._model
     let canvasSize = {

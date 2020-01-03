@@ -39,8 +39,9 @@ export default class Person extends Object3D {
     return Person._threedObjectLoader
   }
 
-  createObject() {
-    Person.threedObjectLoader.then(this.addObject.bind(this))
+  async createObject() {
+    var extObj = await Person.threedObjectLoader
+    this.addObject(extObj)
   }
 
   addObject(extObject) {

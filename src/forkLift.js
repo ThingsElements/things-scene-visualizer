@@ -31,8 +31,9 @@ export default class ForkLift extends Object3D {
     return ForkLift._threedObjectLoader
   }
 
-  createObject() {
-    ForkLift.threedObjectLoader.then(this.addObject.bind(this))
+  async createObject() {
+    var extObj = await ForkLift.threedObjectLoader
+    this.addObject(extObj)
   }
 
   addObject(extObject) {

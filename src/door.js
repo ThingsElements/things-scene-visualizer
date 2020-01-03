@@ -14,7 +14,7 @@ export default class Door extends THREE.Mesh {
     this.createObject(model, canvasSize)
   }
 
-  createObject(model, canvasSize) {
+  async createObject(model, canvasSize) {
     let cx = model.left + model.width / 2 - canvasSize.width / 2
     let cy = model.top + model.height / 2 - canvasSize.height / 2
     let cz = 0.5 * model.depth

@@ -56,10 +56,7 @@ export default class GLTFObject extends Object3D {
         var extObj = scene
 
         var animations = gltf.animations
-
-        setTimeout(() => {
-          this.addObject(extObj.clone(), animations)
-        }, 1)
+        this.addObject(extObj.clone(), animations)
 
         resolve()
       })

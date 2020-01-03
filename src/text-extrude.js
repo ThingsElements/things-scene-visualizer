@@ -79,7 +79,7 @@ export default class TextExtrude extends Object3D {
     }
   }
 
-  createObject() {
+  async createObject() {
     var { type, depth = 1, fontSize = 10, text = '', fontColor = 0x000000 } = this.model
 
     this.fontLoader.load(NanumGothicFont, font => {

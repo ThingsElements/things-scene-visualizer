@@ -7,7 +7,7 @@ import Component3d from './component-3d'
 import Object3D from './object3d'
 
 export default class TextTextureObject extends Object3D {
-  createObject() {
+  async createObject() {
     var {
       width,
       height,

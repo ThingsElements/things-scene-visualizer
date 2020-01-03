@@ -72,8 +72,9 @@ export default class CJTruckSmall extends Object3D {
     return CJTruckSmall._threedObjectLoader
   }
 
-  createObject() {
-    CJTruckSmall.threedObjectLoader.then(this.addObject.bind(this))
+  async createObject() {
+    var extObj = await CJTruckSmall.threedObjectLoader
+    this.addObject(extObj)
   }
 
   addObject(extObject) {

@@ -28,7 +28,7 @@ export default class Wall extends Mesh {
   //   this.createObject(canvasSize);
   // }
 
-  createObject() {
+  async createObject() {
     var { type, width, height, depth = 1 } = this.model
 
     this.type = type

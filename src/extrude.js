@@ -33,7 +33,7 @@ export default class Extrude extends Object3D {
     return this._boundingUVGenerator
   }
 
-  createObject() {
+async createObject() {
     var { fillStyle = 0xffffff, strokeStyle = 0x636363, lineWidth = 1, alpha = 1 } = this.model
 
     // 다각형 그리기

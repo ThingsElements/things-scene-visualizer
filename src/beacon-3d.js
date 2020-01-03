@@ -5,8 +5,6 @@ import * as THREE from 'three'
 import Component3d from './component-3d'
 import Object3D from './object3d'
 
-const STATUS_COLORS = ['#6666ff', '#ccccff', '#ffcccc', '#cc3300']
-
 export default class Beacon3D extends Object3D {
   get cz() {
     var { width = 0, height = 0, zPos = 0 } = this.model
@@ -19,7 +17,7 @@ export default class Beacon3D extends Object3D {
     return this._cz
   }
 
-  createObject() {
+  async createObject() {
     var { width, height, location } = this.model
 
     var rx = Math.min(width, height)

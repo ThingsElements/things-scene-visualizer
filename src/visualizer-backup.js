@@ -206,7 +206,7 @@ export default class Visualizer extends Container {
     this._scene3d.add(floor)
   }
 
-  createObjects(components, canvasSize) {
+  async createObjects(components, canvasSize) {
     components.forEach(component => {
       // requestAnimationFrame(() => {
       var clazz = Component3d.register(component.model.type)

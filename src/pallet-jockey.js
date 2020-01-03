@@ -42,10 +42,9 @@ export default class PalletJockey extends Object3D {
 
   static getPalletJockeyObject(type) {}
 
-  createObject() {
-    var { stockType = 'empty' } = this.model
-
-    PalletJockey.threedObjectLoader.then(this.addObject.bind(this))
+  async createObject() {
+    var extObj = await PalletJockey.threedObjectLoader
+    this.addObject(extObj)
   }
 
   addObject(extObject) {

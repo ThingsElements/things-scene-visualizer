@@ -118,7 +118,7 @@ export default class Stock extends Mesh {
     return Stock._material_default
   }
 
-  createObject() {
+  async createObject() {
     var { width, height, depth } = this.model
 
     this._hideEmptyStock = this._visualizer && this._visualizer.model.hideEmptyStock

@@ -42,10 +42,9 @@ export default class RollerConveyor extends Object3D {
 
   static getRollerConveyorObject(type) {}
 
-  createObject() {
-    var { stockType = 'empty' } = this.model
-
-    RollerConveyor.threedObjectLoader.then(this.addObject.bind(this))
+  async createObject() {
+    var extObj = await RollerConveyor.threedObjectLoader
+    this.addObject(extObj)
   }
 
   addObject(extObject) {

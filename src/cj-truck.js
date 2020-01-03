@@ -48,8 +48,9 @@ export default class CJTruck extends Object3D {
     return CJTruck._threedObjectLoader
   }
 
-  createObject() {
-    CJTruck.threedObjectLoader.then(this.addObject.bind(this))
+  async createObject() {
+    var extObj = await CJTruck.threedObjectLoader
+    this.addObject(extObj)
   }
 
   addObject(extObject) {

@@ -57,7 +57,7 @@ export default class HumiditySensor extends Object3D {
     return this._cz
   }
 
-  createObject(canvasSize) {
+async createObject(canvasSize) {
     var { depth, cx, cy, rx, ry, rotation = 0, location } = this.model
 
     this.type = 'humidity-sensor'

@@ -76,7 +76,7 @@ export default class Mesh extends THREE.Mesh {
     super.onBeforeRender()
   }
 
-  createObject() {}
+  async createObject() {}
 
   setPosition() {
     this.position.set(this.cx, this.cz, this.cy)
