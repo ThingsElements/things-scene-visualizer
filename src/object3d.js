@@ -13,7 +13,11 @@ export default class Object3D extends THREE.Object3D {
 
     this.name = this.model.id
 
-    this.createObject()
+    this.initialize()
+  }
+
+  async initialize() {
+    await this.createObject()
 
     this.setPosition()
     this.setRotation()
@@ -75,7 +79,7 @@ export default class Object3D extends THREE.Object3D {
     super.onBeforeRender()
   }
 
-  createObject() {}
+  async createObject() {}
 
   setPosition() {
     this.position.set(this.cx, this.cz, this.cy)

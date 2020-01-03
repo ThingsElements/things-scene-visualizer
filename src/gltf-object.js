@@ -42,20 +42,27 @@ const NATURE = {
 }
 
 export default class GLTFObject extends Object3D {
-  createObject() {
+  async createObject() {
     var { src } = this.model
 
     let gltfLoader = new GLTFLoader()
 
     var fullSrc = this._visualizer.app.url(src)
     gltfLoader.setCrossOrigin('use-credentials')
-    gltfLoader.load(fullSrc, gltf => {
-      var scene = gltf.scene
-      var extObj = scene
 
-      var animations = gltf.animations
+    return new Promise(resolve => {
+      gltfLoader.load(fullSrc, gltf => {
+        var scene = gltf.scene
+        var extObj = scene
 
-      this.addObject(extObj, animations)
+        var animations = gltf.animations
+
+        setTimeout(() => {
+          this.addObject(extObj.clone(), animations)
+        }, 1)
+
+        resolve()
+      })
     })
   }
 
@@ -64,7 +71,7 @@ export default class GLTFObject extends Object3D {
 
     this.type = 'gltf-object'
 
-    var object = extObject.clone()
+    var object = extObject
 
     var boundingBox = new THREE.Box3().setFromObject(object)
     var center = boundingBox.getCenter(object.position)

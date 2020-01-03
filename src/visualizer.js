@@ -200,6 +200,10 @@ function removeProgressBar(targetEl) {
 }
 
 export default class Visualizer extends ContainerAbstract {
+  get initializeComplete() {
+    return this._initalizeComplete
+  }
+
   get legendTarget() {
     var { legendTarget } = this.model
 
@@ -253,45 +257,54 @@ export default class Visualizer extends ContainerAbstract {
   /* THREE Object related .. */
 
   createFloor(color, width, height) {
-    let fillStyle = this.model.fillStyle
+    return new Promise(resolve => {
+      let fillStyle = this.model.fillStyle
 
-    var floorMaterial
+      var floorMaterial
 
-    if (fillStyle.type == 'pattern' && fillStyle.image) {
-      var floorTexture = this._textureLoader.load(this.app.url(fillStyle.image), texture => {
-        texture.minFilter = THREE.LinearFilter
-        texture.encoding = THREE.sRGBEncoding
+      if (fillStyle.type == 'pattern' && fillStyle.image) {
+        this._textureLoader.load(this.app.url(fillStyle.image), texture => {
+          texture.minFilter = THREE.LinearFilter
+          texture.encoding = THREE.sRGBEncoding
 
-        texture.repeat.set(1, 1)
-        this.render_threed()
-      })
+          texture.repeat.set(1, 1)
+          this.invalidate()
+          // this.render_threed()
 
-      var floorMaterial = [
-        new THREE.MeshLambertMaterial({
-          color: color
-        }),
-        new THREE.MeshLambertMaterial({
-          color: color
-        }),
-        new THREE.MeshLambertMaterial({
-          color: color
-        }),
-        new THREE.MeshLambertMaterial({
-          color: color
-        }),
-        new THREE.MeshLambertMaterial({
-          map: floorTexture
-        }),
-        new THREE.MeshLambertMaterial({
-          color: color
+          floorMaterial = [
+            new THREE.MeshLambertMaterial({
+              color
+            }),
+            new THREE.MeshLambertMaterial({
+              color
+            }),
+            new THREE.MeshLambertMaterial({
+              color
+            }),
+            new THREE.MeshLambertMaterial({
+              color
+            }),
+            new THREE.MeshLambertMaterial({
+              map: texture
+            }),
+            new THREE.MeshLambertMaterial({
+              color
+            })
+          ]
+
+          this._createFloor(floorMaterial, width, height, resolve)
         })
-      ]
-    } else {
-      floorMaterial = new THREE.MeshLambertMaterial({
-        color: color
-      })
-    }
+      } else {
+        floorMaterial = new THREE.MeshLambertMaterial({
+          color
+        })
 
+        this._createFloor(floorMaterial, width, height, resolve)
+      }
+    })
+  }
+
+  _createFloor(floorMaterial, width, height, resolve) {
     var floorGeometry = new THREE.BoxBufferGeometry(1, 1, 1)
     var floor = new THREE.Mesh(floorGeometry, floorMaterial)
 
@@ -305,30 +318,49 @@ export default class Visualizer extends ContainerAbstract {
 
     this._scene3d.add(floor)
 
-    return floor
+    resolve()
   }
 
-  createObjects(components, canvasSize) {
-    components.forEach(component => {
-      var clazz = Component3d.register(component.model.type)
-      if (!clazz) {
-        console.warn(`Class not found : 3d ${component.model.type} class is not exist`)
-        return
-      }
+  createObjects(components, canvasSize, resolve) {
+    this.createIndex = 0
+    if (this._createObjectsRAF) cancelAnimationFrame(this._createObjectsRAF)
 
-      var item = new clazz(component.hierarchy, canvasSize, this, component)
-      if (item) {
-        item.name = component.model.id
-        this._scene3d.add(item)
-        this.putObject(component.model.id, item)
-      }
+    this._createObject(components, canvasSize, resolve)
+  }
+
+  _createObject(components, canvasSize, resolve) {
+    if (this.createIndex == components.length) {
+      resolve()
+      return
+    }
+
+    this._createObjectsRAF = requestAnimationFrame(() => {
+      this._createObject(components, canvasSize, resolve)
     })
+
+    const component = components[this.createIndex]
+    var clazz = Component3d.register(component.model.type)
+    if (!clazz) {
+      console.warn(`Class not found : 3d ${component.model.type} class is not exist`)
+      return
+    }
+
+    var item = new clazz(component.hierarchy, canvasSize, this, component)
+    if (item) {
+      item.name = component.model.id
+      this._scene3d.add(item)
+      this.putObject(component.model.id, item)
+    }
+
+    this.createIndex++
   }
 
   destroy_scene3d() {
     this.stop()
 
     window.removeEventListener('focus', this._onFocus)
+
+    if (this._createObjectsRAF) cancelAnimationFrame(this._createObjectsRAF)
 
     if (this._renderer) this._renderer.clear()
     delete this._renderer
@@ -353,6 +385,8 @@ export default class Visualizer extends ContainerAbstract {
     }
 
     delete this._scene3d
+
+    this._initalizeComplete = null
   }
 
   init_scene3d() {
@@ -362,139 +396,143 @@ export default class Visualizer extends ContainerAbstract {
 
     if (this._scene3d) this.destroy_scene3d()
 
-    // var self = this;
+    this._initalizeComplete = new Promise(async resolve => {
+      // var self = this;
 
-    // THREE.DefaultLoadingManager.onStart = function (item, loaded, total) {
-    //   createProgressbar(self.root.target_element);
-    //   self._loadComplete = false;
-    // }
+      // THREE.DefaultLoadingManager.onStart = function (item, loaded, total) {
+      //   createProgressbar(self.root.target_element);
+      //   self._loadComplete = false;
+      // }
 
-    // THREE.DefaultLoadingManager.onProgress = function (item, loaded, total) {
-    //   var a = this;
-    //   showProgressbar(self.root.target_element, loaded, total)
-    // }
-    // THREE.DefaultLoadingManager.onLoad = function (item, loaded, total) {
-    //   removeProgressBar(self.root.target_element)
-    //   self._loadComplete = true;
-    // }
+      // THREE.DefaultLoadingManager.onProgress = function (item, loaded, total) {
+      //   var a = this;
+      //   showProgressbar(self.root.target_element, loaded, total)
+      // }
+      // THREE.DefaultLoadingManager.onLoad = function (item, loaded, total) {
+      //   removeProgressBar(self.root.target_element)
+      //   self._loadComplete = true;
+      // }
 
-    // THREE.DefaultLoadingManager.onError = function (url) {
-    //   console.warn('There was an error loading ' + url);
-    // }
+      // THREE.DefaultLoadingManager.onError = function (url) {
+      //   console.warn('There was an error loading ' + url);
+      // }
 
-    registerLoaders()
-    this._textureLoader = new THREE.TextureLoader(THREE.DefaultLoadingManager)
-    this._textureLoader.withCredential = true
-    this._textureLoader.crossOrigin = 'use-credentials'
+      registerLoaders()
+      this._textureLoader = new THREE.TextureLoader(THREE.DefaultLoadingManager)
+      this._textureLoader.withCredential = true
+      this._textureLoader.crossOrigin = 'use-credentials'
 
-    // this._exporter = new OBJExporter();
+      // this._exporter = new OBJExporter();
 
-    var { width, height } = this.bounds
+      var { width, height } = this.bounds
 
-    var {
-      fov = 45,
-      near = 0.1,
-      far = 20000,
-      fillStyle = '#424b57',
-      light = 0xffffff,
-      antialias = true,
-      precision = 'highp',
-      cameraX,
-      cameraY,
-      cameraZ,
-      gammaFactor = 1,
-      legendTarget
-    } = this.model
+      var {
+        fov = 45,
+        near = 0.1,
+        far = 20000,
+        fillStyle = '#424b57',
+        light = 0xffffff,
+        antialias = true,
+        precision = 'highp',
+        cameraX,
+        cameraY,
+        cameraZ,
+        gammaFactor = 2,
+        legendTarget
+      } = this.model
 
-    var components = this.components || []
+      var components = this.components || []
 
-    // SCENE
-    this._scene3d = new THREE.Scene()
+      // SCENE
+      this._scene3d = new THREE.Scene()
 
-    // CAMERA
-    var aspect = width / height
+      // CAMERA
+      var aspect = width / height
 
-    this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
+      this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
 
-    var cameraXPos = height * 0.8,
-      cameraYPos = width * 0.8,
-      cameraZPos = Math.floor(Math.min(width, height))
+      var cameraXPos = height * 0.8,
+        cameraYPos = width * 0.8,
+        cameraZPos = Math.floor(Math.min(width, height))
 
-    if (cameraX != undefined) cameraXPos = cameraX * width
-    if (cameraY != undefined) cameraYPos = cameraY * height
-    if (cameraZ != undefined) cameraZPos = cameraZ * Math.floor(Math.min(width, height))
+      if (cameraX != undefined) cameraXPos = cameraX * width
+      if (cameraY != undefined) cameraYPos = cameraY * height
+      if (cameraZ != undefined) cameraZPos = cameraZ * Math.floor(Math.min(width, height))
 
-    this._camera.position.set(cameraXPos, cameraZPos, cameraYPos)
+      this._camera.position.set(cameraXPos, cameraZPos, cameraYPos)
 
-    this._scene3d.add(this._camera)
-    this._camera.lookAt(this._scene3d.position)
-    this._camera.zoom = this.getState('zoom') * 0.01
+      this._scene3d.add(this._camera)
+      this._camera.lookAt(this._scene3d.position)
+      this._camera.zoom = this.getState('zoom') * 0.01
 
-    if (this.model.showAxis) {
-      var axisHelper = new THREE.AxesHelper(width)
-      this._scene3d.add(axisHelper)
-    }
+      if (this.model.showAxis) {
+        var axisHelper = new THREE.AxesHelper(width)
+        this._scene3d.add(axisHelper)
+      }
 
-    try {
-      // RENDERER
-      this._renderer = new THREE.WebGLRenderer({
-        precision: precision,
-        alpha: true,
-        antialias: antialias
-      })
-    } catch (e) {
-      this._noSupportWebgl = true
-    }
+      try {
+        // RENDERER
+        this._renderer = new THREE.WebGLRenderer({
+          precision: precision,
+          alpha: true,
+          antialias: antialias
+        })
+      } catch (e) {
+        this._noSupportWebgl = true
+      }
 
-    if (this._noSupportWebgl) return
+      if (this._noSupportWebgl) return
 
-    this._renderer.autoClear = true
+      this._renderer.autoClear = true
 
-    if (gammaFactor) {
-      this._renderer.outputEncoding = THREE.GammaEncoding
-      this._renderer.gammaFactor = gammaFactor
-    }
-    // this._renderer.physicallyCorrectLights = true
+      if (gammaFactor) {
+        this._renderer.outputEncoding = THREE.GammaEncoding
+        this._renderer.gammaFactor = gammaFactor
+      }
+      this._renderer.physicallyCorrectLights = true
 
-    this._renderer.shadowMap.enabled = true
+      this._renderer.shadowMap.enabled = true
 
-    this._renderer.setClearColor(0xffffff, 0) // transparent
-    this._renderer.setSize(Math.min(width, window.innerWidth), Math.min(height, window.innerHeight))
-    // this._renderer.setPixelRatio(window.devicePixelRatio)
+      this._renderer.setClearColor(0xffffff, 0) // transparent
+      this._renderer.setSize(Math.min(width, window.innerWidth), Math.min(height, window.innerHeight))
+      // this._renderer.setPixelRatio(window.devicePixelRatio)
 
-    // CONTROLS
-    this._controls = new ThreeControls(this._camera, this)
-    this._controls.cameraChanged = true
+      // CONTROLS
+      this._controls = new ThreeControls(this._camera, this)
+      this._controls.cameraChanged = true
 
-    // LIGHT
-    var _hemiLight = new THREE.HemisphereLight(0xffffff, 0x000000, 1)
+      // LIGHT
+      var _hemiLight = new THREE.HemisphereLight(0xffffff, 0x000000, 1)
 
-    _hemiLight.position.set(0, this._camera.position.y * 2, 0)
-    this.scene3d.add(_hemiLight)
+      _hemiLight.position.set(0, this._camera.position.y * 2, 0)
+      this.scene3d.add(_hemiLight)
 
-    this._raycaster = new THREE.Raycaster()
-    this._mouse = new THREE.Vector2()
+      this._raycaster = new THREE.Raycaster()
+      this._mouse = new THREE.Vector2()
 
-    this._tick = 0
-    this._clock = new THREE.Clock(true)
-    this.mixers = new Array()
-    this.mixer = new THREE.AnimationMixer(this.scene3d)
+      this._tick = 0
+      this._clock = new THREE.Clock(true)
+      this.mixers = new Array()
+      this.mixer = new THREE.AnimationMixer(this.scene3d)
 
-    this.createFloor(fillStyle, width, height)
-    this.createObjects(components, {
-      width,
-      height
+      await this.createFloor(fillStyle, width, height)
+      this.createObjects(
+        components,
+        {
+          width,
+          height
+        },
+        resolve
+      )
+
+      this._camera.updateProjectionMatrix()
+
+      this._onFocus = () => {
+        this.render_threed()
+      }
+
+      window.addEventListener('focus', this._onFocus)
     })
-
-    this._camera.updateProjectionMatrix()
-
-    this._onFocus = function() {
-      this.render_threed()
-    }.bind(this)
-
-    window.addEventListener('focus', this._onFocus)
-
-    this.invalidate()
   }
 
   threed_animate() {
@@ -655,7 +693,9 @@ export default class Visualizer extends ContainerAbstract {
     delete this._stock_materials
   }
 
-  _onDataChanged() {
+  async _onDataChanged() {
+    await this.initializeComplete
+
     var locationField = this.getState('locationField') || 'location'
 
     if (this._data) {
