@@ -1,6 +1,6 @@
 {
   "name": "@things-scene/visualizer",
-  "version": "0.5.41",
+  "version": "0.5.42",
   "description": "The visualizer component for things-scene.",
   "things-scene": true,
   "main": "src/index.js",
@@ -28,8 +28,8 @@
   "homepage": "https://github.com/ThingsElements/things-scene-visualizer#readme",
   "devDependencies": {
     "@babel/plugin-proposal-export-default-from": "^7.2.0",
-    "@things-factory/board-app": "^1.0.0-alpha.1",
-    "@things-factory/board-test": "^1.0.0-alpha.1",
+    "@things-factory/board-app": "^2.0.0",
+    "@things-factory/board-test": "^2.0.0",
     "@things-scene/chartjs": "*",
     "@things-scene/forklift": "*",
     "@things-scene/form": "*",
