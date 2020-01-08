@@ -71,7 +71,7 @@ export default class Desk extends Object3D {
 
     for (var i = 0; i < 4; i++) {
       var geometry = new THREE.BoxBufferGeometry(legThickness, d, legThickness)
-      var material = new THREE.MeshLambertMaterial({
+      var material = new THREE.MeshStandardMaterial({
         color: this.model.legColor || '#252525'
       })
       var leg = new THREE.Mesh(geometry, material)
@@ -99,7 +99,7 @@ export default class Desk extends Object3D {
   createDeskBoard(w, h) {
     var d = 10
 
-    var boardMaterial = new THREE.MeshLambertMaterial({
+    var boardMaterial = new THREE.MeshStandardMaterial({
       color: this.model.fillStyle || '#ccaa76'
     })
     var boardGeometry = new THREE.BoxBufferGeometry(w, h, d, 1, 1)

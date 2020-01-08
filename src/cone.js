@@ -46,7 +46,7 @@ export default class Cone extends THREE.Mesh {
     let { fillStyle = 'lightgray' } = this.model
 
     this.geometry = new THREE.ConeBufferGeometry(rx, rz, 20)
-    this.material = new THREE.MeshLambertMaterial({
+    this.material = new THREE.MeshStandardMaterial({
       color: fillStyle,
       side: THREE.FrontSide
     })

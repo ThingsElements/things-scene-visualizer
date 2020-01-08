@@ -48,7 +48,7 @@ export default class Cube extends Mesh {
     let { fillStyle = 'lightgray' } = this.model
 
     this.geometry = new THREE.BoxBufferGeometry(w, d, h)
-    this.material = new THREE.MeshLambertMaterial({ color: fillStyle, side: THREE.FrontSide })
+    this.material = new THREE.MeshStandardMaterial({ color: fillStyle, side: THREE.FrontSide })
   }
 
   get model() {

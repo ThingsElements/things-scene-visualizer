@@ -36,12 +36,12 @@ export default class Beacon3D extends Object3D {
     let geometry = new THREE.SphereBufferGeometry(w, 32, 32)
     var material
     if (isFirst) {
-      material = new THREE.MeshLambertMaterial({
+      material = new THREE.MeshStandardMaterial({
         color: '#57a1d6',
         side: THREE.FrontSide
       })
     } else {
-      material = new THREE.MeshBasicMaterial({
+      material = new THREE.MeshStandardMaterial({
         color: '#57a1d6',
         side: THREE.FrontSide,
         wireframe: true,

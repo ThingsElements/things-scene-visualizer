@@ -127,7 +127,7 @@ export default class VideoPlayer360 extends RectPath(Component) {
     // create ThreeJS mesh sphere onto which our texture will be drawn
     this._mesh = new THREE.Mesh(
       new THREE.SphereBufferGeometry(500, 80, 50),
-      new THREE.MeshBasicMaterial({ map: this._texture })
+      new THREE.MeshStandardMaterial({ map: this._texture })
     )
     this._mesh.scale.x = -1 // mirror the texture, since we're looking from the inside out
     this._scene.add(this._mesh)

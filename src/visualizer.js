@@ -272,22 +272,22 @@ export default class Visualizer extends ContainerAbstract {
           // this.render_threed()
 
           floorMaterial = [
-            new THREE.MeshLambertMaterial({
+            new THREE.MeshStandardMaterial({
               color
             }),
-            new THREE.MeshLambertMaterial({
+            new THREE.MeshStandardMaterial({
               color
             }),
-            new THREE.MeshLambertMaterial({
+            new THREE.MeshStandardMaterial({
               color
             }),
-            new THREE.MeshLambertMaterial({
+            new THREE.MeshStandardMaterial({
               color
             }),
-            new THREE.MeshLambertMaterial({
+            new THREE.MeshStandardMaterial({
               map: texture
             }),
-            new THREE.MeshLambertMaterial({
+            new THREE.MeshStandardMaterial({
               color
             })
           ]
@@ -295,7 +295,7 @@ export default class Visualizer extends ContainerAbstract {
           this._createFloor(floorMaterial, width, height, resolve)
         })
       } else {
-        floorMaterial = new THREE.MeshLambertMaterial({
+        floorMaterial = new THREE.MeshStandardMaterial({
           color
         })
 
@@ -359,8 +359,8 @@ export default class Visualizer extends ContainerAbstract {
     window.removeEventListener('focus', this._onFocus)
 
     if (this._createObjectsRAF) cancelAnimationFrame(this._createObjectsRAF)
-
     if (this._renderer) this._renderer.clear()
+
     delete this._renderer
     delete this._camera
     delete this._2dCamera
@@ -436,7 +436,8 @@ export default class Visualizer extends ContainerAbstract {
         cameraY,
         cameraZ,
         gammaFactor = 2,
-        legendTarget
+        legendTarget,
+        exposure = 2.5
       } = this.model
 
       var components = this.components || []
@@ -451,7 +452,8 @@ export default class Visualizer extends ContainerAbstract {
 
       var cameraXPos = height * 0.8,
         cameraYPos = width * 0.8,
-        cameraZPos = Math.floor(Math.min(width, height))
+        cameraZPos = Math.min(500, Math.floor(Math.min(width, height)))
+      // cameraZPos = Math.floor(Math.min(width, height))
 
       if (cameraX != undefined) cameraXPos = cameraX * width
       if (cameraY != undefined) cameraYPos = cameraY * height
@@ -470,7 +472,11 @@ export default class Visualizer extends ContainerAbstract {
 
       try {
         // RENDERER
+        this._canvas = document.createElement('canvas')
+        let context = this._canvas.getContext('webgl2')
         this._renderer = new THREE.WebGLRenderer({
+          canvas: this._canvas,
+          context,
           precision: precision,
           alpha: true,
           antialias: antialias
@@ -488,6 +494,8 @@ export default class Visualizer extends ContainerAbstract {
         this._renderer.gammaFactor = gammaFactor
       }
       this._renderer.physicallyCorrectLights = true
+      this._renderer.toneMappingExposure = Math.pow(exposure, 5.0)
+      this._renderer.toneMapping = THREE.Uncharted2ToneMapping
 
       this._renderer.shadowMap.enabled = true
 
@@ -499,11 +507,20 @@ export default class Visualizer extends ContainerAbstract {
       this._controls = new ThreeControls(this._camera, this)
       this._controls.cameraChanged = true
 
-      // LIGHT
-      var _hemiLight = new THREE.HemisphereLight(0xffffff, 0x000000, 1)
+      var _hemiLight = new THREE.HemisphereLight(0xdddddd, 0x333333, 0.035)
 
-      _hemiLight.position.set(0, this._camera.position.y * 2, 0)
+      var _directionalLight = new THREE.DirectionalLight(0xd6e1ff, 0.01)
+      _directionalLight.castShadow = true
+
+      var _pointLight1 = new THREE.PointLight(0xd6e1ff, 1, null, 2)
+
+      _pointLight1.power = 1700
+      _pointLight1.castShadow = true
+      _pointLight1.position.set(0, cameraZPos, 0)
+
       this.scene3d.add(_hemiLight)
+      this.scene3d.add(_pointLight1)
+      this._camera.add(_directionalLight)
 
       this._raycaster = new THREE.Raycaster()
       this._mouse = new THREE.Vector2()
@@ -588,12 +605,8 @@ export default class Visualizer extends ContainerAbstract {
         return
       }
 
-      if (this._dataChanged) {
-        this._onDataChanged()
-      }
-
+      if (this._dataChanged) this._onDataChanged()
       if (this._loadComplete === false) return
-
       if (!this._renderer) return
 
       var rendererSize = new THREE.Vector2()

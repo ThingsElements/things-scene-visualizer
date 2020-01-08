@@ -39,7 +39,7 @@ export default class Wall extends Mesh {
     let { fillStyle = 'gray' } = this.model
 
     this.geometry = new THREE.BoxBufferGeometry(w, d, h)
-    this.material = new THREE.MeshLambertMaterial({ color: fillStyle, side: THREE.FrontSide })
+    this.material = new THREE.MeshStandardMaterial({ color: fillStyle, side: THREE.FrontSide })
 
     // this.castShadow = true
   }

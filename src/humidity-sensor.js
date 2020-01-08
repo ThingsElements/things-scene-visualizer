@@ -110,20 +110,20 @@ async createObject(canvasSize) {
       // var texture = new THREE.TextureLoader().load('./images/drop-34055_1280.png')
       // texture.repeat.set(1,1)
       // // texture.premultiplyAlpha = true
-      //  material = new THREE.MeshBasicMaterial( { color : '#cc3300', side: THREE.FrontSide, wireframe: true, wireframeLinewidth : 1} );
-      material = new THREE.MeshLambertMaterial({ color: '#cc3300', side: THREE.FrontSide })
-      // material = new THREE.MeshLambertMaterial( { color : '#74e98a', side: THREE.FrontSide} );
+      //  material = new THREE.MeshStandardMaterial( { color : '#cc3300', side: THREE.FrontSide, wireframe: true, wireframeLinewidth : 1} );
+      material = new THREE.MeshStandardMaterial({ color: '#cc3300', side: THREE.FrontSide })
+      // material = new THREE.MeshStandardMaterial( { color : '#74e98a', side: THREE.FrontSide} );
     } else {
-      material = new THREE.MeshBasicMaterial({
+      material = new THREE.MeshStandardMaterial({
         color: '#cc3300',
         side: THREE.FrontSide,
         wireframe: true,
         wireframeLinewidth: 1
       })
-      // material = new THREE.MeshBasicMaterial( { color : '#74e98a', side: THREE.FrontSide, wireframe: true, wireframeLinewidth : 1} );
+      // material = new THREE.MeshStandardMaterial( { color : '#74e98a', side: THREE.FrontSide, wireframe: true, wireframeLinewidth : 1} );
     }
 
-    // let material = new THREE.MeshBasicMaterial( { color : '#ff3300', side: THREE.DoubleSide, wireframe: true, wireframeLinewidth : 1} );
+    // let material = new THREE.MeshStandardMaterial( { color : '#ff3300', side: THREE.DoubleSide, wireframe: true, wireframeLinewidth : 1} );
 
     var mesh = new THREE.Mesh(geometry, material)
     mesh.material.transparent = true

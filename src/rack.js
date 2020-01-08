@@ -47,7 +47,7 @@ export default class Rack extends Object3D {
 
   static get boardMaterial() {
     if (!Rack._boardMaterial)
-      Rack._boardMaterial = new THREE.MeshBasicMaterial({
+      Rack._boardMaterial = new THREE.MeshStandardMaterial({
         color: '#dedede',
         side: THREE.DoubleSide
       })
@@ -60,8 +60,10 @@ export default class Rack extends Object3D {
 
   static get frameMaterial() {
     if (!Rack._frameMaterial)
-      Rack._frameMaterial = new THREE.MeshLambertMaterial({
-        color: 0xcccccc
+      Rack._frameMaterial = new THREE.MeshStandardMaterial({
+        color: 0xcccccc,
+        roughness: 0.5,
+        metalness: 0.3
       })
     // Rack._frameMaterial = new THREE.LineBasicMaterial({ color: 0xcccccc, linewidth: 3 })
 

@@ -46,7 +46,7 @@ export default class TextTextureObject extends Object3D {
     var texture = new THREE.CanvasTexture(canvas)
     texture.needsUpdate = true
 
-    var material = new THREE.MeshBasicMaterial({
+    var material = new THREE.MeshStandardMaterial({
       map: texture,
       transparent: true,
       alphaTest: 0.5

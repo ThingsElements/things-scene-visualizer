@@ -38,9 +38,10 @@ export default class Stock extends Mesh {
 
       if (!(range && range.color)) this.stockMaterials[index] = this.userDefineDefaultMaterial
 
-      this.stockMaterials[index] = new THREE.MeshLambertMaterial({
+      this.stockMaterials[index] = new THREE.MeshStandardMaterial({
         color: range.color,
-        side: THREE.FrontSide
+        side: THREE.FrontSide,
+        roughness: 0.7
       })
     }
 
@@ -76,9 +77,10 @@ export default class Stock extends Mesh {
 
       if (!defaultColor) return Stock.defaultMaterial
 
-      this._visualizer._default_material = new THREE.MeshLambertMaterial({
+      this._visualizer._default_material = new THREE.MeshStandardMaterial({
         color: defaultColor,
-        side: THREE.FrontSide
+        side: THREE.FrontSide,
+        roughness: 0.7
       })
     }
 
@@ -98,7 +100,7 @@ export default class Stock extends Mesh {
         defaultColor = stockStatus.defaultColor || STOCK_COLOR
       }
 
-      this._visualizer._empty_material = new THREE.MeshBasicMaterial({
+      this._visualizer._empty_material = new THREE.MeshStandardMaterial({
         color: defaultColor
       })
       this._visualizer._empty_material.opacity = 0.33
@@ -110,9 +112,10 @@ export default class Stock extends Mesh {
 
   static get defaultMaterial() {
     if (!Stock._material_default)
-      Stock._material_default = new THREE.MeshLambertMaterial({
+      Stock._material_default = new THREE.MeshStandardMaterial({
         color: STOCK_COLOR,
-        side: THREE.FrontSide
+        side: THREE.FrontSide,
+        roughness: 0.7
       })
 
     return Stock._material_default
@@ -133,7 +136,9 @@ export default class Stock extends Mesh {
 
     this.scale.set(w, d, h)
 
-    // this.castShadow = true
+    this.receiveShadow = true
+
+    this.castShadow = true
   }
 
   setOpacity() {}

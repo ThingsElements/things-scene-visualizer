@@ -52,7 +52,7 @@ export default class Banner extends Object3D {
     var { boxColor = '#ccaa76' } = this.model
 
     var geometry = new THREE.BoxBufferGeometry(w, d, h)
-    var material = new THREE.MeshLambertMaterial({
+    var material = new THREE.MeshStandardMaterial({
       color: boxColor,
       side: THREE.FrontSide
     })
@@ -78,10 +78,10 @@ export default class Banner extends Object3D {
       // texture.repeat.set(1, 1)
       // texture.minFilter = THREE.LinearFilter
 
-      // boardMaterial = new THREE.MeshBasicMaterial({ map: texture, side: THREE.FrontSide });
-      boardMaterial = new THREE.MeshLambertMaterial({ map: texture })
+      // boardMaterial = new THREE.MeshStandardMaterial({ map: texture, side: THREE.FrontSide });
+      boardMaterial = new THREE.MeshStandardMaterial({ map: texture })
     } else {
-      boardMaterial = new THREE.MeshLambertMaterial({
+      boardMaterial = new THREE.MeshStandardMaterial({
         color: fillStyle || '#ccaa76',
         side: THREE.FrontSide
       })

@@ -87,8 +87,8 @@ export default class TextExtrude extends Object3D {
 
       var geometry = this.createTextGeometry()
       var materials = [
-        new THREE.MeshLambertMaterial({ color: fontColor }), // front
-        new THREE.MeshLambertMaterial({ color: fontColor }) // side
+        new THREE.MeshStandardMaterial({ color: fontColor }), // front
+        new THREE.MeshStandardMaterial({ color: fontColor }) // side
       ]
 
       var mesh = new THREE.Mesh(geometry, materials)

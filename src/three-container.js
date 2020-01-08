@@ -136,12 +136,12 @@ export default class ThreeContainer extends Container {
         this.render_threed()
       })
 
-      floorMaterial = new THREE.MeshBasicMaterial({
+      floorMaterial = new THREE.MeshStandardMaterial({
         map: floorTexture,
         side: THREE.DoubleSide
       })
     } else {
-      floorMaterial = new THREE.MeshBasicMaterial({
+      floorMaterial = new THREE.MeshStandardMaterial({
         color: color,
         side: THREE.FrontSide
       })
@@ -189,7 +189,7 @@ async createObjects(components, canvasSize) {
     //   radius: Math.sqrt(width * width + height * height) / 4
     // })
 
-    var heatmapMaterial = new THREE.MeshBasicMaterial({
+    var heatmapMaterial = new THREE.MeshStandardMaterial({
       side: THREE.FrontSide,
       transparent: true,
       visible: false

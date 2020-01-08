@@ -82,17 +82,17 @@ async createObject() {
       })
 
       material = [
-        new THREE.MeshLambertMaterial({
+        new THREE.MeshStandardMaterial({
           map: texture,
           side: THREE.DoubleSide
         }),
-        new THREE.MeshLambertMaterial({
+        new THREE.MeshStandardMaterial({
           color: fillStyle,
           side: THREE.DoubleSide
         })
       ]
     } else {
-      material = new THREE.MeshLambertMaterial({
+      material = new THREE.MeshStandardMaterial({
         color: fillStyle
       })
     }
@@ -120,7 +120,7 @@ async createObject() {
     var hole = new THREE.Path()
     hole.setFromPoints(shape.getPoints())
 
-    var sideMaterial = new THREE.MeshLambertMaterial({
+    var sideMaterial = new THREE.MeshStandardMaterial({
       color: strokeStyle
     })
 

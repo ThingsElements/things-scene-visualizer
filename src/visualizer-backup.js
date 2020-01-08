@@ -165,27 +165,27 @@ export default class Visualizer extends Container {
       })
 
       var floorMaterial = [
-        (floorMaterial = new THREE.MeshLambertMaterial({
+        (floorMaterial = new THREE.MeshStandardMaterial({
           color: color
         })),
-        (floorMaterial = new THREE.MeshLambertMaterial({
+        (floorMaterial = new THREE.MeshStandardMaterial({
           color: color
         })),
-        (floorMaterial = new THREE.MeshLambertMaterial({
+        (floorMaterial = new THREE.MeshStandardMaterial({
           color: color
         })),
-        (floorMaterial = new THREE.MeshLambertMaterial({
+        (floorMaterial = new THREE.MeshStandardMaterial({
           color: color
         })),
-        new THREE.MeshLambertMaterial({
+        new THREE.MeshStandardMaterial({
           map: floorTexture
         }),
-        (floorMaterial = new THREE.MeshLambertMaterial({
+        (floorMaterial = new THREE.MeshStandardMaterial({
           color: color
         }))
       ]
     } else {
-      floorMaterial = new THREE.MeshLambertMaterial({
+      floorMaterial = new THREE.MeshStandardMaterial({
         color: color
       })
     }

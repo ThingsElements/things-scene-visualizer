@@ -1182,11 +1182,11 @@ ColladaLoader.prototype = {
           break
 
         case 'lambert':
-          material = new THREE.MeshLambertMaterial()
+          material = new THREE.MeshStandardMaterial()
           break
 
         default:
-          material = new THREE.MeshBasicMaterial()
+          material = new THREE.MeshStandardMaterial()
           break
       }
 
@@ -2905,7 +2905,7 @@ ColladaLoader.prototype = {
       return object
     }
 
-    var fallbackMaterial = new THREE.MeshBasicMaterial({ color: 0xff00ff })
+    var fallbackMaterial = new THREE.MeshStandardMaterial({ color: 0xff00ff })
 
     function resolveMaterialBinding(keys, instanceMaterials) {
       var materials = []

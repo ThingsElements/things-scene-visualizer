@@ -54,7 +54,7 @@ export default class Cylinder extends Mesh {
     let { fillStyle = 'lightgray' } = this.model
 
     this.geometry = new THREE.CylinderBufferGeometry(rx, rx, rz, 25)
-    this.material = new THREE.MeshLambertMaterial({ color: fillStyle, side: THREE.FrontSide })
+    this.material = new THREE.MeshStandardMaterial({ color: fillStyle, side: THREE.FrontSide })
 
     // this.castShadow = true
   }
