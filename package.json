@@ -1,6 +1,6 @@
 {
   "name": "@things-scene/visualizer",
-  "version": "0.5.43",
+  "version": "0.5.44",
   "description": "The visualizer component for things-scene.",
   "things-scene": true,
   "main": "src/index.js",
@@ -40,7 +40,7 @@
     "@things-scene/restful": "*"
   },
   "dependencies": {
-    "@hatiolab/things-scene": "^2.5.47",
+    "@hatiolab/things-scene": "^2.5.70",
     "lit-element": "^2.1.0",
     "three": "^0.112.1"
   }
