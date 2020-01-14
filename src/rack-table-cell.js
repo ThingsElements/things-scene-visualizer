@@ -3,6 +3,55 @@
  */
 import { Component, RectPath } from '@hatiolab/things-scene'
 
+const NATURE = {
+  mutable: false,
+  resizable: true,
+  rotatable: true,
+  properties: [
+    {
+      type: 'string',
+      label: 'section',
+      name: 'section'
+    },
+    {
+      type: 'string',
+      label: 'unit',
+      name: 'unit'
+    },
+    {
+      type: 'string',
+      label: 'shelf-locations',
+      name: 'shelfLocations',
+      placeholder: '1,2,3,... / ,,,04'
+    },
+    {
+      type: 'textarea',
+      label: 'bin-locations',
+      name: 'binLocations',
+      placeholder: '1,2,3,...'
+    },
+    {
+      type: 'checkbox',
+      label: 'is-empty',
+      name: 'isEmpty'
+    },
+    {
+      type: 'location-increase-pattern',
+      label: '',
+      name: ''
+    },
+    {
+      type: 'editor-table',
+      label: '',
+      name: '',
+      property: {
+        merge: false,
+        split: false
+      }
+    }
+  ]
+}
+
 const EMPTY_BORDER = {}
 
 function isBottomMost(idx, rows, columns) {
@@ -34,63 +83,7 @@ export default class RackTableCell extends RectPath(Component) {
   }
 
   get nature() {
-    return {
-      mutable: false,
-      resizable: true,
-      rotatable: true,
-      properties: [
-        {
-          type: 'string',
-          label: 'section',
-          name: 'section'
-        },
-        {
-          type: 'string',
-          label: 'unit',
-          name: 'unit'
-        },
-        {
-          type: 'string',
-          label: 'shelf-locations',
-          name: 'shelfLocations',
-          placeholder: '1,2,3,... / ,,,04'
-        },
-        {
-          type: 'textarea',
-          label: 'bin-locations',
-          name: 'binLocations',
-          placeholder: '1,2,3,...'
-        },
-        {
-          type: 'checkbox',
-          label: 'is-empty',
-          name: 'isEmpty'
-        },
-        {
-          type: 'location-increase-pattern',
-          label: '',
-          name: '',
-          property: {
-            event: {
-              'increase-location-pattern': event => {
-                var { increasingDirection, skipNumbering, startSection, startUnit } = event.detail
-                const rackTable = this.parent
-                rackTable.increaseLocation(increasingDirection, skipNumbering, startSection, startUnit)
-              }
-            }
-          }
-        },
-        {
-          type: 'editor-table',
-          label: '',
-          name: '',
-          property: {
-            merge: false,
-            split: false
-          }
-        }
-      ]
-    }
+    return NATURE
   }
 
   set merged(merged) {

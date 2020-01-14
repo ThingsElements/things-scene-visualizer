@@ -98,17 +98,11 @@ export default class LocationIncreasePatternEditor extends ThingsEditorProperty 
         <i18n-msg msgid="label.skip-numbering" auto>Skip Numbering</i18n-msg>
       </label>
       <input id="skip-numbering" type="checkbox" data-skip-numbering ?checked="${this.skipNumbering}" />
-      <div id="pattern-set" class="location-increase-pattern-btn" @click=${e => this._onTapType(e)}>
+      <div id="pattern-set" class="location-increase-pattern-btn">
         <paper-button data-value="cw"> <iron-icon icon="editor:border-outer"></iron-icon> </paper-button>
-        <paper-button data-value="ccw">
-          <iron-icon icon="editor:border-inner"></iron-icon>
-        </paper-button>
-        <paper-button data-value="zigzag">
-          <iron-icon icon="editor:border-inner"></iron-icon>
-        </paper-button>
-        <paper-button data-value="zigzag-reverse">
-          <iron-icon icon="editor:border-inner"></iron-icon>
-        </paper-button>
+        <paper-button data-value="ccw"> <iron-icon icon="editor:border-inner"></iron-icon> </paper-button>
+        <paper-button data-value="zigzag"> <iron-icon icon="editor:border-inner"></iron-icon> </paper-button>
+        <paper-button data-value="zigzag-reverse"> <iron-icon icon="editor:border-inner"></iron-icon> </paper-button>
       </div>
     `
   }
@@ -132,30 +126,10 @@ export default class LocationIncreasePatternEditor extends ThingsEditorProperty 
   }
 
   firstUpdated(changedProperties) {
+    // this._specificPropEl = this._getSpecificPropEl()
+    // if (this._specificPropEl)
     this.shadowRoot.addEventListener('rack-table-cell-increment-set', this._handleRackTableCellIncrementSet, false)
-  }
-
-  connectedCallback() {
-    super.connectedCallback()
-    if (this.property && this.property.event) {
-      Object.entries(this.property.event).forEach(entry => {
-        if (entry[0]) {
-          document.addEventListener(entry[0], entry[1])
-        }
-      })
-    }
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback()
-
-    if (this.property && this.property.event) {
-      Object.entries(this.property.event).forEach(entry => {
-        if (entry[0]) {
-          document.removeEventListener(entry[0], entry[1])
-        }
-      })
-    }
+    this.shadowRoot.querySelector('#pattern-set').addEventListener('tap', this._onTapType)
   }
 
   _onTapType(e) {
@@ -165,18 +139,18 @@ export default class LocationIncreasePatternEditor extends ThingsEditorProperty 
 
     if (target === this) return
 
-    document.dispatchEvent(
-      new CustomEvent('increase-location-pattern', {
-        bubbles: true,
-        composed: true,
-        detail: {
-          increasingDirection: target.getAttribute('data-value'),
-          startSection: this.startSection,
-          startUnit: this.startUnit,
-          skipNumbering: this.skipNumbering
-        }
-      })
-    )
+    var evt = new CustomEvent('rack-table-cell-increment-set', {
+      bubbles: true,
+      composed: true,
+      detail: {
+        increasingDirection: target.getAttribute('data-value'),
+        startSection: this.startSection,
+        startUnit: this.startUnit,
+        skipNumbering: this.skipNumbering
+      }
+    })
+
+    this.dispatchEvent(evt)
 
     e.stopPropagation()
   }
