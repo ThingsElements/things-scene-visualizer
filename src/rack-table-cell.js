@@ -112,7 +112,7 @@ export default class RackTableCell extends RectPath(Component) {
   }
 
   get border() {
-    var border = this.model.border || EMPTY_BORDER
+    return this.model.border || EMPTY_BORDER
   }
 
   get isEmpty() {
@@ -128,10 +128,10 @@ export default class RackTableCell extends RectPath(Component) {
     }
   }
 
-  _draw(context) {
+  render(context) {
     var { left, top, width, height } = this.model
 
-    var border = this.model.border || {}
+    var border = this.border
 
     if (!this.model.isEmpty) this._draw_rack_cell(context)
 
@@ -152,14 +152,6 @@ export default class RackTableCell extends RectPath(Component) {
       this._drawBorder(context, left + width, top, left + width, top + height, border.right)
     if (isBottomMost(idx, rows, columns))
       this._drawBorder(context, left + width, top + height, left, top + height, border.bottom)
-  }
-
-  _post_draw(context) {
-    var { left, top, width, height } = this.bounds
-
-    super._post_draw(context)
-
-    if (this._focused) this._draw_location_info(context)
   }
 
   _draw_rack_cell(context) {
@@ -183,7 +175,7 @@ export default class RackTableCell extends RectPath(Component) {
     context.restore()
   }
 
-  _draw_location_info(context) {
+  get tag() {
     var rackTable = this.parent
     var { locPattern, zone } = rackTable.model
 
@@ -196,22 +188,7 @@ export default class RackTableCell extends RectPath(Component) {
         .replace('{s}', this.get('section'))
         .replace('{u}', this.get('unit'))
 
-    if (!locationString) return
-
-    let { left, top } = this.bounds
-
-    left = Math.max(left, 0)
-    top = top - 18
-
-    context.font = '12px Arial'
-    let metrics = context.measureText(locationString)
-
-    context.fillStyle = '#FF0000'
-    context.fillRect(left, top, metrics.width + 6, 16)
-
-    context.fillStyle = 'white'
-
-    context.fillText(locationString, left + 3, top + 13)
+    return locationString || ''
   }
 
   get index() {
@@ -364,13 +341,11 @@ export default class RackTableCell extends RectPath(Component) {
   }
 
   onmouseenter() {
-    this._focused = true
-    this.invalidate()
+    this.trigger('tag', this)
   }
 
   onmouseleave() {
-    this._focused = false
-    this.invalidate()
+    this.trigger('tagreset', this)
   }
 
   contains(x, y) {
