@@ -183,7 +183,7 @@ function array(value, size) {
 }
 
 var columnControlHandler = {
-  ondragmove: function(point, index, component) {
+  ondragmove: function (point, index, component) {
     var { left, top, width, height } = component.textBounds
     var widths_sum = component.widths_sum
 
@@ -217,7 +217,7 @@ var columnControlHandler = {
 }
 
 var rowControlHandler = {
-  ondragmove: function(point, index, component) {
+  ondragmove: function (point, index, component) {
     var { left, top, width, height } = component.textBounds
     var heights_sum = component.heights_sum
 
@@ -328,8 +328,8 @@ export default class RackTable3d extends Group3D {
         stockScale
       }
 
-      var rackLocationIds = (rack.shelfLocations || '').split(/\s*,\s*/)
-      if (!rackModel.isEmpty || (rackLocationIds && rackLocationIds.length == shelves)) {
+      var rackLocationIds = (rack.shelfLocations || '').split(/\s*,\s*/).filter(l => !!l)
+      if (!rackModel.isEmpty || rackLocationIds?.length == shelves) {
         var rack = new Rack(rackModel, this.model, this._visualizer)
         this.add(rack)
       }
