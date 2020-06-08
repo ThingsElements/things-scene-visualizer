@@ -91,9 +91,19 @@ export default class LocationIncreasePatternEditor extends ThingsEditorProperty 
     return html`
       <legend><i18n-msg msgid="label.location-increase-pattern" auto>Increase Pattern</i18n-msg></legend>
       <label> <i18n-msg msgid="label.start-section" auto>Start Section</i18n-msg> </label>
-      <input type="number" data-start-section value="${this.startSection}" />
+      <input
+        type="number"
+        data-start-section
+        value="${this.startSection}"
+        @change=${e => (this.startSection = e.target.valueAsNumber)}
+      />
       <label> <i18n-msg msgid="label.start-unit" auto>Start Unit</i18n-msg> </label>
-      <input type="number" data-start-unit value="${this.startUnit}" />
+      <input
+        type="number"
+        data-start-unit
+        value="${this.startUnit}"
+        @change=${e => (this.startUnit = e.target.valueAsNumber)}
+      />
       <label for="skip-numbering">
         <i18n-msg msgid="label.skip-numbering" auto>Skip Numbering</i18n-msg>
       </label>
@@ -188,7 +198,7 @@ export default class LocationIncreasePatternEditor extends ThingsEditorProperty 
 
     var { increasingDirection, skipNumbering, startSection, startUnit } = detail
 
-    this.scene.undoableChange(function() {
+    this.scene.undoableChange(function () {
       selected.increaseLocation(increasingDirection, skipNumbering, startSection, startUnit)
     })
   }
