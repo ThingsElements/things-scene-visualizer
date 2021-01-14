@@ -140,6 +140,21 @@ const NATURE = {
       type: 'checkbox',
       label: 'hide-empty-stock',
       name: 'hideEmptyStock'
+    },
+    {
+      type: 'select',
+      label: 'popup-position',
+      name: 'popupPosition',
+      property: {
+        options: [
+          { display: '', value: '' },
+          { display: 'CENTER', value: 'center' },
+          { display: 'LEFTTOP', value: 'left-top' },
+          { display: 'RIGHTTOP', value: 'right-top' },
+          { display: 'LEFTBOTTOM', value: 'left-bottom' },
+          { display: 'RIGHTBOTTOM', value: 'right-bottom' }
+        ]
+      }
     }
   ]
 }
@@ -495,7 +510,11 @@ export default class Visualizer extends ContainerAbstract {
       }
       this._renderer.physicallyCorrectLights = true
       this._renderer.toneMappingExposure = Math.pow(exposure, 5.0)
-      this._renderer.toneMapping = THREE.Uncharted2ToneMapping
+
+      this._renderer.toneMapping = THREE.LinearToneMapping
+      // this._renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      // this._renderer.toneMapping = THREE.ReinhardToneMapping;
+      // this._renderer.toneMapping = THREE.CineonToneMapping;
 
       this._renderer.shadowMap.enabled = true
 
@@ -855,7 +874,10 @@ export default class Visualizer extends ContainerAbstract {
       if (object && object.onmouseup) {
         if (ref)
           object.onmouseup(e, this, data => {
-            popup.show(this, ref, data)
+            popup.show(this, ref, {
+              ...data,
+              location: this.state.popupPosition || 'right-top'
+            })
           })
 
         object._focused = true
