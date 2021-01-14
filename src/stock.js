@@ -22,27 +22,31 @@ export default class Stock extends Mesh {
   }
 
   getMaterial(index) {
-    if (!this.stockMaterials[index]) {
-      if (
-        !(
-          this._visualizer &&
-          this._visualizer &&
-          this._visualizer.legendTarget &&
-          this._visualizer.legendTarget.get('status')
-        )
+    if (
+      !(
+        this._visualizer &&
+        this._visualizer &&
+        this._visualizer.legendTarget &&
+        this._visualizer.legendTarget.get('status')
       )
-        return this.userDefineDefaultMaterial
+    ) return this.userDefineDefaultMaterial
 
-      var stockStatus = this._visualizer.legendTarget.get('status')
-      var range = stockStatus.ranges[index]
+    var stockStatus = this._visualizer.legendTarget.get('status')
+    var range = stockStatus.ranges[index]
+    if (!(range && range.color)) this.stockMaterials[index] = this.userDefineDefaultMaterial
 
-      if (!(range && range.color)) this.stockMaterials[index] = this.userDefineDefaultMaterial
-
+    if (!this.stockMaterials[index]) {
       this.stockMaterials[index] = new THREE.MeshStandardMaterial({
         color: range.color,
         side: THREE.FrontSide,
         roughness: 0.7
       })
+    }
+    
+    var alpha=range.color.replace(/^.*,(.+)\)/,'$1')
+    if(alpha>0 && alpha<1){
+      this.stockMaterials[index].opacity = alpha
+      this.stockMaterials[index].transparent = true
     }
 
     return this.stockMaterials[index]
@@ -82,8 +86,12 @@ export default class Stock extends Mesh {
         side: THREE.FrontSide,
         roughness: 0.7
       })
+      var alpha=defaultColor.replace(/^.*,(.+)\)/,'$1')
+      if(alpha>0 && alpha<1){
+        this._visualizer._default_material.opacity = alpha
+        this._visualizer._default_material.transparent = true
+      }
     }
-
     return this._visualizer._default_material
   }
 
@@ -103,8 +111,14 @@ export default class Stock extends Mesh {
       this._visualizer._empty_material = new THREE.MeshStandardMaterial({
         color: defaultColor
       })
-      this._visualizer._empty_material.opacity = 0.33
-      this._visualizer._empty_material.transparent = true
+      var alpha=defaultColor.replace(/^.*,(.+)\)/,'$1')
+      if(alpha>0 && alpha<1){
+        this._visualizer._empty_material.opacity = alpha
+        this._visualizer._empty_material.transparent = true
+      }else{
+        this._visualizer._empty_material.opacity = 0.33
+        this._visualizer._empty_material.transparent = true
+      }
     }
 
     return this._visualizer._empty_material
@@ -175,7 +189,7 @@ export default class Stock extends Mesh {
         return
       }
 
-      ranges.some((range, index) => {
+      var isInRanges = ranges.some((range, index) => {
         let { min, max } = range
 
         min = Number(min) || min
@@ -194,6 +208,9 @@ export default class Stock extends Mesh {
           this.material = this._hideEmptyStock ? this.emptyMaterial : this.userDefineDefaultMaterial
         }
       })
+      if(!isInRanges){
+        this.material = this.userDefineDefaultMaterial
+      }
     }
   }
 
